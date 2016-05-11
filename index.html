@@ -19,7 +19,7 @@
         margin: 0;
         padding: 0;
         width: 100%;
-        height: 100vh;
+        height: 80vh;
       }
     </style>
 
@@ -46,17 +46,17 @@
 - -> END
 
     </div>
-    <script src="acesrc/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script>
-        var editor = ace.edit("editor");
-        editor.getSession().setUseWrapMode(true);
-    </script>
 
+    <a class="compile_button" href="#">Compile!</a>
 
   </body>
 
+  <script src="acesrc/ace.js" type="text/javascript" charset="utf-8"></script>
   <script>
     // You can also require other files to run in this process
     require('./renderer.js');
+
+
+
   </script>
 </html>
