@@ -3,17 +3,60 @@
   <head>
     <meta charset="UTF-8">
     <title>Hello World!</title>
+
+
   </head>
   <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using node <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+
+    <style>
+    body {
+      padding: 0;
+      margin: 0;
+      margin-top: 23px;
+    }
+
+      #editor {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+
+    <div id="editor">
+
+- I looked at Monsieur Fogg 
+*   ... and I could contain myself no longer.
+    'What is the purpose of our journey, Monsieur?'
+    'A wager,' he replied.
+    * *     'A wager!'[] I returned.
+            He nodded. 
+            * * *   'But surely that is foolishness!'
+            * * *  'A most serious matter then!'
+            - - -   He nodded again.
+            * * *   'But can we win?'
+                    'That is what we will endeavour to find out,' he answered.
+            * * *   'A modest wager, I trust?'
+                    'Twenty thousand pounds,' he replied, quite flatly.
+            * * *   I asked nothing further of him then[.], and after a final, polite cough, he offered nothing more to me. <>
+    * *     'Ah[.'],' I replied, uncertain what I thought.
+    - -     After that, <>
+*   ... but I said nothing[] and <> 
+- we passed the day in silence.
+- -> END
+
+    </div>
+    <script src="acesrc/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        var editor = ace.edit("editor");
+        editor.getSession().setUseWrapMode(true);
+    </script>
+
+
   </body>
 
   <script>
     // You can also require other files to run in this process
-    require('./renderer.js')
+    require('./renderer.js');
   </script>
 </html>
