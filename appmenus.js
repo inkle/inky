@@ -75,6 +75,14 @@ const template = [
     label: 'Test',
     submenu: [
       {
+        label: 'Play',
+        accelerator: 'CmdOrCtrl+P',
+        click(item, focusedWindow) { 
+          console.log("Telling "+focusedWindow+" to play...");
+          focusedWindow.webContents.send("play");
+        }
+      },
+      {
         label: 'Compile and run',
         accelerator: 'CmdOrCtrl+B',
         click(item, focusedWindow) { 
