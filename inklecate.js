@@ -10,36 +10,19 @@ const inklecatePath = "ink/inklecate";
 const tempInkPath = "/tmp/inklecatetemp.ink";
 const tempJsonPath = "/tmp/inklecatetemp.json";
 
-var activePlayers = {};
+var sessions = {};
 
-
-function compile(inkString, requester) {
-  console.log("Compiling "+inkString);
-
-  fs.writeFileSync(tempInkPath, inkString);
-
-  exec(inklecatePath + ' -o ' + tempJsonPath + ' ' + tempInkPath, function callback(error, stdout, stderr){
-    console.log("Compile process complete");
-    if( error ) {
-      console.log("ERR"+error);
-      console.log("ERR2"+stderr);
-    } else {
-      var outputContents = fs.readFileSync(tempJsonPath, "utf8");
-      console.log("Got output: "+outputContents);
-      console.log("Sending result back to main window");
-      requester.send("did-compile", outputContents);
-    }
-  });
-}
-
-function play(inkString, requester) {
-  console.log("Playing "+inkString);
+function play(inkString, requester, sessionId) {
+  console.log("Playing "+sessionId);
 
   fs.writeFileSync(tempInkPath, inkString);
 
   const playProcess = spawn(inklecatePath, ['-p', tempInkPath]);
 
-  activePlayers[requester] = playProcess;
+  sessions[sessionId] = {
+    process:playProcess,
+    stopped: false
+  };
 
   playProcess.stderr.setEncoding('utf8');
   playProcess.stderr.on('data', (data) => {
@@ -61,28 +44,31 @@ function play(inkString, requester) {
         requester.send("play-generated-choice", {
           number: parseInt(choiceMatches[1]),
           text: choiceMatches[2]
-        });
+        }, sessionId);
       } else if( line.length > 0 ) {
-        requester.send('play-generated-text', line);
+        requester.send('play-generated-text', line, sessionId);
       }
 
     }
 
-    console.log("STORY DATA: "+text);
+    console.log("STORY DATA (sesssion "+sessionId+"): "+text);
   })
 
   playProcess.on('close', (code) => {
 
-    if( code == 0 ) {
-      console.log("Completed story successfully");
-      requester.send('play-story-completed');
-    }
-    else {
-      console.log("Story exited unexpectedly with error code"+code);
-      requester.send('play-story-unexpected-exit', code);
+    var forceStoppedByPlayer = sessions[sessionId].stopped;
+    if( !forceStoppedByPlayer ) {
+      if( code == 0 ) {
+        console.log("Completed story successfully");
+        requester.send('play-story-completed', sessionId);
+      }
+      else {
+        console.log("Story exited unexpectedly with error code "+code+" (session "+sessionId+")");
+        requester.send('play-story-unexpected-exit', code, sessionId);
+      }
     }
 
-    delete activePlayers[requester];
+    delete sessions[sessionId];
   });
 }
 
@@ -91,14 +77,39 @@ ipc.on("compile-ink", (event, inkStr) => {
   compile(inkStr, event.sender);
 });
 
-ipc.on("play-ink", (event, inkStr) => {
-  console.log("inklecate received play instruction. Here we go...!");
-  play(inkStr, event.sender);
+ipc.on("play-ink", (event, inkStr, sessionId) => {
+  play(inkStr, event.sender, sessionId);
 });
 
-ipc.on("play-continue-with-choice-number", (event, choiceNumber) => {
-  console.log("inklecate received play choice number: "+choiceNumber);
+function stop(sessionId) {
+  const processObj = sessions[sessionId];
+  if( processObj ) {
+    processObj.stopped = true;
+    processObj.process.kill('SIGTERM');
+    return true;
+  } else {
+    console.log("Could not find process to stop");
+    return false;
+  }
+}
+
+ipc.on("play-stop-ink", (event, sessionId) => {
+  console.log("got request to stop "+sessionId);
   const requester = event.sender;
-  const playProcess = activePlayers[requester];
-  playProcess.stdin.write(""+choiceNumber+"\n");
+  if( stop(sessionId) )
+    requester.send('play-story-stopped', sessionId);
+});
+
+ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
+  console.log("inklecate received play choice number: "+choiceNumber+" for session "+sessionId);
+  const requester = event.sender;
+  const playProcess = sessions[sessionId].process;
+  if( playProcess )
+    playProcess.stdin.write(""+choiceNumber+"\n");
+});
+
+electron.app.on("will-quit", function() {
+  for(var session in sessions) {
+    stop(session.sessionId);
+  }
 });

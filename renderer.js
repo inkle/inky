@@ -4,6 +4,7 @@
 var $ = window.jQuery = require('./jquery-2.2.3.min.js');
 var ipc = require("electron").ipcRenderer;
 var util = require('util');
+const assert = require('assert');
 
 var editor = ace.edit("editor");
 editor.setShowPrintMargin(false);
@@ -18,15 +19,44 @@ editor.getSession().setAnnotations([{
 
 $(document).ready(function() {
 
-    ipc.on("play", () => {
-        console.log("Received play instruction. Will play the following:");
-        console.log(editor.getValue());
-        ipc.send("play-ink", editor.getValue());
+    var sessionId = 0;
+
+    function reloadInkForPlaying() {
+
+        stop(sessionId);
+
+        sessionId += 1;
+        console.log("New session id in play(): "+sessionId);
 
         // Reset text and hide play message
-        $("#player .playMessage").fadeOut();
+        var $playMsg = $("#player .playMessage");
+        if( parseFloat($playMsg.css("opacity")) > 0 )
+            $playMsg.fadeOut();
+        
         $("#player .innerText").text("");
+
+        ipc.send("play-ink", editor.getValue(), sessionId);
+    }
+
+    function stop(idToStop) {
+        ipc.send("play-stop-ink", idToStop);
+    }
+
+    // Do first compile
+    setTimeout(reloadInkForPlaying, 1000);
+
+    var editorChanges = 1;
+    var lastEditorChange = null;
+    editor.on("change", () => {
+        lastEditorChange = Date.now();
     });
+
+    setInterval(() => {
+        if( lastEditorChange != null && Date.now() - lastEditorChange > 500 ) {
+            lastEditorChange = null;
+            reloadInkForPlaying();
+        }
+    }, 250);
 
     var lastFadeTime = 0;
     function fadeIn($jqueryElement) {
@@ -35,13 +65,7 @@ $(document).ready(function() {
         const animDuration = 1000;
 
         var currentTime = Date.now();
-
-        console.log("Last fade time: "+lastFadeTime);
-        console.log("Current time: "+currentTime);
-
         var timeSinceLastFade = currentTime - lastFadeTime;
-
-        console.log("timeSinceLastFade: "+timeSinceLastFade);
 
         var delay = 0;
         if( timeSinceLastFade < minimumTimeSeparation )
@@ -53,8 +77,11 @@ $(document).ready(function() {
         lastFadeTime = currentTime + delay;
     }
 
-    ipc.on("play-generated-text", (event, result) => {
-        console.log("Received play text: "+result);
+    ipc.on("play-generated-text", (event, result, fromSessionId) => {
+
+        console.log("Received play text (from "+fromSessionId+", current = "+sessionId+"): "+result);
+        if( fromSessionId != sessionId )
+            return;
 
         var $paragraph = $("<p class='storyText'></p>");
         $paragraph.text(result);
@@ -63,7 +90,11 @@ $(document).ready(function() {
         fadeIn($paragraph);
     });
 
-    ipc.on("play-generated-choice", (event, choice) => {
+    ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
+
+        if( fromSessionId != sessionId )
+            return;
+
         var $choice = $("<a href='#'>"+choice.text+"</a>");
 
         // Append the choice
@@ -82,32 +113,36 @@ $(document).ready(function() {
             $("#player .innerText").append("<hr/>");
 
             // Tell inklecate to make the choice
-            ipc.send("play-continue-with-choice-number", choice.number);
+            ipc.send("play-continue-with-choice-number", choice.number, fromSessionId);
             event.preventDefault();
         });
+        
     });
 
-    ipc.on("play-story-completed", (event) => {
+    ipc.on("play-story-completed", (event, fromSessionId) => {
+
+        console.log("play-story-completed from "+fromSessionId);
+        if( fromSessionId != sessionId )
+            return;
+
         var $end = $("<p class='end'>End of story</p>");
         fadeIn($end);
         $("#player .innerText").append($end);
     });
 
-    ipc.on("play-story-unexpected-exit", (event) => {
+    ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
+
+        console.log("play-story-unexpected-exit from "+fromSessionId);
+        if( sessionId != fromSessionId ) 
+            return;
+
         var $error = $("<p class='error'>Error in story</p>");
         fadeIn($error);
         $("#player .innerText").append($error);
     });
 
-    ipc.on("compile", () => {
-        console.log("Received compile instruction. Will compile the following:");
-        console.log(editor.getValue());
-        ipc.send("compile-ink", editor.getValue());
+    ipc.on("play-story-stopped", (event, fromSessionId) => {
+        console.log("play-story-stopped from "+fromSessionId);
     });
 
-    ipc.on("did-compile", (event, result) => {
-        console.log("Renderer got result back from inklecate. Will place it in #player...");
-        console.log("Placing: "+result);
-        $("#player .innerText").text(result);
-    });
 });

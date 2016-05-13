@@ -75,19 +75,11 @@ const template = [
     label: 'Test',
     submenu: [
       {
-        label: 'Play',
+        label: 'Compile to JSON',
         accelerator: 'CmdOrCtrl+P',
         click(item, focusedWindow) { 
-          console.log("Telling "+focusedWindow+" to play...");
-          focusedWindow.webContents.send("play");
-        }
-      },
-      {
-        label: 'Compile and run',
-        accelerator: 'CmdOrCtrl+B',
-        click(item, focusedWindow) { 
-          console.log("Telling "+focusedWindow+" to compile...");
-          focusedWindow.webContents.send("compile");
+          // TODO
+          //focusedWindow.webContents.send("play");
         }
       }
     ]
