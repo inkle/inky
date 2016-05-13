@@ -40,7 +40,16 @@ function play(inkString, requester, sessionId) {
       var line = lines[i].trim();
 
       var choiceMatches = line.match(/^(\d+):\s+(.*)/);
-      if( choiceMatches ) {
+      var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|TODO): '([^']+)' line (\d+): (.+)/);
+
+      if( errorMatches ) {
+        requester.send('play-generated-error', {
+          type: errorMatches[1],
+          filename: errorMatches[2],
+          lineNumber: parseInt(errorMatches[3]),
+          message: errorMatches[4]
+        }, sessionId);
+      } else if( choiceMatches ) {
         requester.send("play-generated-choice", {
           number: parseInt(choiceMatches[1]),
           text: choiceMatches[2]
@@ -102,10 +111,12 @@ ipc.on("play-stop-ink", (event, sessionId) => {
 
 ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
   console.log("inklecate received play choice number: "+choiceNumber+" for session "+sessionId);
-  const requester = event.sender;
-  const playProcess = sessions[sessionId].process;
-  if( playProcess )
-    playProcess.stdin.write(""+choiceNumber+"\n");
+  if( sessions[sessionId] ) {
+    const playProcess = sessions[sessionId].process;
+    if( playProcess )
+      playProcess.stdin.write(""+choiceNumber+"\n");
+  }
+  
 });
 
 electron.app.on("will-quit", function() {

@@ -7,21 +7,44 @@ var util = require('util');
 const assert = require('assert');
 
 var editor = ace.edit("editor");
+var Range = ace.require("ace/range").Range
+
 editor.setShowPrintMargin(false);
 editor.getSession().setUseWrapMode(true);
-
-editor.getSession().setAnnotations([{
-  row: 1,
-  column: 0,
-  text: "Strange error",
-  type: "error" // also warning and information
-}]);
 
 $(document).ready(function() {
 
     var sessionId = 0;
     var choiceSequence = [];
     var currentReplayTurnIdx = -1;
+    var clearForNextContent = false;
+    var editorMarkers = [];
+    var editorAnnotations = [];
+
+    function resetErrors() {
+        var editorSession = editor.getSession();
+        editorSession.clearAnnotations();
+        editorAnnotations = [];
+
+        for(var i=0; i<editorMarkers.length; i++) {
+            editorSession.removeMarker(editorMarkers[i]);
+        }
+        editorMarkers = [];
+    }
+
+    function clearIfNecessary() {
+        if( clearForNextContent ) {
+
+            // Reset text and hide play message
+            var $playMsg = $("#player .playMessage");
+            if( parseFloat($playMsg.css("opacity")) > 0 )
+            $playMsg.fadeOut();
+        
+            $("#player .innerText").text("");
+
+            clearForNextContent = false;
+        }
+    }
 
     function reloadInkForPlaying() {
 
@@ -36,12 +59,8 @@ $(document).ready(function() {
 
         console.log("New session id in play(): "+sessionId);
 
-        // Reset text and hide play message
-        var $playMsg = $("#player .playMessage");
-        if( parseFloat($playMsg.css("opacity")) > 0 )
-            $playMsg.fadeOut();
-        
-        $("#player .innerText").text("");
+        clearForNextContent = true;
+        resetErrors();
 
         ipc.send("play-ink", editor.getValue(), sessionId);
     }
@@ -66,6 +85,7 @@ $(document).ready(function() {
         }
     }, 250);
 
+
     var lastFadeTime = 0;
     function fadeIn($jqueryElement) {
 
@@ -85,25 +105,88 @@ $(document).ready(function() {
         lastFadeTime = currentTime + delay;
     }
 
+    function scrollToBottom() {
+
+        var $lastObj = $(".innerText").children().last();
+        var bottomEdge = $lastObj.position().top + $lastObj.height();
+        var newHeight = bottomEdge + 100;
+        if( $(".innerText").height() < newHeight )
+            $(".innerText").height(bottomEdge + 100);
+
+        var offset = newHeight - $("#main").height();
+        if( offset > 0 && offset > $("#player").scrollTop() ) {
+            $("#player").animate({
+                scrollTop: offset
+            }, 500);
+        }
+    }
+
     ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
-        console.log("Received play text (from "+fromSessionId+", current = "+sessionId+"): "+result);
         if( fromSessionId != sessionId )
             return;
+
+        clearIfNecessary();
 
         var $paragraph = $("<p class='storyText'></p>");
         $paragraph.text(result);
         $("#player .innerText").append($paragraph);
+
+        scrollToBottom();
 
         var replaying = currentReplayTurnIdx != -1;
         if( !replaying )
             fadeIn($paragraph);
     });
 
+    ipc.on("play-generated-error", (event, error, fromSessionId) => {
+        
+        if( sessionId != fromSessionId )
+            return;
+
+        console.log("Got error: "+JSON.stringify(error));
+
+        var editorErrorType = "error";
+        if( error.type == "WARNING" )
+            editorErrorType = "warning";
+        else if( error.type == "TODO" )
+            editorErrorType = "information";
+
+        editorAnnotations.push({
+          row: error.lineNumber-1,
+          column: 0,
+          text: error.message,
+          type: editorErrorType
+        });
+        editor.getSession().setAnnotations(editorAnnotations);
+
+        if( error.type.indexOf("ERROR") != -1) {
+            var markerId = editor.session.addMarker(
+                new Range(error.lineNumber-1, 0, error.lineNumber, 0),
+                "ace-error", 
+                "line",
+                false
+            );
+            editorMarkers.push(markerId);
+        }
+
+        if( error.type == "RUNTIME ERROR" ) {
+            var $aError = $("<a href='#'>Line "+error.lineNumber+": "+error.message+"</a>");
+            $aError.on("click", function() {
+                editor.gotoLine(error.lineNumber);
+            });
+            var $paragraph = $("<p class='error'></p>");
+            $paragraph.append($aError);
+            $("#player .innerText").append($paragraph);
+        }
+    });
+
     ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
 
         if( fromSessionId != sessionId )
             return;
+
+        clearIfNecessary();
 
         if( currentReplayTurnIdx >= 0 && currentReplayTurnIdx < choiceSequence.length ) {
             var replayChoiceNumber = choiceSequence[currentReplayTurnIdx];
@@ -131,8 +214,13 @@ $(document).ready(function() {
             else
                 fadeIn($choicePara);
 
+            scrollToBottom();
+
             // When this choice is clicked...
             $choice.on("click", (event) => {
+
+                var existingHeight = $(".innerText").height();
+                $(".innerText").height(existingHeight);
 
                 // Remove any existing choices, and add a divider
                 $(".choice").remove();

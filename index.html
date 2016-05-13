@@ -34,6 +34,11 @@
       float: left;
     }
 
+    #editor .ace-error {
+      background: #ffd1d1;
+      position:absolute;
+    }
+
     #player {
       display: block;
       position: relative;
@@ -45,7 +50,8 @@
     }
 
     #player .innerText {
-      padding: 10px 40px 10px 40px;
+      position: relative;
+      padding: 10px 40px 50px 40px;
       margin: 0;
     }
 
@@ -53,6 +59,7 @@
       font-family: Verdana, Geneva, sans-serif;
       font-weight: lighter;
       color: #555;
+      overflow: scroll;
     }
 
     #player hr {
@@ -82,7 +89,7 @@
       text-align: center;
     }
 
-    #player p.error {
+    #player p.error, #player p.error a {
       font-weight: bold;
       color: red;
     }
