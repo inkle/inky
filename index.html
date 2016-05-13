@@ -34,20 +34,83 @@
       float: left;
     }
 
-      #player {
-        display: block;
-        position: relative;
-        width: 50%;
-        height: 100vh;
-        margin-left: -1px;
-        border-left: 1px solid gray;
-        float: left;
-      }
+    #player {
+      display: block;
+      position: relative;
+      width: 50%;
+      height: 100vh;
+      margin-left: -1px;
+      border-left: 1px solid #CCC;
+      float: left;
+    }
 
-      .innerText {
-        padding: 20px;
-        margin: 0;
-      }
+    #player .innerText {
+      padding: 10px 40px 10px 40px;
+      margin: 0;
+    }
+
+    #player {
+      font-family: Verdana, Geneva, sans-serif;
+      font-weight: lighter;
+      color: #555;
+    }
+
+    #player hr {
+      border: 0;
+      border-top: 1px solid #CCC;
+      width: 30%;
+      margin: 0 auto;
+    }
+
+    #player p.choice {
+      text-align: center;
+    }
+
+    #player p.choice a {
+      color: #BBB;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+
+    #player p.choice a:hover {
+      color: #555;
+      text-decoration: underline;
+    }
+
+    #player p.end {
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #player p.error {
+      font-weight: bold;
+      color: red;
+    }
+
+    #player .playMessage {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      margin-top: -50px; /* approx status bar and padding. Better way? */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #player .playMessage div {
+      width: 300px;
+      height: 100px;
+      line-height: 100px;
+      text-align: center;
+      vertical-align: middle;
+      border-radius: 20px;
+      border: 1px solid #CCC;
+      font-size: 18pt;
+      color: #CCC;
+    }
 
     </style>
 
@@ -77,8 +140,11 @@
       </div>
       <div id="player">
         <div class="innerText">
-          Hello player.
+          
         </div>
+        <div class="playMessage">
+            <div>Press &#8984;-P to Play</div>
+          </div>
       </div>
     </div>
 
