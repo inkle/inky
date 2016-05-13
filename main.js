@@ -1,10 +1,13 @@
 const electron = require('electron')
 // Module to control application life.
 const app = electron.app
+
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
 const appmenus = require('./appmenus.js');
+
+const inklecate = require('./inklecate.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -27,6 +30,8 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  inklecate.setMainWindow(mainWindow);
 }
 
 // This method will be called when Electron has finished
