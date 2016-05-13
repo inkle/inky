@@ -11,10 +11,6 @@ editor.getSession().setUseWrapMode(true);
 
 $(document).ready(function() {
 
-    $(".compile_button").click(() => {
-        ipc.send("compile-ink", editor.getValue());
-    });
-
     ipc.on("compile", () => {
         console.log("Received compile instruction. Will compile the following:");
         console.log(editor.getValue());

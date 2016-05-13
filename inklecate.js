@@ -4,9 +4,8 @@ const electron = require('electron');
 const ipc = electron.ipcMain;
 const util = require('util');
 
-var mainWindow = null;
 
-function compile(inkString) {
+function compile(inkString, requester) {
   console.log("Compiling "+inkString);
 
   fs.writeFileSync("/tmp/inklecatetemp.ink", inkString);
@@ -20,17 +19,12 @@ function compile(inkString) {
       var outputContents = fs.readFileSync("/tmp/inklecatetemp.json", "utf8");
       console.log("Got output: "+outputContents);
       console.log("Sending result back to main window");
-      mainWindow.webContents.send("did-compile", outputContents);
+      requester.send("did-compile", outputContents);
     }
   });
 }
 
 ipc.on("compile-ink", (event, inkStr) => {
   console.log("inklecate received compile instruction. Compiling...");
-  compile(inkStr);
+  compile(inkStr, event.sender);
 });
-
-exports.compile = compile;
-exports.setMainWindow = function(w) {
-  mainWindow = w;
-}
