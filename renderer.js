@@ -20,12 +20,20 @@ editor.getSession().setAnnotations([{
 $(document).ready(function() {
 
     var sessionId = 0;
+    var choiceSequence = [];
+    var currentReplayTurnIdx = -1;
 
     function reloadInkForPlaying() {
+
+        lastEditorChange = null;
 
         stop(sessionId);
 
         sessionId += 1;
+
+        if( choiceSequence.length > 0 )
+            currentReplayTurnIdx = 0;
+
         console.log("New session id in play(): "+sessionId);
 
         // Reset text and hide play message
@@ -87,7 +95,9 @@ $(document).ready(function() {
         $paragraph.text(result);
         $("#player .innerText").append($paragraph);
 
-        fadeIn($paragraph);
+        var replaying = currentReplayTurnIdx != -1;
+        if( !replaying )
+            fadeIn($paragraph);
     });
 
     ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
@@ -95,28 +105,47 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        var $choice = $("<a href='#'>"+choice.text+"</a>");
+        if( currentReplayTurnIdx >= 0 && currentReplayTurnIdx < choiceSequence.length ) {
+            var replayChoiceNumber = choiceSequence[currentReplayTurnIdx];
+            if( choice.number == replayChoiceNumber ) {
+                $("#player .innerText").append("<hr/>");
 
-        // Append the choice
-        var $choicePara = $("<p class='choice'></p>");
-        $choicePara.append($choice);
-        $("#player .innerText").append($choicePara);
+                // Found the right choice to choose now, we just need to wait until
+                // the story's ready for our next choice (TODO: More robust way?!)
+                setTimeout(() => {
+                    currentReplayTurnIdx++;
+                    ipc.send("play-continue-with-choice-number", replayChoiceNumber, fromSessionId);
+                }, 10);
+            }
+        } else {
+            var $choice = $("<a href='#'>"+choice.text+"</a>");
 
-        // Fade it in
-        fadeIn($choicePara);
+            // Append the choice
+            var $choicePara = $("<p class='choice'></p>");
+            $choicePara.append($choice);
+            $("#player .innerText").append($choicePara);
 
-        // When this choice is clicked...
-        $choice.on("click", (event) => {
+            // Fade it in
+            if( currentReplayTurnIdx == choiceSequence.length )
+                currentReplayTurnIdx = -1;
+            else
+                fadeIn($choicePara);
 
-            // Remove any existing choices, and add a divider
-            $(".choice").remove();
-            $("#player .innerText").append("<hr/>");
+            // When this choice is clicked...
+            $choice.on("click", (event) => {
 
-            // Tell inklecate to make the choice
-            ipc.send("play-continue-with-choice-number", choice.number, fromSessionId);
-            event.preventDefault();
-        });
-        
+                // Remove any existing choices, and add a divider
+                $(".choice").remove();
+                $("#player .innerText").append("<hr/>");
+
+                // Tell inklecate to make the choice
+                ipc.send("play-continue-with-choice-number", choice.number, fromSessionId);
+                event.preventDefault();
+
+                choiceSequence.push(choice.number);
+            });
+        }
+
     });
 
     ipc.on("play-story-completed", (event, fromSessionId) => {
@@ -143,6 +172,23 @@ $(document).ready(function() {
 
     ipc.on("play-story-stopped", (event, fromSessionId) => {
         console.log("play-story-stopped from "+fromSessionId);
+    });
+
+    $("#restart").on("click", function(event) {
+        choiceSequence = [];
+        currentReplayTurnIdx = -1;
+        reloadInkForPlaying();
+
+        event.preventDefault();
+    });
+
+    $("#stepback").on("click", function(event) {
+        if( choiceSequence.length > 0 )
+            choiceSequence.splice(-1, 1);
+
+        reloadInkForPlaying();
+
+        event.preventDefault();
     });
 
 });
