@@ -10,6 +10,8 @@ const inklecatePath = "ink/inklecate";
 const tempInkPath = "/tmp/inklecatetemp.ink";
 const tempJsonPath = "/tmp/inklecatetemp.json";
 
+var activePlayers = {};
+
 
 function compile(inkString, requester) {
   console.log("Compiling "+inkString);
@@ -37,31 +39,51 @@ function play(inkString, requester) {
 
   const playProcess = spawn(inklecatePath, ['-p', tempInkPath]);
 
+  activePlayers[requester] = playProcess;
 
   playProcess.stderr.setEncoding('utf8');
   playProcess.stderr.on('data', (data) => {
     console.log(`stderr: ${data}`);
   });
 
+  playProcess.stdin.setEncoding('utf8');
+
   playProcess.stdout.setEncoding('utf8');
   playProcess.stdout.on('data', (text) => {
 
-    var choiceMatches = text.match(/(\d+):\s+(.*)/);
-    if( choiceMatches ) {
-      requester.send("play-generated-choice", {
-        number: parseInt(choiceMatches[1]),
-        text: choiceMatches[2]
-      });
-    } else {
-      requester.send('play-generated-text', text);
+    var lines = text.split('\n');
+
+    for(var i=0; i<lines.length; ++i) {
+      var line = lines[i].trim();
+
+      var choiceMatches = line.match(/^(\d+):\s+(.*)/);
+      if( choiceMatches ) {
+        requester.send("play-generated-choice", {
+          number: parseInt(choiceMatches[1]),
+          text: choiceMatches[2]
+        });
+      } else if( line.length > 0 ) {
+        requester.send('play-generated-text', line);
+      }
+
     }
 
-    
+    console.log("STORY DATA: "+text);
   })
 
   playProcess.on('close', (code) => {
-    console.log(`child process exited with code ${code}`);
-  });;
+
+    if( code == 0 ) {
+      console.log("Completed story successfully");
+      requester.send('play-story-completed');
+    }
+    else {
+      console.log("Story exited unexpectedly with error code"+code);
+      requester.send('play-story-unexpected-exit', code);
+    }
+
+    delete activePlayers[requester];
+  });
 }
 
 ipc.on("compile-ink", (event, inkStr) => {
@@ -76,5 +98,7 @@ ipc.on("play-ink", (event, inkStr) => {
 
 ipc.on("play-continue-with-choice-number", (event, choiceNumber) => {
   console.log("inklecate received play choice number: "+choiceNumber);
-  
+  const requester = event.sender;
+  const playProcess = activePlayers[requester];
+  playProcess.stdin.write(""+choiceNumber+"\n");
 });

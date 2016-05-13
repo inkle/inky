@@ -32,12 +32,24 @@ $(document).ready(function() {
     ipc.on("play-generated-choice", (event, choice) => {
         var $choice = $("<a href='"+choice.number+"'>"+choice.text+"</a>");
         $choice.on("click", (event) => {
+
+            $(".choice").remove();
+            $("#player .innerText").append("<hr/>");
+
             ipc.send("play-continue-with-choice-number", choice.number);
             event.preventDefault();
         });
-        var $choicePara = $("<p></p>");
+        var $choicePara = $("<p class='choice'></p>");
         $choicePara.append($choice);
         $("#player .innerText").append($choicePara);
+    });
+
+    ipc.on("play-story-completed", (event) => {
+        $("#player .innerText").append("<p><strong>End of story</strong></p>");
+    });
+
+    ipc.on("play-story-unexpected-exit", (event) => {
+        $("#player .innerText").append("<p><strong>Error in story</strong></p>");
     });
 
     ipc.on("compile", () => {
