@@ -103,32 +103,7 @@
       font-weight: bold;
       color: red;
     }
-
-    #player .playMessage {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      margin-top: -50px; /* approx status bar and padding. Better way? */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #player .playMessage div {
-      width: 300px;
-      height: 100px;
-      line-height: 100px;
-      text-align: center;
-      vertical-align: middle;
-      border-radius: 20px;
-      border: 1px solid #CCC;
-      font-size: 18pt;
-      color: #CCC;
-    }
-
+    
     #restart {
       right: 5px;
       top: 5px;
@@ -162,36 +137,10 @@
     <div class="button" id="restart">Restart</div>
 
     <div id="main">
-      <div id="editor">
-
-  - I looked at Monsieur Fogg 
-  *   ... and I could contain myself no longer.
-      'What is the purpose of our journey, Monsieur?'
-      'A wager,' he replied.
-      * *     'A wager!'[] I returned.
-              He nodded. 
-              * * *   'But surely that is foolishness!'
-              * * *  'A most serious matter then!'
-              - - -   He nodded again.
-              * * *   'But can we win?'
-                      'That is what we will endeavour to find out,' he answered.
-              * * *   'A modest wager, I trust?'
-                      'Twenty thousand pounds,' he replied, quite flatly.
-              * * *   I asked nothing further of him then[.], and after a final, polite cough, he offered nothing more to me. <>
-      * *     'Ah[.'],' I replied, uncertain what I thought.
-      - -     After that, <>
-  *   ... but I said nothing[] and <> 
-  - we passed the day in silence.
-  - -> END
-
-      </div>
+      <div id="editor"></div>
       <div id="player">
         <div class="innerText">
-          
         </div>
-        <div class="playMessage">
-            <div>Press &#8984;-P to Play</div>
-          </div>
       </div>
     </div>
 

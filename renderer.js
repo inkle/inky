@@ -35,11 +35,6 @@ $(document).ready(function() {
     function clearIfNecessary() {
         if( clearForNextContent ) {
 
-            // Reset text and hide play message
-            var $playMsg = $("#player .playMessage");
-            if( parseFloat($playMsg.css("opacity")) > 0 )
-            $playMsg.fadeOut();
-        
             $("#player .innerText").text("");
 
             // Temporarily set the height to zero so that it re-collapses,
