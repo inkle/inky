@@ -9,6 +9,12 @@ var editor = ace.edit("editor");
 editor.setShowPrintMargin(false);
 editor.getSession().setUseWrapMode(true);
 
+editor.getSession().setAnnotations([{
+  row: 1,
+  column: 0,
+  text: "Strange error",
+  type: "error" // also warning and information
+}]);
 
 $(document).ready(function() {
 
