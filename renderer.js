@@ -42,6 +42,10 @@ $(document).ready(function() {
         
             $("#player .innerText").text("");
 
+            // Temporarily set the height to zero so that it re-collapses,
+            // and then we can expand it as the content fills it later
+            $(".innerText").height(0);
+
             clearForNextContent = false;
         }
     }
@@ -132,8 +136,6 @@ $(document).ready(function() {
         $paragraph.text(result);
         $("#player .innerText").append($paragraph);
 
-        scrollToBottom();
-
         var replaying = currentReplayTurnIdx != -1;
         if( !replaying )
             fadeIn($paragraph);
@@ -147,10 +149,15 @@ $(document).ready(function() {
         console.log("Got error: "+JSON.stringify(error));
 
         var editorErrorType = "error";
-        if( error.type == "WARNING" )
+        var editorClass = "ace-error";
+        if( error.type == "WARNING" ) {
             editorErrorType = "warning";
-        else if( error.type == "TODO" )
+            editorClass = "ace-warning";
+        }
+        else if( error.type == "TODO" ) {
             editorErrorType = "information";
+            editorClass = 'ace-todo';
+        }
 
         editorAnnotations.push({
           row: error.lineNumber-1,
@@ -160,15 +167,14 @@ $(document).ready(function() {
         });
         editor.getSession().setAnnotations(editorAnnotations);
 
-        if( error.type.indexOf("ERROR") != -1) {
-            var markerId = editor.session.addMarker(
-                new Range(error.lineNumber-1, 0, error.lineNumber, 0),
-                "ace-error", 
-                "line",
-                false
-            );
-            editorMarkers.push(markerId);
-        }
+        var aceClass = "ace-error";
+        var markerId = editor.session.addMarker(
+            new Range(error.lineNumber-1, 0, error.lineNumber, 0),
+            editorClass, 
+            "line",
+            false
+        );
+        editorMarkers.push(markerId);
 
         if( error.type == "RUNTIME ERROR" ) {
             var $aError = $("<a href='#'>Line "+error.lineNumber+": "+error.message+"</a>");
@@ -188,19 +194,8 @@ $(document).ready(function() {
 
         clearIfNecessary();
 
-        if( currentReplayTurnIdx >= 0 && currentReplayTurnIdx < choiceSequence.length ) {
-            var replayChoiceNumber = choiceSequence[currentReplayTurnIdx];
-            if( choice.number == replayChoiceNumber ) {
-                $("#player .innerText").append("<hr/>");
+        if( currentReplayTurnIdx == -1 || currentReplayTurnIdx >= choiceSequence.length ) {
 
-                // Found the right choice to choose now, we just need to wait until
-                // the story's ready for our next choice (TODO: More robust way?!)
-                setTimeout(() => {
-                    currentReplayTurnIdx++;
-                    ipc.send("play-continue-with-choice-number", replayChoiceNumber, fromSessionId);
-                }, 10);
-            }
-        } else {
             var $choice = $("<a href='#'>"+choice.text+"</a>");
 
             // Append the choice
@@ -213,8 +208,6 @@ $(document).ready(function() {
                 currentReplayTurnIdx = -1;
             else
                 fadeIn($choicePara);
-
-            scrollToBottom();
 
             // When this choice is clicked...
             $choice.on("click", (event) => {
@@ -236,11 +229,31 @@ $(document).ready(function() {
 
     });
 
+    ipc.on("play-requires-input", (event, fromSessionId) => {
+
+        if( fromSessionId != sessionId )
+            return;
+
+        scrollToBottom();
+
+        // Replay?
+        if( currentReplayTurnIdx >= 0 && currentReplayTurnIdx < choiceSequence.length ) {
+
+            $("#player .innerText").append("<hr/>");
+
+            var replayChoiceNumber = choiceSequence[currentReplayTurnIdx];
+            currentReplayTurnIdx++;
+            ipc.send("play-continue-with-choice-number", replayChoiceNumber, fromSessionId);
+        }
+    });
+
     ipc.on("play-story-completed", (event, fromSessionId) => {
 
         console.log("play-story-completed from "+fromSessionId);
         if( fromSessionId != sessionId )
             return;
+
+        clearIfNecessary();
 
         var $end = $("<p class='end'>End of story</p>");
         fadeIn($end);

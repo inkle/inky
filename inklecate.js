@@ -41,6 +41,7 @@ function play(inkString, requester, sessionId) {
 
       var choiceMatches = line.match(/^(\d+):\s+(.*)/);
       var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|TODO): '([^']+)' line (\d+): (.+)/);
+      var promptMatches = line.match(/^\?>/);
 
       if( errorMatches ) {
         requester.send('play-generated-error', {
@@ -54,6 +55,8 @@ function play(inkString, requester, sessionId) {
           number: parseInt(choiceMatches[1]),
           text: choiceMatches[2]
         }, sessionId);
+      } else if( promptMatches ) {
+        requester.send('play-requires-input', sessionId);
       } else if( line.length > 0 ) {
         requester.send('play-generated-text', line, sessionId);
       }
