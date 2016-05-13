@@ -11,6 +11,7 @@
       padding: 0;
       margin: 0;
       margin-top: 23px;
+      overflow: hidden;
     }
 
     div {
@@ -18,52 +19,40 @@
       margin: 0;
     }
 
-    #editor {
-      width: 100%;
-      height: 100vh;
-    }
-
-      #main {
+    #main {
+      display: block;
+      position: relative;
         width: 100%;
         height: 100vh;
       }
 
+    #editor {
+      display: block;
+      position: relative;
+      width: 50%;
+      height: 100vh;
+      float: left;
+    }
+
       #player {
+        display: block;
+        position: relative;
+        width: 50%;
         height: 100vh;
-      }
-
-      .gutter {
-        background-color: #eee;
-
-        background-repeat: no-repeat;
-        background-position: 50%;
-      }
-
-      .gutter.gutter-horizontal {
-        background-image: url('vertical.png');
-        cursor: ew-resize;
-      }
-
-      .split {
-        -webkit-box-sizing: border-box;
-           -moz-box-sizing: border-box;
-                box-sizing: border-box;
-      }
-
-      .split, .gutter.gutter-horizontal {
-        height: 100vh;
+        margin-left: -1px;
+        border-left: 1px solid gray;
         float: left;
       }
 
-/*      .split {
-        overflow-y: auto;
-        overflow-x: hidden;
-      }*/
+      .innerText {
+        padding: 20px;
+        margin: 0;
+      }
 
     </style>
 
     <div id="main">
-      <div id="editor" class="split">
+      <div id="editor">
 
   - I looked at Monsieur Fogg 
   *   ... and I could contain myself no longer.
@@ -86,8 +75,10 @@
   - -> END
 
       </div>
-      <div id="player" class="split">
-        Hello player.
+      <div id="player">
+        <div class="innerText">
+          Hello player.
+        </div>
       </div>
     </div>
 

@@ -76,7 +76,7 @@ const template = [
     submenu: [
       {
         label: 'Compile and run',
-        accelerator: 'CmdOrCtrl+R',
+        accelerator: 'CmdOrCtrl+B',
         click(item, focusedWindow) { 
           console.log("Telling "+focusedWindow+" to compile...");
           focusedWindow.webContents.send("compile");
