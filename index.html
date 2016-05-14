@@ -10,7 +10,6 @@
     body {
       padding: 0;
       margin: 0;
-      margin-top: 23px;
       overflow: hidden;
     }
 
@@ -19,18 +18,63 @@
       margin: 0;
     }
 
+    body {
+      background: yellow;
+    }
+
+    #toolbar {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 49px;
+      background: #FBFBFB;
+      border-bottom: 1px solid #DDD;
+    }
+
+    #toolbar h1.filename {
+      font-family: Helvetica, sans-serif;
+      font-size: 14px;
+      font-weight: normal;
+      color: black;
+      position: absolute;
+      left: 70px;
+      right: 70px;
+      text-align: center;
+      overflow: hidden;
+      top: 0;
+    }
+
+    #toolbar p.issuesMessage {
+      font-family: Helvetica, sans-serif;
+      font-style: oblique;
+      color: #BBB;
+      font-size: 9pt;
+      line-height: 20px;
+      left: 70px;
+      right: 70px;
+      top: 28px;
+      bottom: 0;
+      position: absolute;
+      text-align: center;
+      margin: 0;
+    }
+
     #main {
       display: block;
-      position: relative;
-        width: 100%;
-        height: 100vh;
-      }
+      position: absolute;
+      top: 50px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: white;
+    }
 
     #editor {
       display: block;
-      position: relative;
+      position: absolute;
       width: 50%;
-      height: 100vh;
+      top: 0;
+      bottom: 0;
       float: left;
     }
 
@@ -56,10 +100,11 @@
 
     #player {
       display: block;
-      position: relative;
+      position: absolute;
       width: 50%;
-      height: 100vh;
-      margin-left: -1px;
+      top: 0;
+      bottom: 0;
+      right: 0;
       border-left: 1px solid #DDD;
       float: left;
     }
@@ -148,6 +193,10 @@
     <div class="button" id="stepback">Step Back</div>
     <div class="button" id="restart">Restart</div>
 
+    <div id="toolbar">
+      <h1 class="filename">myFilename.ink</h1>
+      <p class="issuesMessage">No issues.</p>
+    </div>
     <div id="main">
       <div id="editor"></div>
       <div id="player">
