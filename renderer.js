@@ -326,7 +326,7 @@ $(document).ready(function() {
         event.preventDefault();
     });
 
-    $("#stepback").on("click", function(event) {
+    $("#toolbar .step-back.button").on("click", function(event) {
         if( choiceSequence.length > 0 )
             choiceSequence.splice(-1, 1);
 

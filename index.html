@@ -87,14 +87,21 @@
       height: 12px;
     }
 
-    #toolbar .button.rewind {
+    #toolbar .button {
       position: absolute;
       border: 0;
       width: 30px;
       height: 30px;
       background: none;
-      right: 10px;
       top: 10px;
+    }
+
+    #toolbar .button.rewind {
+      right: 10px;
+    }
+
+    #toolbar .button.step-back {
+      right: 45px;
     }
 
     #toolbar .button:hover {
@@ -106,6 +113,13 @@
       height: 19px;
       vertical-align: middle;
       margin-left: -2px;
+    }
+
+    #toolbar .button.step-back img {
+      width: 12x;
+      height: 16px;
+      vertical-align: middle;
+      margin-top: 3px;
     }
 
     #main {
@@ -249,6 +263,9 @@
         <div class="issueCount todo"><span>4</span> <img class="issue-icon todo" src="img/todo-icon.png"/></div>
         <div class="issueCount warning"><span>4</span> <img class="issue-icon warning" src="img/warning-icon.png"/></div>
         <div class="issueCount error"><span>4</span> <img class="issue-icon error" src="img/error-icon.png"/></div>
+      </div>
+      <div class="button step-back" title="Rewind a single choice">
+        <img src="img/step-back.png"/>
       </div>
       <div class="button rewind" title="Restart story">
         <img src="img/rewind.png"/>
