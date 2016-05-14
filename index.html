@@ -49,13 +49,18 @@
       position:absolute;
     }
 
+    #editor .ace_gutter-layer {
+      background: #f9f9f9;
+      border-right: 1px solid #DDD;
+    }
+
     #player {
       display: block;
       position: relative;
       width: 50%;
       height: 100vh;
       margin-left: -1px;
-      border-left: 1px solid #CCC;
+      border-left: 1px solid #DDD;
       float: left;
     }
 
@@ -101,9 +106,16 @@
 
     #player p.error, #player p.error a {
       font-weight: bold;
-      color: red;
+      color: #C56D6D;
+      font-size: 10pt;
+      text-align: center;
+      font-weight: normal;
     }
-    
+
+    #player p.error a:hover {
+      color: black;
+    }
+
     #restart {
       right: 5px;
       top: 5px;
