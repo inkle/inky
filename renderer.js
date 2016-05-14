@@ -318,7 +318,7 @@ $(document).ready(function() {
         console.log("play-story-stopped from "+fromSessionId);
     });
 
-    $("#restart").on("click", function(event) {
+    $("#toolbar .rewind.button").on("click", function(event) {
         choiceSequence = [];
         currentReplayTurnIdx = -1;
         reloadInkForPlaying();

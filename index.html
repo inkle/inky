@@ -87,11 +87,26 @@
       height: 12px;
     }
 
-/*          <div class="issuesSummary">
-        <div class="issueCount">4 <img class="issue-icon todo" src="img/pencil-icon.png"/></div>
-        <div class="issueCount">4 <img class="issue-icon warning" src="img/warning-icon.png"/></div>
-        <div class="issueCount">4 <img class="issue-icon error" src="img/error-icon.png"/></div>
-      </div>*/
+    #toolbar .button.rewind {
+      position: absolute;
+      border: 0;
+      width: 30px;
+      height: 30px;
+      background: none;
+      right: 10px;
+      top: 10px;
+    }
+
+    #toolbar .button:hover {
+      background: #EEE;
+    }
+
+    #toolbar .button.rewind img {
+      width: 19px;
+      height: 19px;
+      vertical-align: middle;
+      margin-left: -2px;
+    }
 
     #main {
       display: block;
@@ -234,6 +249,9 @@
         <div class="issueCount todo"><span>4</span> <img class="issue-icon todo" src="img/todo-icon.png"/></div>
         <div class="issueCount warning"><span>4</span> <img class="issue-icon warning" src="img/warning-icon.png"/></div>
         <div class="issueCount error"><span>4</span> <img class="issue-icon error" src="img/error-icon.png"/></div>
+      </div>
+      <div class="button rewind" title="Restart story">
+        <img src="img/rewind.png"/>
       </div>
     </div>
     <div id="main">
