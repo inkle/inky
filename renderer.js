@@ -20,6 +20,7 @@ $(document).ready(function() {
     var clearForNextContent = false;
     var editorMarkers = [];
     var editorAnnotations = [];
+    var issues = [];
 
     function resetErrors() {
         var editorSession = editor.getSession();
@@ -30,6 +31,10 @@ $(document).ready(function() {
             editorSession.removeMarker(editorMarkers[i]);
         }
         editorMarkers = [];
+
+        issues = [];
+
+        refreshIssueSummary();
     }
 
     function clearIfNecessary() {
@@ -120,6 +125,47 @@ $(document).ready(function() {
         }
     }
 
+    function refreshIssueSummary() {
+        var errorCount = 0;
+        var warningCount = 0;
+        var todoCount = 0;
+
+        for(var i=0; i<issues.length; ++i) {
+            var issue = issues[i];
+            if( issue.type == "ERROR" || issue.type == "RUNTIME ERROR" ) {
+                errorCount++;
+            } else if( issue.type == "WARNING" ) {
+                warningCount++;
+            } else if( issue.type == "TODO" ) {
+                todoCount++;
+            }
+        }
+
+        var $message = $(".issuesMessage");
+        var $summary = $(".issuesSummary");
+        if( errorCount == 0 && warningCount == 0 && todoCount == 0 ) {
+            $summary.hide();
+            $message.text("No issues.");
+            $message.show();
+        } else {
+            $message.hide();
+            function updateCount(className, count) {
+                var $issueCount = $summary.children(".issueCount."+className);
+                if( count == 0 )
+                    $issueCount.hide();
+                else {
+                    $issueCount.show();
+                    $issueCount.children("span").text(count);
+                }
+            }
+
+            updateCount("error", errorCount);
+            updateCount("warning", warningCount);
+            updateCount("todo", todoCount);
+            $summary.show();
+        }
+    }
+
     ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
         if( fromSessionId != sessionId )
@@ -140,8 +186,6 @@ $(document).ready(function() {
         
         if( sessionId != fromSessionId )
             return;
-
-        console.log("Got error: "+JSON.stringify(error));
 
         var editorErrorType = "error";
         var editorClass = "ace-error";
@@ -180,6 +224,10 @@ $(document).ready(function() {
             $paragraph.append($aError);
             $("#player .innerText").append($paragraph);
         }
+
+        issues.push(error);
+
+        refreshIssueSummary();
     });
 
     ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
