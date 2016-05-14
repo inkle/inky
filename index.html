@@ -44,7 +44,7 @@
       top: 0;
     }
 
-    #toolbar p.issuesMessage {
+    #toolbar p.issuesMessage, #toolbar div.issuesSummary {
       font-family: Helvetica, sans-serif;
       font-style: oblique;
       color: #BBB;
@@ -58,6 +58,40 @@
       text-align: center;
       margin: 0;
     }
+
+    #toolbar div.issuesSummary .issueCount {
+      display: inline-block;
+      font-style: normal;
+      color: black;
+      margin-left: 4px;
+      margin-right: 4px;
+    }
+
+    #toolbar div.issuesSummary .issueCount img.issue-icon {
+      vertical-align: middle;
+      margin-top: -2px;
+    }
+    #toolbar div.issuesSummary .issueCount img.issue-icon.warning {
+      margin-top: -3px;
+    }
+    img.issue-icon.error {
+      width: 11px;
+      height: 11px;
+    }
+    img.issue-icon.todo {
+      width: 11px;
+      height: 11px;
+    }
+    img.issue-icon.warning {
+      width: 13px;
+      height: 12px;
+    }
+
+/*          <div class="issuesSummary">
+        <div class="issueCount">4 <img class="issue-icon todo" src="img/pencil-icon.png"/></div>
+        <div class="issueCount">4 <img class="issue-icon warning" src="img/warning-icon.png"/></div>
+        <div class="issueCount">4 <img class="issue-icon error" src="img/error-icon.png"/></div>
+      </div>*/
 
     #main {
       display: block;
@@ -195,7 +229,12 @@
 
     <div id="toolbar">
       <h1 class="filename">myFilename.ink</h1>
-      <p class="issuesMessage">No issues.</p>
+      <p class="issuesMessage" style="display: none;">No issues.</p>
+      <div class="issuesSummary" style="display: none;">
+        <div class="issueCount"><span>4</span> <img class="issue-icon todo" src="img/todo-icon.png"/></div>
+        <div class="issueCount"><span>4</span> <img class="issue-icon warning" src="img/warning-icon.png"/></div>
+        <div class="issueCount"><span>4</span> <img class="issue-icon error" src="img/error-icon.png"/></div>
+      </div>
     </div>
     <div id="main">
       <div id="editor"></div>
