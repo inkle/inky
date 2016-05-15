@@ -22,6 +22,10 @@
       background: yellow;
     }
 
+    .hidden {
+      display: none;
+    }
+
     #toolbar {
       position: absolute;
       top: 0;
@@ -120,6 +124,118 @@
       height: 16px;
       vertical-align: middle;
       margin-top: 3px;
+    }
+
+    #toolbar .issue-popup {
+      position: absolute;
+      top: 55px;
+      left: 500px;
+      min-width: 300px;
+      margin: 0 auto;
+      background: white;
+      z-index: 10;
+      border: 1px solid #E2E2E2;
+    }
+
+    #toolbar .issue-popup {
+      border-radius: 6px;
+    }
+    #toolbar .issue-popup .row:first-child {
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+    }
+    #toolbar .issue-popup .row:last-child {
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+    #toolbar .issue-popup .row:first-child .col:first-child {
+      border-top-left-radius: 6px;
+    }
+    #toolbar .issue-popup .row:first-child .col:last-child {
+      border-top-right-radius: 6px;
+    }
+    #toolbar .issue-popup .row:last-child .col:first-child {
+      border-bottom-left-radius: 6px;
+    }
+    #toolbar .issue-popup .row:last-child .col:last-child {
+      border-bottom-right-radius: 6px;
+    }
+
+    #toolbar .issue-popup .row {
+      display: block;
+      position: relative;
+      margin: 0;
+      padding: 0;
+      height: 30px;
+    }
+
+    #toolbar .issue-popup .row:hover {
+      background: #F9F9F9;
+    }
+
+    #toolbar .issue-popup .row {
+      border-bottom: 1px solid #E1E1E1;
+    }
+    #toolbar .issue-popup .row:last-child {
+      border-bottom: none;
+    }
+
+    #toolbar .issue-popup .col {
+      display: block;
+      position: relative;
+      height: 100%;
+      float: left;
+      padding: 0;
+      margin: 0;
+    }
+
+    #toolbar .issue-popup .line-no {
+      font-family: Monaco, sans-serif;
+      width: 30px;
+      height: 30px;
+      background: #F9F9F9;
+      border-right: 1px solid #E1E1E1;
+      font-size: 10px;
+      line-height: 30px;
+      text-align: right;
+      padding-right: 5px;
+    }
+
+    #toolbar .issue-popup .issue {
+      height: 30px;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: 11px;
+      font-family: Helvetica, sans-serif;
+      line-height: 30px;
+    }
+
+    #toolbar .issue-popup img.chevron {
+      width: 8px;
+      height: 14px;
+      float: right;
+      padding: 7px;
+    }
+
+    #toolbar .issue-popup img.nubbin {
+      width: 20px;
+      height: 13px;
+      position: absolute;
+      left: 50%;
+      margin-left: -10px;
+      top: -12px;
+    }
+
+    #toolbar .issue-popup .error .issue {
+      color: #CE5D5D;
+    }
+
+    #toolbar .issue-popup .warning .issue {
+      color: #F5B750;
+    }
+
+    #toolbar .issue-popup .todo .issue {
+      color: #82C39C;
     }
 
     #main {
@@ -267,8 +383,8 @@
 
     <div id="toolbar">
       <h1 class="filename">myFilename.ink</h1>
-      <p class="issuesMessage" style="display: none;">No issues.</p>
-      <div class="issuesSummary" style="display: none;">
+      <p class="issuesMessage hidden">No issues.</p>
+      <div class="issuesSummary hidden">
         <div class="issueCount todo"><span>4</span> <img class="issue-icon todo" src="img/todo-icon.png"/></div>
         <div class="issueCount warning"><span>4</span> <img class="issue-icon warning" src="img/warning-icon.png"/></div>
         <div class="issueCount error"><span>4</span> <img class="issue-icon error" src="img/error-icon.png"/></div>
@@ -279,6 +395,30 @@
       <div class="button rewind" title="Restart story">
         <img src="img/rewind.png"/>
       </div>
+      <div class="issue-popup">
+        <img class="nubbin" src="img/nubbin.png"/>
+        <div class="table">
+          <div class="row">
+            <div class="col line-no">
+              5
+            </div>
+            <div class="col issue">
+              Divert target not found: ‘nowhere’
+            </div>
+            <img class="chevron" src="img/right-chevron.png"/>
+          </div>
+          <div class="row">
+            <div class="col line-no">
+              103
+            </div>
+            <div class="col issue">
+              Another error message here
+            </div>
+            <img class="chevron" src="img/right-chevron.png"/>
+          </div> <!-- row  -->
+        </div> <!-- table  -->
+      </div>
+      
     </div>
     <div id="main">
       <div id="editor"></div>

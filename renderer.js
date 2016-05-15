@@ -126,29 +126,50 @@ $(document).ready(function() {
     }
 
     function refreshIssueSummary() {
+
+        var $message = $(".issuesMessage");
+        var $summary = $(".issuesSummary");
+        var $issues = $("#toolbar .issue-popup");
+        var $issuesTable = $issues.children(".table");
+        $issuesTable.empty();
+
         var errorCount = 0;
         var warningCount = 0;
         var todoCount = 0;
 
         for(var i=0; i<issues.length; ++i) {
             var issue = issues[i];
+            var errorClass = "";
             if( issue.type == "ERROR" || issue.type == "RUNTIME ERROR" ) {
                 errorCount++;
+                errorClass = "error";
             } else if( issue.type == "WARNING" ) {
                 warningCount++;
+                errorClass = "warning";
             } else if( issue.type == "TODO" ) {
                 todoCount++;
+                errorClass = "todo";
             }
+
+            $issuesTable.append(`<div class="row ${errorClass}">
+            <div class="col line-no">
+              ${issue.lineNumber}
+            </div>
+            <div class="col issue">
+              ${issue.message}
+            </div>
+            <img class="chevron" src="img/right-chevron.png"/>
+          </div>`
+            );
         }
 
-        var $message = $(".issuesMessage");
-        var $summary = $(".issuesSummary");
         if( errorCount == 0 && warningCount == 0 && todoCount == 0 ) {
-            $summary.hide();
+            $summary.addClass("hidden");
             $message.text("No issues.");
-            $message.show();
+            $message.removeClass("hidden");
+            $issues.addClass("hidden");
         } else {
-            $message.hide();
+            $message.addClass("hidden");
             function updateCount(className, count) {
                 var $issueCount = $summary.children(".issueCount."+className);
                 if( count == 0 )
@@ -162,8 +183,17 @@ $(document).ready(function() {
             updateCount("error", errorCount);
             updateCount("warning", warningCount);
             updateCount("todo", todoCount);
-            $summary.show();
+            $summary.removeClass("hidden");
+
+            updateIssuesPopupPosition();
         }
+    }
+
+    function updateIssuesPopupPosition() {
+        var $issues = $("#toolbar .issue-popup");
+        $issues.css({
+            left: 0.5*$(window).width() - 0.5*$issues.width()
+        });
     }
 
     ipc.on("play-generated-text", (event, result, fromSessionId) => {
@@ -335,4 +365,13 @@ $(document).ready(function() {
         event.preventDefault();
     });
 
+    $("#toolbar .issuesSummary").hover(function(e) {
+        $("#toolbar .issue-popup").removeClass("hidden");
+    }, function(e) {
+        $("#toolbar .issue-popup").addClass("hidden");
+    })
+
+    $(window).resize(() => {
+        updateIssuesPopupPosition();
+    });
 });
