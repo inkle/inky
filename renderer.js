@@ -151,11 +151,10 @@ $(document).ready(function() {
             if( errorTypeDiff != 0 )
                 return errorTypeDiff;
             else
-                return issuePriorties[i1.lineNumber] - issuePriorties[i2.lineNumber];
+                return i1.lineNumber - i2.lineNumber;
         });
 
         issues.forEach((issue) => {
-            //var issue = issues[i];
             var errorClass = "";
             if( issue.type == "ERROR" || issue.type == "RUNTIME ERROR" ) {
                 errorCount++;
