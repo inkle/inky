@@ -1,16 +1,21 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
-var $ = window.jQuery = require('./jquery-2.2.3.min.js');
-var ipc = require("electron").ipcRenderer;
-var util = require('util');
+const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+const ipc = require("electron").ipcRenderer;
+const util = require('util');
 const assert = require('assert');
+const path = require("path");
+var DocumentManager = require('electron-document-manager').getRendererModule();
 
 var editor = ace.edit("editor");
 var Range = ace.require("ace/range").Range
 
 editor.setShowPrintMargin(false);
 editor.getSession().setUseWrapMode(true);
+
+
+
 
 $(document).ready(function() {
 
@@ -22,6 +27,24 @@ $(document).ready(function() {
     var editorAnnotations = [];
     var issues = [];
     var selectedIssueIdx = -1;
+
+
+    DocumentManager.setContentSetter(function(content) {
+        editor.setValue(content);
+    });
+     
+    DocumentManager.setContentGetter(function() {
+        return editor.getValue();
+    });
+
+    var currentFilepath = null;
+    ipc.on("set-filepath", (event, filename) => {
+        currentFilepath = filename;
+        var baseFilename = path.basename(filename);
+        $("h1.title").text(path.basename(filename));
+
+        $(".sidebar .nav-group.main-ink .nav-group-item .filename").text(baseFilename)
+    });
 
     function resetErrors() {
         var editorSession = editor.getSession();
@@ -82,6 +105,7 @@ $(document).ready(function() {
     var lastEditorChange = null;
     editor.on("change", () => {
         lastEditorChange = Date.now();
+        DocumentManager.setEdited(true);
     });
 
     setInterval(() => {

@@ -9,6 +9,10 @@ const appmenus = require('./appmenus.js');
 
 const inklecate = require('./inklecate.js');
 
+var DocumentManager = require('electron-document-manager').main;
+ 
+DocumentManager({ entryPoint: 'file://' + __dirname + 'index.html' });
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
