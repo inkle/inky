@@ -72,14 +72,13 @@ const template = [
     ]
   },
   {
-    label: 'Test',
+    label: 'Story',
     submenu: [
       {
-        label: 'Compile to JSON',
-        accelerator: 'CmdOrCtrl+P',
+        label: 'Next Issue',
+        accelerator: 'CmdOrCtrl+.',
         click(item, focusedWindow) { 
-          // TODO
-          //focusedWindow.webContents.send("play");
+          focusedWindow.webContents.send("next-issue");
         }
       }
     ]

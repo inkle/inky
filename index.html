@@ -33,6 +33,11 @@
       height: 49px;
       background: #FBFBFB;
       border-bottom: 1px solid #DDD;
+      cursor: default;
+    }
+
+    #toolbar div {
+      cursor: default;
     }
 
     #toolbar h1.filename {
@@ -48,7 +53,7 @@
       top: 0;
     }
 
-    #toolbar p.issuesMessage, #toolbar div.issuesSummary {
+    #toolbar p.issuesMessage {
       font-family: Helvetica, sans-serif;
       font-style: oblique;
       color: #BBB;
@@ -61,6 +66,20 @@
       position: absolute;
       text-align: center;
       margin: 0;
+    }
+
+    #toolbar div.issuesSummary {
+      font-family: Helvetica, sans-serif;
+      font-style: oblique;
+      color: #BBB;
+      font-size: 9pt;
+      line-height: 20px;
+      top: 28px;
+      bottom: 0;
+      position: relative;
+      text-align: center;
+      margin: 0 auto;
+      max-width: 200px;
     }
 
     #toolbar div.issuesSummary .issueCount {
@@ -395,27 +414,9 @@
       <div class="button rewind" title="Restart story">
         <img src="img/rewind.png"/>
       </div>
-      <div class="issue-popup">
+      <div class="issue-popup hidden">
         <img class="nubbin" src="img/nubbin.png"/>
         <div class="table">
-          <div class="row">
-            <div class="col line-no">
-              5
-            </div>
-            <div class="col issue">
-              Divert target not found: ‘nowhere’
-            </div>
-            <img class="chevron" src="img/right-chevron.png"/>
-          </div>
-          <div class="row">
-            <div class="col line-no">
-              103
-            </div>
-            <div class="col issue">
-              Another error message here
-            </div>
-            <img class="chevron" src="img/right-chevron.png"/>
-          </div> <!-- row  -->
         </div> <!-- table  -->
       </div>
       

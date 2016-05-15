@@ -21,6 +21,7 @@ $(document).ready(function() {
     var editorMarkers = [];
     var editorAnnotations = [];
     var issues = [];
+    var selectedIssueIdx = -1;
 
     function resetErrors() {
         var editorSession = editor.getSession();
@@ -33,6 +34,7 @@ $(document).ready(function() {
         editorMarkers = [];
 
         issues = [];
+        selectedIssueIdx = -1;
 
         refreshIssueSummary();
     }
@@ -137,8 +139,23 @@ $(document).ready(function() {
         var warningCount = 0;
         var todoCount = 0;
 
-        for(var i=0; i<issues.length; ++i) {
-            var issue = issues[i];
+        var issuePriorties = {
+            "ERROR": 1,
+            "RUNTIME ERROR": 2,
+            "WARNING": 3,
+            "TODO": 4
+        };
+
+        issues.sort((i1, i2) => {
+            var errorTypeDiff = issuePriorties[i1.type] - issuePriorties[i2.type];
+            if( errorTypeDiff != 0 )
+                return errorTypeDiff;
+            else
+                return issuePriorties[i1.lineNumber] - issuePriorties[i2.lineNumber];
+        });
+
+        issues.forEach((issue) => {
+            //var issue = issues[i];
             var errorClass = "";
             if( issue.type == "ERROR" || issue.type == "RUNTIME ERROR" ) {
                 errorCount++;
@@ -151,7 +168,7 @@ $(document).ready(function() {
                 errorClass = "todo";
             }
 
-            $issuesTable.append(`<div class="row ${errorClass}">
+            var $issueRow = $(`<div class="row ${errorClass}">
             <div class="col line-no">
               ${issue.lineNumber}
             </div>
@@ -159,9 +176,15 @@ $(document).ready(function() {
               ${issue.message}
             </div>
             <img class="chevron" src="img/right-chevron.png"/>
-          </div>`
-            );
-        }
+          </div>`);
+
+            $issueRow.click((e) => {
+                editor.gotoLine(issue.lineNumber);
+                e.preventDefault();
+            });
+
+            $issuesTable.append($issueRow);
+        });
 
         if( errorCount == 0 && warningCount == 0 && todoCount == 0 ) {
             $summary.addClass("hidden");
@@ -195,6 +218,16 @@ $(document).ready(function() {
             left: 0.5*$(window).width() - 0.5*$issues.width()
         });
     }
+
+
+    ipc.on("next-issue", () => {
+        if( issues.length > 0 ) {
+            selectedIssueIdx++;
+            if( selectedIssueIdx >= issues.length )
+                selectedIssueIdx = 0;
+            editor.gotoLine(issues[selectedIssueIdx].lineNumber);
+        }
+    });
 
     ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
@@ -365,11 +398,17 @@ $(document).ready(function() {
         event.preventDefault();
     });
 
-    $("#toolbar .issuesSummary").hover(function(e) {
+    var shouldBeHidden = false;
+    $("#toolbar .issuesSummary, #toolbar .issue-popup").hover(function(e) {
         $("#toolbar .issue-popup").removeClass("hidden");
+        shouldBeHidden = false;
     }, function(e) {
-        $("#toolbar .issue-popup").addClass("hidden");
-    })
+        shouldBeHidden = true;
+        setTimeout(() => { 
+            if( shouldBeHidden )
+                $("#toolbar .issue-popup").addClass("hidden");
+        }, 500);
+    });
 
     $(window).resize(() => {
         updateIssuesPopupPosition();
