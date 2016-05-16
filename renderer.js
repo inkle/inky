@@ -14,12 +14,26 @@ var Range = ace.require("ace/range").Range
 editor.setShowPrintMargin(false);
 editor.getSession().setUseWrapMode(true);
 editor.setOptions({
-    enableBasicAutocompletion: true,
     enableLiveAutocompletion: true
 });
 
+/* TODO: It's possible to complete custom keywords.
+   Can do this when we have them parsed from the ink file.
+var staticWordCompleter = {
+    getCompletions: function(editor, session, pos, prefix, callback) {
+        var wordList = ["foo", "bar", "baz"];
+        callback(null, wordList.map(function(word) {
+            return {
+                caption: word,
+                value: word,
+                meta: "static"
+            };
+        }));
 
-
+    }
+}
+editor.completers = [staticWordCompleter];
+*/
 
 $(document).ready(function() {
 
