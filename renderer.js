@@ -13,6 +13,10 @@ var Range = ace.require("ace/range").Range
 
 editor.setShowPrintMargin(false);
 editor.getSession().setUseWrapMode(true);
+editor.setOptions({
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true
+});
 
 
 
