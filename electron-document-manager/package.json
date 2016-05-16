@@ -1,0 +1,45 @@
+{
+  "name": "electron-document-manager",
+  "version": "0.1.0",
+  "description": "Manages opening and saving documents in Electron apps",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron"
+  ],
+  "author": {
+    "name": "Jackson de Campos",
+    "email": "jackson@jacksondc.com",
+    "url": "http://jacksondc.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "async": "^1.5.2",
+    "jquery": "^2.2.0",
+    "lodash": "^4.0.0"
+  },
+  "gitHead": "45357e1cc6d0d568bdbcdbc4d2c2fb24c8575bb8",
+  "_id": "electron-document-manager@0.1.0",
+  "_shasum": "4f6762204bf0dc8d8a8b8df650fda194335d68ea",
+  "_from": "electron-document-manager@*",
+  "_npmVersion": "3.5.3",
+  "_nodeVersion": "5.3.0",
+  "_npmUser": {
+    "name": "jacksondc",
+    "email": "jackson@jacksondc.com"
+  },
+  "dist": {
+    "shasum": "4f6762204bf0dc8d8a8b8df650fda194335d68ea",
+    "tarball": "https://registry.npmjs.org/electron-document-manager/-/electron-document-manager-0.1.0.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "jacksondc",
+      "email": "jackson@jacksondc.com"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/electron-document-manager/-/electron-document-manager-0.1.0.tgz"
+}

@@ -68,6 +68,9 @@ function play(inkString, requester, sessionId) {
 
   playProcess.on('close', (code) => {
 
+    if( !sessions[sessionId] )
+      return;
+
     var forceStoppedByPlayer = sessions[sessionId].stopped;
     if( !forceStoppedByPlayer ) {
       if( code == 0 ) {
