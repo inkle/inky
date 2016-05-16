@@ -6,7 +6,7 @@ const electron = require('electron');
 const ipc = electron.ipcMain;
 const util = require('util');
 
-const inklecatePath = "ink/inklecate";
+const inklecatePath = __dirname + "/ink/inklecate";
 const tempInkPath = "/tmp/inklecatetemp.ink";
 const tempJsonPath = "/tmp/inklecatetemp.json";
 
