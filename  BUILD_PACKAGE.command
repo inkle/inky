@@ -6,4 +6,5 @@ cd "`dirname "$0"`"
 #     npm install electron-packager -g
 #
 
-electron-packager . Inky --platform=darwin --arch=x64
+rm -rf Inky-darwin-x64/
+electron-packager . Inky --platform=darwin --arch=x64 --extend-info=info.plist
