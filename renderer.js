@@ -6,10 +6,13 @@ const ipc = require("electron").ipcRenderer;
 const util = require('util');
 const assert = require('assert');
 const path = require("path");
-var DocumentManager = require('./electron-document-manager').getRendererModule();
+const DocumentManager = require('./electron-document-manager').getRendererModule();
 
 var editor = ace.edit("editor");
-var Range = ace.require("ace/range").Range
+var Range = ace.require("ace/range").Range;
+
+const modeTest = require("./ace-ink-mode/ace_mode_test.js").withAce(ace);
+modeTest.doStuff();
 
 editor.setShowPrintMargin(false);
 editor.getSession().setUseWrapMode(true);
