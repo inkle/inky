@@ -42,14 +42,12 @@ var inkHighlightRules = function() {
             include: "#statements"
         }],
         "#TODO": [{
+            regex: /^(\s*)(TODO\b)([:\w\ \t]+)/,
             token: [
-                "comment.todo",
-                "comment.todo.TODO",
-                "comment.todo.TODO",
-                "comment.todo",
-                "comment.todo"
-            ],
-            regex: /^(\s*)(?:(TODO\s*:)|(TODO\b))(\s*)(.*)/
+                "todo", // whitespace
+                "todo.TODO", // TODO
+                "todo" // user text
+            ]
         }],
         "#choice": [{
             regex: /^(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
