@@ -130,20 +130,22 @@ var inkHighlightRules = function() {
             ]
         }],
         "#globalVAR": [{
-            token: [
-                "meta.variable.assignment",
-                "storage",
-                "meta.variable.declaration",
-                "entity.name.variable",
-                "meta.variable.assignment"
-            ],
             regex: /^(\s*)(VAR|CONST)(\s*)(\w+)(\s*)/,
+            token: [
+                "var-decl", // whitespace
+                "var-decl.keyword",
+                "var-decl", // whitespace
+                "var-decl.name",
+                "var-decl" // whitespace
+            ],
+            
+            // The rest of the assignment line
             push: [{
-                token: "meta.variable.assignment",
+                token: "var-decl",
                 regex: /$/,
                 next: "pop"
             }, {
-                defaultToken: "meta.variable.assignment"
+                defaultToken: "var-decl"
             }]
         }],
         "#inlineConditional": [{
