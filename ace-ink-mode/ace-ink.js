@@ -52,15 +52,17 @@ var inkHighlightRules = function() {
             regex: /^(\s*)(?:(TODO\s*:)|(TODO\b))(\s*)(.*)/
         }],
         "#choice": [{
-            token: [
-                "choice",
-                "keyword.operator.weaveBullet.choice",
-                "choice",
-                "meta.label",
-                "entity.name.label",
-                "meta.label"
-            ],
             regex: /^(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
+            token: [
+                "choice", // whitespace
+                "choice.bullets", // * or +
+                "choice", // whitespace
+                "choice.label", // ( 
+                "choice.label.name", // label_name
+                "choice.label" // )
+            ],
+
+            // Sub section within choice
             push: [{
                 token: "choice",
                 regex: /$/,
@@ -69,9 +71,9 @@ var inkHighlightRules = function() {
                 include: "#comments"
             }, {
                 token: [
-                    "keyword.operator.weaveBracket",
-                    "string.content",
-                    "keyword.operator.weaveBracket"
+                    "choice.weaveBracket",
+                    "choice.weaveInsideBrackets",
+                    "choice.weaveBracket"
                 ],
                 regex: /(\[)([^\]]*)(\])/
             }, {
@@ -120,14 +122,14 @@ var inkHighlightRules = function() {
             regex: /(->|<-)(\s*)(?:(DONE)|(END)|([\w\d\.,\(\)\ \t]+))/
         }],
         "#gather": [{
+            regex: /^(\s*)((?:-\s*)+)(?!>)(?:(\(\s*)(\w+)(\s*\)))?/,
             token: [
-                "meta.gather",
-                "keyword.operator.weaveBullet.gather",
-                "meta.label",
-                "entity.name.label",
-                "meta.label"
-            ],
-            regex: /^(\s*)((?:-\s*)+)(?!>)(?:(\(\s*)(\w+)(\s*\)))?/
+                "gather", // whitespace
+                "gather.bullets", // - - 
+                "gather.label", // (
+                "gather.label.name", // label_name
+                "gather.label" // )
+            ]
         }],
         "#globalVAR": [{
             token: [
