@@ -155,33 +155,33 @@ var inkHighlightRules = function() {
             }]
         }],
         "#inlineConditional": [{
-            token: [
-                "keyword.operator.inlineConditionalStart",
-                "entity.inlineConditional"
-            ],
             regex: /(\{)([^:\|\}]+:)/,
+            token: [
+                "logic.inline.punctuation",
+                "logic.inline.conditional.condition"
+            ],
             push: [{
-                token: "keyword.operator.inlineConditionalEnd",
+                token: "logic.inline.conditional.punctuation",
                 regex: /\}/,
                 next: "pop"
             }, {
-                token: "keyword.operator.inlineConditionalBranchSeparator",
+                token: "logic.inline.conditional.punctuation",
                 regex: /\|/
             }, {
                 include: "#mixedContent"
             }, {
-                defaultToken: "entity.inlineConditional"
+                defaultToken: "logic.inline.innerContent"
             }]
         }],
         "#inlineLogic": [{
-            token: "keyword.operator.inlineLogicStart",
+            token: "logic.inline.punctuation",
             regex: /\{/,
             push: [{
-                token: "keyword.operator.inlineLogicEnd",
+                token: "logic.inline.punctuation",
                 regex: /\}/,
                 next: "pop"
             }, {
-                defaultToken: "meta.logic"
+                defaultToken: "logic.inline"
             }]
         }],
         "#inlineSequence": [{
