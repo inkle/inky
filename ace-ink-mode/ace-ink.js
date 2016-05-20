@@ -11,30 +11,29 @@ var inkHighlightRules = function() {
         start: [{
             include: "#comments"
         }, {
+            regex: /^(\s*)(={2,})(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/,
             token: [
-                "meta.knot.declaration",
-                "markup.punctuation",
-                "meta.knot.declaration",
-                "keyword.function",
-                "meta.knot.declaration",
-                "entity.name.knot",
-                "meta.knot.declaration",
-                "variable.parameter",
-                "meta.knot.declaration",
-                "markup.punctuation"
-            ],
-            regex: /^(\s*)(={2,})(\s*)((?:function)?)(\s*)(\w+)(\s*)((?:\([^)]*\))?)(\s*)((?:={1,})?)/
+                "",
+                "flow.knot.declaration.punctuation", // ===
+                "flow.knot.declaration", // whitespace
+                "flow.knot.declaration.function", // function (optional)
+                "flow.knot.declaration", // whitespace
+                "flow.knot.declaration.name", // knot_name
+                "flow.knot.declaration", // whitespace
+                "flow.knot.declaration.parameters", // (arg1, arg2)
+                "flow.knot.declaration", // whitespace
+                "flow.knot.declaration.punctuation" // ====
+            ]
         }, {
+            regex: /^(\s*)(=)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?/,
             token: [
-                "meta.stitch.declaration",
-                "markup.punctuation",
-                "meta.stitch.declaration",
-                "keyword.function",
-                "meta.stitch.declaration",
-                "entity.name.knot",
-                "meta.stitch.declaration"
-            ],
-            regex: /^(\s*)(=)(\s*)(\w+)(\s*)((?:\([^)$]*\))?)(\s*$)/
+                "flow.stitch.declaration", // whitespace
+                "flow.stitch.declaration.punctuation", // =
+                "flow.stitch.declaration", // whitespace
+                "flow.stitch.declaration.name", // stitch_name
+                "flow.stitch.declaration", // whitespace
+                "flow.stitch.declaration.parameters" // parameters
+            ]
         }, {
             include: "#choice"
         }, {
@@ -112,14 +111,13 @@ var inkHighlightRules = function() {
         }],
         "#divert": [{
             token: [
-                "keyword.operator.divert",
-                "meta.divert",
-                "keyword.done",
-                "keyword.end",
-                "variable.divertTarget",
-                "meta.divert"
+                "divert.operator",
+                "divert",
+                "divert.to-done",
+                "divert.to-end",
+                "divert.target"
             ],
-            regex: /(->|<-)(\s*)(?:(?:(DONE)|(END)|(\w+))(?:\s*\.\s*\w+)*(\s*)(?:\([^\)]+\))?)?/
+            regex: /(->|<-)(\s*)(?:(DONE)|(END)|([\w\d\.,\(\)\ \t]+))/
         }],
         "#gather": [{
             token: [

@@ -49,10 +49,6 @@ $(document).ready(function() {
     var issues = [];
     var selectedIssueIdx = -1;
 
-    $('body').on('click', 'span.ace_variable.ace_divertTarget', function(event){
-        console.log("clicked target");
-    });
-
     // Unfortunately standard jquery events don't work since 
     // Ace turns pointer events off
     editor.on("click", function(e){
@@ -65,12 +61,19 @@ $(document).ready(function() {
         var pos = editor.getCursorPosition();
         var token = editor.session.getTokenAt(pos.row, pos.column);
 
-        if( token && token.type == "variable.divertTarget" ) {
+        if( token && token.type == "divert.target" ) {
+
+            var targetName = token.value;
+
+            // Remove parameters from target name
+            // TODO: We could do targetName.split(".") in order to find
+            // components of a longer path
+            targetName = targetName.replace(/\([^\)]*\)/g, "");
 
             // TODO: Need a more accurate way to match the target!
             $(".ace_name").each((i, el) => {
                 var $el = $(el);
-                if( $el.text() == token.value ) {
+                if( $el.text() == targetName ) {
                     var pos = $el.offset();
                     var character = editor.renderer.screenToTextCoordinates(pos.left, pos.top+5);
                     e.preventDefault();
@@ -100,7 +103,7 @@ $(document).ready(function() {
 
             const lineHeight = 12;
             if( e.x >= tokenStartPos.pageX && e.x <= tokenEndPos.pageX && e.y >= tokenStartPos.pageY && e.y <= tokenEndPos.pageY+lineHeight) {
-                if( token && token.type == "variable.divertTarget" ) {
+                if( token && token.type == "divert.target" ) {
                     editor.renderer.setCursorStyle("pointer");
                     return;
                 }
