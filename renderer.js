@@ -49,6 +49,66 @@ $(document).ready(function() {
     var issues = [];
     var selectedIssueIdx = -1;
 
+    $('body').on('click', 'span.ace_variable.ace_divertTarget', function(event){
+        console.log("clicked target");
+    });
+
+    // Unfortunately standard jquery events don't work since 
+    // Ace turns pointer events off
+    editor.on("click", function(e){
+
+        // Have to hold down modifier key to jump
+        if( !e.domEvent.metaKey && !e.domEvent.ctrlKey )
+            return;
+
+        var editor = e.editor;
+        var pos = editor.getCursorPosition();
+        var token = editor.session.getTokenAt(pos.row, pos.column);
+
+        if( token && token.type == "variable.divertTarget" ) {
+
+            // TODO: Need a more accurate way to match the target!
+            $(".ace_name").each((i, el) => {
+                var $el = $(el);
+                if( $el.text() == token.value ) {
+                    var pos = $el.offset();
+                    var character = editor.renderer.screenToTextCoordinates(pos.left, pos.top+5);
+                    e.preventDefault();
+
+                    editor.gotoLine(character.row+1, character.column);
+                }
+            });
+        }
+    });
+
+    // Unfortunately standard CSS for hover doesn't work in the editor
+    // since they turn pointer events off.
+    editor.on("mousemove", function (e) {
+
+        var editor = e.editor;
+
+        // Have to hold down modifier key to jump
+        if( e.domEvent.metaKey || e.domEvent.ctrlKey ) {
+
+            var character = editor.renderer.screenToTextCoordinates(e.x, e.y);
+            var token = editor.session.getTokenAt(character.row, character.column);
+            if( !token )
+                return;
+
+            var tokenStartPos = editor.renderer.textToScreenCoordinates(character.row, token.start);
+            var tokenEndPos = editor.renderer.textToScreenCoordinates(character.row, token.start + token.value.length);
+
+            const lineHeight = 12;
+            if( e.x >= tokenStartPos.pageX && e.x <= tokenEndPos.pageX && e.y >= tokenStartPos.pageY && e.y <= tokenEndPos.pageY+lineHeight) {
+                if( token && token.type == "variable.divertTarget" ) {
+                    editor.renderer.setCursorStyle("pointer");
+                    return;
+                }
+            }
+        }
+        
+        editor.renderer.setCursorStyle("default");
+    });
 
     DocumentManager.setContentSetter(function(content) {
         editor.setValue(content);
