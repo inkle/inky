@@ -11,9 +11,9 @@ const DocumentManager = require('./electron-document-manager').getRendererModule
 var editor = ace.edit("editor");
 var Range = ace.require("ace/range").Range;
 
-const modeTest = require("./ace-ink-mode/ace_mode_test.js").withAce(ace);
-modeTest.doStuff();
+const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
+editor.getSession().setMode(new InkMode());
 editor.setShowPrintMargin(false);
 editor.getSession().setUseWrapMode(true);
 editor.setOptions({
