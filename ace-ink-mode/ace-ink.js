@@ -130,19 +130,25 @@ var inkHighlightRules = function() {
             ]
         }],
         "#globalVAR": [{
-            regex: /^(\s*)(VAR|CONST)(\s*)(\w+)(\s*)/,
+            regex: /^(\s*)(VAR|CONST)\b/, // (\s*)(\w+)(\s*)
             token: [
                 "var-decl", // whitespace
-                "var-decl.keyword",
-                "var-decl", // whitespace
-                "var-decl.name",
-                "var-decl" // whitespace
+                "var-decl.keyword"
             ],
             
-            // The rest of the assignment line
             push: [{
-                token: "var-decl",
+                regex: /(\s*)(\w+)(\s*)/,
+                token: [
+                    "var-decl", // whitespace
+                    "var-decl.name",
+                    "var-decl" // whitespace
+                ]
+            }, 
+
+            // The rest of the assignment line
+            { 
                 regex: /$/,
+                token: "var-decl",
                 next: "pop"
             }, {
                 defaultToken: "var-decl"
