@@ -170,6 +170,30 @@ var inkHighlightRules = function() {
                 defaultToken: "var-decl"
             }]
         }],
+        "#INCLUDE": [{
+            regex: /(\s*)(INCLUDE\b)/,
+            token: [
+                "include",
+                "include.keyword"
+            ],
+
+            push: [{
+                regex: /(\s*)([^\r\n]+)/,
+                token: [
+                    "include", // whitespace
+                    "include.filepath"
+                ]
+            }, 
+
+            // The rest of the assignment line
+            { 
+                regex: /$/,
+                token: "include",
+                next: "pop"
+            }, {
+                defaultToken: "include"
+            }]
+        }],
         "#inlineConditional": [{
             regex: /(\{)([^:\|\}]+:)/,
             token: [
@@ -279,6 +303,8 @@ var inkHighlightRules = function() {
             include: "#TODO"
         }, {
             include: "#globalVAR"
+        }, {
+            include: "#INCLUDE"
         }, {
             include: "#choice"
         }, {

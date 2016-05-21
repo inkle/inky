@@ -62,6 +62,11 @@ $(document).ready(function() {
         var pos = editor.getCursorPosition();
         var searchToken = editor.session.getTokenAt(pos.row, pos.column);
 
+        if( searchToken && searchToken.type == "include.filepath" ) {
+            alert("Jumping to INCLUDEs not yet supported!")
+            return;
+        }
+
         // Approximate search:
         //  - Split the search token up into its components: x.y.z
         //  - POS = clicked token
@@ -153,9 +158,11 @@ $(document).ready(function() {
 
             const lineHeight = 12;
             if( e.x >= tokenStartPos.pageX && e.x <= tokenEndPos.pageX && e.y >= tokenStartPos.pageY && e.y <= tokenEndPos.pageY+lineHeight) {
-                if( token && token.type == "divert.target" ) {
-                    editor.renderer.setCursorStyle("pointer");
-                    return;
+                if( token ) {
+                    if( token.type == "divert.target" || token.type == "include.filepath" ) {
+                        editor.renderer.setCursorStyle("pointer");
+                        return;
+                    }
                 }
             }
         }
