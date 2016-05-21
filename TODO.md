@@ -20,9 +20,13 @@
     * Reliability of story reloading - sometimes it fails
     * When inklecate crashes, we should handle it specially
     * Replaying a story sometimes goes through a few transitions (e.g. with The Intercept)
+
 * Refactor - `renderer.js` is getting ugly
     * Split editor and player related stuff
     * Split into jquery related stuff (view) v.s. inklecate integration
+
+* `/app`: Organise project better, with actual app files in there
+
 * Background worker for document model
     * Build simple hierarchy of document
         * Knots, stitches, gathers/choices

@@ -47,8 +47,16 @@ $(document).ready(function() {
     var clearForNextContent = false;
     var editorMarkers = [];
     var editorAnnotations = [];
+    var editorChanges = 1;
+    var lastEditorChange = null;
     var issues = [];
     var selectedIssueIdx = -1;
+    
+
+    editor.on("change", () => {
+        lastEditorChange = Date.now();
+        DocumentManager.setEdited(true);
+    });
 
     // Unfortunately standard jquery events don't work since 
     // Ace turns pointer events off
@@ -240,15 +248,12 @@ $(document).ready(function() {
     }
 
     // Do first compile
+    // Really just for debug when loading ink immediately
+    // other actions will cause editor changes
     setTimeout(reloadInkForPlaying, 1000);
 
-    var editorChanges = 1;
-    var lastEditorChange = null;
-    editor.on("change", () => {
-        lastEditorChange = Date.now();
-        DocumentManager.setEdited(true);
-    });
-
+    // compile loop - detect changes every 0.25 and make sure
+    // user has paused before actually compiling
     setInterval(() => {
         if( lastEditorChange != null && Date.now() - lastEditorChange > 500 ) {
             lastEditorChange = null;
