@@ -211,7 +211,7 @@ function resetErrors() {
     issues = [];
     selectedIssueIdx = -1;
 
-    refreshIssueSummary();
+    ToolbarView.updateIssueSummary(issues);
 }
 
 
@@ -253,98 +253,6 @@ setInterval(() => {
         reloadInkForPlaying();
     }
 }, 250);
-
-function refreshIssueSummary() {
-
-    var $message = $(".issuesMessage");
-    var $summary = $(".issuesSummary");
-    var $issues = $("#toolbar .issue-popup");
-    var $issuesTable = $issues.children(".table");
-    $issuesTable.empty();
-
-    var errorCount = 0;
-    var warningCount = 0;
-    var todoCount = 0;
-
-    var issuePriorties = {
-        "ERROR": 1,
-        "RUNTIME ERROR": 2,
-        "WARNING": 3,
-        "TODO": 4
-    };
-
-    issues.sort((i1, i2) => {
-        var errorTypeDiff = issuePriorties[i1.type] - issuePriorties[i2.type];
-        if( errorTypeDiff != 0 )
-            return errorTypeDiff;
-        else
-            return i1.lineNumber - i2.lineNumber;
-    });
-
-    issues.forEach((issue) => {
-        var errorClass = "";
-        if( issue.type == "ERROR" || issue.type == "RUNTIME ERROR" ) {
-            errorCount++;
-            errorClass = "error";
-        } else if( issue.type == "WARNING" ) {
-            warningCount++;
-            errorClass = "warning";
-        } else if( issue.type == "TODO" ) {
-            todoCount++;
-            errorClass = "todo";
-        }
-
-        var $issueRow = $(`<div class="row ${errorClass}">
-        <div class="col line-no">
-          ${issue.lineNumber}
-        </div>
-        <div class="col issue">
-          ${issue.message}
-        </div>
-        <img class="chevron" src="img/right-chevron.png"/>
-      </div>`);
-
-        $issueRow.click((e) => {
-            editor.gotoLine(issue.lineNumber);
-            e.preventDefault();
-        });
-
-        $issuesTable.append($issueRow);
-    });
-
-    if( errorCount == 0 && warningCount == 0 && todoCount == 0 ) {
-        $summary.addClass("hidden");
-        $message.text("No issues.");
-        $message.removeClass("hidden");
-        $issues.addClass("hidden");
-    } else {
-        $message.addClass("hidden");
-        function updateCount(className, count) {
-            var $issueCount = $summary.children(".issueCount."+className);
-            if( count == 0 )
-                $issueCount.hide();
-            else {
-                $issueCount.show();
-                $issueCount.children("span").text(count);
-            }
-        }
-
-        updateCount("error", errorCount);
-        updateCount("warning", warningCount);
-        updateCount("todo", todoCount);
-        $summary.removeClass("hidden");
-
-        updateIssuesPopupPosition();
-    }
-}
-
-function updateIssuesPopupPosition() {
-    var $issues = $("#toolbar .issue-popup");
-    $issues.css({
-        left: 0.5*$(window).width() - 0.5*$issues.width()
-    });
-}
-
 
 ipc.on("next-issue", () => {
     if( issues.length > 0 ) {
@@ -406,7 +314,7 @@ ipc.on("play-generated-error", (event, error, fromSessionId) => {
 
     issues.push(error);
 
-    refreshIssueSummary();
+    ToolbarView.updateIssueSummary(issues);
 });
 
 ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
@@ -470,7 +378,7 @@ ipc.on("play-story-stopped", (event, fromSessionId) => {
     console.log("play-story-stopped from "+fromSessionId);
 });
 
-ToolbarView.setButtonActions({
+ToolbarView.setEvents({
     rewind: () => {
         choiceSequence = [];
         currentReplayTurnIdx = -1;
@@ -480,12 +388,10 @@ ToolbarView.setButtonActions({
         if( choiceSequence.length > 0 )
             choiceSequence.splice(-1, 1);
         reloadInkForPlaying();
+    },
+    selectIssue: (issue) => {
+        editor.gotoLine(issue.lineNumber);
     }
 })
 
 
-$(document).ready(function() {
-    $(window).resize(() => {
-        updateIssuesPopupPosition();
-    });
-});
