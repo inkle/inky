@@ -254,7 +254,7 @@ var inkHighlightRules = function() {
         }, {
             include: "#divert"
         }, {
-            token: "constant.glue",
+            token: "glue",
             regex: /<>/
         }],
         "#statements": [{
