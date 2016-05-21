@@ -19,9 +19,9 @@ DocumentManager({
 });
 
 // Open the DevTools.
-setTimeout(() => {
-    BrowserWindow.getFocusedWindow().webContents.openDevTools();
-}, 500);
+// setTimeout(() => {
+//     BrowserWindow.getFocusedWindow().webContents.openDevTools();
+// }, 500);
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
