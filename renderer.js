@@ -10,6 +10,7 @@ const DocumentManager = require('./electron-document-manager').getRendererModule
 
 var editor = ace.edit("editor");
 var Range = ace.require("ace/range").Range;
+var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
@@ -59,28 +60,77 @@ $(document).ready(function() {
 
         var editor = e.editor;
         var pos = editor.getCursorPosition();
-        var token = editor.session.getTokenAt(pos.row, pos.column);
+        var searchToken = editor.session.getTokenAt(pos.row, pos.column);
 
-        if( token && token.type == "divert.target" ) {
+        // Approximate search:
+        //  - Split the search token up into its components: x.y.z
+        //  - POS = clicked token
+        //  - for each component:
+        //       - find the *nearest* matching token to POS
+        //       - POS = that matching component's pos
+        //       - next component
+        // Effectively it drills into the path, except that it's not
+        // 100% accurate since it just tried to find the nearest, rather
+        // than searching through the structure correctly.
+        if( searchToken && searchToken.type == "divert.target" ) {
 
-            var targetName = token.value;
+            e.preventDefault();
 
-            // Remove parameters from target name
-            // TODO: We could do targetName.split(".") in order to find
-            // components of a longer path
-            targetName = targetName.replace(/\([^\)]*\)/g, "");
+            var targetPath = searchToken.value;
 
-            // TODO: Need a more accurate way to match the target!
-            $(".ace_name").each((i, el) => {
-                var $el = $(el);
-                if( $el.text() == targetName ) {
-                    var pos = $el.offset();
-                    var character = editor.renderer.screenToTextCoordinates(pos.left, pos.top+5);
-                    e.preventDefault();
+            var pathComponents = targetPath.split(".");
+            var foundSomeOfPath = false;
 
-                    editor.gotoLine(character.row+1, character.column);
+            for(var pathIdx=0; pathIdx<pathComponents.length; ++pathIdx) {
+
+                // Remove parameters from target name
+                var pathElementName = pathComponents[pathIdx];
+                pathElementName = pathElementName.replace(/\([^\)]*\)/g, "");
+                pathElementName = pathElementName.trim();
+
+                function searchForName(forward) {
+                    var it = new TokenIterator(editor.session, pos.row, pos.column);
+                    for(var tok = it.getCurrentToken(); tok; forward ? tok = it.stepForward() : tok = it.stepBackward()) {
+                        if( tok.type.indexOf("name") != -1 && tok.value == pathElementName ) {
+                            return {
+                                row: it.getCurrentTokenRow(),
+                                column: it.getCurrentTokenColumn(),
+                                found: true
+                            };
+                        }
+                    }
+                    return {
+                        found: false
+                    };
                 }
-            });
+
+                var forwardSearchResult = searchForName(true);
+                var backwardSearchResult = searchForName(false);
+                var target = null;
+
+                if( forwardSearchResult.found && backwardSearchResult.found ) {
+                    if( Math.abs(forwardSearchResult.row - pos.row) < Math.abs(backwardSearchResult.row - pos.row) ) {
+                        target = forwardSearchResult;
+                    } else {
+                        target = backwardSearchResult;
+                    }
+                } else if( forwardSearchResult.found ) {
+                    target = forwardSearchResult;
+                } else if( backwardSearchResult.found ) {
+                    target = backwardSearchResult;
+                }
+
+                if( target ) {
+                    pos = target;
+                    foundSomeOfPath = true;
+                } else {
+                    break;
+                }
+
+            } // path component iteration
+
+            if( foundSomeOfPath )
+                editor.gotoLine(pos.row+1, pos.column);
         }
     });
 
