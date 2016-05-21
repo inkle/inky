@@ -54,7 +54,7 @@ $(document).ready(function() {
     editor.on("click", function(e){
 
         // Have to hold down modifier key to jump
-        if( !e.domEvent.metaKey && !e.domEvent.ctrlKey )
+        if( !e.domEvent.altKey )
             return;
 
         var editor = e.editor;
@@ -91,7 +91,7 @@ $(document).ready(function() {
         var editor = e.editor;
 
         // Have to hold down modifier key to jump
-        if( e.domEvent.metaKey || e.domEvent.ctrlKey ) {
+        if( e.domEvent.altKey ) {
 
             var character = editor.renderer.screenToTextCoordinates(e.x, e.y);
             var token = editor.session.getTokenAt(character.row, character.column);
