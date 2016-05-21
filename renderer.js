@@ -8,6 +8,8 @@ const assert = require('assert');
 const path = require("path");
 const DocumentManager = require('./electron-document-manager').getRendererModule();
 
+const PlayerView = require("./playerView.js").PlayerView;
+
 var editor = ace.edit("editor");
 var Range = ace.require("ace/range").Range;
 var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
@@ -44,7 +46,7 @@ $(document).ready(function() {
     var sessionId = 0;
     var choiceSequence = [];
     var currentReplayTurnIdx = -1;
-    var clearForNextContent = false;
+    
     var editorMarkers = [];
     var editorAnnotations = [];
     var editorChanges = 1;
@@ -211,18 +213,7 @@ $(document).ready(function() {
         refreshIssueSummary();
     }
 
-    function clearIfNecessary() {
-        if( clearForNextContent ) {
 
-            $("#player .innerText").text("");
-
-            // Temporarily set the height to zero so that it re-collapses,
-            // and then we can expand it as the content fills it later
-            $(".innerText").height(0);
-
-            clearForNextContent = false;
-        }
-    }
 
     function reloadInkForPlaying() {
 
@@ -237,7 +228,8 @@ $(document).ready(function() {
 
         console.log("New session id in play(): "+sessionId);
 
-        clearForNextContent = true;
+        PlayerView.prepareForNextContent();
+
         resetErrors();
 
         ipc.send("play-ink", editor.getValue(), sessionId);
@@ -260,42 +252,6 @@ $(document).ready(function() {
             reloadInkForPlaying();
         }
     }, 250);
-
-
-    var lastFadeTime = 0;
-    function fadeIn($jqueryElement) {
-
-        const minimumTimeSeparation = 200;
-        const animDuration = 1000;
-
-        var currentTime = Date.now();
-        var timeSinceLastFade = currentTime - lastFadeTime;
-
-        var delay = 0;
-        if( timeSinceLastFade < minimumTimeSeparation )
-            delay = minimumTimeSeparation - timeSinceLastFade;
-
-        $jqueryElement.css("opacity", 0);
-        $jqueryElement.delay(delay).animate({opacity: 1.0}, animDuration);
-
-        lastFadeTime = currentTime + delay;
-    }
-
-    function scrollToBottom() {
-
-        var $lastObj = $(".innerText").children().last();
-        var bottomEdge = $lastObj.position().top + $lastObj.height();
-        var newHeight = bottomEdge + 100;
-        if( $(".innerText").height() < newHeight )
-            $(".innerText").height(bottomEdge + 100);
-
-        var offset = newHeight - $("#main").height();
-        if( offset > 0 && offset > $("#player").scrollTop() ) {
-            $("#player").animate({
-                scrollTop: offset
-            }, 500);
-        }
-    }
 
     function refreshIssueSummary() {
 
@@ -403,7 +359,7 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        clearIfNecessary();
+        PlayerView.clearIfNecessary();
 
         var $paragraph = $("<p class='storyText'></p>");
         $paragraph.text(result);
@@ -411,7 +367,7 @@ $(document).ready(function() {
 
         var replaying = currentReplayTurnIdx != -1;
         if( !replaying )
-            fadeIn($paragraph);
+            PlayerView.fadeIn($paragraph);
     });
 
     ipc.on("play-generated-error", (event, error, fromSessionId) => {
@@ -467,7 +423,7 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        clearIfNecessary();
+        PlayerView.clearIfNecessary();
 
         if( currentReplayTurnIdx == -1 || currentReplayTurnIdx >= choiceSequence.length ) {
 
@@ -482,7 +438,7 @@ $(document).ready(function() {
             if( currentReplayTurnIdx == choiceSequence.length )
                 currentReplayTurnIdx = -1;
             else
-                fadeIn($choicePara);
+                PlayerView.fadeIn($choicePara);
 
             // When this choice is clicked...
             $choice.on("click", (event) => {
@@ -509,7 +465,7 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        scrollToBottom();
+        PlayerView.scrollToBottom();
 
         // Replay?
         if( currentReplayTurnIdx >= 0 && currentReplayTurnIdx < choiceSequence.length ) {
@@ -528,10 +484,10 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        clearIfNecessary();
+        PlayerView.clearIfNecessary();
 
         var $end = $("<p class='end'>End of story</p>");
-        fadeIn($end);
+        PlayerView.fadeIn($end);
         $("#player .innerText").append($end);
     });
 
