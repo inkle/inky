@@ -359,15 +359,9 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        PlayerView.clearIfNecessary();
-
-        var $paragraph = $("<p class='storyText'></p>");
-        $paragraph.text(result);
-        $("#player .innerText").append($paragraph);
-
         var replaying = currentReplayTurnIdx != -1;
-        if( !replaying )
-            PlayerView.fadeIn($paragraph);
+        var animated = !replaying;
+        PlayerView.addTextSection(result, animated);
     });
 
     ipc.on("play-generated-error", (event, error, fromSessionId) => {
@@ -404,13 +398,9 @@ $(document).ready(function() {
         editorMarkers.push(markerId);
 
         if( error.type == "RUNTIME ERROR" ) {
-            var $aError = $("<a href='#'>Line "+error.lineNumber+": "+error.message+"</a>");
-            $aError.on("click", function() {
+            PlayerView.addLineError(error, () => {
                 editor.gotoLine(error.lineNumber);
             });
-            var $paragraph = $("<p class='error'></p>");
-            $paragraph.append($aError);
-            $("#player .innerText").append($paragraph);
         }
 
         issues.push(error);
@@ -423,42 +413,21 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        PlayerView.clearIfNecessary();
+        var animated = false;
+        if( currentReplayTurnIdx == choiceSequence.length )
+            currentReplayTurnIdx = -1;
+        else
+            animated = true;
 
         if( currentReplayTurnIdx == -1 || currentReplayTurnIdx >= choiceSequence.length ) {
-
-            var $choice = $("<a href='#'>"+choice.text+"</a>");
-
-            // Append the choice
-            var $choicePara = $("<p class='choice'></p>");
-            $choicePara.append($choice);
-            $("#player .innerText").append($choicePara);
-
-            // Fade it in
-            if( currentReplayTurnIdx == choiceSequence.length )
-                currentReplayTurnIdx = -1;
-            else
-                PlayerView.fadeIn($choicePara);
-
-            // When this choice is clicked...
-            $choice.on("click", (event) => {
-
-                var existingHeight = $(".innerText").height();
-                $(".innerText").height(existingHeight);
-
-                // Remove any existing choices, and add a divider
-                $(".choice").remove();
-                $("#player .innerText").append("<hr/>");
-
-                // Tell inklecate to make the choice
+            PlayerView.addChoice(choice, animated, () => {
                 ipc.send("play-continue-with-choice-number", choice.number, fromSessionId);
-                event.preventDefault();
-
                 choiceSequence.push(choice.number);
             });
         }
-
     });
+
+
 
     ipc.on("play-requires-input", (event, fromSessionId) => {
 
@@ -470,7 +439,7 @@ $(document).ready(function() {
         // Replay?
         if( currentReplayTurnIdx >= 0 && currentReplayTurnIdx < choiceSequence.length ) {
 
-            $("#player .innerText").append("<hr/>");
+            PlayerView.addHorizontalDivider();
 
             var replayChoiceNumber = choiceSequence[currentReplayTurnIdx];
             currentReplayTurnIdx++;
@@ -484,11 +453,7 @@ $(document).ready(function() {
         if( fromSessionId != sessionId )
             return;
 
-        PlayerView.clearIfNecessary();
-
-        var $end = $("<p class='end'>End of story</p>");
-        PlayerView.fadeIn($end);
-        $("#player .innerText").append($end);
+        PlayerView.addTerminatingMessage("End of story", "end");
     });
 
     ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
@@ -497,9 +462,7 @@ $(document).ready(function() {
         if( sessionId != fromSessionId ) 
             return;
 
-        var $error = $("<p class='error'>Error in story</p>");
-        fadeIn($error);
-        $("#player .innerText").append($error);
+        PlayerView.addTerminatingMessage("Error in story", "error");
     });
 
     ipc.on("play-story-stopped", (event, fromSessionId) => {

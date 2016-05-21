@@ -54,9 +54,79 @@ function prepareForNextContent() {
     shouldClearPlayerContent = true;
 }
 
+function addTextSection(text, animated)
+{
+    clearIfNecessary();
+
+    var $paragraph = $("<p class='storyText'></p>");
+    $paragraph.text(text);
+    $("#player .innerText").append($paragraph);
+
+    if( animated )
+        fadeIn($paragraph);
+}
+
+function addChoice(choice, animated, callback)
+{
+    clearIfNecessary();
+
+    var $choice = $("<a href='#'>"+choice.text+"</a>");
+
+    // Append the choice
+    var $choicePara = $("<p class='choice'></p>");
+    $choicePara.append($choice);
+    $("#player .innerText").append($choicePara);
+
+    // Fade it in
+    if( animated )
+        fadeIn($choicePara);
+
+    // When this choice is clicked...
+    $choice.on("click", (event) => {
+
+        var existingHeight = $(".innerText").height();
+        $(".innerText").height(existingHeight);
+
+        // Remove any existing choices, and add a divider
+        $(".choice").remove();
+        $("#player .innerText").append("<hr/>");
+
+        event.preventDefault();
+
+        callback();
+    });
+}
+
+function addTerminatingMessage(message, cssClass)
+{            
+    clearIfNecessary();
+
+    var $message = $(`<p class='${cssClass}'>${message}</p>`);
+    fadeIn($message);
+    $("#player .innerText").append($message);
+}
+
+function addHorizontalDivider()
+{
+    $("#player .innerText").append("<hr/>");
+}
+
+function addLineError(error, callback)
+{
+    var $aError = $("<a href='#'>Line "+error.lineNumber+": "+error.message+"</a>");
+    $aError.on("click", callback);
+
+    var $paragraph = $("<p class='error'></p>");
+    $paragraph.append($aError);
+    $("#player .innerText").append($paragraph);
+}
+
 exports.PlayerView = {
-    fadeIn: fadeIn,
     scrollToBottom: scrollToBottom,
-    clearIfNecessary: clearIfNecessary,
-    prepareForNextContent: prepareForNextContent
+    prepareForNextContent: prepareForNextContent,
+    addTextSection: addTextSection,
+    addChoice: addChoice,
+    addTerminatingMessage: addTerminatingMessage,
+    addHorizontalDivider: addHorizontalDivider,
+    addLineError: addLineError
 };
