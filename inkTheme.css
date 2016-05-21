@@ -1,0 +1,19 @@
+
+/* Flow related stuff in blue */
+#editor span.ace_flow.ace_declaration, 
+#editor span.ace_divert, 
+#editor span.ace_choice.ace_bullets,
+#editor span.ace_choice.ace_label,
+#editor span.ace_choice.ace_weaveBracket,
+#editor span.ace_gather.ace_bullets,
+#editor span.ace_gather.ace_label,
+#editor span.ace_glue,
+#editor span.ace_include {
+  color: blue;
+}
+
+/* Logic */
+#editor span.ace_var-decl,
+#editor span.ace_logic:not(.ace_innerContent) {
+  color: green;
+}

@@ -1,19 +1,12 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// All of the Node.js APIs are available in this process.
 const ipc = require("electron").ipcRenderer;
-const util = require('util');
-const assert = require('assert');
 const path = require("path");
 
-const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const DocumentManager = require('./electron-document-manager').getRendererModule();
-
 const EditorView = require("./editorView.js").EditorView;
 const PlayerView = require("./playerView.js").PlayerView;
 const ToolbarView = require("./toolbarView.js").ToolbarView;
+const NavView = require("./navView.js").NavView;
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
-
 
 DocumentManager.setContentSetter(function(content) {
     EditorView.setValue(content);
@@ -29,8 +22,7 @@ ipc.on("set-filepath", (event, filename) => {
     var baseFilename = path.basename(filename);
 
     ToolbarView.setTitle(baseFilename);
-
-    $(".sidebar .nav-group.main-ink .nav-group-item .filename").text(baseFilename)
+    NavView.setCurrentFilename(baseFilename);
 });
 
 LiveCompiler.setInkProvider(() => {
