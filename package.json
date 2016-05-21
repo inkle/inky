@@ -5,7 +5,7 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron main.js"
+    "start": "electron app/main.js"
   },
   "repository": {
     "type": "git",
