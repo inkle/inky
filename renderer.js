@@ -1,192 +1,32 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
-const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const ipc = require("electron").ipcRenderer;
 const util = require('util');
 const assert = require('assert');
 const path = require("path");
+
+const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const DocumentManager = require('./electron-document-manager').getRendererModule();
 
+const EditorView = require("./editorView.js").EditorView;
 const PlayerView = require("./playerView.js").PlayerView;
 const ToolbarView = require("./toolbarView.js").ToolbarView;
-
-var editor = ace.edit("editor");
-var Range = ace.require("ace/range").Range;
-var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
-
-const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
-
-editor.getSession().setMode(new InkMode());
-editor.setShowPrintMargin(false);
-editor.getSession().setUseWrapMode(true);
-editor.setOptions({
-    enableLiveAutocompletion: true
-});
-
-/* TODO: It's possible to complete custom keywords.
-   Can do this when we have them parsed from the ink file.
-var staticWordCompleter = {
-    getCompletions: function(editor, session, pos, prefix, callback) {
-        var wordList = ["foo", "bar", "baz"];
-        callback(null, wordList.map(function(word) {
-            return {
-                caption: word,
-                value: word,
-                meta: "static"
-            };
-        }));
-
-    }
-}
-editor.completers = [staticWordCompleter];
-*/
-
-
 
 var sessionId = 0;
 var choiceSequence = [];
 var currentReplayTurnIdx = -1;
 
-var editorMarkers = [];
-var editorAnnotations = [];
-var editorChanges = 1;
 var lastEditorChange = null;
 var issues = [];
 var selectedIssueIdx = -1;
 
-
-editor.on("change", () => {
-    lastEditorChange = Date.now();
-    DocumentManager.setEdited(true);
-});
-
-// Unfortunately standard jquery events don't work since 
-// Ace turns pointer events off
-editor.on("click", function(e){
-
-    // Have to hold down modifier key to jump
-    if( !e.domEvent.altKey )
-        return;
-
-    var editor = e.editor;
-    var pos = editor.getCursorPosition();
-    var searchToken = editor.session.getTokenAt(pos.row, pos.column);
-
-    if( searchToken && searchToken.type == "include.filepath" ) {
-        alert("Jumping to INCLUDEs not yet supported!")
-        return;
-    }
-
-    // Approximate search:
-    //  - Split the search token up into its components: x.y.z
-    //  - POS = clicked token
-    //  - for each component:
-    //       - find the *nearest* matching token to POS
-    //       - POS = that matching component's pos
-    //       - next component
-    // Effectively it drills into the path, except that it's not
-    // 100% accurate since it just tried to find the nearest, rather
-    // than searching through the structure correctly.
-    if( searchToken && searchToken.type == "divert.target" ) {
-
-        e.preventDefault();
-
-        var targetPath = searchToken.value;
-
-        var pathComponents = targetPath.split(".");
-        var foundSomeOfPath = false;
-
-        for(var pathIdx=0; pathIdx<pathComponents.length; ++pathIdx) {
-
-            // Remove parameters from target name
-            var pathElementName = pathComponents[pathIdx];
-            pathElementName = pathElementName.replace(/\([^\)]*\)/g, "");
-            pathElementName = pathElementName.trim();
-
-            function searchForName(forward) {
-                var it = new TokenIterator(editor.session, pos.row, pos.column);
-                for(var tok = it.getCurrentToken(); tok; forward ? tok = it.stepForward() : tok = it.stepBackward()) {
-                    if( tok.type.indexOf("name") != -1 && tok.value == pathElementName ) {
-                        return {
-                            row: it.getCurrentTokenRow(),
-                            column: it.getCurrentTokenColumn(),
-                            found: true
-                        };
-                    }
-                }
-                return {
-                    found: false
-                };
-            }
-
-            var forwardSearchResult = searchForName(true);
-            var backwardSearchResult = searchForName(false);
-            var target = null;
-
-            if( forwardSearchResult.found && backwardSearchResult.found ) {
-                if( Math.abs(forwardSearchResult.row - pos.row) < Math.abs(backwardSearchResult.row - pos.row) ) {
-                    target = forwardSearchResult;
-                } else {
-                    target = backwardSearchResult;
-                }
-            } else if( forwardSearchResult.found ) {
-                target = forwardSearchResult;
-            } else if( backwardSearchResult.found ) {
-                target = backwardSearchResult;
-            }
-
-            if( target ) {
-                pos = target;
-                foundSomeOfPath = true;
-            } else {
-                break;
-            }
-
-        } // path component iteration
-
-        if( foundSomeOfPath )
-            editor.gotoLine(pos.row+1, pos.column);
-    }
-});
-
-// Unfortunately standard CSS for hover doesn't work in the editor
-// since they turn pointer events off.
-editor.on("mousemove", function (e) {
-
-    var editor = e.editor;
-
-    // Have to hold down modifier key to jump
-    if( e.domEvent.altKey ) {
-
-        var character = editor.renderer.screenToTextCoordinates(e.x, e.y);
-        var token = editor.session.getTokenAt(character.row, character.column);
-        if( !token )
-            return;
-
-        var tokenStartPos = editor.renderer.textToScreenCoordinates(character.row, token.start);
-        var tokenEndPos = editor.renderer.textToScreenCoordinates(character.row, token.start + token.value.length);
-
-        const lineHeight = 12;
-        if( e.x >= tokenStartPos.pageX && e.x <= tokenEndPos.pageX && e.y >= tokenStartPos.pageY && e.y <= tokenEndPos.pageY+lineHeight) {
-            if( token ) {
-                if( token.type == "divert.target" || token.type == "include.filepath" ) {
-                    editor.renderer.setCursorStyle("pointer");
-                    return;
-                }
-            }
-        }
-    }
-    
-    editor.renderer.setCursorStyle("default");
-});
-
 DocumentManager.setContentSetter(function(content) {
-    editor.setValue(content);
+    EditorView.setValue(content);
 });
  
 DocumentManager.setContentGetter(function() {
-    return editor.getValue();
+    return EditorView.getValue();
 });
 
 var currentFilepath = null;
@@ -199,22 +39,12 @@ ipc.on("set-filepath", (event, filename) => {
 });
 
 function resetErrors() {
-    var editorSession = editor.getSession();
-    editorSession.clearAnnotations();
-    editorAnnotations = [];
-
-    for(var i=0; i<editorMarkers.length; i++) {
-        editorSession.removeMarker(editorMarkers[i]);
-    }
-    editorMarkers = [];
-
     issues = [];
     selectedIssueIdx = -1;
-
+    
+    EditorView.clearErrors();
     ToolbarView.updateIssueSummary(issues);
 }
-
-
 
 function reloadInkForPlaying() {
 
@@ -233,7 +63,7 @@ function reloadInkForPlaying() {
 
     resetErrors();
 
-    ipc.send("play-ink", editor.getValue(), sessionId);
+    ipc.send("play-ink", EditorView.getValue(), sessionId);
 }
 
 function stop(idToStop) {
@@ -254,12 +84,17 @@ setInterval(() => {
     }
 }, 250);
 
+EditorView.onChange(() => {
+    lastEditorChange = Date.now();
+    DocumentManager.setEdited(true);
+});
+
 ipc.on("next-issue", () => {
     if( issues.length > 0 ) {
         selectedIssueIdx++;
         if( selectedIssueIdx >= issues.length )
             selectedIssueIdx = 0;
-        editor.gotoLine(issues[selectedIssueIdx].lineNumber);
+        EditorView.gotoLine(issues[selectedIssueIdx].lineNumber);
     }
 });
 
@@ -278,37 +113,11 @@ ipc.on("play-generated-error", (event, error, fromSessionId) => {
     if( sessionId != fromSessionId )
         return;
 
-    var editorErrorType = "error";
-    var editorClass = "ace-error";
-    if( error.type == "WARNING" ) {
-        editorErrorType = "warning";
-        editorClass = "ace-warning";
-    }
-    else if( error.type == "TODO" ) {
-        editorErrorType = "information";
-        editorClass = 'ace-todo';
-    }
-
-    editorAnnotations.push({
-      row: error.lineNumber-1,
-      column: 0,
-      text: error.message,
-      type: editorErrorType
-    });
-    editor.getSession().setAnnotations(editorAnnotations);
-
-    var aceClass = "ace-error";
-    var markerId = editor.session.addMarker(
-        new Range(error.lineNumber-1, 0, error.lineNumber, 0),
-        editorClass, 
-        "line",
-        false
-    );
-    editorMarkers.push(markerId);
+    EditorView.addError(error);
 
     if( error.type == "RUNTIME ERROR" ) {
         PlayerView.addLineError(error, () => {
-            editor.gotoLine(error.lineNumber);
+            EditorView.gotoLine(error.lineNumber);
         });
     }
 
@@ -390,7 +199,7 @@ ToolbarView.setEvents({
         reloadInkForPlaying();
     },
     selectIssue: (issue) => {
-        editor.gotoLine(issue.lineNumber);
+        EditorView.gotoLine(issue.lineNumber);
     }
 })
 
