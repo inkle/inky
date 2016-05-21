@@ -110,7 +110,18 @@ var inkHighlightRules = function() {
             regex: /(\/\/)(.*$)/
         }],
         "#divert": [{
-            regex: /(->|<-)(\s*)(?:(DONE)|(END)|([\w\d\.,\(\)\ \t]+))(\s*)((?:->)(?!\s*\w+))?/,
+            // (->|<-)
+            // (\s*)
+            //      (DONE)
+            //      (END)
+            //      ((?:[\w\(\)\.,]+|\s+(?=[\w\(\)\.,]))+)
+            //          which is:   
+            //          [\w\(\)\.,]+   then   \s+, 
+            //         (but only if not followed by more \w etc: don't capture last \s+)
+            // (\s*)
+            // ((?:->)(?!\s*\w+))?
+            //    Final tunnel arrow, but not match if there are more things to divert to afterwards
+            regex: /(->|<-)(\s*)(?:(DONE)|(END)|((?:[\w\(\)\.,]+|\s+(?=[\w\(\)\.,]))+))(\s*)((?:->)(?!\s*\w+))?/,
             token: [
                 "divert.operator", // ->
                 "divert",         // whitespace
