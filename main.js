@@ -14,8 +14,8 @@ const windowOptions = {
 };
 
 DocumentManager({ 
-  entryPoint: 'file://' + __dirname + '/index.html',
-  windowOptions: windowOptions
+    entryPoint: 'file://' + __dirname + '/index.html',
+    windowOptions: windowOptions
 });
 
 // Open the DevTools.

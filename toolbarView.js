@@ -129,7 +129,13 @@ $(document).ready(function() {
     $(window).resize(updateIssuesPopupPosition);
 });
 
+function setTitle(title) {
+    $("h1.title").text(title);
+}
+
 exports.ToolbarView = {
     setEvents: (e) => { events = e; },
-    updateIssueSummary: updateIssueSummary
+    updateIssueSummary: updateIssueSummary,
+    clearIssueSummary: () => { updateIssueSummary([]); },
+    setTitle: setTitle
 }
