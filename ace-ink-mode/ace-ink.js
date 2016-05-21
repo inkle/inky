@@ -110,14 +110,19 @@ var inkHighlightRules = function() {
             regex: /(\/\/)(.*$)/
         }],
         "#divert": [{
+            regex: /(->|<-)(\s*)(?:(DONE)|(END)|([\w\d\.,\(\)\ \t]+))(\s*)((?:->)(?!\s*\w+))?/,
             token: [
-                "divert.operator",
-                "divert",
-                "divert.to-done",
-                "divert.to-end",
-                "divert.target"
-            ],
-            regex: /(->|<-)(\s*)(?:(DONE)|(END)|([\w\d\.,\(\)\ \t]+))/
+                "divert.operator", // ->
+                "divert",         // whitespace
+                "divert.to-done", // DONE
+                "divert.to-end",  // END
+                "divert.target",  // knot_name(params)
+                "divert",         // whitespace
+                "divert.tunnel"   // ->   (terminating, for tunnels)
+            ]
+        }, {
+            regex: /->->/,
+            token: "divert.to-tunnel"
         }],
         "#gather": [{
             regex: /^(\s*)((?:-\s*)+)(?!>)(?:(\(\s*)(\w+)(\s*\)))?/,
