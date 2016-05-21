@@ -157,7 +157,7 @@ var inkHighlightRules = function() {
         "#inlineConditional": [{
             regex: /(\{)([^:\|\}]+:)/,
             token: [
-                "logic.inline.punctuation",
+                "logic.punctuation",
                 "logic.inline.conditional.condition"
             ],
             push: [{
@@ -173,39 +173,76 @@ var inkHighlightRules = function() {
                 defaultToken: "logic.inline.innerContent"
             }]
         }],
+        "#inlineSequence": [{
+            regex: /(\{)(\s*)((?:~|&|!|\$)?)(?=[^\|\}]*\|)/, // Try look ahead to make sure there's a pipe char
+            token: [
+                "logic.punctuation", // {
+                "logic.sequence", // whitespace
+                "logic.sequence.operator" // sequence type char (~&!$)
+            ],
+            push: [{
+                token: "logic.punctuation", // }
+                regex: /\}/,
+                next: "pop"
+            }, {
+                token: "logic.sequence.punctuation", // | (but not ||)
+                regex: /\|(?!\|)/
+            }, {
+                include: "#mixedContent"
+            }, {
+                defaultToken: "logic.sequence.innerContent"
+            }]
+        }],
         "#inlineLogic": [{
-            token: "logic.inline.punctuation",
+            token: "logic.punctuation",
             regex: /\{/,
             push: [{
-                token: "logic.inline.punctuation",
+                token: "logic.punctuation",
                 regex: /\}/,
                 next: "pop"
             }, {
                 defaultToken: "logic.inline"
             }]
         }],
-        "#inlineSequence": [{
+        "#multiLineLogic": [{
+            regex: /^(\s*)(\{)(?:([^}:]+)(:))?(?=[^}]*$)/,
             token: [
-                "keyword.operator.inlineSequenceStart",
-                "entity.inlineSequence",
-                "keyword.operator.inlineSequenceTypeChar"
+                "logic", // whitespace
+                "logic.punctuation", // {
+                "logic.conditional.multiline.condition", // optional initial condition
+                "logic.conditional.multiline.condition.punctuation" // :
             ],
-            regex: /(\{)(\s*)((?:~|&|!|\$)?)(?=[^\|]*\|(?!\|)[^\}]*\})/,
             push: [{
-                token: "keyword.operator.inlineSequenceEnd",
+                token: "logic.punctuation",
                 regex: /\}/,
                 next: "pop"
             }, {
-                token: "keyword.operator.inlineSequenceSeparator",
-                regex: /\|(?!\|)/
+                regex: /^\s*else\s*\:/,
+                token: "conditional.multiline.else"
             }, {
-                include: "#mixedContent"
+                regex: /^(\s*)(-)((?:\s?[^:\{}]+):)?/,
+                token: [
+                    "logic.multiline.branch",
+                    "logic.multiline.branch.operator",
+                    "logic.multiline.branch.condition"
+                ],
+                push: [{
+                    token: "logic.multiline.branch",
+                    regex: /$/,
+                    next: "pop"
+                }, {
+                    include: "#mixedContent"
+                }, {
+                    defaultToken: "logic.multiline.branch.innerContent"
+                }]
             }, {
-                defaultToken: "entity.inlineSequence"
+                include: "#statements"
+            }, {
+                defaultToken: "logic.multiline.innerContent"
             }]
         }],
         "#logicLine": [{
-            token: "meta.logic",
+            token: "logic.tilda",
             regex: /\s*~\s*.*$/
         }],
         "#mixedContent": [{
@@ -219,44 +256,6 @@ var inkHighlightRules = function() {
         }, {
             token: "constant.glue",
             regex: /<>/
-        }],
-        "#multiLineLogic": [{
-            token: [
-                "meta.multilineLogic",
-                "keyword.operator.logic",
-                "meta.multilineLogic",
-                "keyword.operator.logic"
-            ],
-            regex: /^(\s*)(\{)(?:([\w_\s\*\/\-\+\&\|\%\<\>\.\(\)]+)(:))?(?=[^}]+$)/,
-            push: [{
-                token: "keyword.operator",
-                regex: /\}/,
-                next: "pop"
-            }, {
-                token: "conditional.else",
-                regex: /^\s*else\s*\:/
-            }, {
-                token: [
-                    "conditional.clause",
-                    "keyword.operator",
-                    "conditional.clause",
-                    "keyword.operator"
-                ],
-                regex: /^(\s*)(-)(\s?[^:]+)(:)/,
-                push: [{
-                    token: "conditional.clause",
-                    regex: /$/,
-                    next: "pop"
-                }, {
-                    include: "#mixedContent"
-                }, {
-                    defaultToken: "conditional.clause"
-                }]
-            }, {
-                include: "#statements"
-            }, {
-                defaultToken: "meta.multilineLogic"
-            }]
         }],
         "#statements": [{
             include: "#comments"
