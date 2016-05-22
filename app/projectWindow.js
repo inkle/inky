@@ -13,7 +13,7 @@ const electronWindowOptions = {
 var windows = [];
 
 
-function Window(filePath) {
+function ProjectWindow(filePath) {
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/index.html");
 
@@ -25,21 +25,21 @@ function Window(filePath) {
     }
 }
 
-Window.prototype.openDevTools = function() {
+ProjectWindow.prototype.openDevTools = function() {
     this.browserWindow.webContents.openDevTools();
 }
 
-Window.createEmpty = function() {
-    var newEmpty = new Window();
+ProjectWindow.createEmpty = function() {
+    var newEmpty = new ProjectWindow();
     windows.push(newEmpty);
     return newEmpty;
 }
 
-Window.open = function(filePath) {
-    var w = new Window(filePath);
+ProjectWindow.open = function(filePath) {
+    var w = new ProjectWindow(filePath);
     windows.push(w);
     return w;
 }
 
 
-exports.Window = Window;
+exports.ProjectWindow = ProjectWindow;

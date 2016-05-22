@@ -1,7 +1,7 @@
 const electron = require('electron')
 const app = electron.app
 const dialog = electron.dialog;
-const Window = require("./window.js").Window;
+const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const appmenus = require('./appmenus.js');
 const inklecate = require('./inklecate.js');
 const DocumentManager = require('./electron-document-manager/main.js').main;
@@ -20,7 +20,7 @@ app.on('ready', function() {
                 properties: ['openFile']
             });
             if( multiSelectPaths && multiSelectPaths.length > 0 ) {
-                Window.open(multiSelectPaths[0]);
+                ProjectWindow.open(multiSelectPaths[0]);
             }
         },
         save: () => {},
@@ -32,7 +32,7 @@ app.on('ready', function() {
         }
     });
 
-    Window.createEmpty();
+    ProjectWindow.createEmpty();
 
     // Debug
     w.openDevTools();
