@@ -35,10 +35,6 @@ function setupMenus(callbacks) {
             click: callbacks.saveAs
           },
           {
-            label: 'Rename',
-            click: callbacks.rename
-          },
-          {
             label: 'Close',
             accelerator: 'CmdOrCtrl+W',
             enabled: callbacks.isFocusedWindow,

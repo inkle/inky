@@ -3,9 +3,6 @@ const app = electron.app
 const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const appmenus = require('./appmenus.js');
-const inklecate = require('./inklecate.js');
-const DocumentManager = require('./electron-document-manager/main.js').main;
-const BrowserWindow = electron.BrowserWindow;
 
 
 // This method will be called when Electron has finished
@@ -14,7 +11,9 @@ const BrowserWindow = electron.BrowserWindow;
 app.on('ready', function() {
 
     appmenus.setupMenus({
-        new: () => {},
+        new: () => {
+            ProjectWindow.createEmpty();
+        },
         open: () => {
             var multiSelectPaths = dialog.showOpenDialog({
                 properties: ['openFile']
@@ -25,7 +24,6 @@ app.on('ready', function() {
         },
         save: () => {},
         saveAs: () => {},
-        rename: () => {},
         close: () => {
             //windows = _.without(windows, null); //get rid of null windows
             ProjectWindow.closeFocussed();
@@ -35,8 +33,14 @@ app.on('ready', function() {
         }
     });
 
-    ProjectWindow.createEmpty();
+    var w = ProjectWindow.createEmpty();
 
     // Debug
-    w.openDevTools();
+    //w.openDevTools();
+});
+
+app.on('window-all-closed', function() {
+    if (process.platform != 'darwin') {
+        app.quit();
+    }
 });
