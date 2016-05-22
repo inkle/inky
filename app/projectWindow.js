@@ -12,6 +12,22 @@ const electronWindowOptions = {
 
 var windows = [];
 
+function windowWithBrowserWindow(browWin) {
+    for(var i=0; i<windows.length; i++) {
+        if( windows[i].browserWindow = browWin )
+            return windows[i];
+    }
+    return null;
+}
+
+function focusedWindow() {
+    var browWin = BrowserWindow.getFocusedWindow();
+    if( browWin )
+        return windowWithBrowserWindow(browWin);
+    else
+        return null;
+}
+
 function ProjectWindow(filePath) {
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/index.html");
@@ -29,9 +45,11 @@ function ProjectWindow(filePath) {
         var idx = windows.indexOf(this);
         if( idx != -1 )
             windows.splice(idx);
-
-        console.log("windows now has "+windows.length+" elements");
     });
+}
+
+ProjectWindow.prototype.save = function() {
+    this.browserWindow.webContents.send('project-save-current');
 }
 
 ProjectWindow.prototype.openDevTools = function() {
@@ -46,9 +64,16 @@ ProjectWindow.open = function(filePath) {
     return new ProjectWindow(filePath);
 }
 
-ProjectWindow.closeFocussed = function() {
+ProjectWindow.closeFocused = function() {
     var win = BrowserWindow.getFocusedWindow();
     if( win ) win.close();
+}
+
+ProjectWindow.saveFocused = function() {
+    var win = focusedWindow();
+    if( win ) {
+        win.save();
+    }
 }
 
 exports.ProjectWindow = ProjectWindow;

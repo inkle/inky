@@ -9,9 +9,10 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
 
-var project = null;
+var currentProject = null;
 
 function setProject(project) {
+    currentProject = project;
     ToolbarView.setTitle(project.mainInk.filename);
     NavView.setCurrentFilename(project.mainInk.filename);
 }
@@ -22,6 +23,12 @@ setProject(new InkProject());
 // ...until we're told to load something into the window
 ipc.on("set-project-main-ink-filepath", (event, filePath) => {
     setProject(new InkProject(filePath));
+});
+
+ipc.on("project-save-current", (event) => {
+    if( currentProject ) {
+        currentProject.save();
+    }
 });
 
 LiveCompiler.setInkProvider(() => {

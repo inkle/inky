@@ -40,12 +40,32 @@ InkFile.prototype.getAceSession = function() {
     return this.aceSession;
 }
 
+InkFile.prototype.save = function() {
+    if( !this.path ) {
+        alert("TODO: Show save dialogue");
+    } else {
+        fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", function() {
+
+            // WARNING: If the async operation took a while, this will be incorrect...
+            this.hasUnsavedChanges = false;
+        })
+    }
+}
+
 function InkProject(mainInkFilePath) {
     this.files = [];
     this.mainInk = new InkFile(mainInkFilePath || null);
     this.files.push(this.mainInk);
+    this.openInkFile(this.mainInk);
+}
 
+InkProject.prototype.openInkFile = function(inkFile) {
+    this.activeInkFile = this.mainInk;
     EditorView.openInkFile(this.mainInk);
+}
+
+InkProject.prototype.save = function() {
+    this.activeInkFile.save();
 }
 
 exports.InkProject = InkProject;

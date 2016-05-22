@@ -22,11 +22,13 @@ app.on('ready', function() {
                 ProjectWindow.open(multiSelectPaths[0]);
             }
         },
-        save: () => {},
+        save: () => {
+            ProjectWindow.saveFocused();
+        },
         saveAs: () => {},
         close: () => {
             //windows = _.without(windows, null); //get rid of null windows
-            ProjectWindow.closeFocussed();
+            ProjectWindow.closeFocused();
         },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
