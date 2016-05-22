@@ -9,16 +9,13 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
 var project = new InkProject();
-project.testEdit(project.mainInk);
 
+ipc.on("set-project-main-ink-filepath", (event, filePath) => {
 
-var currentFilepath = null;
-ipc.on("set-project-filepath", (event, filename) => {
-    currentFilepath = filename;
-    var baseFilename = path.basename(filename);
+    project = new InkProject(filePath);
 
-    ToolbarView.setTitle(baseFilename);
-    NavView.setCurrentFilename(baseFilename);
+    ToolbarView.setTitle(project.mainInk.filename());
+    NavView.setCurrentFilename(project.mainInk.filename());
 });
 
 LiveCompiler.setInkProvider(() => {

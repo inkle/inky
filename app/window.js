@@ -1,5 +1,6 @@
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
+const path = require("path");
 
 const electronWindowOptions = {
   width: 1300, 
@@ -12,11 +13,16 @@ const electronWindowOptions = {
 var windows = [];
 
 
-function Window() {
+function Window(filePath) {
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/index.html");
 
-    //window.setRepresentedFilename();
+    if( filePath ) {
+        this.browserWindow.webContents.on('dom-ready', () => {
+            this.browserWindow.setRepresentedFilename(filePath);
+            this.browserWindow.webContents.send('set-project-main-ink-filepath', filePath);
+        });
+    }
 }
 
 Window.prototype.openDevTools = function() {
@@ -27,6 +33,12 @@ Window.createEmpty = function() {
     var newEmpty = new Window();
     windows.push(newEmpty);
     return newEmpty;
+}
+
+Window.open = function(filePath) {
+    var w = new Window(filePath);
+    windows.push(w);
+    return w;
 }
 
 

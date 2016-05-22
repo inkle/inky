@@ -201,7 +201,7 @@ exports.EditorView = {
     setValue: (v) => { editor.setValue(v); },
     gotoLine: (line) => { editor.gotoLine(line); },
     addError: addError,
-    setAceSession: (session) => {
-        editor.setSession(session);
+    openInkFile: (inkFile) => {
+        editor.setSession(inkFile.getAceSession());
     }
 };

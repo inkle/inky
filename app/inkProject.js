@@ -1,11 +1,24 @@
+const path = require("path");
+const fs = require("fs");
+
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 const EditorView = require("./editorView.js").EditorView;
 
-function InkFile() {
+function InkFile(filePath) {
+
+    this.path = filePath;
+
     this.aceDocument = new Document("");
-    this.path = null;
+    this.aceSession = null;
+
+    if( this.path ) {
+        this.filename = path.basename(this.path);
+        fs.readFile(this.path, 'utf8', (err, data) => {
+            this.aceDocument.setValue(data);
+        });
+    }
 
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
@@ -16,22 +29,25 @@ function InkFile() {
     this.symbols = {};
 }
 
-function InkProject() {
-    this.files = [];
-    this.mainInk = new InkFile();
-    this.files.push(this.mainInk);
+InkFile.prototype.filename = function() {
+    return path.basename(this.path);
 }
 
-InkProject.prototype.testEdit = function(inkFile) {
+InkFile.prototype.getAceSession = function() {
+    if( this.aceSession == null ) {
+        this.aceSession = new EditSession(this.aceDocument, new InkMode());
+        this.aceSession.setUseWrapMode(true);
+    }
 
-    var session = new EditSession(inkFile.aceDocument, new InkMode());
-    session.setUseWrapMode(true);
+    return this.aceSession;
+}
 
-    var token = session.getTokenAt(0, 0);
-    console.log("First token: ");
-    console.log(token);
+function InkProject(mainInkFilePath) {
+    this.files = [];
+    this.mainInk = new InkFile(mainInkFilePath || null);
+    this.files.push(this.mainInk);
 
-    EditorView.setAceSession(session);
+    EditorView.openInkFile(this.mainInk);
 }
 
 exports.InkProject = InkProject;
