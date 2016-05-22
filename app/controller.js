@@ -1,7 +1,6 @@
 const ipc = require("electron").ipcRenderer;
 const path = require("path");
 
-const DocumentManager = require('./electron-document-manager').getRendererModule();
 const EditorView = require("./editorView.js").EditorView;
 const PlayerView = require("./playerView.js").PlayerView;
 const ToolbarView = require("./toolbarView.js").ToolbarView;
@@ -9,19 +8,12 @@ const NavView = require("./navView.js").NavView;
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
-var testInkProject = new InkProject();
-testInkProject.testEdit(testInkProject.mainInk);
+var project = new InkProject();
+project.testEdit(project.mainInk);
 
-DocumentManager.setContentSetter(function(content) {
-    EditorView.setValue(content);
-});
- 
-DocumentManager.setContentGetter(function() {
-    return EditorView.getValue();
-});
 
 var currentFilepath = null;
-ipc.on("set-filepath", (event, filename) => {
+ipc.on("set-project-filepath", (event, filename) => {
     currentFilepath = filename;
     var baseFilename = path.basename(filename);
 
@@ -39,7 +31,7 @@ LiveCompiler.setEvents({
         ToolbarView.clearIssueSummary();
         PlayerView.prepareForNextContent();
     },
-    selectIssue: () => {
+    selectIssue: (issue) => {
         EditorView.gotoLine(issue.lineNumber);
     },
     textAdded: (text, replaying) => {
@@ -80,7 +72,7 @@ LiveCompiler.setEvents({
 
 EditorView.onChange(() => {
     LiveCompiler.setEdited();
-    DocumentManager.setEdited(true);
+    //DocumentManager.setEdited(true);
 });
 
 ToolbarView.setEvents({
