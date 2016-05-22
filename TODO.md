@@ -19,7 +19,7 @@
     * Reliability of story reloading - sometimes it fails
     * When inklecate crashes, we should handle it specially
     * (DONE?) Replaying a story sometimes goes through a few transitions (e.g. with The Intercept)
-    * (DONE?) Copies of inklecate left open sometimes
+    * Copies of inklecate left open sometimes (bleh, still happening)
 
 * Background worker for document model
     * Build simple hierarchy of document
