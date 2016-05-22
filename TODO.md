@@ -16,10 +16,10 @@
 ## Engineering
 
 * **FIX:**
-    * Copies of inklecate left open sometimes
     * Reliability of story reloading - sometimes it fails
     * When inklecate crashes, we should handle it specially
-    * Replaying a story sometimes goes through a few transitions (e.g. with The Intercept)
+    * (DONE?) Replaying a story sometimes goes through a few transitions (e.g. with The Intercept)
+    * (DONE?) Copies of inklecate left open sometimes
 
 * Background worker for document model
     * Build simple hierarchy of document
