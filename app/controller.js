@@ -10,8 +10,7 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
 var testInkProject = new InkProject();
-//testInkProject.testEdit(0);
-testInkProject.testEdit(1);
+testInkProject.testEdit(testInkProject.mainInk);
 
 DocumentManager.setContentSetter(function(content) {
     EditorView.setValue(content);
