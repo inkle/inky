@@ -6,9 +6,7 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 var editorMarkers = [];
 var editorAnnotations = [];
 
-editor.getSession().setMode(new InkMode());
 editor.setShowPrintMargin(false);
-editor.getSession().setUseWrapMode(true);
 editor.setOptions({
     enableLiveAutocompletion: true
 });
@@ -202,5 +200,8 @@ exports.EditorView = {
     getValue: () => { return editor.getValue(); },
     setValue: (v) => { editor.setValue(v); },
     gotoLine: (line) => { editor.gotoLine(line); },
-    addError: addError
+    addError: addError,
+    setAceSession: (session) => {
+        editor.setSession(session);
+    }
 };

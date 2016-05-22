@@ -7,6 +7,11 @@ const PlayerView = require("./playerView.js").PlayerView;
 const ToolbarView = require("./toolbarView.js").ToolbarView;
 const NavView = require("./navView.js").NavView;
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
+const InkProject = require("./inkProject.js").InkProject;
+
+var testInkProject = new InkProject();
+//testInkProject.testEdit(0);
+testInkProject.testEdit(1);
 
 DocumentManager.setContentSetter(function(content) {
     EditorView.setValue(content);
