@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Inky",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/app/main.js",
+            "stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+            "runtimeArgs": [/*
+                ".",
+                "--enable-logging"
+            */],
+            "env": {},
+            "externalConsole": false,
+            "sourceMaps": false,
+            "outDir": null
+        },
+        {
+            "name": "Attach",
+            "type": "node",
+            "request": "attach",
+            "port": 5858,
+            "sourceMaps": false,
+            "outDir": null
+        }
+    ]
+}
