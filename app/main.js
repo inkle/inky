@@ -26,7 +26,10 @@ app.on('ready', function() {
         save: () => {},
         saveAs: () => {},
         rename: () => {},
-        close: () => {},
+        close: () => {
+            //windows = _.without(windows, null); //get rid of null windows
+            ProjectWindow.closeFocussed();
+        },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
         }

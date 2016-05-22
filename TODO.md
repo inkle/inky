@@ -20,6 +20,7 @@
     * When inklecate crashes, we should handle it specially
     * (DONE?) Replaying a story sometimes goes through a few transitions (e.g. with The Intercept)
     * Copies of inklecate left open sometimes (bleh, still happening)
+        * Check when windows are closed
     * Focus editor view on load
 
 * Background worker for document model
