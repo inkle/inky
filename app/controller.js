@@ -8,14 +8,20 @@ const NavView = require("./navView.js").NavView;
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
-var project = new InkProject();
 
+var project = null;
+
+function setProject(project) {
+    ToolbarView.setTitle(project.mainInk.filename);
+    NavView.setCurrentFilename(project.mainInk.filename);
+}
+
+// Default state is a new empty project...
+setProject(new InkProject());
+
+// ...until we're told to load something into the window
 ipc.on("set-project-main-ink-filepath", (event, filePath) => {
-
-    project = new InkProject(filePath);
-
-    ToolbarView.setTitle(project.mainInk.filename());
-    NavView.setCurrentFilename(project.mainInk.filename());
+    setProject(new InkProject(filePath));
 });
 
 LiveCompiler.setInkProvider(() => {

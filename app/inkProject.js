@@ -18,6 +18,8 @@ function InkFile(filePath) {
         fs.readFile(this.path, 'utf8', (err, data) => {
             this.aceDocument.setValue(data);
         });
+    } else {
+        this.filename = "Untitled.ink";
     }
 
     this.hasUnsavedChanges = false;
@@ -27,10 +29,6 @@ function InkFile(filePath) {
 
     // Knots, stitches etc
     this.symbols = {};
-}
-
-InkFile.prototype.filename = function() {
-    return path.basename(this.path);
 }
 
 InkFile.prototype.getAceSession = function() {
