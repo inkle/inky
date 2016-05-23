@@ -1,6 +1,8 @@
 const path = require("path");
 const fs = require("fs");
 
+const dialog = require('electron').remote.dialog;
+
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
@@ -42,7 +44,12 @@ InkFile.prototype.getAceSession = function() {
 
 InkFile.prototype.save = function() {
     if( !this.path ) {
-        alert("TODO: Show save dialogue");
+        dialog.showSaveDialog((savedPath) => {
+            if( savedPath ) {
+                this.path = savedPath;
+                this.save();
+            }
+        });
     } else {
         fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", function() {
 

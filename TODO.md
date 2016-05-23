@@ -1,9 +1,20 @@
 # TODO
 
+## SOON
+
+Make document model fully robust for single ink files.
+
+* Save As...
+
+* Message if you try to close with unsaved changes
+
+* Error checking
+
+* Ditch old electron-document-manager
+
 ## Features and improvements
 
-* Document model reliability
-    * Sometimes it asks if you want to save, sometimes it doesn't?
+* Document model replacement
     * Ability to drag and drop files on
     * Ability to make the app the default one for ink
 * Multi-ink file editing
