@@ -1,7 +1,9 @@
 const path = require("path");
 const fs = require("fs");
 
-const dialog = require('electron').remote.dialog;
+const remote = require('electron').remote;
+const dialog = remote.dialog;
+const BrowserWindow = remote.BrowserWindow;
 
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
@@ -42,9 +44,13 @@ InkFile.prototype.getAceSession = function() {
     return this.aceSession;
 }
 
-InkFile.prototype.save = function() {
-    if( !this.path ) {
-        dialog.showSaveDialog((savedPath) => {
+InkFile.prototype.save = function(saveAs) {
+    if( !this.path || saveAs ) {
+        var opts = {};
+        if( saveAs && this.path )
+            opts.defaultPath = this.path;
+
+        dialog.showSaveDialog(BrowserWindow.getFocusedWindow(), opts, (savedPath) => {
             if( savedPath ) {
                 this.path = savedPath;
                 this.save();
@@ -59,6 +65,10 @@ InkFile.prototype.save = function() {
     }
 }
 
+InkFile.prototype.saveAs = function() {
+    this.save(true);
+}
+
 function InkProject(mainInkFilePath) {
     this.files = [];
     this.mainInk = new InkFile(mainInkFilePath || null);
@@ -71,8 +81,12 @@ InkProject.prototype.openInkFile = function(inkFile) {
     EditorView.openInkFile(this.mainInk);
 }
 
-InkProject.prototype.save = function() {
+InkProject.prototype.save = function(saveAs) {
     this.activeInkFile.save();
+}
+
+InkProject.prototype.saveAs = function(saveAs) {
+    this.activeInkFile.saveAs();
 }
 
 exports.InkProject = InkProject;

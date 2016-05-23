@@ -31,6 +31,7 @@ function focusedWindow() {
 function ProjectWindow(filePath) {
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/index.html");
+    this.browserWindow.setSheetOffset(49);
 
     if( filePath ) {
         this.browserWindow.webContents.on('dom-ready', () => {
@@ -50,6 +51,10 @@ function ProjectWindow(filePath) {
 
 ProjectWindow.prototype.save = function() {
     this.browserWindow.webContents.send('project-save-current');
+}
+
+ProjectWindow.prototype.saveAs = function() {
+    this.browserWindow.webContents.send('project-saveAs-current');
 }
 
 ProjectWindow.prototype.openDevTools = function() {
@@ -73,6 +78,13 @@ ProjectWindow.saveFocused = function() {
     var win = focusedWindow();
     if( win ) {
         win.save();
+    }
+}
+
+ProjectWindow.saveAsFocused = function() {
+    var win = focusedWindow();
+    if( win ) {
+        win.saveAs();
     }
 }
 

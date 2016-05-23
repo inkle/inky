@@ -25,7 +25,9 @@ app.on('ready', function() {
         save: () => {
             ProjectWindow.saveFocused();
         },
-        saveAs: () => {},
+        saveAs: () => {
+            ProjectWindow.saveAsFocused();
+        },
         close: () => {
             //windows = _.without(windows, null); //get rid of null windows
             ProjectWindow.closeFocused();

@@ -31,6 +31,12 @@ ipc.on("project-save-current", (event) => {
     }
 });
 
+ipc.on("project-saveAs-current", (event) => {
+    if( currentProject ) {
+        currentProject.saveAs();
+    }
+});
+
 LiveCompiler.setInkProvider(() => {
     return EditorView.getValue();
 })
