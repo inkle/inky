@@ -22,7 +22,7 @@ function windowWithWebContents(webContents) {
         return null;
 
     for(var i=0; i<windows.length; i++) {
-        if( windows[i].browserWindow.webContents = webContents )
+        if( windows[i].browserWindow.webContents === webContents )
             return windows[i];
     }
     return null;
