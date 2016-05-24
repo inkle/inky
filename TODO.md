@@ -4,17 +4,18 @@
 
 * Move currentProject (and other project stuff) from controller.js to InkProject.js
 
-* Error checking
+* Add Mac dot on red traffic light for unsaved changes
 
-* Ditch old electron-document-manager
+* Ability to drag and drop files onto dock icon
+
+* Error checking for file system integration
 
 ## Features and improvements
 
-* Ability to drag and drop files on
+* Drag split view divider
+    * And hide/show editor and player views?
+* Pause live compilation / playing?
 * Ability to make the app the default one for ink
-* Multiple windows - robustness
-    * Document saving model seems a bit broken?
-    * Multiple sessions
 * Multi-ink file editing
     * Parse INCLUDE lines, allow you to jump between them via nav
         * What should happen in the document model?
@@ -31,6 +32,7 @@
     * Copies of inklecate left open sometimes (bleh, still happening)
         * Check when windows are closed
     * Focus editor view on load
+    * Multiple windows - robustness (do we still have a problem here?)
 
 * Background worker for document model
     * Build simple hierarchy of document
