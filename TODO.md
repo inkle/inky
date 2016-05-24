@@ -2,11 +2,7 @@
 
 ## SOON
 
-Make document model fully robust for single ink files.
-
-* Save As...
-
-* Message if you try to close with unsaved changes
+* Move currentProject (and other project stuff) from controller.js to InkProject.js
 
 * Error checking
 
@@ -14,9 +10,11 @@ Make document model fully robust for single ink files.
 
 ## Features and improvements
 
-* Document model replacement
-    * Ability to drag and drop files on
-    * Ability to make the app the default one for ink
+* Ability to drag and drop files on
+* Ability to make the app the default one for ink
+* Multiple windows - robustness
+    * Document saving model seems a bit broken?
+    * Multiple sessions
 * Multi-ink file editing
     * Parse INCLUDE lines, allow you to jump between them via nav
         * What should happen in the document model?

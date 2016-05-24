@@ -13,12 +13,21 @@ var currentProject = null;
 
 function setProject(project) {
     currentProject = project;
-    ToolbarView.setTitle(project.mainInk.filename);
-    NavView.setCurrentFilename(project.mainInk.filename);
+    currentProject.setEvents({
+        "didSave": () => {
+            updateFilenames();
+        }
+    });
+    updateFilenames();
 }
 
 // Default state is a new empty project...
 setProject(new InkProject());
+
+function updateFilenames() {
+    ToolbarView.setTitle(currentProject.mainInk.filename());
+    NavView.setCurrentFilename(currentProject.mainInk.filename());
+}
 
 // ...until we're told to load something into the window
 ipc.on("set-project-main-ink-filepath", (event, filePath) => {
@@ -34,6 +43,12 @@ ipc.on("project-save-current", (event) => {
 ipc.on("project-saveAs-current", (event) => {
     if( currentProject ) {
         currentProject.saveAs();
+    }
+});
+
+ipc.on("project-tryClose", (event) => {
+    if( currentProject ) {
+        currentProject.tryClose();
     }
 });
 
@@ -88,7 +103,6 @@ LiveCompiler.setEvents({
 
 EditorView.onChange(() => {
     LiveCompiler.setEdited();
-    //DocumentManager.setEdited(true);
 });
 
 ToolbarView.setEvents({

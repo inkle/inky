@@ -1,4 +1,5 @@
 const electron = require('electron');
+const ipc = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 
@@ -13,8 +14,15 @@ const electronWindowOptions = {
 var windows = [];
 
 function windowWithBrowserWindow(browWin) {
+    return browWin ? windowWithWebContents(browWin.webContents) : null;
+}
+
+function windowWithWebContents(webContents) {
+    if( !webContents )
+        return null;
+
     for(var i=0; i<windows.length; i++) {
-        if( windows[i].browserWindow = browWin )
+        if( windows[i].browserWindow.webContents = webContents )
             return windows[i];
     }
     return null;
@@ -33,6 +41,8 @@ function ProjectWindow(filePath) {
     this.browserWindow.loadURL("file://" + __dirname + "/index.html");
     this.browserWindow.setSheetOffset(49);
 
+    this.safeToClose = false;
+
     if( filePath ) {
         this.browserWindow.webContents.on('dom-ready', () => {
             this.browserWindow.setRepresentedFilename(filePath);
@@ -41,6 +51,13 @@ function ProjectWindow(filePath) {
     }
 
     windows.push(this);
+
+    this.browserWindow.on("close", (event) => {
+        if( !this.safeToClose ) {
+            event.preventDefault();
+            this.tryClose();
+        }
+    })
 
     this.browserWindow.on("closed", () => {
         var idx = windows.indexOf(this);
@@ -57,6 +74,19 @@ ProjectWindow.prototype.saveAs = function() {
     this.browserWindow.webContents.send('project-saveAs-current');
 }
 
+ProjectWindow.prototype.saveAs = function() {
+    this.browserWindow.webContents.send('project-saveAs-current');
+}
+
+ProjectWindow.prototype.tryClose = function() {
+    this.browserWindow.webContents.send('project-tryClose');
+}
+
+ProjectWindow.prototype.finalClose = function() {
+    this.safeToClose = true;
+    this.browserWindow.close();
+}
+
 ProjectWindow.prototype.openDevTools = function() {
     this.browserWindow.webContents.openDevTools();
 }
@@ -69,9 +99,12 @@ ProjectWindow.open = function(filePath) {
     return new ProjectWindow(filePath);
 }
 
-ProjectWindow.closeFocused = function() {
-    var win = BrowserWindow.getFocusedWindow();
-    if( win ) win.close();
+ProjectWindow.tryCloseFocused = function() {
+    var win = focusedWindow();
+    if( win ) {
+        win.tryClose();
+    }
+    return true;
 }
 
 ProjectWindow.saveFocused = function() {
@@ -87,5 +120,10 @@ ProjectWindow.saveAsFocused = function() {
         win.saveAs();
     }
 }
+
+ipc.on("project-final-close", (event) => {
+    var win = windowWithWebContents(event.sender);
+    win.finalClose();
+});
 
 exports.ProjectWindow = ProjectWindow;
