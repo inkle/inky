@@ -3,6 +3,7 @@ const app = electron.app
 const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const appmenus = require('./appmenus.js');
+require("./inklecate.js");
 
 
 // This method will be called when Electron has finished
