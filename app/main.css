@@ -114,6 +114,11 @@ img.issue-icon.warning {
   top: 10px;
 }
 
+#toolbar .button .icon {
+  font-size: 16pt;
+  color: gray;
+}
+
 #toolbar .button.rewind {
   right: 10px;
 }
@@ -122,8 +127,15 @@ img.issue-icon.warning {
   right: 45px;
 }
 
-#toolbar .button:hover {
+#toolbar .button.nav-toggle {
+  left: 5px;
+}
+
+#toolbar .button:hover:not(.low) {
   background: #EEE;
+}
+#toolbar .button.low:hover .icon {
+  color: black;
 }
 
 #toolbar .button.rewind img {
@@ -139,6 +151,11 @@ img.issue-icon.warning {
   vertical-align: middle;
   margin-top: 3px;
 }
+
+#toolbar .button.low {
+  top: 18px;
+}
+
 
 #toolbar .issue-popup {
   position: absolute;
@@ -259,7 +276,7 @@ img.issue-icon.warning {
 
 .sidebar {
   display: absolute;
-  width: 199px;
+  width: 0;
   border-right: 1px solid #DDD;;
   left: 0;
   top: 0;
@@ -268,13 +285,17 @@ img.issue-icon.warning {
   overflow: scroll;
 }
 
+.sidebar.hidden {
+  display: none;
+}
+
 .sidebar, .sidebar * {
   cursor: default;
 }
 
 .twopane {
   position: absolute;
-  left: 200px;
+  left: 0;
   right: 0;
   top: 0;
   bottom: 0;

@@ -114,6 +114,11 @@ $(document).ready(function() {
         event.preventDefault();
     });
 
+    $("#toolbar .nav-toggle.button").on("click", function(event) {
+        events.toggleNav();
+        event.preventDefault();
+    });
+
     var shouldBeHidden = false;
     $("#toolbar .issuesSummary, #toolbar .issue-popup").hover(function(e) {
         $("#toolbar .issue-popup").removeClass("hidden");

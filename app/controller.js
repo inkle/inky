@@ -108,6 +108,6 @@ EditorView.onChange(() => {
 ToolbarView.setEvents({
     rewind:   () => { LiveCompiler.rewind(); },
     stepBack: () => { LiveCompiler.stepBack(); },
-    selectIssue: (issue) => { EditorView.gotoLine(issue.lineNumber); }
+    selectIssue: (issue) => { EditorView.gotoLine(issue.lineNumber); },
+    toggleNav: () => { NavView.toggle(); }
 });
-
