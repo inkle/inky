@@ -8,6 +8,7 @@
 
 ## Features and improvements
 
+* Back and forward buttons
 * Drag split view divider
     * And hide/show editor and player views?
 * Pause live compilation / playing?
