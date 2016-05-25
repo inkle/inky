@@ -10,9 +10,14 @@ const EditSession = ace.require('ace/edit_session').EditSession;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 const EditorView = require("./editorView.js").EditorView;
 
-function InkFile(filePath) {
+// -----------------------------------------------------------------
+// InkFile
+// -----------------------------------------------------------------
+
+function InkFile(filePath, changeCallback) {
 
     this.path = filePath;
+    this.fileChangesCallback = changeCallback;
 
     this.aceDocument = new Document("");
     this.aceSession = null;
@@ -21,12 +26,14 @@ function InkFile(filePath) {
         fs.readFile(this.path, 'utf8', (err, data) => {
             this.aceDocument.setValue(data);
             this.hasUnsavedChanges = false;
+            this.fileChangesCallback();
         });
     }
 
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
+        this.fileChangesCallback();
     });
 
     // Knots, stitches etc
@@ -73,6 +80,7 @@ InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
         var self = this;
         fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", function() {
             self.hasUnsavedChanges = false;
+            self.fileChangesCallback();
             if( afterSaveCallback )
                 afterSaveCallback(true);
         })
@@ -85,13 +93,42 @@ InkFile.prototype.saveAs = function(callback) {
     this.saveGeneral(true,  callback);  
 }
 
+// -----------------------------------------------------------------
+// InkProject
+// -----------------------------------------------------------------
+
 function InkProject(mainInkFilePath) {
     this.files = [];
+    this.hasUnsavedChanges = false;
 
-    this.mainInk = new InkFile(mainInkFilePath || null);
+    var self = this;
+    this.mainInk = new InkFile(mainInkFilePath || null, function() {
+        self.refreshUnsavedChanges();
+    });
 
     this.files.push(this.mainInk);
     this.openInkFile(this.mainInk);
+}
+
+InkProject.events = {};
+InkProject.currentProject = null;
+
+InkProject.prototype.refreshUnsavedChanges = function() {
+
+    var prevUnsavedChanges = this.hasUnsavedChanges;
+
+    this.hasUnsavedChanges = false;
+    for(var i=0; i<this.files.length; i++) {
+        var file = this.files[i];
+        if( file.hasUnsavedChanges ) {
+            this.hasUnsavedChanges = true;
+            break;
+        }
+    }
+
+    // Update window state
+    if( this.hasUnsavedChanges != prevUnsavedChanges )
+        remote.getCurrentWindow().setDocumentEdited(this.hasUnsavedChanges);
 }
 
 InkProject.prototype.openInkFile = function(inkFile) {
@@ -101,7 +138,7 @@ InkProject.prototype.openInkFile = function(inkFile) {
 
 InkProject.prototype.save = function(saveAs, callback) {
     this.activeInkFile.save(() => {
-        this.events.didSave();
+        InkProject.events.didSave();
         if( callback )
             callback();
     });
@@ -112,16 +149,7 @@ InkProject.prototype.saveAs = function(saveAs) {
 }
 
 InkProject.prototype.tryClose = function() {
-    var projectHasUnsavedChanges = false;
-    for(var i=0; i<this.files.length; i++) {
-        var file = this.files[i];
-        if( file.hasUnsavedChanges ) {
-            projectHasUnsavedChanges = true;
-            break;
-        }
-    }
-
-    if( projectHasUnsavedChanges ) {
+    if( this.hasUnsavedChanges ) {
         dialog.showMessageBox(remote.getCurrentWindow(), {
             type: "warning",
             message: "Would you like to save changes before exiting?",
@@ -160,8 +188,40 @@ InkProject.prototype.closeImmediate = function() {
     ipc.send("project-final-close");
 }
 
-InkProject.prototype.setEvents = function(e) {
-    this.events = e;
+InkProject.setEvents = function(e) {
+    InkProject.events = e;
 }
+
+InkProject.startNew = function() {
+    InkProject.setProject(new InkProject());
+}
+
+InkProject.setProject = function(project) {
+    InkProject.currentProject = project;
+    InkProject.events.newProject();
+}
+
+ipc.on("set-project-main-ink-filepath", (event, filePath) => {
+    InkProject.setProject(new InkProject(filePath));
+});
+
+ipc.on("project-save-current", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.save();
+    }
+});
+
+ipc.on("project-saveAs-current", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.saveAs();
+    }
+});
+
+ipc.on("project-tryClose", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.tryClose();
+    }
+});
+
 
 exports.InkProject = InkProject;

@@ -9,48 +9,21 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
 
-var currentProject = null;
-
-function setProject(project) {
-    currentProject = project;
-    currentProject.setEvents({
-        "didSave": () => {
-            updateFilenames();
-        }
-    });
-    updateFilenames();
-}
-
-// Default state is a new empty project...
-setProject(new InkProject());
-
 function updateFilenames() {
-    ToolbarView.setTitle(currentProject.mainInk.filename());
-    NavView.setCurrentFilename(currentProject.mainInk.filename());
+    var mainFilename = InkProject.currentProject.mainInk.filename();
+    ToolbarView.setTitle(mainFilename);
+    NavView.setCurrentFilename(mainFilename);
 }
 
-// ...until we're told to load something into the window
-ipc.on("set-project-main-ink-filepath", (event, filePath) => {
-    setProject(new InkProject(filePath));
+InkProject.setEvents({
+    "newProject": () => {
+        updateFilenames();
+        EditorView.focus();
+    },
+    "didSave": updateFilenames
 });
+InkProject.startNew();
 
-ipc.on("project-save-current", (event) => {
-    if( currentProject ) {
-        currentProject.save();
-    }
-});
-
-ipc.on("project-saveAs-current", (event) => {
-    if( currentProject ) {
-        currentProject.saveAs();
-    }
-});
-
-ipc.on("project-tryClose", (event) => {
-    if( currentProject ) {
-        currentProject.tryClose();
-    }
-});
 
 LiveCompiler.setInkProvider(() => {
     return EditorView.getValue();

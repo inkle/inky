@@ -2,10 +2,6 @@
 
 ## SOON
 
-* Move currentProject (and other project stuff) from controller.js to InkProject.js
-
-* Add Mac dot on red traffic light for unsaved changes
-
 * Ability to drag and drop files onto dock icon
 
 * Error checking for file system integration
@@ -31,8 +27,8 @@
     * (DONE?) Replaying a story sometimes goes through a few transitions (e.g. with The Intercept)
     * Copies of inklecate left open sometimes (bleh, still happening)
         * Check when windows are closed
-    * Focus editor view on load
     * Multiple windows - robustness (do we still have a problem here?)
+    * Cmd-D for "don't save" option
 
 * Background worker for document model
     * Build simple hierarchy of document
