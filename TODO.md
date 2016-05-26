@@ -2,7 +2,7 @@
 
 ## SOON
 
-* Ability to drag and drop files onto dock icon
+* Organisation: Split main process v.s. renderer process files into different directories
 
 * Error checking for file system integration
 
@@ -12,13 +12,12 @@
 * Drag split view divider
     * And hide/show editor and player views?
 * Pause live compilation / playing?
-* Ability to make the app the default one for ink
 * Multi-ink file editing
     * Parse INCLUDE lines, allow you to jump between them via nav
         * What should happen in the document model?
     * Enable opt-click INCLUDE declarations
     * Automatic discovery of other nearby ink files in addition to those that are INCLUDE-ed
-
+* Switch to specific project/file when opening an ink file externally that's related to a particular existing open project
 
 ## Engineering
 

@@ -96,6 +96,8 @@ ProjectWindow.createEmpty = function() {
 }
 
 ProjectWindow.open = function(filePath) {
+    // TODO: Could check whether the filepath is relative to any of our
+    // existing open projects, and switch to that window?
     return new ProjectWindow(filePath);
 }
 
