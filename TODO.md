@@ -2,9 +2,7 @@
 
 ## SOON
 
-* Organisation: Split main process v.s. renderer process files into different directories
-
-* Error checking for file system integration
+* Start parsing file structure for the sake of INCLUDE directives, and also for knot/stitch/gather/choice names
 
 ## Features and improvements
 
@@ -18,6 +16,7 @@
     * Enable opt-click INCLUDE declarations
     * Automatic discovery of other nearby ink files in addition to those that are INCLUDE-ed
 * Switch to specific project/file when opening an ink file externally that's related to a particular existing open project
+* Error checking for file system integration
 
 ## Engineering
 

@@ -38,7 +38,7 @@ function focusedWindow() {
 
 function ProjectWindow(filePath) {
     this.browserWindow = new BrowserWindow(electronWindowOptions);
-    this.browserWindow.loadURL("file://" + __dirname + "/index.html");
+    this.browserWindow.loadURL("file://" + __dirname + "/../renderer/index.html");
     this.browserWindow.setSheetOffset(49);
 
     this.safeToClose = false;

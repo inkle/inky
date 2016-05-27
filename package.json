@@ -3,9 +3,9 @@
   "productName": "Inky",
   "version": "1.0.0",
   "description": "An editor for ink",
-  "main": "app/main.js",
+  "main": "app/main-process/main.js",
   "scripts": {
-    "start": "electron app/main.js"
+    "start": "electron app/main-process/main.js"
   },
   "repository": {
     "type": "git",
