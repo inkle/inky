@@ -31,6 +31,8 @@
     * Multiple windows - robustness (do we still have a problem here?)
     * Cmd-D for "don't save" option
 
+* Convert ad-hoc style events to be proper NodeJS EventEmitters
+
 * Background worker for document model
     * Build simple hierarchy of document
         * Knots, stitches, gathers/choices
