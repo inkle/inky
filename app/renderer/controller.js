@@ -73,9 +73,19 @@ LiveCompiler.setEvents({
     }
 });
 
-
-EditorView.onChange(() => {
-    LiveCompiler.setEdited();
+EditorView.setEvents({
+    "change": () => {
+        LiveCompiler.setEdited();
+    },
+    "jumpToSymbol": (symbolName, contextPos) => {
+        var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
+        if( foundSymbol ) {
+            EditorView.gotoLine(foundSymbol.row+1, foundSymbol.column);
+        }
+    },
+    "jumpToInclude": (includePath) => {
+        alert("Jumping to INCLUDEs not yet supported! "+includePath);
+    }
 });
 
 ToolbarView.setEvents({

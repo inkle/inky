@@ -6,9 +6,14 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 var editorMarkers = [];
 var editorAnnotations = [];
 
+var events = {};
+
 editor.setShowPrintMargin(false);
 editor.setOptions({
     enableLiveAutocompletion: true
+});
+editor.on("change", () => {
+    events.change();
 });
 
 /* TODO: It's possible to complete custom keywords.
@@ -42,7 +47,7 @@ editor.on("click", function(e){
     var searchToken = editor.session.getTokenAt(pos.row, pos.column);
 
     if( searchToken && searchToken.type == "include.filepath" ) {
-        alert("Jumping to INCLUDEs not yet supported!")
+        events.jumpToInclude(searchToken.value);
         return;
     }
 
@@ -62,59 +67,61 @@ editor.on("click", function(e){
 
         var targetPath = searchToken.value;
 
-        var pathComponents = targetPath.split(".");
-        var foundSomeOfPath = false;
+        events.jumpToSymbol(targetPath, pos);
 
-        for(var pathIdx=0; pathIdx<pathComponents.length; ++pathIdx) {
+        // var pathComponents = targetPath.split(".");
+        // var foundSomeOfPath = false;
 
-            // Remove parameters from target name
-            var pathElementName = pathComponents[pathIdx];
-            pathElementName = pathElementName.replace(/\([^\)]*\)/g, "");
-            pathElementName = pathElementName.trim();
+        // for(var pathIdx=0; pathIdx<pathComponents.length; ++pathIdx) {
 
-            function searchForName(forward) {
-                var it = new TokenIterator(editor.session, pos.row, pos.column);
-                for(var tok = it.getCurrentToken(); tok; forward ? tok = it.stepForward() : tok = it.stepBackward()) {
-                    if( tok.type.indexOf("name") != -1 && tok.value == pathElementName ) {
-                        return {
-                            row: it.getCurrentTokenRow(),
-                            column: it.getCurrentTokenColumn(),
-                            found: true
-                        };
-                    }
-                }
-                return {
-                    found: false
-                };
-            }
+        //     // Remove parameters from target name
+        //     var pathElementName = pathComponents[pathIdx];
+        //     pathElementName = pathElementName.replace(/\([^\)]*\)/g, "");
+        //     pathElementName = pathElementName.trim();
 
-            var forwardSearchResult = searchForName(true);
-            var backwardSearchResult = searchForName(false);
-            var target = null;
+        //     function searchForName(forward) {
+        //         var it = new TokenIterator(editor.session, pos.row, pos.column);
+        //         for(var tok = it.getCurrentToken(); tok; forward ? tok = it.stepForward() : tok = it.stepBackward()) {
+        //             if( tok.type.indexOf("name") != -1 && tok.value == pathElementName ) {
+        //                 return {
+        //                     row: it.getCurrentTokenRow(),
+        //                     column: it.getCurrentTokenColumn(),
+        //                     found: true
+        //                 };
+        //             }
+        //         }
+        //         return {
+        //             found: false
+        //         };
+        //     }
 
-            if( forwardSearchResult.found && backwardSearchResult.found ) {
-                if( Math.abs(forwardSearchResult.row - pos.row) < Math.abs(backwardSearchResult.row - pos.row) ) {
-                    target = forwardSearchResult;
-                } else {
-                    target = backwardSearchResult;
-                }
-            } else if( forwardSearchResult.found ) {
-                target = forwardSearchResult;
-            } else if( backwardSearchResult.found ) {
-                target = backwardSearchResult;
-            }
+        //     var forwardSearchResult = searchForName(true);
+        //     var backwardSearchResult = searchForName(false);
+        //     var target = null;
 
-            if( target ) {
-                pos = target;
-                foundSomeOfPath = true;
-            } else {
-                break;
-            }
+        //     if( forwardSearchResult.found && backwardSearchResult.found ) {
+        //         if( Math.abs(forwardSearchResult.row - pos.row) < Math.abs(backwardSearchResult.row - pos.row) ) {
+        //             target = forwardSearchResult;
+        //         } else {
+        //             target = backwardSearchResult;
+        //         }
+        //     } else if( forwardSearchResult.found ) {
+        //         target = forwardSearchResult;
+        //     } else if( backwardSearchResult.found ) {
+        //         target = backwardSearchResult;
+        //     }
 
-        } // path component iteration
+        //     if( target ) {
+        //         pos = target;
+        //         foundSomeOfPath = true;
+        //     } else {
+        //         break;
+        //     }
 
-        if( foundSomeOfPath )
-            editor.gotoLine(pos.row+1, pos.column);
+        // } // path component iteration
+
+        // if( foundSomeOfPath )
+        //     editor.gotoLine(pos.row+1, pos.column);
     }
 });
 
@@ -194,12 +201,10 @@ function clearErrors() {
 
 exports.EditorView = {
     clearErrors: clearErrors,
-    onChange: (callback) => {
-        editor.on("change", callback);
-    },
+    setEvents: (e) => { events = e; },
     getValue: () => { return editor.getValue(); },
     setValue: (v) => { editor.setValue(v); },
-    gotoLine: (line) => { editor.gotoLine(line); },
+    gotoLine: (row, col) => { editor.gotoLine(row, col); },
     addError: addError,
     openInkFile: (inkFile) => {
         editor.setSession(inkFile.getAceSession());

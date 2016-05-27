@@ -101,6 +101,34 @@ InkProject.prototype.closeImmediate = function() {
     ipc.send("project-final-close");
 }
 
+InkProject.prototype.findSymbol = function(name, posContext) {
+    var allSymbols = {};
+    for(var i=0; i<this.files.length; i++) {
+        var file = this.files[i];
+        var fileSymbols = file.symbols.getSymbols();
+        
+        allSymbols = Object.assign(allSymbols, fileSymbols);
+    }
+
+    var currentScope = allSymbols;
+    var nameComps = name.split(".");
+    for(var i=0; i<nameComps.length; i++) {
+        var comp = nameComps[i];
+        var found = allSymbols[comp];
+        if( found )
+            currentScope = found;
+        else
+            break;
+    }
+
+    if( currentScope != allSymbols ){
+        console.log("Found "+JSON.stringify(currentScope));
+        return currentScope;
+    } else {
+        console.log("Failed to find symbol");
+    }
+}
+
 InkProject.setEvents = function(e) {
     InkProject.events = e;
 }
