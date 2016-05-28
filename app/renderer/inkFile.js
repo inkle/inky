@@ -23,19 +23,30 @@ function InkFile(filePath, events) {
     this.aceSession = null;
 
     this.includes = [];
+    this.newlyLoaded = true;
 
     this.symbols = new InkFileSymbols(this, {
         includesChanged: (includes) => {
             this.includes = includes.slice();
-            this.events.includesChanged(this.includes);
+            this.events.includesChanged(this.includes, this.newlyLoaded);
         }
     });
 
     if( this.path ) {
         fs.readFile(this.path, 'utf8', (err, data) => {
+
+            this.newlyLoaded = true;
+
             this.aceDocument.setValue(data);
             this.hasUnsavedChanges = false;
             this.events.fileChanged();
+
+            // Force immediate symbol re-parse (rather than the lazy scheduling)
+            // in the newly loaded state so that we gather the includes and
+            // project structure ASAP.
+            this.symbols.parse();
+
+            this.newlyLoaded = false;
         });
     }
 

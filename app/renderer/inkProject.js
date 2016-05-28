@@ -20,8 +20,6 @@ function InkProject(mainInkFilePath) {
     this.files = [];
     this.hasUnsavedChanges = false;
 
-    this.refreshIncludesTimer = null;
-
     this.mainInk = new InkFile(mainInkFilePath || null, inkFileEvents);
     this.files.push(this.mainInk);
 
@@ -30,19 +28,14 @@ function InkProject(mainInkFilePath) {
 
 const inkFileEvents = {
     fileChanged: () => InkProject.currentProject.refreshUnsavedChanges(),
-    includesChanged: () => {
-        var self = InkProject.currentProject;
-        if( self.refreshIncludesTimer ) 
-            clearTimeout(self.refreshIncludesTimer);
-        self.refreshIncludesTimer = setTimeout(() => {
-            self.refreshIncludes();
-        }, 100);
+    includesChanged: (includes, newlyLoaded) => {         
+        InkProject.currentProject.refreshIncludes();
+        if( newlyLoaded && includes.length > 0 )
+            NavView.show();
     }
 }
 
 InkProject.prototype.refreshIncludes = function() {
-    clearTimeout(this.refreshIncludesTimer);
-    this.refreshIncludesTimer = null;
 
     var allIncludes = [];
     var rootDirectory = path.dirname(this.mainInk.path);

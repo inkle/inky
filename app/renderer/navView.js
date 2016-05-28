@@ -49,7 +49,13 @@ function setFilePaths(mainInkPath, includePaths) {
                             </span>`;
         });
 
-        var $group = $(`<nav class="nav-group"><h5 class="nav-group-title">${dir}</h5> ${items} </nav>`);
+        var dirTitle = dir;
+
+        // include in same directory as main? just hide the name
+        if( dirTitle == "." )
+            dirTitle = "";
+
+        var $group = $(`<nav class="nav-group"><h5 class="nav-group-title">${dirTitle}</h5> ${items} </nav>`);
         $sidebar.append($group);
     }
 }

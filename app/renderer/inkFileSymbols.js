@@ -1,17 +1,28 @@
 const assert = require("assert");
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+const _ = require("lodash");
 
 function InkFileSymbols(inkFile, events) {
     this.inkFile = inkFile;
     this.events = events;
 
     this.dirty = true;
+    this.parseTimeout = null;
+
     this.inkFile.aceDocument.on("change", () => {
         this.dirty = true;
-
-        // TODO: Don't do this on every change!
-        this.parse();
+        this.scheduleParse();
     });
+}
+
+InkFileSymbols.prototype.scheduleParse = function() {
+    if( this.parseTimeout ) 
+        clearTimeout(this.parseTimeout);
+
+    this.parseTimeout = setTimeout(() => {
+        this.parseTimeout = null;
+        this.parse();
+    }, 200);
 }
 
 InkFileSymbols.prototype.parse = function() {
@@ -97,10 +108,21 @@ InkFileSymbols.prototype.parse = function() {
 
     this.symbols = symbolStack[0].innerSymbols;
     this.rangeIndex = symbolStack[0].rangeIndex;
+
+    // Detect whether the includes actually changed at all
+    var oldIncludes = this.includes || [];
     this.includes = includes;
 
-    // TODO: Only fire when actually changed
-    this.events.includesChanged(this.includes);
+    var includesChanged = false;
+    if( includes.length != oldIncludes.length ) {
+        includesChanged = true;
+    } else {
+        var beforeAndAfter = _.union(includes, oldIncludes);
+        includesChanged = beforeAndAfter.length != includes.length;
+    }
+
+    if( includesChanged )
+        this.events.includesChanged(this.includes);
 
     this.dirty = false;
 }
