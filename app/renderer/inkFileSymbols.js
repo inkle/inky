@@ -1,12 +1,16 @@
 const assert = require("assert");
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 
-function InkFileSymbols(inkFile) {
+function InkFileSymbols(inkFile, events) {
     this.inkFile = inkFile;
+    this.events = events;
 
     this.dirty = true;
     this.inkFile.aceDocument.on("change", () => {
         this.dirty = true;
+
+        // TODO: Don't do this on every change!
+        this.parse();
     });
 }
 
@@ -94,6 +98,9 @@ InkFileSymbols.prototype.parse = function() {
     this.symbols = symbolStack[0].innerSymbols;
     this.rangeIndex = symbolStack[0].rangeIndex;
     this.includes = includes;
+
+    // TODO: Only fire when actually changed
+    this.events.includesChanged(this.includes);
 
     this.dirty = false;
 }

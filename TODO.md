@@ -2,6 +2,20 @@
 
 ## SOON
 
+* Correct logic for re-parsing file for includes - see: `// TODO: Don't do this on every change`
+    * Simply pause before parsing? But make sure it parses on first load. (how? InkFile forces it when the document has been read?)
+
+* Don't tell includes to refresh unless they've changed - see: `// TODO: Only fire when actually changed`
+
+* inklecate has errors on includes since it only compiles ink from /tmp/someinkfile.ink
+    * Copy entire unsaved project into /tmp for compilation?
+
+* Clicking sidebar ink files should display them in the editor
+
+* Open sidebar when loading project with includes
+
+* Recursive include file parsing
+
 * Multi-ink file editing
     * Parse INCLUDE lines on load, allow you to jump between them via nav
     * Enable opt-click INCLUDE declarations

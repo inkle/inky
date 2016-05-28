@@ -14,29 +14,36 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 // InkFile
 // -----------------------------------------------------------------
 
-function InkFile(filePath, changeCallback) {
+function InkFile(filePath, events) {
 
     this.path = filePath;
-    this.fileChangesCallback = changeCallback;
+    this.events = events;
 
     this.aceDocument = new Document("");
     this.aceSession = null;
+
+    this.includes = [];
+
+    this.symbols = new InkFileSymbols(this, {
+        includesChanged: (includes) => {
+            this.includes = includes.slice();
+            this.events.includesChanged(this.includes);
+        }
+    });
 
     if( this.path ) {
         fs.readFile(this.path, 'utf8', (err, data) => {
             this.aceDocument.setValue(data);
             this.hasUnsavedChanges = false;
-            this.fileChangesCallback();
+            this.events.fileChanged();
         });
     }
 
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
-        this.fileChangesCallback();
+        this.events.fileChanged();
     });
-
-    this.symbols = new InkFileSymbols(this);
 }
 
 InkFile.prototype.filename = function() {
@@ -76,10 +83,9 @@ InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
 
     // Quick save to existing path
     else {
-        var self = this;
-        fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", function() {
-            self.hasUnsavedChanges = false;
-            self.fileChangesCallback();
+        fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", () => {
+            this.hasUnsavedChanges = false;
+            this.events.fileChanged();
             if( afterSaveCallback )
                 afterSaveCallback(true);
         })

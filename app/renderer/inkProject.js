@@ -1,8 +1,11 @@
 const remote = require('electron').remote;
 const dialog = remote.dialog;
 const ipc = require("electron").ipcRenderer;
+const path = require("path");
+const _ = require("lodash");
 
 const EditorView = require("./editorView.js").EditorView;
+const NavView = require("./navView.js").NavView;
 
 const InkFile = require("./inkFile.js").InkFile;
 
@@ -10,21 +13,61 @@ const InkFile = require("./inkFile.js").InkFile;
 // InkProject
 // -----------------------------------------------------------------
 
+InkProject.events = {};
+InkProject.currentProject = null;
+
 function InkProject(mainInkFilePath) {
     this.files = [];
     this.hasUnsavedChanges = false;
 
-    var self = this;
-    this.mainInk = new InkFile(mainInkFilePath || null, function() {
-        self.refreshUnsavedChanges();
-    });
+    this.refreshIncludesTimer = null;
 
+    this.mainInk = new InkFile(mainInkFilePath || null, inkFileEvents);
     this.files.push(this.mainInk);
+
     this.openInkFile(this.mainInk);
 }
 
-InkProject.events = {};
-InkProject.currentProject = null;
+const inkFileEvents = {
+    fileChanged: () => InkProject.currentProject.refreshUnsavedChanges(),
+    includesChanged: () => {
+        var self = InkProject.currentProject;
+        if( self.refreshIncludesTimer ) 
+            clearTimeout(self.refreshIncludesTimer);
+        self.refreshIncludesTimer = setTimeout(() => {
+            self.refreshIncludes();
+        }, 100);
+    }
+}
+
+InkProject.prototype.refreshIncludes = function() {
+    clearTimeout(this.refreshIncludesTimer);
+    this.refreshIncludesTimer = null;
+
+    var allIncludes = [];
+    var rootDirectory = path.dirname(this.mainInk.path);
+
+    // TODO: Make it recursive
+    var existingIncludePaths = _.map(_.without(this.files, this.mainInk), (f) => f.path);
+    var latestIncludePaths = _.map(this.mainInk.includes, (inc) => {
+        return path.join(rootDirectory, inc);
+    });
+
+    var includesToAdd    = _.difference(latestIncludePaths, existingIncludePaths)
+    var includesToRemove = _.difference(existingIncludePaths, latestIncludePaths);
+
+    var filesToRemove = _.filter(this.files, (f) => includesToRemove.indexOf(f.path) != -1 );
+
+    // TODO: Could iterate on the above array to process them before removal?
+    this.files = _.difference(this.files, filesToRemove);
+
+    includesToAdd.forEach((newIncludePath) => {
+        var newIncludeFile = new InkFile(newIncludePath || null, inkFileEvents);
+        this.files.push(newIncludeFile);
+    });
+
+    NavView.setFilePaths(this.mainInk.path, latestIncludePaths);
+}
 
 InkProject.prototype.refreshUnsavedChanges = function() {
 
