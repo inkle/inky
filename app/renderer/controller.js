@@ -9,19 +9,20 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
 
-function updateFilenames() {
-    var mainFilename = InkProject.currentProject.mainInk.filename();
-    ToolbarView.setTitle(mainFilename);
-    NavView.setCurrentFilename(mainFilename);
+function updateFilename(filename) {
+    filename = filename || InkProject.currentProject.activeInkFile.filename()
+    ToolbarView.setTitle(filename);
+    NavView.setCurrentFilename(filename);
 }
 
 InkProject.setEvents({
     "newProject": (project) => {
-        updateFilenames();
+        updateFilename();
         EditorView.focus();
         LiveCompiler.setProject(project);
     },
-    "didSave": updateFilenames
+    "didSave": () => updateFilename(),
+    "changeOpenInkFile": (inkFile) => updateFilename(inkFile.filename())
 });
 InkProject.startNew();
 
@@ -90,4 +91,11 @@ ToolbarView.setEvents({
     stepBack: () => { LiveCompiler.stepBack(); },
     selectIssue: (issue) => { EditorView.gotoLine(issue.lineNumber); },
     toggleNav: () => { NavView.toggle(); }
+});
+
+NavView.setEvents({
+    clickFile: (relativePath) => {
+        var inkFile = InkProject.currentProject.inkFileWithRelativePath(relativePath);
+        InkProject.currentProject.openInkFile(inkFile);
+    }
 });

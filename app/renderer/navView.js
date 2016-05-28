@@ -9,10 +9,23 @@ var $sidebar = null;
 var $twoPane = null;
 
 var visible = false;
+var events = {};
 
 $(document).ready(() => {
     $sidebar = $(".sidebar");
     $twoPane = $(".twopane");
+    $sidebar.on("click", ".nav-group-item", function(event) {
+        event.preventDefault();
+
+        var $target = $(event.currentTarget);
+        $sidebar.find(".nav-group-item").not($target).removeClass("active");
+        $target.addClass("active");
+
+        var inkFilename = $target.find(".filename").text();
+        var relativeDir = $target.closest(".nav-group").find(".nav-group-title").text();
+        var relativePath = path.join(relativeDir, inkFilename);
+        events.clickFile(relativePath);
+    });
 });
 
 function setCurrentFilename(name) {
@@ -45,7 +58,7 @@ function setFilePaths(mainInkPath, includePaths) {
             var incFilename = path.basename(incPath);
             items = items + `<span class="nav-group-item">
                                 <span class="icon icon-doc-text"></span>
-                                ${incFilename}
+                                <span class="filename">${incFilename}</span>
                             </span>`;
         });
 
@@ -95,6 +108,7 @@ function show() {
 exports.NavView = {
     setCurrentFilename: setCurrentFilename,
     setFilePaths: setFilePaths,
+    setEvents: e => events = e,
     hide: hide,
     show: show,
     toggle: () => { if( visible ) hide(); else show(); }

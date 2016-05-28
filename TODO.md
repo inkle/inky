@@ -2,7 +2,8 @@
 
 ## SOON
 
-* Clicking sidebar ink files should display them in the editor
+* Open ink files when choosing symbols
+* Open ink files when clicking include lines
 
 * Recursive include file parsing (currently it only works one include level deep)
 

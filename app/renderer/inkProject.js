@@ -81,8 +81,9 @@ InkProject.prototype.refreshUnsavedChanges = function() {
 }
 
 InkProject.prototype.openInkFile = function(inkFile) {
-    this.activeInkFile = this.mainInk;
-    EditorView.openInkFile(this.mainInk);
+    this.activeInkFile = inkFile;
+    EditorView.openInkFile(inkFile);
+    InkProject.events.changeOpenInkFile(this.activeInkFile);
 }
 
 InkProject.prototype.save = function(saveAs, callback) {
@@ -94,7 +95,7 @@ InkProject.prototype.save = function(saveAs, callback) {
 }
 
 InkProject.prototype.saveAs = function(saveAs) {
-    this.activeInkFile.saveAs(() => this.events.didSave());
+    this.activeInkFile.saveAs(() => InkProject.events.didSave());
 }
 
 InkProject.prototype.tryClose = function() {
@@ -135,6 +136,10 @@ InkProject.prototype.tryClose = function() {
 
 InkProject.prototype.closeImmediate = function() {
     ipc.send("project-final-close");
+}
+
+InkProject.prototype.inkFileWithRelativePath = function(relativePath) {
+    return _.find(this.files, f => f.relativePath() == relativePath);
 }
 
 InkProject.prototype.findSymbol = function(name, posContext) {
