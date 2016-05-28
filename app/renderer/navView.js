@@ -22,9 +22,14 @@ $(document).ready(() => {
         $target.addClass("active");
 
         var inkFilename = $target.find(".filename").text();
-        var relativeDir = $target.closest(".nav-group").find(".nav-group-title").text();
-        var relativePath = path.join(relativeDir, inkFilename);
-        events.clickFile(relativePath);
+        var $navGroup = $target.closest(".nav-group");
+        if( $navGroup.hasClass("main-ink") ) {
+            events.clickFile(inkFilename);
+        } else {
+            var relativeDir = $target.closest(".nav-group").find(".nav-group-title").text();
+            var relativePath = path.join(relativeDir, inkFilename);
+            events.clickFile(relativePath);
+        }
     });
 });
 

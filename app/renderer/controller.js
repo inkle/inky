@@ -8,21 +8,23 @@ const NavView = require("./navView.js").NavView;
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 
-
-function updateFilename(filename) {
-    filename = filename || InkProject.currentProject.activeInkFile.filename()
-    ToolbarView.setTitle(filename);
-    NavView.setCurrentFilename(filename);
-}
-
 InkProject.setEvents({
     "newProject": (project) => {
-        updateFilename();
         EditorView.focus();
         LiveCompiler.setProject(project);
+        
+        var filename = project.activeInkFile.filename();
+        ToolbarView.setTitle(filename);
+        NavView.setCurrentFilename(filename);
     },
-    "didSave": () => updateFilename(),
-    "changeOpenInkFile": (inkFile) => updateFilename(inkFile.filename())
+    "didSave": () => {
+        var filename = InkProject.currentProject.activeInkFile.filename();
+        ToolbarView.setTitle(filename);
+        NavView.setCurrentFilename(filename);
+    },
+    "changeOpenInkFile": (inkFile) => {
+        ToolbarView.setTitle(inkFile.filename());
+    }
 });
 InkProject.startNew();
 
