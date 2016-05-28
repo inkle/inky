@@ -20,7 +20,7 @@ function InkProject(mainInkFilePath) {
     this.files = [];
     this.hasUnsavedChanges = false;
 
-    this.mainInk = new InkFile(mainInkFilePath || null, inkFileEvents);
+    this.mainInk = new InkFile(mainInkFilePath || null, null, inkFileEvents);
     this.files.push(this.mainInk);
 
     this.openInkFile(this.mainInk);
@@ -55,7 +55,7 @@ InkProject.prototype.refreshIncludes = function() {
     this.files = _.difference(this.files, filesToRemove);
 
     includesToAdd.forEach((newIncludePath) => {
-        var newIncludeFile = new InkFile(newIncludePath || null, inkFileEvents);
+        var newIncludeFile = new InkFile(newIncludePath || null, this.mainInk, inkFileEvents);
         this.files.push(newIncludeFile);
     });
 
@@ -229,7 +229,7 @@ InkProject.startNew = function() {
 
 InkProject.setProject = function(project) {
     InkProject.currentProject = project;
-    InkProject.events.newProject();
+    InkProject.events.newProject(project);
 }
 
 ipc.on("set-project-main-ink-filepath", (event, filePath) => {

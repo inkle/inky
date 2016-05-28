@@ -2,13 +2,14 @@
 
 ## SOON
 
-* inklecate has errors on includes since it only compiles ink from /tmp/someinkfile.ink
-    * Copy entire unsaved project into /tmp for compilation?
-    * Within a project/window specific sub-folder to avoid collisions
-
 * Clicking sidebar ink files should display them in the editor
 
-* Recursive include file parsing
+* Recursive include file parsing (currently it only works one include level deep)
+
+* Only write out ink files that have changed for compilation
+
+* inklecate.js should compile within a project/window specific sub-folder to avoid collisions
+    * Investigate fs.mkdtemp(prefix, callback)
 
 * Multi-ink file editing
     * Parse INCLUDE lines on load, allow you to jump between them via nav

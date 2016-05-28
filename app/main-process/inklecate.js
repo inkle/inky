@@ -2,22 +2,47 @@ const child_process = require('child_process');
 const exec = child_process.exec;
 const spawn = child_process.spawn;
 const fs = require('fs');
+const path = require("path");
 const electron = require('electron');
 const ipc = electron.ipcMain;
 const util = require('util');
+const mkdirp = require('mkdirp');
 
 const inklecatePath = __dirname + "/ink/inklecate";
-const tempInkPath = "/tmp/inklecatetemp.ink";
-const tempJsonPath = "/tmp/inklecatetemp.json";
+
+// TODO: Customise this for different projects
+const tempInkPath = "/tmp/inklecatetemp/";
 
 var sessions = {};
 
-function play(inkString, requester, sessionId) {
+
+function play(compileInstruction, requester, sessionId) {
     console.log("Playing "+sessionId);
 
-    fs.writeFileSync(tempInkPath, inkString);
+    // TODO: handle errors
+    mkdirp.sync(tempInkPath);
 
-    const playProcess = spawn(inklecatePath, ['-p', tempInkPath]);
+    for(var relativePath in compileInstruction.updatedFiles) {
+
+        console.log("Relative path: "+relativePath);
+
+        var fullInkPath = path.join(tempInkPath, relativePath);
+        var inkFileContent = compileInstruction.updatedFiles[relativePath];
+
+        if( path.dirname(relativePath) != "." ) {
+            var fullDir = path.dirname(fullInkPath);
+            console.log("MAKING DIR: "+fullDir);
+            mkdirp.sync(fullDir);
+        }
+
+
+        console.log("WRITING TO: "+fullInkPath);
+
+        fs.writeFileSync(fullInkPath, inkFileContent);
+    }
+
+    var mainInkPath = path.join(tempInkPath, compileInstruction.mainName);
+    const playProcess = spawn(inklecatePath, ['-cp', mainInkPath]);
 
     sessions[sessionId] = {
         process:playProcess,
@@ -122,14 +147,8 @@ function killSessions(optionalBrowserWindow) {
     }
 }
 
-
-ipc.on("compile-ink", (event, inkStr) => {
-    console.log("inklecate received compile instruction. Compiling...");
-    compile(inkStr, event.sender);
-});
-
-ipc.on("play-ink", (event, inkStr, sessionId) => {
-    play(inkStr, event.sender, sessionId);
+ipc.on("play-ink", (event, compileInstruction, sessionId) => {
+    play(compileInstruction, event.sender, sessionId);
 });
 
 ipc.on("play-stop-ink", (event, sessionId) => {

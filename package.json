@@ -23,6 +23,7 @@
   },
   "homepage": "http://www.inklestudios.com/ink",
   "devDependencies": {
-    "electron-prebuilt": "^0.37.8"
+    "electron-prebuilt": "^0.37.8",
+    "mkdirp": "0.5.1"
   }
 }

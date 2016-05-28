@@ -14,10 +14,12 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 // InkFile
 // -----------------------------------------------------------------
 
-function InkFile(filePath, events) {
+function InkFile(filePath, mainInkFile, events) {
 
     this.path = filePath;
     this.events = events;
+
+    this.mainInkFile = mainInkFile;
 
     this.aceDocument = new Document("");
     this.aceSession = null;
@@ -59,6 +61,28 @@ function InkFile(filePath, events) {
 
 InkFile.prototype.filename = function() {
     return this.path ? path.basename(this.path) : "Untitled.ink";
+}
+
+InkFile.prototype.relativePath = function() {
+
+    // Path will be relative for unsaved files
+    if( this.path && !path.isAbsolute(this.path) )
+        return this.path;
+
+    // This file is an include (hence it has a ref to the main ink file)
+    if( this.mainInkFile ) {
+        var mainDir = path.dirname(this.mainInkFile.path);
+        return path.relative(mainDir, this.path);
+    } 
+
+    // This file is the main ink
+    else {
+        return this.filename();
+    }
+}
+
+InkFile.prototype.getValue = function() {
+    return this.aceDocument.getValue();
 }
 
 InkFile.prototype.getAceSession = function() {

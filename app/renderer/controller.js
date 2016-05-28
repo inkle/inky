@@ -16,18 +16,15 @@ function updateFilenames() {
 }
 
 InkProject.setEvents({
-    "newProject": () => {
+    "newProject": (project) => {
         updateFilenames();
         EditorView.focus();
+        LiveCompiler.setProject(project);
     },
     "didSave": updateFilenames
 });
 InkProject.startNew();
 
-
-LiveCompiler.setInkProvider(() => {
-    return EditorView.getValue();
-})
 
 LiveCompiler.setEvents({
     resetting: () => {

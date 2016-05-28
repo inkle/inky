@@ -9,7 +9,7 @@ var currentReplayTurnIdx = -1;
 var issues = [];
 var selectedIssueIdx = -1;
 
-var getInkFunc;
+var project = null;
 var events = {}
 
 
@@ -33,7 +33,18 @@ function reloadInklecateSession() {
 
     resetErrors();
 
-    ipc.send("play-ink", getInkFunc(), sessionId);
+    // Construct instruction object to send to inklecate.js
+    var compileInstruction = {
+        mainName: project.mainInk.filename(),
+        updatedFiles: {}
+    };
+
+    // TODO: Only update the files that have actually changed
+    project.files.forEach((inkFile) => {
+        compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
+    });
+
+    ipc.send("play-ink", compileInstruction, sessionId);
 }
 
 function stopInklecateSession(idToStop) {
@@ -161,9 +172,7 @@ ipc.on("play-story-stopped", (event, fromSessionId) => {
 });
 
 exports.LiveCompiler = {
-    setInkProvider: (callback) => {
-        getInkFunc = callback;
-    },
+    setProject: (p) => { project = p; },
     reload: reloadInklecateSession,
     setEdited: () => { lastEditorChange = Date.now(); },
     setEvents: (e) => { events = e; },
