@@ -24,8 +24,7 @@
     * Reliability of story reloading - sometimes it fails
     * When inklecate crashes, we should handle it specially
     * (DONE?) Replaying a story sometimes goes through a few transitions (e.g. with The Intercept)
-    * Copies of inklecate left open sometimes (bleh, still happening)
-        * Check when windows are closed
+    * Copies of inklecate left open sometimes (POSSIBLY FIXED AGAIN?)
     * Multiple windows - robustness (do we still have a problem here?)
     * Cmd-D for "don't save" option
 

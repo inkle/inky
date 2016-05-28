@@ -3,7 +3,8 @@ const app = electron.app
 const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const appmenus = require('./appmenus.js');
-require("./inklecate.js");
+const forceQuitDetect = require('./forceQuitDetect');
+const Inklecate = require("./inklecate.js").Inklecate;
 
 app.on('will-finish-launching', function() {
     app.on("open-file", function(event, path) {
@@ -55,3 +56,9 @@ app.on('ready', function() {
     //w.openDevTools();
 });
 
+function finalQuit() {
+    Inklecate.killSessions();
+}
+
+forceQuitDetect.onForceQuit(finalQuit);
+electron.app.on("will-quit", finalQuit);

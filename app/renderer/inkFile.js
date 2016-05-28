@@ -4,6 +4,8 @@ const fs = require("fs");
 const remote = require('electron').remote;
 const dialog = remote.dialog;
 
+const InkFileSymbols = require("./inkFileSymbols.js").InkFileSymbols;
+
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
@@ -34,8 +36,7 @@ function InkFile(filePath, changeCallback) {
         this.fileChangesCallback();
     });
 
-    // Knots, stitches etc
-    this.symbols = {};
+    this.symbols = new InkFileSymbols(this);
 }
 
 InkFile.prototype.filename = function() {

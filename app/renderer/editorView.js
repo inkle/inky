@@ -6,9 +6,14 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 var editorMarkers = [];
 var editorAnnotations = [];
 
+var events = {};
+
 editor.setShowPrintMargin(false);
 editor.setOptions({
     enableLiveAutocompletion: true
+});
+editor.on("change", () => {
+    events.change();
 });
 
 /* TODO: It's possible to complete custom keywords.
@@ -42,79 +47,15 @@ editor.on("click", function(e){
     var searchToken = editor.session.getTokenAt(pos.row, pos.column);
 
     if( searchToken && searchToken.type == "include.filepath" ) {
-        alert("Jumping to INCLUDEs not yet supported!")
+        events.jumpToInclude(searchToken.value);
         return;
     }
 
-    // Approximate search:
-    //  - Split the search token up into its components: x.y.z
-    //  - POS = clicked token
-    //  - for each component:
-    //       - find the *nearest* matching token to POS
-    //       - POS = that matching component's pos
-    //       - next component
-    // Effectively it drills into the path, except that it's not
-    // 100% accurate since it just tried to find the nearest, rather
-    // than searching through the structure correctly.
     if( searchToken && searchToken.type == "divert.target" ) {
-
         e.preventDefault();
-
         var targetPath = searchToken.value;
-
-        var pathComponents = targetPath.split(".");
-        var foundSomeOfPath = false;
-
-        for(var pathIdx=0; pathIdx<pathComponents.length; ++pathIdx) {
-
-            // Remove parameters from target name
-            var pathElementName = pathComponents[pathIdx];
-            pathElementName = pathElementName.replace(/\([^\)]*\)/g, "");
-            pathElementName = pathElementName.trim();
-
-            function searchForName(forward) {
-                var it = new TokenIterator(editor.session, pos.row, pos.column);
-                for(var tok = it.getCurrentToken(); tok; forward ? tok = it.stepForward() : tok = it.stepBackward()) {
-                    if( tok.type.indexOf("name") != -1 && tok.value == pathElementName ) {
-                        return {
-                            row: it.getCurrentTokenRow(),
-                            column: it.getCurrentTokenColumn(),
-                            found: true
-                        };
-                    }
-                }
-                return {
-                    found: false
-                };
-            }
-
-            var forwardSearchResult = searchForName(true);
-            var backwardSearchResult = searchForName(false);
-            var target = null;
-
-            if( forwardSearchResult.found && backwardSearchResult.found ) {
-                if( Math.abs(forwardSearchResult.row - pos.row) < Math.abs(backwardSearchResult.row - pos.row) ) {
-                    target = forwardSearchResult;
-                } else {
-                    target = backwardSearchResult;
-                }
-            } else if( forwardSearchResult.found ) {
-                target = forwardSearchResult;
-            } else if( backwardSearchResult.found ) {
-                target = backwardSearchResult;
-            }
-
-            if( target ) {
-                pos = target;
-                foundSomeOfPath = true;
-            } else {
-                break;
-            }
-
-        } // path component iteration
-
-        if( foundSomeOfPath )
-            editor.gotoLine(pos.row+1, pos.column);
+        events.jumpToSymbol(targetPath, pos);
+        return;
     }
 });
 
@@ -194,12 +135,10 @@ function clearErrors() {
 
 exports.EditorView = {
     clearErrors: clearErrors,
-    onChange: (callback) => {
-        editor.on("change", callback);
-    },
+    setEvents: (e) => { events = e; },
     getValue: () => { return editor.getValue(); },
     setValue: (v) => { editor.setValue(v); },
-    gotoLine: (line) => { editor.gotoLine(line); },
+    gotoLine: (row, col) => { editor.gotoLine(row, col); },
     addError: addError,
     openInkFile: (inkFile) => {
         editor.setSession(inkFile.getAceSession());

@@ -6,8 +6,6 @@ const electron = require('electron');
 const ipc = electron.ipcMain;
 const util = require('util');
 
-const forceQuitDetect = require('./forceQuitDetect');
-
 const inklecatePath = __dirname + "/ink/inklecate";
 const tempInkPath = "/tmp/inklecatetemp.ink";
 const tempJsonPath = "/tmp/inklecatetemp.json";
@@ -23,6 +21,7 @@ function play(inkString, requester, sessionId) {
 
     sessions[sessionId] = {
         process:playProcess,
+        requesterWebContents: requester,
         stopped: false
     };
 
@@ -104,10 +103,23 @@ function stop(sessionId) {
     }
 }
 
-function killAllSessions() {
-    console.log("Kill all sessions");
-    for(var session in sessions)
-        stop(session.sessionId);
+function killSessions(optionalBrowserWindow) {
+    if( optionalBrowserWindow )
+        console.log("Kill sessions for window");
+    else
+        console.log("Kill all sessions");
+
+    for(var sessionId in sessions) {
+
+        if( !optionalBrowserWindow || sessions[sessionId] &&
+            sessions[sessionId].requesterWebContents == optionalBrowserWindow.webContents ) {
+
+            if( optionalBrowserWindow )
+                console.log("Found session to stop: "+sessionId);
+
+            stop(sessionId);
+        }
+    }
 }
 
 
@@ -137,5 +149,7 @@ ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
     
 });
 
-forceQuitDetect.onForceQuit(killAllSessions);
-electron.app.on("will-quit", killAllSessions);
+
+exports.Inklecate = {
+    killSessions: killSessions
+}

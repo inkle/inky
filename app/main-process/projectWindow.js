@@ -2,6 +2,7 @@ const electron = require('electron');
 const ipc = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
+const Inklecate = require("./inklecate.js").Inklecate;
 
 const electronWindowOptions = {
   width: 1300, 
@@ -84,6 +85,7 @@ ProjectWindow.prototype.tryClose = function() {
 
 ProjectWindow.prototype.finalClose = function() {
     this.safeToClose = true;
+    Inklecate.killSessions(this.browserWindow);
     this.browserWindow.close();
 }
 
