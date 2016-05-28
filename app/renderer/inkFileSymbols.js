@@ -26,7 +26,8 @@ InkFileSymbols.prototype.parse = function() {
 
     var symbolStack = [{
         flowType: topLevelInkFlow,
-        innerSymbols: {}
+        innerSymbols: {},
+        rangeIndex: []
     }];
     symbolStack.currentElement = function() {
         var currElement = this[this.length-1];
@@ -41,10 +42,6 @@ InkFileSymbols.prototype.parse = function() {
         if( tok.type.indexOf(".name") != -1 ) {
 
             var symbolName = tok.value;
-
-            // DEBUG
-            if( tok.type.indexOf("var-decl") != -1 )
-                continue;
 
             var flowType = null;
             for(var flowTypeName in flowTypes) {
@@ -66,11 +63,24 @@ InkFileSymbols.prototype.parse = function() {
                 name: symbolName,
                 flowType: flowType,
                 row: it.getCurrentTokenRow(),
-                column: it.getCurrentTokenColumn(),
-                innerSymbols: {}
+                column: it.getCurrentTokenColumn()
             };
             
-            symbolStack.currentElement().innerSymbols[symbolName] = symbol;
+            var parent = symbolStack.currentElement();
+            if( parent != symbolStack )
+                symbol.parent = parent;
+
+            if( !parent.innerSymbols ) {
+                parent.innerSymbols = [];
+                parent.rangeIndex = [];
+            }
+
+            parent.innerSymbols[symbolName] = symbol;
+            parent.rangeIndex.push({
+                rowStart: symbol.row,
+                symbol: symbol
+            });
+
             symbolStack.push(symbol);
         }
 
@@ -82,9 +92,42 @@ InkFileSymbols.prototype.parse = function() {
     } // for token iterator
 
     this.symbols = symbolStack[0].innerSymbols;
+    this.rangeIndex = symbolStack[0].rangeIndex;
     this.includes = includes;
 
     this.dirty = false;
+}
+
+InkFileSymbols.prototype.symbolAtPos = function(pos) {
+
+    if( this.dirty ) this.parse();
+
+    // Range index is an index of all the symbols by row number,
+    // nested into a hierarchy. 
+    function symbolWithinIndex(rangeIndex) {
+
+        if( !rangeIndex )
+            return null;
+
+        // Loop through range until we find the symbol,
+        // then dig in to see if we can find a more accurate sub-symbol
+        for(var i=0; i<rangeIndex.length; i++) {
+
+            var nextRangeElement = null;
+            if( i < rangeIndex.length-1 )
+                nextRangeElement = rangeIndex[i+1];
+
+            if( !nextRangeElement || pos.row < nextRangeElement.rowStart ) {
+                var symbol = rangeIndex[i].symbol;
+                return symbolWithinIndex(symbol.rangeIndex) || symbol;
+            }
+        }
+
+        // Only if it's an empty range, so impossible?
+        return null;
+    }
+
+    return symbolWithinIndex(this.rangeIndex);
 }
 
 InkFileSymbols.prototype.getSymbols = function() {
