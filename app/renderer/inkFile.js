@@ -26,7 +26,7 @@ function InkFile(filePath, mainInkFile, events) {
 
     this.includes = [];
     this.newlyLoaded = true;
-    this.shouldCompile = true;
+    this.compilerVersionDirty = true;
 
     this.symbols = new InkFileSymbols(this, {
         includesChanged: (includes) => {
@@ -56,7 +56,7 @@ function InkFile(filePath, mainInkFile, events) {
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
-        this.shouldCompile = true;
+        this.compilerVersionDirty = true;
         this.events.fileChanged();
     });
 }
