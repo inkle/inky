@@ -2,8 +2,6 @@
 
 ## SOON
 
-* Save v.s. save all for project (currently it's inconsistent and broken - only saves one file and not necessarily the right one)
-
 * Multi-ink file editing
     * Add filenames to issue browser
     * Highlight files in nav that have errors
@@ -29,6 +27,7 @@
 
 * **FIX:**
     
+    * Quit never completes if it has to go through a project save dialog (even when not saving)
     * When inklecate crashes, we should handle it specially
     * Replaying a story goes through a transition for the last turn
         * jquery still fades in the last chunk even though it's a replay
@@ -41,5 +40,5 @@
 
 * inklecate.js should compile within a project/window specific sub-folder to avoid collisions
     * Investigate fs.mkdtemp(prefix, callback)
-    
+
 * Convert ad-hoc style events to be proper NodeJS EventEmitters (?)

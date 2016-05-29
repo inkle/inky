@@ -92,7 +92,21 @@ InkProject.prototype.openInkFile = function(inkFile) {
     }
 }
 
-InkProject.prototype.save = function(saveAs, callback) {
+InkProject.prototype.save = function(callback) {
+    var filesRemaining = this.files.length;
+    this.files.forEach(f => {
+        f.save(() => {
+            filesRemaining--;
+            if( filesRemaining == 0 ) {
+                InkProject.events.didSave();
+                if( callback )
+                    callback();
+            }
+        })
+    });
+}
+
+InkProject.prototype.saveCurrentFile = function(saveAs, callback) {
     this.activeInkFile.save(() => {
         InkProject.events.didSave();
         if( callback )
@@ -100,7 +114,7 @@ InkProject.prototype.save = function(saveAs, callback) {
     });
 }
 
-InkProject.prototype.saveAs = function(saveAs) {
+InkProject.prototype.saveCurrentFileAs = function(saveAs) {
     this.activeInkFile.saveAs(() => InkProject.events.didSave());
 }
 
@@ -251,15 +265,21 @@ ipc.on("set-project-main-ink-filepath", (event, filePath) => {
     InkProject.loadProject(filePath);
 });
 
-ipc.on("project-save-current", (event) => {
+ipc.on("project-save", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.save();
     }
 });
 
-ipc.on("project-saveAs-current", (event) => {
+ipc.on("project-saveCurrentFile", (event) => {
     if( InkProject.currentProject ) {
-        InkProject.currentProject.saveAs();
+        InkProject.currentProject.saveCurrentFile();
+    }
+});
+
+ipc.on("project-saveCurrentFileAs", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.saveCurrentFileAs();
     }
 });
 

@@ -68,15 +68,15 @@ function ProjectWindow(filePath) {
 }
 
 ProjectWindow.prototype.save = function() {
-    this.browserWindow.webContents.send('project-save-current');
+    this.browserWindow.webContents.send('project-save');
 }
 
-ProjectWindow.prototype.saveAs = function() {
-    this.browserWindow.webContents.send('project-saveAs-current');
+ProjectWindow.prototype.saveCurrentFile = function() {
+    this.browserWindow.webContents.send('project-saveCurrentFile');
 }
 
-ProjectWindow.prototype.saveAs = function() {
-    this.browserWindow.webContents.send('project-saveAs-current');
+ProjectWindow.prototype.saveCurrentFileAs = function() {
+    this.browserWindow.webContents.send('project-saveCurrentFileAs');
 }
 
 ProjectWindow.prototype.tryClose = function() {
@@ -103,7 +103,7 @@ ProjectWindow.open = function(filePath) {
     return new ProjectWindow(filePath);
 }
 
-ProjectWindow.tryCloseFocused = function() {
+ProjectWindow.tryClose = function() {
     var win = focusedWindow();
     if( win ) {
         win.tryClose();
@@ -111,17 +111,25 @@ ProjectWindow.tryCloseFocused = function() {
     return true;
 }
 
-ProjectWindow.saveFocused = function() {
+ProjectWindow.save = function() {
     var win = focusedWindow();
     if( win ) {
         win.save();
     }
 }
 
-ProjectWindow.saveAsFocused = function() {
+
+ProjectWindow.saveCurrentFile = function() {
     var win = focusedWindow();
     if( win ) {
-        win.saveAs();
+        win.saveCurrentFile();
+    }
+}
+
+ProjectWindow.saveCurrentFileAs = function() {
+    var win = focusedWindow();
+    if( win ) {
+        win.saveCurrentFileAs();
     }
 }
 

@@ -23,16 +23,21 @@ function setupMenus(callbacks) {
             type: 'separator'
           },
           {
-            label: 'Save',
+            label: 'Save All',
             accelerator: 'CmdOrCtrl+S',
             enabled: callbacks.isFocusedWindow,
             click: callbacks.save
           },
           {
-            label: 'Save As',
+            label: 'Save Current File',
+            enabled: callbacks.isFocusedWindow,
+            click: callbacks.saveCurrentFile
+          },
+          {
+            label: 'Save Current File As',
             accelerator: 'CmdOrCtrl+Shift+S',
             enabled: callbacks.isFocusedWindow,
-            click: callbacks.saveAs
+            click: callbacks.saveCurrentFileAs
           },
           {
             label: 'Close',

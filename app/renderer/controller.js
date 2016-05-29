@@ -20,7 +20,7 @@ InkProject.setEvents({
     "didSave": () => {
         var activeInk = InkProject.currentProject.activeInkFile;
         ToolbarView.setTitle(activeInk.filename());
-        NavView.setMainInkFilename(activeInk.filename());
+        NavView.setMainInkFilename(InkProject.currentProject.mainInk.filename());
         NavView.highlightRelativePath(activeInk.relativePath());
     },
     "changeOpenInkFile": (inkFile) => {

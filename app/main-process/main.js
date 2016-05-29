@@ -37,13 +37,16 @@ app.on('ready', function() {
             }
         },
         save: () => {
-            ProjectWindow.saveFocused();
+            ProjectWindow.save();
         },
-        saveAs: () => {
-            ProjectWindow.saveAsFocused();
+        saveCurrentFile: () => {
+            ProjectWindow.saveCurrentFile();
+        },
+        saveCurrentFileAs: () => {
+            ProjectWindow.saveCurrentFileAs();
         },
         close: (event) => {
-            ProjectWindow.tryCloseFocused();
+            ProjectWindow.tryClose();
         },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
