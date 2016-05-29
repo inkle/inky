@@ -109,32 +109,86 @@ var inkHighlightRules = function() {
             ],
             regex: /(\/\/)(.*$)/
         }],
+
+        // Try different types of divert in sequence, since it's a bit complicated
+        // to try to do it in one expression!
+        // It's partly complicated because we need to parse it fairly accurately in
+        // order to find the divert targets for hyperlinking.
         "#divert": [{
-            // (->|<-)
-            // (\s*)
-            //      (DONE)
-            //      (END)
-            //      ((?:[\w\(\)\.,]+|\s+(?=[\w\(\)\.,]))+)
-            //          which is:   
-            //          [\w\(\)\.,]+   then   \s+, 
-            //         (but only if not followed by more \w etc: don't capture last \s+)
-            // (\s*)
-            // ((?:->)(?!\s*\w+))?
-            //    Final tunnel arrow, but not match if there are more things to divert to afterwards
-            regex: /(->|<-)(\s*)(?:(DONE)|(END)|((?:[\w\(\)\.,]+|\s+(?=[\w\(\)\.,]))+))(\s*)((?:->)(?!\s*\w+))?/,
+            // -> DONE|END
+            regex: /(->|<-)(\s*)(DONE|END)(\s*)/,
             token: [
-                "divert.operator", // ->
-                "divert",         // whitespace
-                "divert.to-done", // DONE
-                "divert.to-end",  // END
-                "divert.target",  // knot_name(params)
-                "divert",         // whitespace
-                "divert.tunnel"   // ->   (terminating, for tunnels)
+                "divert.operator",      // ->
+                "divert",               // whitespace
+                "divert.to-special",    // DONE / END
+                "divert"               // whitespace
             ]
         }, {
+            // Tunnel onwards
             regex: /->->/,
             token: "divert.to-tunnel"
+        }, {
+            // Divert with parameters: -> knot (param, -> param2)
+            regex: /(->|<-)(\s*)(\w[\w\.\s]*?)(\s*)(\()/,
+            token: [
+                "divert.operator",  // ->
+                "divert",           // whitespace
+                "divert.target",    // target.name
+                "divert",           // whitespace
+                "divert.operator",  // (
+            ],
+            push: [{
+                // Divert target, as parameter to the current divert
+                regex: /(->)(\s*)(\w[\w\.\s]*?)(\s*)(?![\w\.])/,
+                token: [
+                    "divert.parameter.operator",  // ->
+                    "divert.parameter",           // whitespace
+                    "divert.target",              // target.name
+                    "divert.parameter"            // whitespace
+                ]
+            }, {
+                // Explicitly parse function calls so that the close bracket
+                // doesn't accidentally get parsed as the end of the parameters
+                include: "#functionCallInDivertParameter"
+            }, {
+                regex: /\)/,
+                token: "divert.parameter.operator",
+                next: "pop"
+            }, {
+                defaultToken: "divert.parameter"
+            }]
+        }, {
+            // Vanilla divert
+            regex: /(->|<-)(\s*)(\w[\w\.\s]*?)(\s*)(?![\w\.])/,
+            token: [
+                "divert.operator",  // -> | <-
+                "divert",           // whitespace
+                "divert.target",              // target.name
+                "divert"            // whitespace
+            ]
+        }, {
+            // Divert to gather/choice point, or end of tunnel divert
+            regex: /->/,
+            token: "divert.operator"
         }],
+
+        // Used to parse function calls within divert paramters so that
+        // the closing bracket doesn't accidentally cause the rule to end early. 
+        // Having it as a separate rule also allows it to be recursive.
+        "#functionCallInDivertParameter": [{
+            regex: /\w+\s*\(/,
+            token: "divert.parameter",
+            push: [{
+                "include": "#functionCallInDivertParameter"
+            }, {
+                regex: /\)/,
+                token: "divert.parameter",
+                next: "pop"
+            }, {
+                defaultToken: "divert.parameter"
+            }]
+        }],
+
         "#gather": [{
             regex: /^(\s*)((?:-\s*)+)(?!>)(?:(\(\s*)(\w+)(\s*\)))?/,
             token: [
@@ -260,7 +314,7 @@ var inkHighlightRules = function() {
                 regex: /^\s*else\s*\:/,
                 token: "conditional.multiline.else"
             }, {
-                regex: /^(\s*)(-)((?:\s?[^:\{}]+):)?/,
+                regex: /^(\s*)(-)(?!>)((?:\s?[^:\{}]+):)?/,
                 token: [
                     "logic.multiline.branch",
                     "logic.multiline.branch.operator",
@@ -291,6 +345,8 @@ var inkHighlightRules = function() {
             include: "#inlineSequence"
         }, {
             include: "#inlineLogic"
+        }, {
+            include: "#logicLine"
         }, {
             include: "#divert"
         }, {
