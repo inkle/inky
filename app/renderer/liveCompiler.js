@@ -3,7 +3,6 @@ const _ = require("lodash");
 
 var sessionId = 0;
 var lastEditorChange = null;
-var isFirstSession = true;
 
 var choiceSequence = [];
 var currentReplayTurnIdx = -1;
@@ -44,14 +43,14 @@ function reloadInklecateSession() {
     project.files.forEach((inkFile) => {
         // Add Ink Files with changes to be saved before the next compile
         // If we're running for the first time, add all because non of the files has been saved to tempInkPath
-        if( inkFile.hasUnsavedChanges || isFirstSession )
+        if( inkFile.shouldCompile ) {
             compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
+            inkFile.shouldCompile = false;
+        }
     });
 
     if( !_.isEmpty(compileInstruction.updatedFiles) )
         ipc.send("play-ink", compileInstruction, sessionId);
-
-    isFirstSession = false;
 }
 
 function stopInklecateSession(idToStop) {
