@@ -106,13 +106,15 @@ EditorView.setEvents({
 });
 
 ToolbarView.setEvents({
-    rewind:   () => { LiveCompiler.rewind(); },
-    stepBack: () => { LiveCompiler.stepBack(); },
+    toggleSidebar: () => { NavView.toggle(); },
+    navigateBack: () => { alert("TODO: Navigate back"); },
+    navigateForward: () => { alert("TODO: Navigate forward"); },
     selectIssue: (issue) => { 
         InkProject.currentProject.openInkFile(issue.filename);
         EditorView.gotoLine(issue.lineNumber); 
     },
-    toggleNav: () => { NavView.toggle(); }
+    stepBack: () => { LiveCompiler.stepBack(); },
+    rewind:   () => { LiveCompiler.rewind(); }
 });
 
 NavView.setEvents({
