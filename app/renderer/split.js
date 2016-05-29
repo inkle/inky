@@ -2,6 +2,8 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 const editor = ace.edit("editor");
 
+const widthLimit = 100;
+
 $(document).ready(() => {
     $(".split").each(function() {
 
@@ -20,11 +22,16 @@ $(document).ready(() => {
         });
         $(document).mousemove(function(event) {
             if( isDragging ) {
-                var x = event.pageX;
                 var x0 = $parent.offset().left;
+                var x = event.pageX - x0;
                 var width = $parent.width();
 
-                var percent = 100 * ((x-x0) / width);
+                if( x < widthLimit )
+                    x = widthLimit;
+                if( x > width-widthLimit )
+                    x = width-widthLimit;
+
+                var percent = 100 * (x / width);
                 var fromLeft = percent + "%";
                 var fromRight = (100-percent) + "%";
 

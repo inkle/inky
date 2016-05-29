@@ -82,8 +82,8 @@ h1.title {
   color: #BBB;
   font-size: 9pt;
   line-height: 20px;
-  left: 70px;
-  right: 70px;
+  left: 110px;
+  right: 110px;
   top: 28px;
   bottom: 0;
   position: absolute;
@@ -139,7 +139,6 @@ img.issue-icon.warning {
   height: 30px;
   background: none;
   top: 18px;
-  z-index: 1; /* above issues message */
 }
 #toolbar .buttons.left {
   left: 5px;
