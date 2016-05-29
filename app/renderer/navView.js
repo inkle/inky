@@ -33,7 +33,7 @@ $(document).ready(() => {
 });
 
 function setMainInkFilename(name) {
-    $(".sidebar .nav-group.main-ink .nav-group-item .filename").text(name);
+    $sidebar.find(".nav-group.main-ink .nav-group-item .filename").text(name);
 }
 
 function setFilePaths(mainInkPath, includePaths) {

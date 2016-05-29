@@ -1,6 +1,8 @@
 const ipc = require("electron").ipcRenderer;
 const path = require("path");
 
+const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+
 const EditorView = require("./editorView.js").EditorView;
 const PlayerView = require("./playerView.js").PlayerView;
 const ToolbarView = require("./toolbarView.js").ToolbarView;
@@ -30,7 +32,13 @@ InkProject.setEvents({
         setImmediate(() => EditorView.setErrors(fileIssues));
     }
 });
-InkProject.startNew();
+
+// Wait for DOM to be ready before kicking most stuff off
+// (some of the views get confused otherwise)
+$(document).ready(() => { 
+    if( InkProject.currentProject == null ) 
+        InkProject.startNew(); 
+});
 
 
 LiveCompiler.setEvents({
