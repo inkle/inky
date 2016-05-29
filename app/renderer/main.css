@@ -26,6 +26,7 @@ body {
   border-bottom: 1px solid #DDD;
   cursor: default;
   z-index: 50;
+  -webkit-user-select: none;
 }
 
 #toolbar div {
@@ -46,6 +47,7 @@ h1.title {
   overflow: hidden;
   top: 2px;
   z-index: 100;
+  -webkit-user-select: none;
 }
 
 #toolbar p.issuesMessage {
@@ -279,6 +281,7 @@ img.issue-icon.warning {
   height: 100%;
   z-index: 1;
   overflow: scroll;
+  -webkit-user-select: none;
 }
 
 .sidebar.hidden {
