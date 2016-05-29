@@ -6,7 +6,12 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 var editorMarkers = [];
 var editorAnnotations = [];
 
-var events = {};
+// Overriden by controller.js
+var events = {
+    change:         () => {},
+    jumpToInclude:  () => {},
+    jumpToSymbol:   () => {}
+};
 
 editor.setShowPrintMargin(false);
 editor.setOptions({

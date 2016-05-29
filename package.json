@@ -25,5 +25,8 @@
   "devDependencies": {
     "electron-prebuilt": "^0.37.8",
     "mkdirp": "0.5.1"
+  },
+  "dependencies": {
+    "lodash": "^4.13.1"
   }
 }
