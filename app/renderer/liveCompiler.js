@@ -168,6 +168,14 @@ ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
     events.unexpectedExit();
 });
 
+ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
+
+    if( sessionId != fromSessionId )
+        return;
+
+    events.unexpectedError(error);
+});
+
 ipc.on("play-story-stopped", (event, fromSessionId) => {
     
 });

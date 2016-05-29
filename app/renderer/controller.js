@@ -98,6 +98,10 @@ LiveCompiler.setEvents({
     },
     unexpectedExit: () => {
         PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
+    },
+    unexpectedError: (error) => {
+        PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
+        PlayerView.addTerminatingMessage(error, "error");
     }
 });
 

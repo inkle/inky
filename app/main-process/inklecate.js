@@ -53,6 +53,7 @@ function play(compileInstruction, requester, sessionId) {
     playProcess.stderr.setEncoding('utf8');
     playProcess.stderr.on('data', (data) => {
         console.log(`stderr: ${data}`);
+        requester.send('play-story-unexpected-error', data, sessionId);
     });
 
     playProcess.stdin.setEncoding('utf8');
