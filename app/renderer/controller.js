@@ -12,18 +12,20 @@ InkProject.setEvents({
     "newProject": (project) => {
         EditorView.focus();
         LiveCompiler.setProject(project);
-        
+
         var filename = project.activeInkFile.filename();
         ToolbarView.setTitle(filename);
-        NavView.setCurrentFilename(filename);
+        NavView.setMainInkFilename(filename);
     },
     "didSave": () => {
-        var filename = InkProject.currentProject.activeInkFile.filename();
-        ToolbarView.setTitle(filename);
-        NavView.setCurrentFilename(filename);
+        var activeInk = InkProject.currentProject.activeInkFile;
+        ToolbarView.setTitle(activeInk.filename());
+        NavView.setMainInkFilename(activeInk.filename());
+        NavView.highlightRelativePath(activeInk.relativePath());
     },
     "changeOpenInkFile": (inkFile) => {
         ToolbarView.setTitle(inkFile.filename());
+        NavView.highlightRelativePath(inkFile.relativePath());
     }
 });
 InkProject.startNew();
@@ -80,6 +82,7 @@ EditorView.setEvents({
     "jumpToSymbol": (symbolName, contextPos) => {
         var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
         if( foundSymbol ) {
+            InkProject.currentProject.openInkFile(foundSymbol.inkFile);
             EditorView.gotoLine(foundSymbol.row+1, foundSymbol.column);
         }
     },

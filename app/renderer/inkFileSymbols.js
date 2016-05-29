@@ -78,7 +78,8 @@ InkFileSymbols.prototype.parse = function() {
                 name: symbolName,
                 flowType: flowType,
                 row: it.getCurrentTokenRow(),
-                column: it.getCurrentTokenColumn()
+                column: it.getCurrentTokenColumn(),
+                inkFile: this.inkFile
             };
             
             var parent = symbolStack.currentElement();

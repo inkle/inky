@@ -17,23 +17,22 @@ $(document).ready(() => {
     $sidebar.on("click", ".nav-group-item", function(event) {
         event.preventDefault();
 
-        var $target = $(event.currentTarget);
-        $sidebar.find(".nav-group-item").not($target).removeClass("active");
-        $target.addClass("active");
+        var $targetNavGroupItem = $(event.currentTarget);
+        highlight$NavGroupItem($targetNavGroupItem);
 
-        var inkFilename = $target.find(".filename").text();
-        var $navGroup = $target.closest(".nav-group");
+        var inkFilename = $targetNavGroupItem.find(".filename").text();
+        var $navGroup = $targetNavGroupItem.closest(".nav-group");
         if( $navGroup.hasClass("main-ink") ) {
             events.clickFile(inkFilename);
         } else {
-            var relativeDir = $target.closest(".nav-group").find(".nav-group-title").text();
+            var relativeDir = $targetNavGroupItem.closest(".nav-group").find(".nav-group-title").text();
             var relativePath = path.join(relativeDir, inkFilename);
             events.clickFile(relativePath);
         }
     });
 });
 
-function setCurrentFilename(name) {
+function setMainInkFilename(name) {
     $(".sidebar .nav-group.main-ink .nav-group-item .filename").text(name);
 }
 
@@ -78,6 +77,26 @@ function setFilePaths(mainInkPath, includePaths) {
     }
 }
 
+function highlight$NavGroupItem($navGroupItem) {
+    $sidebar.find(".nav-group-item").not($navGroupItem).removeClass("active");
+    $navGroupItem.addClass("active");
+}
+
+function highlightRelativePath(relativePath) {
+    var dirName = path.dirname(relativePath);
+    if( dirName == "." )
+        dirName = "";
+
+    var filename = path.basename(relativePath);
+
+    var $group = $sidebar.find(".nav-group").filter((i, el) => $(el).find(".nav-group-title").text() == dirName);
+    if( dirName == "" ) $group = $group.add(".nav-group.main-ink");
+
+    var $file = $group.find(".nav-group-item .filename").filter((i, el) => $(el).text() == filename);
+    var $navGroupItem = $file.closest(".nav-group-item");
+    highlight$NavGroupItem($navGroupItem);
+}
+
 function hide() {
     if( !visible )
         return;
@@ -111,8 +130,9 @@ function show() {
 }
 
 exports.NavView = {
-    setCurrentFilename: setCurrentFilename,
+    setMainInkFilename: setMainInkFilename,
     setFilePaths: setFilePaths,
+    highlightRelativePath: highlightRelativePath,
     setEvents: e => events = e,
     hide: hide,
     show: show,

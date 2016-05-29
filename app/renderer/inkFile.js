@@ -16,7 +16,7 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
 function InkFile(filePath, mainInkFile, events) {
 
-    this.path = filePath;
+    this.path = filePath ? path.resolve(filePath) : null;
     this.events = events;
 
     this.mainInkFile = mainInkFile;
@@ -59,6 +59,10 @@ function InkFile(filePath, mainInkFile, events) {
     });
 }
 
+InkFile.prototype.isMain = function() {
+    return this.mainInkFile == null;
+}
+
 InkFile.prototype.filename = function() {
     return this.path ? path.basename(this.path) : "Untitled.ink";
 }
@@ -69,15 +73,15 @@ InkFile.prototype.relativePath = function() {
     if( this.path && !path.isAbsolute(this.path) )
         return this.path;
 
-    // This file is an include (hence it has a ref to the main ink file)
-    if( this.mainInkFile ) {
-        var mainDir = path.dirname(this.mainInkFile.path);
-        return path.relative(mainDir, this.path);
+    // This file is the main ink
+    if( this.isMain() ) {
+        return this.filename();
     } 
 
-    // This file is the main ink
+    // This file is an include
     else {
-        return this.filename();
+        var mainDir = path.dirname(this.mainInkFile.path);
+        return path.relative(mainDir, this.path);
     }
 }
 

@@ -2,19 +2,21 @@
 
 ## SOON
 
-* Open ink files when choosing symbols
-* Open ink files when clicking include lines
-
-* Recursive include file parsing (currently it only works one include level deep)
+* Enable opt-click INCLUDE declarations
 
 * Only write out ink files that have changed for compilation
+
+* Save v.s. save all for project (currently it's inconsistent and broken - only saves one file and not necessarily the right one)
 
 * inklecate.js should compile within a project/window specific sub-folder to avoid collisions
     * Investigate fs.mkdtemp(prefix, callback)
 
 * Multi-ink file editing
-    * Parse INCLUDE lines on load, allow you to jump between them via nav
-    * Enable opt-click INCLUDE declarations
+    * Error parsing needs to be able to jump between files
+    * Error highlighting should be in the correct file
+    * Highlight files in nav that have errors
+    * Add filenames to issue browser
+    * Recursive include file parsing (currently it only works one include level deep)
     * Automatic discovery of other nearby ink files in addition to those that are INCLUDE-ed
 
 ## Features and improvements

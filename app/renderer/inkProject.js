@@ -81,9 +81,11 @@ InkProject.prototype.refreshUnsavedChanges = function() {
 }
 
 InkProject.prototype.openInkFile = function(inkFile) {
-    this.activeInkFile = inkFile;
-    EditorView.openInkFile(inkFile);
-    InkProject.events.changeOpenInkFile(this.activeInkFile);
+    if( inkFile != this.activeInkFile ) {
+        this.activeInkFile = inkFile;
+        EditorView.openInkFile(inkFile);
+        InkProject.events.changeOpenInkFile(this.activeInkFile);
+    }
 }
 
 InkProject.prototype.save = function(saveAs, callback) {
@@ -232,13 +234,17 @@ InkProject.startNew = function() {
     InkProject.setProject(new InkProject());
 }
 
+InkProject.loadProject = function(mainInkPath) {
+    InkProject.setProject(new InkProject(mainInkPath));
+}
+
 InkProject.setProject = function(project) {
     InkProject.currentProject = project;
     InkProject.events.newProject(project);
 }
 
 ipc.on("set-project-main-ink-filepath", (event, filePath) => {
-    InkProject.setProject(new InkProject(filePath));
+    InkProject.loadProject(filePath);
 });
 
 ipc.on("project-save-current", (event) => {
