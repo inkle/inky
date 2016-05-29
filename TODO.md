@@ -2,10 +2,7 @@
 
 ## SOON
 
-* Advanced divert usage doesn't highlight properly and therefore symbol search breaks. e.g.:
 
-    `-> somewhere( -> divertTarget ) -> somewhereElse( -> anotherTarget, -> yetAnother )`
-        
 ## Features and improvements
 
 * Multi-ink file editing
