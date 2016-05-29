@@ -98,10 +98,19 @@ function addChoice(choice, animated, callback)
 }
 
 function addTerminatingMessage(message, cssClass)
-{            
+{
     clearIfNecessary();
 
     var $message = $(`<p class='${cssClass}'>${message}</p>`);
+    fadeIn($message);
+    $("#player .innerText").append($message);
+}
+
+function addLongMessage(message, cssClass)
+{
+    clearIfNecessary();
+
+    var $message = $(`<pre class='${cssClass}'>${message}</pre>`);
     fadeIn($message);
     $("#player .innerText").append($message);
 }
@@ -127,6 +136,7 @@ exports.PlayerView = {
     addTextSection: addTextSection,
     addChoice: addChoice,
     addTerminatingMessage: addTerminatingMessage,
+    addLongMessage: addLongMessage,
     addHorizontalDivider: addHorizontalDivider,
     addLineError: addLineError
 };
