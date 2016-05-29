@@ -48,7 +48,9 @@ function reloadInklecateSession() {
             compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
     });
 
-    ipc.send("play-ink", compileInstruction, sessionId);
+    if( !_.isEmpty(compileInstruction.updatedFiles) )
+        ipc.send("play-ink", compileInstruction, sessionId);
+
     isFirstSession = false;
 }
 
@@ -119,7 +121,7 @@ ipc.on("play-generated-text", (event, result, fromSessionId) => {
 });
 
 ipc.on("play-generated-error", (event, error, fromSessionId) => {
-    
+
     if( sessionId != fromSessionId )
         return;
 
@@ -166,7 +168,7 @@ ipc.on("play-story-completed", (event, fromSessionId) => {
 
 ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
 
-    if( sessionId != fromSessionId ) 
+    if( sessionId != fromSessionId )
         return;
 
     events.unexpectedExit();
@@ -181,7 +183,7 @@ ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
 });
 
 ipc.on("play-story-stopped", (event, fromSessionId) => {
-    
+
 });
 
 exports.LiveCompiler = {
