@@ -121,6 +121,11 @@ function addError(error) {
     editorMarkers.push(markerId);
 }
 
+function setErrors(errors) {
+    clearErrors();
+    errors.forEach(addError);
+}
+
 function clearErrors() {
 
     var editorSession = editor.getSession();
@@ -140,6 +145,7 @@ exports.EditorView = {
     setValue: (v) => { editor.setValue(v); },
     gotoLine: (row, col) => { editor.gotoLine(row, col); },
     addError: addError,
+    setErrors: setErrors,
     openInkFile: (inkFile) => {
         editor.setSession(inkFile.getAceSession());
     },

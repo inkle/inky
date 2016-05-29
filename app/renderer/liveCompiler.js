@@ -1,4 +1,5 @@
 const ipc = require("electron").ipcRenderer;
+const _ = require("lodash");
 
 var sessionId = 0;
 var lastEditorChange = null;
@@ -177,6 +178,7 @@ exports.LiveCompiler = {
     setEdited: () => { lastEditorChange = Date.now(); },
     setEvents: (e) => { events = e; },
     getIssues: () => { return issues; },
+    getIssuesForFilename: (filename) => _.filter(issues, i => i.filename == filename),
     choose: choose,
     rewind: rewind,
     stepBack: stepBack

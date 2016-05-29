@@ -81,7 +81,11 @@ InkProject.prototype.refreshUnsavedChanges = function() {
 }
 
 InkProject.prototype.openInkFile = function(inkFile) {
-    if( inkFile != this.activeInkFile ) {
+
+    if( _.isString(inkFile) )
+        inkFile = this.inkFileWithRelativePath(inkFile);
+
+    if( inkFile && inkFile != this.activeInkFile ) {
         this.activeInkFile = inkFile;
         EditorView.openInkFile(inkFile);
         InkProject.events.changeOpenInkFile(this.activeInkFile);

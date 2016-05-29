@@ -26,6 +26,8 @@ InkProject.setEvents({
     "changeOpenInkFile": (inkFile) => {
         ToolbarView.setTitle(inkFile.filename());
         NavView.highlightRelativePath(inkFile.relativePath());
+        var fileIssues = LiveCompiler.getIssuesForFilename(inkFile.relativePath());
+        setImmediate(() => EditorView.setErrors(fileIssues));
     }
 });
 InkProject.startNew();
@@ -53,9 +55,13 @@ LiveCompiler.setEvents({
         }
     },
     errorAdded: (error) => {
-        EditorView.addError(error);
+
+        if( error.filename == InkProject.currentProject.activeInkFile.relativePath() )
+            EditorView.addError(error);
+
         if( error.type == "RUNTIME ERROR" ) {
             PlayerView.addLineError(error, () => {
+                InkProject.currentProject.openInkFile(error.filename);
                 EditorView.gotoLine(error.lineNumber);
             });
         }
@@ -87,17 +93,17 @@ EditorView.setEvents({
         }
     },
     "jumpToInclude": (includePath) => {
-        var includeInkFile = InkProject.currentProject.inkFileWithRelativePath(includePath);
-        if( includeInkFile ) {
-            InkProject.currentProject.openInkFile(includeInkFile);
-        }
+        InkProject.currentProject.openInkFile(includePath);
     }
 });
 
 ToolbarView.setEvents({
     rewind:   () => { LiveCompiler.rewind(); },
     stepBack: () => { LiveCompiler.stepBack(); },
-    selectIssue: (issue) => { EditorView.gotoLine(issue.lineNumber); },
+    selectIssue: (issue) => { 
+        InkProject.currentProject.openInkFile(issue.filename);
+        EditorView.gotoLine(issue.lineNumber); 
+    },
     toggleNav: () => { NavView.toggle(); }
 });
 
