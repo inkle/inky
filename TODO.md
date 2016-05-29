@@ -45,7 +45,7 @@
         `-> somewhere( -> divertTarget ) -> somewhereElse( -> anotherTarget, -> yetAnother )`
 
     * Quit never completes if it has to go through a project save dialog (even when not saving)
-    * When inklecate crashes, we should handle it specially
+    * (DONE?) When inklecate crashes, we should handle it specially
     * Replaying a story goes through a transition for the last turn
         * jquery still fades in the last chunk even though it's a replay
         * should force the view height never to get smaller despite temporary content reduction
