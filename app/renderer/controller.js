@@ -9,6 +9,7 @@ const ToolbarView = require("./toolbarView.js").ToolbarView;
 const NavView = require("./navView.js").NavView;
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
+const NavHistory = require("./navHistory.js").NavHistory;
 
 InkProject.setEvents({
     "newProject": (project) => {
@@ -18,6 +19,7 @@ InkProject.setEvents({
         var filename = project.activeInkFile.filename();
         ToolbarView.setTitle(filename);
         NavView.setMainInkFilename(filename);
+        NavHistory.reset();
     },
     "didSave": () => {
         var activeInk = InkProject.currentProject.activeInkFile;
@@ -30,6 +32,7 @@ InkProject.setEvents({
         NavView.highlightRelativePath(inkFile.relativePath());
         var fileIssues = LiveCompiler.getIssuesForFilename(inkFile.relativePath());
         setImmediate(() => EditorView.setErrors(fileIssues));
+        NavHistory.addStep();
     }
 });
 
@@ -40,6 +43,18 @@ $(document).ready(() => {
         InkProject.startNew(); 
 });
 
+function gotoIssue(issue) {
+    InkProject.currentProject.openInkFile(issue.filename);
+    EditorView.gotoLine(issue.lineNumber);
+    NavHistory.addStep();
+}
+
+NavHistory.setEvents({
+    goto: (location) => {
+        InkProject.currentProject.openInkFile(location.filePath);
+        EditorView.gotoLine(location.position.row+1);
+    }
+})
 
 LiveCompiler.setEvents({
     resetting: () => {
@@ -47,9 +62,7 @@ LiveCompiler.setEvents({
         ToolbarView.clearIssueSummary();
         PlayerView.prepareForNextContent();
     },
-    selectIssue: (issue) => {
-        EditorView.gotoLine(issue.lineNumber);
-    },
+    selectIssue: gotoIssue,
     textAdded: (text, replaying) => {
         var animated = !replaying;
         PlayerView.addTextSection(text, animated);
@@ -68,10 +81,7 @@ LiveCompiler.setEvents({
             EditorView.addError(error);
 
         if( error.type == "RUNTIME ERROR" ) {
-            PlayerView.addLineError(error, () => {
-                InkProject.currentProject.openInkFile(error.filename);
-                EditorView.gotoLine(error.lineNumber);
-            });
+            PlayerView.addLineError(error, () => gotoIssue(error));
         }
         ToolbarView.updateIssueSummary(LiveCompiler.getIssues());
     },
@@ -98,21 +108,21 @@ EditorView.setEvents({
         if( foundSymbol ) {
             InkProject.currentProject.openInkFile(foundSymbol.inkFile);
             EditorView.gotoLine(foundSymbol.row+1, foundSymbol.column);
+            NavHistory.addStep();
         }
     },
     "jumpToInclude": (includePath) => {
         InkProject.currentProject.openInkFile(includePath);
-    }
+        NavHistory.addStep();
+    },
+    "navigate": () => NavHistory.addStep()
 });
 
 ToolbarView.setEvents({
     toggleSidebar: () => { NavView.toggle(); },
-    navigateBack: () => { alert("TODO: Navigate back"); },
-    navigateForward: () => { alert("TODO: Navigate forward"); },
-    selectIssue: (issue) => { 
-        InkProject.currentProject.openInkFile(issue.filename);
-        EditorView.gotoLine(issue.lineNumber); 
-    },
+    navigateBack: () => NavHistory.back(),
+    navigateForward: () => NavHistory.forward(),
+    selectIssue: gotoIssue,
     stepBack: () => { LiveCompiler.stepBack(); },
     rewind:   () => { LiveCompiler.rewind(); }
 });

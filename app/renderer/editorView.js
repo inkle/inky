@@ -38,11 +38,15 @@ editor.completers = [staticWordCompleter];
 // Ace turns pointer events off
 editor.on("click", function(e){
 
-    // Have to hold down modifier key to jump
-    if( !e.domEvent.altKey )
-        return;
+    if( e.domEvent.altKey ) {
+        tryClickCodeLink(e);
+    } else {
+        setImmediate(() => events.navigate());
+    }
+});
 
-    var editor = e.editor;
+function tryClickCodeLink(event) {
+    var editor = event.editor;
     var pos = editor.getCursorPosition();
     var searchToken = editor.session.getTokenAt(pos.row, pos.column);
 
@@ -52,12 +56,12 @@ editor.on("click", function(e){
     }
 
     if( searchToken && searchToken.type == "divert.target" ) {
-        e.preventDefault();
+        event.preventDefault();
         var targetPath = searchToken.value;
         events.jumpToSymbol(targetPath, pos);
         return;
     }
-});
+}
 
 // Unfortunately standard CSS for hover doesn't work in the editor
 // since they turn pointer events off.

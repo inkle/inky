@@ -113,6 +113,7 @@ img.issue-icon.warning {
   height: 30px;
   background: none;
   top: 18px;
+  z-index: 1; /* above issues message */
 }
 #toolbar .buttons.left {
   left: 5px;
