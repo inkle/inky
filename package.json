@@ -23,10 +23,10 @@
   },
   "homepage": "http://www.inklestudios.com/ink",
   "devDependencies": {
-    "electron-prebuilt": "^0.37.8",
-    "mkdirp": "0.5.1"
+    "electron-prebuilt": "^0.37.8"
   },
   "dependencies": {
-    "lodash": "^4.13.1"
+    "lodash": "^4.13.1",
+    "mkdirp": "^0.5.1"
   }
 }
