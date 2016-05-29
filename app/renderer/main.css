@@ -105,55 +105,47 @@ img.issue-icon.warning {
   height: 12px;
 }
 
-#toolbar .button {
+#toolbar .buttons {
   position: absolute;
+  border: 0;
+  height: 30px;
+  background: none;
+  top: 18px;
+}
+#toolbar .buttons.left {
+  left: 5px;
+  right: 50%;
+  text-align: left;
+}
+#toolbar .buttons.right {
+  right: 5px;
+  left: 50%;
+  text-align: right;
+}
+
+#toolbar .button {
+  position: relative;
+  display: inline-block;
   border: 0;
   width: 30px;
   height: 30px;
   background: none;
-  top: 10px;
 }
 
 #toolbar .button .icon {
   font-size: 16pt;
   color: gray;
 }
-
-#toolbar .button.rewind {
-  right: 10px;
-}
-
-#toolbar .button.step-back {
-  right: 45px;
-}
-
-#toolbar .button.nav-toggle {
-  left: 5px;
-}
-
-#toolbar .button:hover:not(.low) {
-  background: #EEE;
-}
-#toolbar .button.low:hover .icon {
+#toolbar .button:hover .icon {
   color: black;
 }
 
-#toolbar .button.rewind img {
-  width: 19px;
-  height: 19px;
-  vertical-align: middle;
-  margin-left: -2px;
-}
 
-#toolbar .button.step-back img {
-  width: 12x;
-  height: 16px;
-  vertical-align: middle;
-  margin-top: 3px;
+#toolbar .button.nav-back {
+  margin-right: -5px;
 }
-
-#toolbar .button.low {
-  top: 18px;
+#toolbar .button.nav-forward {
+  margin-left: -5px;
 }
 
 
