@@ -3,7 +3,7 @@ const path = require("path");
 const _ = require("lodash");
 
 const slideAnimDuration = 200;
-const defaultWidth = 200;
+var sidebarWidth = 200;
 
 var $sidebar = null;
 var $twoPane = null;
@@ -14,6 +14,10 @@ var events = {};
 $(document).ready(() => {
     $sidebar = $(".sidebar");
     $twoPane = $(".twopane");
+    $sidebarSplit = $("#main").children(".split");
+    $sidebarSplit.hide();
+    $sidebarSplit.css("left", 0);
+
     $sidebar.on("click", ".nav-group-item", function(event) {
         event.preventDefault();
 
@@ -101,12 +105,17 @@ function hide() {
     if( !visible )
         return;
 
+    sidebarWidth = $sidebarSplit.position().left;
+
     $sidebar.animate({
         width: 0,
     }, slideAnimDuration, () => {
         $sidebar.hide();
     });
     $twoPane.animate({
+        left: 0
+    }, slideAnimDuration);
+    $sidebarSplit.animate({
         left: 0
     }, slideAnimDuration);
     visible = false;
@@ -118,13 +127,19 @@ function show() {
 
     // hidden class only exists in initial state
     $sidebar.removeClass("hidden");
+    $sidebarSplit.removeClass("hidden");
 
     $sidebar.show();
+    $sidebarSplit.show();
+
     $sidebar.animate({
-        width: defaultWidth-1 // border
+        width: sidebarWidth-1 // border
     }, slideAnimDuration);
     $twoPane.animate({
-        left: defaultWidth
+        left: sidebarWidth
+    }, slideAnimDuration);
+    $sidebarSplit.animate({
+        left: sidebarWidth
     }, slideAnimDuration);
     visible = true;
 }

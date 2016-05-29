@@ -2,7 +2,10 @@
 
 ## SOON
 
+* Advanced divert usage doesn't highlight properly and therefore symbol search breaks. e.g.:
 
+    `-> somewhere( -> divertTarget ) -> somewhereElse( -> anotherTarget, -> yetAnother )`
+        
 ## Features and improvements
 
 * Multi-ink file editing
@@ -25,8 +28,8 @@
             * call `watcher.close()` to stop
         * If watching, we can live-reload files without unsaved changes, and refresh the nav
 * Include step back buttons on each turn chunk to rewind to a specific one
-* Drag split view divider
-    * And hide/show editor and player views?
+* Ability to hide/show editor and player views
+    * Add large-ish left/right margins to both when very wide to give a sort of "focus" mode, esp when fullscreen
 * Pause live compilation / playing?
 * Switch to specific ink file within the current project when opening an ink file externally that's related to the current project
 * Error checking for file system integration (opening / saving files etc currently doesn't check for any errors)
@@ -36,11 +39,6 @@
 ## Engineering
 
 * **FIX:**
-    
-    * Advanced divert usage doesn't highlight properly and therefore symbol search breaks. e.g.:
-
-        `-> somewhere( -> divertTarget ) -> somewhereElse( -> anotherTarget, -> yetAnother )`
-
     * Quit never completes if it has to go through a project save dialog (even when not saving)
     * When inklecate crashes, we should handle it specially
     * Replaying a story goes through a transition for the last turn

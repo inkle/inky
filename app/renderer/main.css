@@ -17,6 +17,31 @@ body {
   display: none;
 }
 
+.split {
+  position: absolute;
+  display: block;
+  overflow: visible;
+  width: 1px;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  background: #DDD;
+  z-index: 10;
+}
+
+.split .grip {
+  position: absolute;
+  display: block;
+  width: 10px;
+  left: -5px;
+  right: -5px;
+  top: 0;
+  bottom: 0;
+  z-index: 50;
+  background: none;
+  cursor: col-resize;
+}
+
 #toolbar {
   position: absolute;
   top: 0;
@@ -276,8 +301,6 @@ img.issue-icon.warning {
 
 .sidebar {
   display: absolute;
-  width: 0;
-  border-right: 1px solid #DDD;;
   left: 0;
   top: 0;
   height: 100%;
@@ -315,10 +338,10 @@ img.issue-icon.warning {
 #editor {
   display: block;
   position: absolute;
-  width: 50%;
   top: 0;
   bottom: 0;
   left: 0;
+  right: 50%;
 }
 
 #editor .ace-error {
@@ -374,12 +397,10 @@ img.issue-icon.warning {
 #player {
   display: block;
   position: absolute;
-  width: 50%;
   top: 0;
   bottom: 0;
   right: 0;
-  border-left: 1px solid #DDD;
-  float: left;
+  left: 50%;
 }
 
 #player .innerText {

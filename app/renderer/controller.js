@@ -2,6 +2,7 @@ const ipc = require("electron").ipcRenderer;
 const path = require("path");
 
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+require("./split.js");
 
 const EditorView = require("./editorView.js").EditorView;
 const PlayerView = require("./playerView.js").PlayerView;
