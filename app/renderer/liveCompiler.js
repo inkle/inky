@@ -40,9 +40,10 @@ function reloadInklecateSession() {
         updatedFiles: {}
     };
 
-    // TODO: Only update the files that have actually changed
     project.files.forEach((inkFile) => {
-        compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
+        // Add Ink Files with changes to be saved before the next compile
+        if( inkFile.hasUnsavedChanges )
+            compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
     });
 
     ipc.send("play-ink", compileInstruction, sessionId);
