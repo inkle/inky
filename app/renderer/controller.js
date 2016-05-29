@@ -20,6 +20,7 @@ InkProject.setEvents({
         ToolbarView.setTitle(filename);
         NavView.setMainInkFilename(filename);
         NavHistory.reset();
+        NavHistory.addStep();
     },
     "didSave": () => {
         var activeInk = InkProject.currentProject.activeInkFile;

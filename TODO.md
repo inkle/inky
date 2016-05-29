@@ -2,9 +2,6 @@
 
 ## SOON
 
-* Back and forward buttons
-    * Navigation history - should probably be outside of `EditorView` since it needs to cope with different files
-        * Can use a combination of our own callbacks for moving between files and ace's own callbacks for cursor position. How to only record big-ish jumps...?
 
 ## Features and improvements
 

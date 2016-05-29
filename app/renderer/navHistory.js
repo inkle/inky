@@ -4,6 +4,7 @@ const editor = ace.edit("editor");
 var history = [];
 var currentHistoryIdx = -1;
 var events = {};
+var navigating = false;
 
 function go(steps) {
     var newHistoryIdx = currentHistoryIdx + steps;
@@ -14,12 +15,15 @@ function go(steps) {
 
     if( newHistoryIdx != currentHistoryIdx ) {
         currentHistoryIdx = newHistoryIdx;
+
+        navigating = true;
         events.goto(history[currentHistoryIdx]);
+        navigating = false;
     }
 }
 
 function addStep() {
-    if( !InkProject.currentProject )
+    if( !InkProject.currentProject || navigating )
         return;
 
     var file = InkProject.currentProject.activeInkFile;
@@ -30,7 +34,7 @@ function addStep() {
         filePath: file.relativePath(),
         position: editor.getCursorPosition()
     };
-    
+
     currentHistoryIdx++;
 
     // Re-writing history? remove future steps

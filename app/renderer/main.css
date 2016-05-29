@@ -48,6 +48,7 @@ h1.title {
   top: 2px;
   z-index: 100;
   -webkit-user-select: none;
+  pointer-events: none;
 }
 
 #toolbar p.issuesMessage {
