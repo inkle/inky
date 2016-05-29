@@ -2,8 +2,6 @@
 
 ## SOON
 
-* Enable opt-click INCLUDE declarations
-
 * Only write out ink files that have changed for compilation
 
 * Save v.s. save all for project (currently it's inconsistent and broken - only saves one file and not necessarily the right one)

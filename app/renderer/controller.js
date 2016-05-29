@@ -87,7 +87,10 @@ EditorView.setEvents({
         }
     },
     "jumpToInclude": (includePath) => {
-        alert("Jumping to INCLUDEs not yet supported! "+includePath);
+        var includeInkFile = InkProject.currentProject.inkFileWithRelativePath(includePath);
+        if( includeInkFile ) {
+            InkProject.currentProject.openInkFile(includeInkFile);
+        }
     }
 });
 
