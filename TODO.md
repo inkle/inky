@@ -2,6 +2,12 @@
 
 ## SOON
 
+* Back and forward buttons
+    * Navigation history - should probably be outside of `EditorView` since it needs to cope with different files
+        * Can use a combination of our own callbacks for moving between files and ace's own callbacks for cursor position. How to only record big-ish jumps...?
+
+## Features and improvements
+
 * Multi-ink file editing
     * Add filenames to issue browser (as headings, only when in multi-file and not in single active file)
     * Highlight files in nav that have errors
@@ -15,15 +21,12 @@
         * Drag/drop between groups (more tricky!)
     * Recursive include file parsing (currently it only works one include level deep)
     * Automatic discovery of other nearby ink files in addition to those that are INCLUDE-ed
+        * Apparently `fs.watch` is crap, and you should use <https://github.com/paulmillr/chokidar>, which has been used in big popular projects successfully
         * `var watcher = fs.watch(filename[, options][, listener])`
             * `filename` can be a dir
             * `options` can include `recursive`
             * call `watcher.close()` to stop
         * If watching, we can live-reload files without unsaved changes, and refresh the nav
-
-## Features and improvements
-
-* Back and forward buttons
 * Convert rewind and step back buttons to the sidebar button style
 * Include step back buttons on each turn chunk to rewind to a specific one
 * Drag split view divider
