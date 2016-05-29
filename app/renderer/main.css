@@ -240,17 +240,21 @@ img.issue-icon.warning {
 #toolbar .issue-popup .issue {
   height: 30px;
   padding-left: 10px;
-  padding-right: 10px;
+  padding-right: 26px;
   font-size: 11px;
   font-family: Helvetica, sans-serif;
   line-height: 30px;
 }
 
-#toolbar .issue-popup img.chevron {
-  width: 8px;
-  height: 14px;
-  float: right;
-  padding: 7px;
+#toolbar .issue-popup .icon-right-open-big {
+  position: absolute;
+  width: 16px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 12pt;
+  color: #CCC;
+  top: 0;
+  right: 0;
 }
 
 #toolbar .issue-popup img.nubbin {

@@ -27,7 +27,6 @@
             * `options` can include `recursive`
             * call `watcher.close()` to stop
         * If watching, we can live-reload files without unsaved changes, and refresh the nav
-* Convert rewind and step back buttons to the sidebar button style
 * Include step back buttons on each turn chunk to rewind to a specific one
 * Drag split view divider
     * And hide/show editor and player views?

@@ -89,6 +89,10 @@ InkFile.prototype.getValue = function() {
     return this.aceDocument.getValue();
 }
 
+InkFile.prototype.setValue = function(text) {
+    this.aceDocument.setValue(text);
+}
+
 InkFile.prototype.getAceSession = function() {
     if( this.aceSession == null ) {
         this.aceSession = new EditSession(this.aceDocument, new InkMode());

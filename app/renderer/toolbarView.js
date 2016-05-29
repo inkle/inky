@@ -58,7 +58,7 @@ function updateIssueSummary(issues, issueClickCallback) {
                             <div class="col issue">
                               ${issue.message}
                             </div>
-                            <img class="chevron" src="img/right-chevron.png"/>
+                            <span class="icon icon-right-open-big"></span>
                           </div>`);
 
         $issueRow.click((e) => {
