@@ -26,6 +26,7 @@ function InkFile(filePath, mainInkFile, events) {
 
     this.includes = [];
     this.newlyLoaded = true;
+    this.compilerVersionDirty = true;
 
     this.symbols = new InkFileSymbols(this, {
         includesChanged: (includes) => {
@@ -55,6 +56,7 @@ function InkFile(filePath, mainInkFile, events) {
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
+        this.compilerVersionDirty = true;
         this.events.fileChanged();
     });
 }
@@ -76,7 +78,7 @@ InkFile.prototype.relativePath = function() {
     // This file is the main ink
     if( this.isMain() ) {
         return this.filename();
-    } 
+    }
 
     // This file is an include
     else {
@@ -103,7 +105,7 @@ InkFile.prototype.getAceSession = function() {
 }
 
 InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
-    
+
     // Need to show save path dialog?
     if( !this.path || saveAs ) {
         var opts = {};
@@ -122,7 +124,7 @@ InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
                     afterSaveCallback(false);
             }
         });
-    } 
+    }
 
     // Quick save to existing path
     else {
@@ -134,11 +136,11 @@ InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
         })
     }
 }
-InkFile.prototype.save = function(callback) { 
-    this.saveGeneral(false, callback); 
+InkFile.prototype.save = function(callback) {
+    this.saveGeneral(false, callback);
 }
-InkFile.prototype.saveAs = function(callback) { 
-    this.saveGeneral(true,  callback);  
+InkFile.prototype.saveAs = function(callback) {
+    this.saveGeneral(true,  callback);
 }
 
 exports.InkFile = InkFile;

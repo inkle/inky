@@ -40,12 +40,17 @@ function reloadInklecateSession() {
         updatedFiles: {}
     };
 
-    // TODO: Only update the files that have actually changed
     project.files.forEach((inkFile) => {
-        compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
+        // Add Ink Files with changes to be saved before the next compile
+        // If we're running for the first time, add all because non of the files has been saved to tempInkPath
+        if( inkFile.compilerVersionDirty ) {
+            compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
+            inkFile.compilerVersionDirty = false;
+        }
     });
 
-    ipc.send("play-ink", compileInstruction, sessionId);
+    if( !_.isEmpty(compileInstruction.updatedFiles) )
+        ipc.send("play-ink", compileInstruction, sessionId);
 }
 
 function stopInklecateSession(idToStop) {
@@ -115,7 +120,7 @@ ipc.on("play-generated-text", (event, result, fromSessionId) => {
 });
 
 ipc.on("play-generated-error", (event, error, fromSessionId) => {
-    
+
     if( sessionId != fromSessionId )
         return;
 
@@ -162,7 +167,7 @@ ipc.on("play-story-completed", (event, fromSessionId) => {
 
 ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
 
-    if( sessionId != fromSessionId ) 
+    if( sessionId != fromSessionId )
         return;
 
     events.unexpectedExit();
@@ -177,7 +182,7 @@ ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
 });
 
 ipc.on("play-story-stopped", (event, fromSessionId) => {
-    
+
 });
 
 exports.LiveCompiler = {
