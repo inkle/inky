@@ -150,5 +150,8 @@ NavView.setEvents({
     clickFileId: (fileId) => {
         var inkFile = InkProject.currentProject.inkFileWithId(fileId);
         InkProject.currentProject.openInkFile(inkFile);
+    },
+    addInclude: (filename) => {
+        alert("TODO: Add include called "+filename);
     }
 });

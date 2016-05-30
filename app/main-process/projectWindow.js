@@ -14,29 +14,6 @@ const electronWindowOptions = {
 
 var windows = [];
 
-function windowWithBrowserWindow(browWin) {
-    return browWin ? windowWithWebContents(browWin.webContents) : null;
-}
-
-function windowWithWebContents(webContents) {
-    if( !webContents )
-        return null;
-
-    for(var i=0; i<windows.length; i++) {
-        if( windows[i].browserWindow.webContents === webContents )
-            return windows[i];
-    }
-    return null;
-}
-
-function focusedWindow() {
-    var browWin = BrowserWindow.getFocusedWindow();
-    if( browWin )
-        return windowWithBrowserWindow(browWin);
-    else
-        return null;
-}
-
 function ProjectWindow(filePath) {
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/../renderer/index.html");
@@ -65,6 +42,10 @@ function ProjectWindow(filePath) {
         if( idx != -1 )
             windows.splice(idx);
     });
+}
+
+ProjectWindow.prototype.newInclude = function() {
+    this.browserWindow.webContents.send('project-new-include');
 }
 
 ProjectWindow.prototype.save = function() {
@@ -97,44 +78,34 @@ ProjectWindow.createEmpty = function() {
     return new ProjectWindow(); 
 }
 
+ProjectWindow.focused = function() {
+    var browWin = BrowserWindow.getFocusedWindow();
+    if( browWin )
+        return ProjectWindow.withWebContents(browWin.webContents);
+    else
+        return null;
+}
+
+
+ProjectWindow.withWebContents = function(webContents) {
+    if( !webContents )
+        return null;
+
+    for(var i=0; i<windows.length; i++) {
+        if( windows[i].browserWindow.webContents === webContents )
+            return windows[i];
+    }
+    return null;
+}
+
 ProjectWindow.open = function(filePath) {
     // TODO: Could check whether the filepath is relative to any of our
     // existing open projects, and switch to that window?
     return new ProjectWindow(filePath);
 }
 
-ProjectWindow.tryClose = function() {
-    var win = focusedWindow();
-    if( win ) {
-        win.tryClose();
-    }
-    return true;
-}
-
-ProjectWindow.save = function() {
-    var win = focusedWindow();
-    if( win ) {
-        win.save();
-    }
-}
-
-
-ProjectWindow.saveCurrentFile = function() {
-    var win = focusedWindow();
-    if( win ) {
-        win.saveCurrentFile();
-    }
-}
-
-ProjectWindow.saveCurrentFileAs = function() {
-    var win = focusedWindow();
-    if( win ) {
-        win.saveCurrentFileAs();
-    }
-}
-
 ipc.on("project-final-close", (event) => {
-    var win = windowWithWebContents(event.sender);
+    var win = ProjectWindow.withWebContents(event.sender);
     win.finalClose();
 });
 

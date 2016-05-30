@@ -10,9 +10,17 @@ function setupMenus(callbacks) {
         label: 'File',
         submenu: [
           {
-            label: 'New',
+            label: 'New Project',
             accelerator: 'CmdOrCtrl+N',
             click: callbacks.new
+          },
+          {
+            label: 'New Included Ink File',
+            accelerator: 'CmdOrCtrl+Alt+N',
+            click: callbacks.newInclude
+          },
+          {
+            type: 'separator'
           },
           {
             label: 'Open',

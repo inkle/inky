@@ -7,6 +7,8 @@ var sidebarWidth = 200;
 
 var $sidebar = null;
 var $twoPane = null;
+var $footer = null;
+var $newIncludeForm = null;
 
 var visible = false;
 var events = {};
@@ -17,7 +19,9 @@ $(document).ready(() => {
     $sidebarSplit = $("#main").children(".split");
     $sidebarSplit.hide();
     $sidebarSplit.css("left", 0);
+    $footer = $sidebar.find(".footer");
 
+    // Clicking on files
     $sidebar.on("click", ".nav-group-item", function(event) {
         event.preventDefault();
 
@@ -27,6 +31,55 @@ $(document).ready(() => {
         var fileIdStr = $targetNavGroupItem.attr("data-file-id");
         var fileId = parseInt(fileIdStr);
         events.clickFileId(fileId);
+    });
+
+    // Add new include interactions
+    $newIncludeForm = $footer.find(".new-include-form");
+    $footer.find(".add-include-button").on("click", function(event) {
+        setIncludeFormVisible(true);
+        event.preventDefault();
+        
+    });
+    $footer.find("#cancel-add-include").on("click", function(event) {
+        setIncludeFormVisible(false);
+        event.preventDefault();
+    })
+
+    function confirmAddInclude() {
+        var confirmedFilename = $newIncludeForm.find("input").val();
+        setIncludeFormVisible(false);
+        events.addInclude(confirmedFilename);
+    }
+
+    $newIncludeForm.find("input").on("keypress", function(event) {
+        const returnKey = 13;
+        if( event.which == returnKey ) {
+            confirmAddInclude();
+            event.preventDefault();
+        }
+    });
+    $newIncludeForm.find("#add-include").on("click", function(event) {
+        event.preventDefault();
+        confirmAddInclude();
+    })
+
+    // Unfortuanately you can't capture escape from the input itself
+    $(document).keyup(function(e) {
+        const escape = 27;
+        if (e.keyCode == escape) {
+            if( $newIncludeForm.find("input").is(":focus") ) {
+                e.preventDefault();
+                setIncludeFormVisible(false);
+            }
+        }
+    });
+
+    $(document).on("click", function(e) {
+        var $target = $(e.target);
+        if( $footer.hasClass("showingForm") && $target.closest(".footer").length == 0 ) {
+            setIncludeFormVisible(false);
+            e.preventDefault();
+        }
     });
 });
 
@@ -151,6 +204,17 @@ function show() {
     visible = true;
 }
 
+function setIncludeFormVisible(visible) {
+    if( visible ) {
+        $newIncludeForm.find("input").val("");
+        $footer.addClass("showingForm");
+        $newIncludeForm.find("input").focus();
+    } else {
+        $newIncludeForm.find("input").blur();
+        $footer.removeClass("showingForm");
+    }
+}
+
 exports.NavView = {
     setMainInkFilename: setMainInkFilename,
     setFiles: setFiles,
@@ -158,5 +222,6 @@ exports.NavView = {
     setEvents: e => events = e,
     hide: hide,
     show: show,
-    toggle: () => { if( visible ) hide(); else show(); }
+    toggle: () => { if( visible ) hide(); else show(); },
+    showAddIncludeForm: () => setIncludeFormVisible(true)
 }

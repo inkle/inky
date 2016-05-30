@@ -41,6 +41,11 @@ const inkFileEvents = {
     }
 }
 
+InkProject.prototype.newInclude = function() {
+    NavView.show();
+    NavView.showAddIncludeForm();
+}
+
 InkProject.prototype.refreshIncludes = function() {
 
     var allIncludes = [];
@@ -298,6 +303,12 @@ InkProject.setProject = function(project) {
 
 ipc.on("set-project-main-ink-filepath", (event, filePath) => {
     InkProject.loadProject(filePath);
+});
+
+ipc.on("project-new-include", () => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.newInclude();
+    }
 });
 
 ipc.on("project-save", (event) => {

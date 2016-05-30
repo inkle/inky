@@ -299,7 +299,8 @@ img.issue-icon.warning {
 }
 
 .sidebar {
-  display: absolute;
+  position: absolute;
+  display: block;
   left: 0;
   top: 0;
   height: 100%;
@@ -322,6 +323,108 @@ img.issue-icon.warning {
 
 .sidebar .nav-group.unused .nav-group-title {
   font-weight: bold;
+}
+
+.sidebar .footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32px;
+  border-top: 1px solid #CCC;
+  transition: height 0.2s;
+}
+
+.sidebar .footer.showingForm {
+  height: 95px;
+  transition: height 0.2s;
+}
+
+
+.sidebar .footer .add-include-button {
+  position: absolute;
+  top: 0;
+  left: 5px;
+  right: 5px;
+  width: auto;
+  line-height: 15px;
+  color: #CCC;
+  opacity: 1.0;
+  transition: opacity 0.2s;
+}
+
+.sidebar .footer.showingForm .add-include-button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar .footer .add-include-button .icon {
+  position: relative;
+  top: 4px;
+  font-size: 18pt;
+  color: #AAA;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.sidebar .footer .add-include-button:hover,
+.sidebar .footer .add-include-button:hover .icon {
+  color: #666;
+}
+
+.sidebar .footer:not(.showingForm) .new-include-form {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+}
+
+.sidebar .footer .new-include-form {
+  opacity: 1.0;
+  transition: opacity 0.2s;
+}
+
+.sidebar .footer:not(.showingForm) .new-include-form {
+  opacity: 0.0;
+  pointer-events: none;
+}
+
+.sidebar .footer h5 {
+  padding: 5px;
+  margin: 0;
+  font-size: 10pt;
+}
+
+.sidebar .footer .inputWrapper {
+  position: absolute;
+  display: block;
+  left: 5px;
+  right: 5px;
+  top: 26px;
+  width: auto;
+  height: 30px;
+}
+
+.sidebar .footer input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.sidebar .footer .form-buttons {
+  position: absolute;
+  display: block;
+  left: 5px;
+  right: 5px;
+  bottom: 0;
+  height: 30px;
+  min-width: 180px;
+}
+
+.sidebar .footer .form-buttons .btn {
+  margin-left: 2px;
+  margin-right: 2px;
+  width: 80px;
 }
 
 .twopane {

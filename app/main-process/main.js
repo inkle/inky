@@ -41,6 +41,10 @@ app.on('ready', function() {
         new: () => {
             ProjectWindow.createEmpty();
         },
+        newInclude: () => {
+            var win = ProjectWindow.focused();
+            if( win ) win.newInclude();
+        },
         open: () => {
             var multiSelectPaths = dialog.showOpenDialog({
                 properties: ['openFile']
@@ -50,16 +54,20 @@ app.on('ready', function() {
             }
         },
         save: () => {
-            ProjectWindow.save();
+            var win = ProjectWindow.focused();
+            if( win ) win.save();
         },
         saveCurrentFile: () => {
-            ProjectWindow.saveCurrentFile();
+            var win = ProjectWindow.focused();
+            if( win ) win.saveCurrentFile();
         },
         saveCurrentFileAs: () => {
-            ProjectWindow.saveCurrentFileAs();
+            var win = ProjectWindow.focused();
+            if( win ) win.saveCurrentFileAs();
         },
         close: (event) => {
-            ProjectWindow.tryClose();
+            var win = ProjectWindow.focused();
+            if( win ) win.tryClose();
         },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
