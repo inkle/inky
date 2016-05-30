@@ -173,7 +173,9 @@ InkProject.prototype.tryClose = function() {
             }
 
             // Cancel
-            else { }
+            else { 
+                ipc.send("project-cancelled-close");
+            }
         });
     } 
 

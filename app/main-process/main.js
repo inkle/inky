@@ -1,5 +1,6 @@
 const electron = require('electron')
 const app = electron.app
+const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const appmenus = require('./appmenus.js');
@@ -19,6 +20,10 @@ app.on('before-quit', function() {
     // We need this to differentiate between pressing quit (which should quit) or closing all windows
     // (which leaves the app open)
     isQuitting = true;
+});
+
+ipc.on("project-cancelled-close", (event) => {
+    isQuitting = false;
 });
 
 // This method will be called when Electron has finished
