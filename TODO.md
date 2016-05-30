@@ -59,7 +59,7 @@
         * jquery still fades in the last chunk even though it's a replay
         * should force the view height never to get smaller despite temporary content reduction
     * Cmd-D for "don't save" option
-    * Only write out ink files that have changed for compilation
+    * (DONE?) Only write out ink files that have changed for compilation
     * (VERIFY) Multiple windows - can be flaky? e.g. saving v.s. compiling etc
     * (DONE?) Reliability of story reloading - sometimes it fails
     * (DONE?) Copies of inklecate left open sometimes
