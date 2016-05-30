@@ -316,6 +316,14 @@ img.issue-icon.warning {
   cursor: default;
 }
 
+.sidebar .nav-group-item.unsaved .filename {
+  font-weight: bold;
+}
+
+.sidebar .nav-group.unused .nav-group-title {
+  font-weight: bold;
+}
+
 .twopane {
   position: absolute;
   left: 0;

@@ -16,7 +16,7 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
 function InkFile(filePath, mainInkFile, events) {
 
-    this.path = filePath ? path.resolve(filePath) : null;
+    this.path = filePath;
     this.events = events;
 
     this.mainInkFile = mainInkFile;
@@ -26,6 +26,7 @@ function InkFile(filePath, mainInkFile, events) {
 
     this.includes = [];
     this.newlyLoaded = true;
+    this.brandNew = true;
 
     this.symbols = new InkFileSymbols(this, {
         includesChanged: (includes) => {
@@ -34,10 +35,16 @@ function InkFile(filePath, mainInkFile, events) {
         }
     });
 
-    if( this.path ) {
+    if( this.path && path.isAbsolute(this.path) ) {
+
         fs.readFile(this.path, 'utf8', (err, data) => {
+            if( err ) {
+                console.error("Failed to load include at: "+this.path);
+                return;
+            }
 
             this.newlyLoaded = true;
+            this.brandNew = false;
 
             this.aceDocument.setValue(data);
             this.hasUnsavedChanges = false;
@@ -55,6 +62,7 @@ function InkFile(filePath, mainInkFile, events) {
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
+        this.brandNew = false;
         this.events.fileChanged();
     });
 }

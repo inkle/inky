@@ -27,7 +27,13 @@ function InkProject(mainInkFilePath) {
 }
 
 const inkFileEvents = {
-    fileChanged: () => InkProject.currentProject.refreshUnsavedChanges(),
+    fileChanged: () => { 
+        InkProject.currentProject.refreshUnsavedChanges();
+
+        // When a file is changed, its state may change to have unsaved changes,
+        // which should be reflected in the sidebar (unsaved files are bold)
+        InkProject.currentProject.refreshIncludes();
+    },
     includesChanged: (includes, newlyLoaded) => {         
         InkProject.currentProject.refreshIncludes();
         if( newlyLoaded && includes.length > 0 )
@@ -49,7 +55,17 @@ InkProject.prototype.refreshIncludes = function() {
     var includesToAdd    = _.difference(latestIncludePaths, existingIncludePaths)
     var includesToRemove = _.difference(existingIncludePaths, latestIncludePaths);
 
-    var filesToRemove = _.filter(this.files, (f) => includesToRemove.indexOf(f.path) != -1 );
+    // Reset spare flag
+    this.files.forEach(f => f.isSpare = false);
+
+    var filesToRemove = _.filter(this.files, f => includesToRemove.indexOf(f.path) != -1 );
+
+    // Don't remove files that have unsaved changes
+    filesToRemove = _.filter(filesToRemove, f => { 
+        if( f.hasUnsavedChanges ) 
+            f.isSpare = true;
+        return !f.hasUnsavedChanges;
+    });
 
     // TODO: Could iterate on the above array to process them before removal?
     this.files = _.difference(this.files, filesToRemove);
@@ -59,7 +75,7 @@ InkProject.prototype.refreshIncludes = function() {
         this.files.push(newIncludeFile);
     });
 
-    NavView.setFilePaths(this.mainInk.path, latestIncludePaths);
+    NavView.setFiles(this.mainInk, this.files);
 }
 
 InkProject.prototype.refreshUnsavedChanges = function() {

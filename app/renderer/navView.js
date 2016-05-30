@@ -40,45 +40,58 @@ function setMainInkFilename(name) {
     $sidebar.find(".nav-group.main-ink .nav-group-item .filename").text(name);
 }
 
-function setFilePaths(mainInkPath, includePaths) {
-    var mainFilename = path.basename(mainInkPath);
-    var baseDirectory = path.dirname(mainInkPath);
+function setFiles(mainInk, allFiles) {
 
-    var relativeIncludePaths = _.map(includePaths, (p) => path.relative(baseDirectory, p));
-    var includePathsByDir = _.groupBy(relativeIncludePaths, (p) => path.dirname(p));
+    var unusedFiles = _.filter(allFiles, f => f.isSpare);
+    var normalIncludes = _.filter(allFiles, f => !f.isSpare && f != mainInk);
+    var groupedIncludes = _.groupBy(normalIncludes, f => { 
+        var dirName = path.dirname(f.relativePath());
+        if( dirName == "." )
+            dirName = "";
+        return dirName;
+    });
+
+    var groupsArray = _.map(groupedIncludes, (group, name) => { return {name: name, files: group}; });
+    groupsArray = _.sortBy(groupsArray, g => g.name);
+
+    if( unusedFiles.length > 0 )
+        groupsArray.push({
+            name: "Unused files",
+            files: unusedFiles
+        });
 
     var $sidebar = $(".sidebar");
     $sidebar.empty();
 
+    var extraClass = mainInk.hasUnsavedChanges || mainInk.brandNew ? "unsaved" : "";
     var $main = `<nav class="nav-group main-ink">
                     <h5 class="nav-group-title">Main ink file</h5>
-                    <a class="nav-group-item active">
+                    <a class="nav-group-item ${extraClass}">
                         <span class="icon icon-book"></span>
-                        <span class="filename">${mainFilename}</span>
+                        <span class="filename">${mainInk.filename()}</span>
                     </a>
                 </nav>`;
     $sidebar.append($main)
 
-    for(var dir in includePathsByDir) {
+    groupsArray.forEach(group => {
         var items = "";
-        var includePathsForDir = includePathsByDir[dir];
-        includePathsForDir.forEach((incPath) => {
-            var incFilename = path.basename(incPath);
-            items = items + `<span class="nav-group-item">
+
+        group.files.forEach((file) => {
+            var name = file.isSpare ? file.relativePath() : file.filename();
+            var extraClass = file.hasUnsavedChanges || file.brandNew ? "unsaved" : "";
+            items = items + `<span class="nav-group-item ${extraClass}">
                                 <span class="icon icon-doc-text"></span>
-                                <span class="filename">${incFilename}</span>
+                                <span class="filename">${name}</span>
                             </span>`;
         });
 
-        var dirTitle = dir;
+        extraClass = "";
+        if( group.files === unusedFiles )
+            extraClass = "unused";
 
-        // include in same directory as main? just hide the name
-        if( dirTitle == "." )
-            dirTitle = "";
-
-        var $group = $(`<nav class="nav-group"><h5 class="nav-group-title">${dirTitle}</h5> ${items} </nav>`);
+        var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
         $sidebar.append($group);
-    }
+    });
 }
 
 function highlight$NavGroupItem($navGroupItem) {
@@ -146,7 +159,7 @@ function show() {
 
 exports.NavView = {
     setMainInkFilename: setMainInkFilename,
-    setFilePaths: setFilePaths,
+    setFiles: setFiles,
     highlightRelativePath: highlightRelativePath,
     setEvents: e => events = e,
     hide: hide,
