@@ -28,6 +28,7 @@ InkFileSymbols.prototype.scheduleParse = function() {
 InkFileSymbols.prototype.parse = function() {
 
     var includes = [];
+    var lastIncludeRow = -1;
 
     var session = this.inkFile.getAceSession();
 
@@ -103,6 +104,7 @@ InkFileSymbols.prototype.parse = function() {
         // INCLUDE
         else if( tok.type.indexOf("include.filepath") != -1 ) {
             includes.push(tok.value);
+            lastIncludeRow = it.getCurrentTokenRow();
         }
 
     } // for token iterator
@@ -113,6 +115,7 @@ InkFileSymbols.prototype.parse = function() {
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];
     this.includes = includes;
+    this.lastIncludeRow = lastIncludeRow;
 
     var includesChanged = false;
     if( includes.length != oldIncludes.length ) {
@@ -168,6 +171,11 @@ InkFileSymbols.prototype.getSymbols = function() {
 InkFileSymbols.prototype.getIncludes = function() {
     if( this.dirty ) this.parse();
     return this.includes;
+}
+
+InkFileSymbols.prototype.getLastIncludeRow = function() {
+    if( this.dirty ) this.parse();
+    return this.lastIncludeRow;
 }
 
 exports.InkFileSymbols = InkFileSymbols;

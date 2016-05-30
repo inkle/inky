@@ -155,4 +155,15 @@ InkFile.prototype.saveAs = function(callback) {
     this.saveGeneral(true,  callback);
 }
 
+InkFile.prototype.addIncludeLine = function(relativePath) {
+    var includeText = "INCLUDE "+relativePath+"\n";
+    var lastIncludeRow = this.symbols.getLastIncludeRow();
+    if( lastIncludeRow == -1 ) {
+        this.aceDocument.insert({row: 0, column: 0}, includeText);
+    } else {
+        var lastIncludeRowContent = this.aceDocument.getLine(lastIncludeRow);
+        this.aceDocument.insert({row: lastIncludeRow, column: lastIncludeRowContent.length}, "\n" + includeText);
+    }
+}
+
 exports.InkFile = InkFile;

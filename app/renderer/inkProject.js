@@ -41,9 +41,13 @@ const inkFileEvents = {
     }
 }
 
-InkProject.prototype.addNewInclude = function(newIncludePath) {
+InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
     var newIncludeFile = new InkFile(newIncludePath || null, this.mainInk, inkFileEvents);
     this.files.push(newIncludeFile);
+
+    if( addToMainInk )
+        this.mainInk.addIncludeLine(newIncludeFile.relativePath());
+
     NavView.setFiles(this.mainInk, this.files);
     return newIncludeFile;
 }

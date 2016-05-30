@@ -49,13 +49,16 @@ $(document).ready(() => {
 
     function confirmAddInclude() {
         var $inputBox = $newIncludeForm.find("input[type='text']");
+        var $addToMainInkCheckbox = $newIncludeForm.find(".add-to-main-ink input");
+
         var confirmedFilename = $inputBox.val();
         if( !confirmedFilename || confirmedFilename.trim().length == 0 ) {
             $inputBox.addClass("error");
             setImmediate(() => $inputBox.focus());
         } else {
             setIncludeFormVisible(false);
-            events.addInclude(confirmedFilename);
+            var shouldAddToMainInk = $addToMainInkCheckbox.get(0).checked;
+            events.addInclude(confirmedFilename, shouldAddToMainInk);
         }
     }
 
