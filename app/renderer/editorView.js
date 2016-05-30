@@ -157,6 +157,7 @@ exports.EditorView = {
     setErrors: setErrors,
     openInkFile: (inkFile) => {
         editor.setSession(inkFile.getAceSession());
+        editor.focus();
     },
     focus: () => { editor.focus(); }
 };

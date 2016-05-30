@@ -48,11 +48,24 @@ InkProject.prototype.refreshIncludes = function() {
 
     // TODO: Make it recursive
     var existingIncludePaths = _.map(_.without(this.files, this.mainInk), (f) => f.path);
-    var latestIncludePaths = _.map(this.mainInk.includes, (inc) => {
-        return path.join(rootDirectory, inc);
-    });
 
-    var includesToAdd    = _.difference(latestIncludePaths, existingIncludePaths)
+    var latestIncludePaths = [];
+    var addIncludesFromFile = (inkFile) => {
+        if( !inkFile.includes )
+            return;
+
+        inkFile.includes.forEach(incPath => {
+            var absPath = path.join(rootDirectory, incPath);
+            latestIncludePaths.push(absPath);
+
+            var recurseInkFile = this.inkFileWithRelativePath(incPath);
+            if( recurseInkFile )
+                addIncludesFromFile(recurseInkFile);
+        });
+    }
+    addIncludesFromFile(this.mainInk);
+
+    var includesToAdd    = _.difference(latestIncludePaths,   existingIncludePaths)
     var includesToRemove = _.difference(existingIncludePaths, latestIncludePaths);
 
     // Reset spare flag

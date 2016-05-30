@@ -13,7 +13,6 @@
         * Mac-style pressing return with a file selected to rename it? Double click to rename?
         * File -> Rename current file
         * Drag/drop between groups (more tricky!)
-    * Recursive include file parsing (currently it only works one include level deep)
     * Highlight files in nav that have errors
     * Add filenames to issue browser (as headings, only when in multi-file and not in single active file)
     * Automatic discovery of other nearby ink files in addition to those that are INCLUDE-ed
