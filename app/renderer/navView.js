@@ -6,6 +6,7 @@ const slideAnimDuration = 200;
 var sidebarWidth = 200;
 
 var $sidebar = null;
+var $navWrapper = null;
 var $twoPane = null;
 var $footer = null;
 var $newIncludeForm = null;
@@ -15,6 +16,7 @@ var events = {};
 
 $(document).ready(() => {
     $sidebar = $(".sidebar");
+    $navWrapper = $sidebar.find(".nav-wrapper");
     $twoPane = $(".twopane");
     $sidebarSplit = $("#main").children(".split");
     $sidebarSplit.hide();
@@ -22,7 +24,7 @@ $(document).ready(() => {
     $footer = $sidebar.find(".footer");
 
     // Clicking on files
-    $sidebar.on("click", ".nav-group-item", function(event) {
+    $navWrapper.on("click", ".nav-group-item", function(event) {
         event.preventDefault();
 
         var $targetNavGroupItem = $(event.currentTarget);
@@ -46,9 +48,15 @@ $(document).ready(() => {
     })
 
     function confirmAddInclude() {
-        var confirmedFilename = $newIncludeForm.find("input").val();
-        setIncludeFormVisible(false);
-        events.addInclude(confirmedFilename);
+        var $inputBox = $newIncludeForm.find("input[type='text']");
+        var confirmedFilename = $inputBox.val();
+        if( !confirmedFilename || confirmedFilename.trim().length == 0 ) {
+            $inputBox.addClass("error");
+            setImmediate(() => $inputBox.focus());
+        } else {
+            setIncludeFormVisible(false);
+            events.addInclude(confirmedFilename);
+        }
     }
 
     $newIncludeForm.find("input").on("keypress", function(event) {
@@ -76,7 +84,7 @@ $(document).ready(() => {
 
     $(document).on("click", function(e) {
         var $target = $(e.target);
-        if( $footer.hasClass("showingForm") && $target.closest(".footer").length == 0 ) {
+        if( $footer.hasClass("showingForm") && $target.closest(".footer").length == 0 && $target.closest(".split") == 0 ) {
             setIncludeFormVisible(false);
             e.preventDefault();
         }
@@ -84,7 +92,7 @@ $(document).ready(() => {
 });
 
 function setMainInkFilename(name) {
-    $sidebar.find(".nav-group.main-ink .nav-group-item .filename").text(name);
+    $navWrapper.find(".nav-group.main-ink .nav-group-item .filename").text(name);
 }
 
 function setFiles(mainInk, allFiles) {
@@ -107,8 +115,7 @@ function setFiles(mainInk, allFiles) {
             files: unusedFiles
         });
 
-    var $sidebar = $(".sidebar");
-    $sidebar.empty();
+    $navWrapper.empty();
 
     var extraClass = mainInk.hasUnsavedChanges || mainInk.brandNew ? "unsaved" : "";
     var $main = `<nav class="nav-group main-ink">
@@ -118,7 +125,7 @@ function setFiles(mainInk, allFiles) {
                         <span class="filename">${mainInk.filename()}</span>
                     </a>
                 </nav>`;
-    $sidebar.append($main)
+    $navWrapper.append($main)
 
     groupsArray.forEach(group => {
         var items = "";
@@ -137,12 +144,12 @@ function setFiles(mainInk, allFiles) {
             extraClass = "unused";
 
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
-        $sidebar.append($group);
+        $navWrapper.append($group);
     });
 }
 
 function highlight$NavGroupItem($navGroupItem) {
-    $sidebar.find(".nav-group-item").not($navGroupItem).removeClass("active");
+    $navWrapper.find(".nav-group-item").not($navGroupItem).removeClass("active");
     $navGroupItem.addClass("active");
 }
 
@@ -153,7 +160,7 @@ function highlightRelativePath(relativePath) {
 
     var filename = path.basename(relativePath);
 
-    var $group = $sidebar.find(".nav-group").filter((i, el) => $(el).find(".nav-group-title").text() == dirName);
+    var $group = $navWrapper.find(".nav-group").filter((i, el) => $(el).find(".nav-group-title").text() == dirName);
     if( dirName == "" ) $group = $group.add(".nav-group.main-ink");
 
     var $file = $group.find(".nav-group-item .filename").filter((i, el) => $(el).text() == filename);
@@ -205,12 +212,15 @@ function show() {
 }
 
 function setIncludeFormVisible(visible) {
+    var $inputBox = $newIncludeForm.find("input[type='text']");
     if( visible ) {
-        $newIncludeForm.find("input").val("");
+        $inputBox.val("");
+        $inputBox.removeClass("error");
         $footer.addClass("showingForm");
-        $newIncludeForm.find("input").focus();
+        $inputBox.focus();
     } else {
-        $newIncludeForm.find("input").blur();
+        $inputBox.blur();
+        $inputBox.removeClass("error");
         $footer.removeClass("showingForm");
     }
 }

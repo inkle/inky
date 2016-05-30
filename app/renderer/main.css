@@ -303,10 +303,19 @@ img.issue-icon.warning {
   display: block;
   left: 0;
   top: 0;
-  height: 100%;
+  bottom: 0;
   z-index: 1;
-  overflow: scroll;
+  overflow: hidden;
   -webkit-user-select: none;
+}
+
+.sidebar .nav-wrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: scroll;
 }
 
 .sidebar.hidden {
@@ -332,12 +341,14 @@ img.issue-icon.warning {
   bottom: 0;
   height: 32px;
   border-top: 1px solid #CCC;
-  transition: height 0.2s;
+  /*transition: height 0.2s;*/
+  /*transition: height 3s;*/
 }
 
 .sidebar .footer.showingForm {
-  height: 95px;
-  transition: height 0.2s;
+  height: 120px;
+  bottom: 0;
+  /*transition: height 3s;/*0.2s;*/*/
 }
 
 
@@ -396,29 +407,49 @@ img.issue-icon.warning {
 }
 
 .sidebar .footer .inputWrapper {
-  position: absolute;
+  position: relative;
   display: block;
-  left: 5px;
-  right: 5px;
-  top: 26px;
+  margin-left: 5px;
+  margin-right: 5px;
   width: auto;
   height: 30px;
 }
 
-.sidebar .footer input {
+.sidebar .footer input[type="text"] {
   width: 100%;
   height: 100%;
   margin: 0;
 }
 
+.sidebar .footer input[type="text"].error {
+  outline-color: #feb3b3;
+  outline-style: solid;
+}
+
+.sidebar .footer .add-to-main-ink {
+  position: relative;
+  height: 20px;
+  margin-top: 3px;
+  margin-bottom: 5px;
+  min-width: 180px;
+  margin-left: 6px;
+}
+
+.sidebar .footer .add-to-main-ink input {
+  right: 6px;
+}
+
+.sidebar .footer .add-to-main-ink span {
+  float: right;
+  margin-right: 25px;
+} 
+
 .sidebar .footer .form-buttons {
-  position: absolute;
+  position: relative;
   display: block;
-  left: 5px;
-  right: 5px;
-  bottom: 0;
   height: 30px;
   min-width: 180px;
+  margin-right: 3px;
 }
 
 .sidebar .footer .form-buttons .btn {

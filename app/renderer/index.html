@@ -66,13 +66,15 @@
         <div id="main">
            <div class="sidebar hidden">
 
-            <nav class="nav-group main-ink">
-              <h5 class="nav-group-title">Main ink file</h5>
-              <a class="nav-group-item active">
-                <span class="icon icon-book"></span>
-                <span class="filename"></span>
-              </a>
-            </nav>
+            <div class="nav-wrapper">
+              <nav class="nav-group main-ink">
+                <h5 class="nav-group-title">Main ink file</h5>
+                <a class="nav-group-item active">
+                  <span class="icon icon-book"></span>
+                  <span class="filename"></span>
+                </a>
+              </nav>
+            </div>
 
             <div class="footer">
               <a class="add-include-button">
@@ -83,6 +85,9 @@
                 <h5>Enter new ink file name:</h5>
                 <div class="inputWrapper">
                   <input type="text" class="form-control" placeholder="Folder/inkFileName.ink">
+                </div>
+                <div class="checkbox add-to-main-ink">
+                    <input type="checkbox" checked><span>Add to main ink</span>
                 </div>
                 <div class="form-buttons">
                   <button id="add-include" class="btn btn-primary pull-right">Add</button>
