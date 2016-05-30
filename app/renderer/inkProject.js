@@ -178,6 +178,10 @@ InkProject.prototype.inkFileWithRelativePath = function(relativePath) {
     return _.find(this.files, f => f.relativePath() == relativePath);
 }
 
+InkProject.prototype.inkFileWithId = function(id) {
+    return _.find(this.files, f => f.id == id);
+}
+
 InkProject.prototype.findSymbol = function(name, posContext) {
 
     // Name components

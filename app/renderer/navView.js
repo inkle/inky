@@ -24,15 +24,9 @@ $(document).ready(() => {
         var $targetNavGroupItem = $(event.currentTarget);
         highlight$NavGroupItem($targetNavGroupItem);
 
-        var inkFilename = $targetNavGroupItem.find(".filename").text();
-        var $navGroup = $targetNavGroupItem.closest(".nav-group");
-        if( $navGroup.hasClass("main-ink") ) {
-            events.clickFile(inkFilename);
-        } else {
-            var relativeDir = $targetNavGroupItem.closest(".nav-group").find(".nav-group-title").text();
-            var relativePath = path.join(relativeDir, inkFilename);
-            events.clickFile(relativePath);
-        }
+        var fileIdStr = $targetNavGroupItem.attr("data-file-id");
+        var fileId = parseInt(fileIdStr);
+        events.clickFileId(fileId);
     });
 });
 
@@ -66,7 +60,7 @@ function setFiles(mainInk, allFiles) {
     var extraClass = mainInk.hasUnsavedChanges || mainInk.brandNew ? "unsaved" : "";
     var $main = `<nav class="nav-group main-ink">
                     <h5 class="nav-group-title">Main ink file</h5>
-                    <a class="nav-group-item ${extraClass}">
+                    <a class="nav-group-item ${extraClass}" data-file-id="${mainInk.id}">
                         <span class="icon icon-book"></span>
                         <span class="filename">${mainInk.filename()}</span>
                     </a>
@@ -79,7 +73,7 @@ function setFiles(mainInk, allFiles) {
         group.files.forEach((file) => {
             var name = file.isSpare ? file.relativePath() : file.filename();
             var extraClass = file.hasUnsavedChanges || file.brandNew ? "unsaved" : "";
-            items = items + `<span class="nav-group-item ${extraClass}">
+            items = items + `<span class="nav-group-item ${extraClass}" data-file-id="${file.id}">
                                 <span class="icon icon-doc-text"></span>
                                 <span class="filename">${name}</span>
                             </span>`;

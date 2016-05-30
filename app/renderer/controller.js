@@ -134,8 +134,8 @@ ToolbarView.setEvents({
 });
 
 NavView.setEvents({
-    clickFile: (relativePath) => {
-        var inkFile = InkProject.currentProject.inkFileWithRelativePath(relativePath);
+    clickFileId: (fileId) => {
+        var inkFile = InkProject.currentProject.inkFileWithId(fileId);
         InkProject.currentProject.openInkFile(inkFile);
     }
 });

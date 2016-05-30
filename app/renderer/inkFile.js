@@ -10,11 +10,15 @@ const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
+var fileIdCounter = 0;
+
 // -----------------------------------------------------------------
 // InkFile
 // -----------------------------------------------------------------
 
 function InkFile(filePath, mainInkFile, events) {
+    
+    this.id = fileIdCounter++;
 
     this.path = filePath;
     this.events = events;
