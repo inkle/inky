@@ -48,7 +48,6 @@
 ## Engineering
 
 * **FIX:**
-    * (DONE?) Quit never completes if it has to go through a project save dialog (even when not saving)
     * `/tmp` never gets cleared out, so if you remove a file in the project (e.g. in the finder), it still compiles when it shouldn't.
     * Replaying a story goes through a transition for the last turn
         * jquery still fades in the last chunk even though it's a replay
