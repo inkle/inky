@@ -49,8 +49,7 @@ function reloadInklecateSession() {
         }
     });
 
-    if( !_.isEmpty(compileInstruction.updatedFiles) )
-        ipc.send("play-ink", compileInstruction, sessionId);
+    ipc.send("play-ink", compileInstruction, sessionId);
 }
 
 function stopInklecateSession(idToStop) {
