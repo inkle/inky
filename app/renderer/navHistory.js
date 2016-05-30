@@ -22,26 +22,46 @@ function go(steps) {
     }
 }
 
+function currentStep() {
+    if( currentHistoryIdx >= 0 && currentHistoryIdx < history.length ) {
+        return history[currentHistoryIdx];
+    }
+    return null;
+}
+
 function addStep() {
     if( !InkProject.currentProject || navigating )
         return;
 
-    var file = InkProject.currentProject.activeInkFile;
+    // Wait until after we've jumped to the right line number etc
+    setImmediate(() =>{
 
-    // Don't store a reference to the file itself so that
-    // the reference is weak and doesn't keep old files around
-    var step = {
-        filePath: file.relativePath(),
-        position: editor.getCursorPosition()
-    };
+        var file = InkProject.currentProject.activeInkFile;
 
-    currentHistoryIdx++;
+        // Don't store a reference to the file itself so that
+        // the reference is weak and doesn't keep old files around
+        var step = {
+            filePath: file.relativePath(),
+            position: editor.getCursorPosition()
+        };
 
-    // Re-writing history? remove future steps
-    if( history.length > currentHistoryIdx )
-        history.splice(currentHistoryIdx);
+        // Prevent duplicate steps
+        var existingStep = currentStep();
+        if( existingStep ) {
+            if( existingStep.filePath == step.filePath && existingStep.position.row == step.position.row ) {
+                return;
+            }
+        }
 
-    history.push(step);
+        currentHistoryIdx++;
+
+        // Re-writing history? remove future steps
+        if( history.length > currentHistoryIdx )
+            history.splice(currentHistoryIdx);
+
+        history.push(step);
+    });
+
 }
 
 function reset() {

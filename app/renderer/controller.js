@@ -150,9 +150,11 @@ NavView.setEvents({
     clickFileId: (fileId) => {
         var inkFile = InkProject.currentProject.inkFileWithId(fileId);
         InkProject.currentProject.openInkFile(inkFile);
+        NavHistory.addStep();
     },
     addInclude: (filename, addToMainInk) => {
         var newInkFile = InkProject.currentProject.addNewInclude(filename, addToMainInk);
         InkProject.currentProject.openInkFile(newInkFile);
+        NavHistory.addStep();
     }
 });

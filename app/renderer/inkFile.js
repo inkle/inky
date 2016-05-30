@@ -156,6 +156,13 @@ InkFile.prototype.saveAs = function(callback) {
 }
 
 InkFile.prototype.addIncludeLine = function(relativePath) {
+
+    // Normally we allow the InkFileSymbols class to do this,
+    // but by the time it gets round to doing parsing, it'll be too late.
+    this.includes.push(relativePath);
+    this.events.includesChanged(this.includes, this.newlyLoaded);
+
+    // Insert the include text itself
     var includeText = "INCLUDE "+relativePath+"\n";
     var lastIncludeRow = this.symbols.getLastIncludeRow();
     if( lastIncludeRow == -1 ) {
