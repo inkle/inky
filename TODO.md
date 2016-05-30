@@ -7,8 +7,6 @@
 
 * Multi-ink file editing
     * Creation / saving of includes
-        * File -> Add Include...
-        * (+) button at bottom of sidebar (and inside each group?)
         * Contextual menu on includes (Rename, Delete)
         * Mac-style pressing return with a file selected to rename it? Double click to rename?
         * File -> Rename current file

@@ -41,9 +41,11 @@ const inkFileEvents = {
     }
 }
 
-InkProject.prototype.newInclude = function() {
-    NavView.show();
-    NavView.showAddIncludeForm();
+InkProject.prototype.addNewInclude = function(newIncludePath) {
+    var newIncludeFile = new InkFile(newIncludePath || null, this.mainInk, inkFileEvents);
+    this.files.push(newIncludeFile);
+    NavView.setFiles(this.mainInk, this.files);
+    return newIncludeFile;
 }
 
 InkProject.prototype.refreshIncludes = function() {
@@ -307,7 +309,8 @@ ipc.on("set-project-main-ink-filepath", (event, filePath) => {
 
 ipc.on("project-new-include", () => {
     if( InkProject.currentProject ) {
-        InkProject.currentProject.newInclude();
+        NavView.show();
+        NavView.showAddIncludeForm();
     }
 });
 

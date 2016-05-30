@@ -42,7 +42,7 @@ InkProject.setEvents({
 // (some of the views get confused otherwise)
 $(document).ready(() => { 
     if( InkProject.currentProject == null ) 
-        InkProject.startNew(); 
+        InkProject.startNew();
 });
 
 function gotoIssue(issue) {
@@ -152,6 +152,7 @@ NavView.setEvents({
         InkProject.currentProject.openInkFile(inkFile);
     },
     addInclude: (filename) => {
-        alert("TODO: Add include called "+filename);
+        var newInkFile = InkProject.currentProject.addNewInclude(filename);
+        InkProject.currentProject.openInkFile(newInkFile);
     }
 });
