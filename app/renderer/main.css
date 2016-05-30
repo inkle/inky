@@ -458,6 +458,21 @@ img.issue-icon.warning {
   color: black;
 }
 
+#player pre {
+  padding-left: 10px;
+  white-space: pre-wrap;       /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+#player pre.error {
+  color: #C56D6D;
+  font-size: 9pt;
+  font-weight: normal;
+}
+
 #restart {
   right: 5px;
   top: 5px;
