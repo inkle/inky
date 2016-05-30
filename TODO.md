@@ -24,6 +24,10 @@
             * call `watcher.close()` to stop
         * If watching, we can live-reload files without unsaved changes, and refresh the nav
 
+* Toolbar UI to jump to a particular path at the start of the story
+
+* Other debugging features: ability to query variables, list variables etc
+
 * Include step back buttons on each turn chunk to rewind to a specific one
 
 * Ability to hide/show editor and player views

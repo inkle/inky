@@ -46,7 +46,7 @@ function setFiles(mainInk, allFiles) {
     });
 
     var groupsArray = _.map(groupedIncludes, (group, name) => { return {name: name, files: group}; });
-    groupsArray = _.sortBy(groupsArray, g => g.name);
+    groupsArray.sort((a,b) => a.name.localeCompare(b.name));
 
     if( unusedFiles.length > 0 )
         groupsArray.push({
