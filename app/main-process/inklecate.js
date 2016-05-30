@@ -42,7 +42,12 @@ function play(compileInstruction, requester, sessionId) {
     }
 
     var mainInkPath = path.join(tempInkPath, compileInstruction.mainName);
-    const playProcess = spawn(inklecatePath, ['-cp', mainInkPath]);
+    const playProcess = spawn(inklecatePath, ['-cp', mainInkPath], {
+        "cwd": path.dirname(inklecatePath),
+        "env": {
+            "MONO_BUNDLED_OPTIONS": "--debug"
+        }
+    });
 
     sessions[sessionId] = {
         process:playProcess,

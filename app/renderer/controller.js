@@ -100,8 +100,21 @@ LiveCompiler.setEvents({
         PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
     },
     unexpectedError: (error) => {
-        PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
-        PlayerView.addLongMessage(error, "error");
+        if( error.indexOf("Unhandled Exception") != -1 ) {
+            PlayerView.addTerminatingMessage("Sorry, the ink compiler crashed ☹", "error");
+            PlayerView.addTerminatingMessage("Here is some diagnostic information:", "error");
+
+            // Make it a bit less verbose and concentrate on the useful stuff
+            // [0x000ea] in /Users/blah/blah/blah/blah/ink/ParsedHierarchy/FlowBase.cs:377 
+            // After replacement:
+            // in FlowBase.cs line 377
+            error = error.replace(/\[\w+\] in (?:[\w/]+?)(\w+\.cs):(\d+)/g, "in $1 line $2");
+
+            PlayerView.addLongMessage(error, "diagnostic");
+        } else {
+            PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
+            PlayerView.addLongMessage(error, "error");
+        }
     }
 });
 
