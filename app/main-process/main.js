@@ -13,13 +13,21 @@ app.on('will-finish-launching', function() {
     });
 });
 
+let isQuitting = false;
+
+app.on('before-quit', function() {
+    // We need this to differentiate between pressing quit (which should quit) or closing all windows
+    // (which leaves the app open)
+    isQuitting = true;
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', function() {
 
     app.on('window-all-closed', function() {
-        if (process.platform != 'darwin') {
+        if (process.platform != 'darwin' || isQuitting) {
             app.quit();
         }
     });
