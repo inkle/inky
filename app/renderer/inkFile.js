@@ -53,7 +53,7 @@ function InkFile(filePath, mainInkFile, events) {
 
             this.aceDocument.setValue(data);
             this.hasUnsavedChanges = false;
-            this.events.fileChanged();
+            this.events.fileChanged(this);
 
             // Force immediate symbol re-parse (rather than the lazy scheduling)
             // in the newly loaded state so that we gather the includes and
@@ -69,7 +69,9 @@ function InkFile(filePath, mainInkFile, events) {
         this.hasUnsavedChanges = true;
         this.brandNew = false;
         this.compilerVersionDirty = true;
-        this.events.fileChanged();
+        
+        if( !this.newlyLoaded ) 
+            this.events.fileChanged(this);
     });
 }
 
@@ -118,12 +120,25 @@ InkFile.prototype.getAceSession = function() {
 
 InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
 
+    // Resolve temporary relative paths in include files
+    if( (!this.path || !path.isAbsolute(this.path)) && !this.isMain() ) {
+        var mainInkPath = this.mainInkFile.path;
+        if( !mainInkPath || !path.isAbsolute(mainInkPath) ) {
+            alert("Please save the main ink before saving this include file.")
+            return;
+        }
+        var projectDir = path.dirname(mainInkPath);
+        if( !this.path )
+            this.path = this.filename();
+
+        this.path = path.join(projectDir, this.path);
+    }
+
     // Need to show save path dialog?
     if( !this.path || saveAs ) {
         var opts = {};
         if( saveAs && this.path )
             opts.defaultPath = this.path;
-
 
         dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savedPath) => {
             if( savedPath ) {
@@ -140,11 +155,13 @@ InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
 
     // Quick save to existing path
     else {
-        fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", () => {
-            this.hasUnsavedChanges = false;
-            this.events.fileChanged();
-            if( afterSaveCallback )
+        fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", (err) => {
+            if( err ) 
+                afterSaveCallback(false);
+            else {
+                this.hasUnsavedChanges = false;
                 afterSaveCallback(true);
+            }
         })
     }
 }

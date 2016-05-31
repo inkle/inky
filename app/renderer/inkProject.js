@@ -19,6 +19,7 @@ InkProject.currentProject = null;
 function InkProject(mainInkFilePath) {
     this.files = [];
     this.hasUnsavedChanges = false;
+    this.unsavedFiles = [];
 
     this.mainInk = new InkFile(mainInkFilePath || null, null, inkFileEvents);
     this.files.push(this.mainInk);
@@ -27,12 +28,16 @@ function InkProject(mainInkFilePath) {
 }
 
 const inkFileEvents = {
-    fileChanged: () => { 
-        InkProject.currentProject.refreshUnsavedChanges();
+    fileChanged: file => { 
+        var proj = InkProject.currentProject;
+        if( file.hasUnsavedChanges && !proj.unsavedFiles.contains(file) ) {
+            proj.unsavedFiles.push(file);
+            proj.refreshUnsavedChanges();
+        }
 
         // When a file is changed, its state may change to have unsaved changes,
         // which should be reflected in the sidebar (unsaved files are bold)
-        InkProject.currentProject.refreshIncludes();
+        proj.refreshIncludes();
     },
     includesChanged: (includes, newlyLoaded) => {         
         InkProject.currentProject.refreshIncludes();
@@ -104,20 +109,16 @@ InkProject.prototype.refreshIncludes = function() {
 
 InkProject.prototype.refreshUnsavedChanges = function() {
 
-    var prevUnsavedChanges = this.hasUnsavedChanges;
+    this.hasUnsavedChanges = this.unsavedFiles.length > 0;
 
-    this.hasUnsavedChanges = false;
-    for(var i=0; i<this.files.length; i++) {
-        var file = this.files[i];
-        if( file.hasUnsavedChanges ) {
-            this.hasUnsavedChanges = true;
-            break;
-        }
-    }
+    // Update NavView for whether files are bold or not
+    // TODO: This could be faster if it simply refreshes the state rather than
+    // rebuilding the entire nav view hierarchy
+    NavView.setFiles(this.mainInk, this.files);
 
-    // Update window state
-    if( this.hasUnsavedChanges != prevUnsavedChanges )
-        remote.getCurrentWindow().setDocumentEdited(this.hasUnsavedChanges);
+    // Overall, are there *any* unsaved changes, and has the state changed?
+    // Change the dot in the Mac close window button
+    remote.getCurrentWindow().setDocumentEdited(this.hasUnsavedChanges);
 }
 
 InkProject.prototype.openInkFile = function(inkFile) {
@@ -132,17 +133,31 @@ InkProject.prototype.openInkFile = function(inkFile) {
     }
 }
 
-InkProject.prototype.save = function(callback) {
+InkProject.prototype.save = function() {
     var filesRemaining = this.files.length;
-    this.files.forEach(f => {
-        f.save(() => {
-            filesRemaining--;
-            if( filesRemaining == 0 ) {
+    var includeFiles = _.filter(this.files, f => f != this.mainInk);
+
+    var allSuccess = true;
+
+    var singleFileSaveComplete = (file, success) => {
+        allSuccess = allSuccess && success;
+        if( success ) this.unsavedFiles.remove(file);
+
+        filesRemaining--;
+        if( filesRemaining == 0 ) {
+            this.refreshUnsavedChanges();
+
+            if( allSuccess )
                 InkProject.events.didSave();
-                if( callback )
-                    callback();
-            }
-        })
+            else
+                alert("There was an error when saving :-(");
+        }
+    }
+
+    // Save main ink to ensure the other files have a base directory path
+    this.mainInk.save(success => {
+        singleFileSaveComplete(this.mainInk, success);
+        includeFiles.forEach(f => f.save(success => singleFileSaveComplete(f, success)));
     });
 }
 

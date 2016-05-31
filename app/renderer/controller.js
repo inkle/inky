@@ -2,6 +2,10 @@ const ipc = require("electron").ipcRenderer;
 const path = require("path");
 
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+
+// Helpers in global objects and namespace
+require("./util.js");
+
 require("./split.js");
 
 const EditorView = require("./editorView.js").EditorView;

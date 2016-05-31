@@ -2,6 +2,7 @@
 
 ## SOON
 
+* Remove save current file and save as functionality since it's pretty pointless and creates weird edge cases with our project model
 
 ## Features and improvements
 
@@ -49,6 +50,7 @@
 
 * **FIX:**
     * `/tmp` never gets cleared out, so if you remove a file in the project (e.g. in the finder), it still compiles when it shouldn't.
+    * Undo not working in editor??
     * Replaying a story goes through a transition for the last turn
         * jquery still fades in the last chunk even though it's a replay
         * should force the view height never to get smaller despite temporary content reduction
