@@ -62,6 +62,8 @@ function InkFile(filePath, mainInkFile, events) {
 
             this.newlyLoaded = false;
         });
+    } else {
+        this.newlyLoaded = false;
     }
 
     this.hasUnsavedChanges = false;
