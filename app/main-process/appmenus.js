@@ -31,21 +31,10 @@ function setupMenus(callbacks) {
             type: 'separator'
           },
           {
-            label: 'Save All',
+            label: 'Save Project',
             accelerator: 'CmdOrCtrl+S',
             enabled: callbacks.isFocusedWindow,
             click: callbacks.save
-          },
-          {
-            label: 'Save Current File',
-            enabled: callbacks.isFocusedWindow,
-            click: callbacks.saveCurrentFile
-          },
-          {
-            label: 'Save Current File As',
-            accelerator: 'CmdOrCtrl+Shift+S',
-            enabled: callbacks.isFocusedWindow,
-            click: callbacks.saveCurrentFileAs
           },
           {
             label: 'Close',

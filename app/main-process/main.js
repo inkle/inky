@@ -57,14 +57,6 @@ app.on('ready', function() {
             var win = ProjectWindow.focused();
             if( win ) win.save();
         },
-        saveCurrentFile: () => {
-            var win = ProjectWindow.focused();
-            if( win ) win.saveCurrentFile();
-        },
-        saveCurrentFileAs: () => {
-            var win = ProjectWindow.focused();
-            if( win ) win.saveCurrentFileAs();
-        },
         close: (event) => {
             var win = ProjectWindow.focused();
             if( win ) win.tryClose();

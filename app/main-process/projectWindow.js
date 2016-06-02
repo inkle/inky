@@ -52,14 +52,6 @@ ProjectWindow.prototype.save = function() {
     this.browserWindow.webContents.send('project-save');
 }
 
-ProjectWindow.prototype.saveCurrentFile = function() {
-    this.browserWindow.webContents.send('project-saveCurrentFile');
-}
-
-ProjectWindow.prototype.saveCurrentFileAs = function() {
-    this.browserWindow.webContents.send('project-saveCurrentFileAs');
-}
-
 ProjectWindow.prototype.tryClose = function() {
     this.browserWindow.webContents.send('project-tryClose');
 }

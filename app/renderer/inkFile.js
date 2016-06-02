@@ -120,7 +120,7 @@ InkFile.prototype.getAceSession = function() {
     return this.aceSession;
 }
 
-InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
+InkFile.prototype.save = function(afterSaveCallback) {
 
     // Resolve temporary relative paths in include files
     if( (!this.path || !path.isAbsolute(this.path)) && !this.isMain() ) {
@@ -137,10 +137,8 @@ InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
     }
 
     // Need to show save path dialog?
-    if( !this.path || saveAs ) {
+    if( !this.path ) {
         var opts = {};
-        if( saveAs && this.path )
-            opts.defaultPath = this.path;
 
         dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savedPath) => {
             if( savedPath ) {
@@ -166,12 +164,6 @@ InkFile.prototype.saveGeneral = function(saveAs, afterSaveCallback) {
             }
         })
     }
-}
-InkFile.prototype.save = function(callback) {
-    this.saveGeneral(false, callback);
-}
-InkFile.prototype.saveAs = function(callback) {
-    this.saveGeneral(true,  callback);
 }
 
 InkFile.prototype.addIncludeLine = function(relativePath) {

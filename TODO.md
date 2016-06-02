@@ -2,8 +2,6 @@
 
 ## SOON
 
-* Remove save current file and save as functionality since it's pretty pointless and creates weird edge cases with our project model
-
 * Ability export a JSON file (to slot into other pipelines e.g. ink.js, though general Unity pipeline is fine)
 
 ## Need before release
@@ -17,6 +15,9 @@
     * Particularly save/load functionality
 
 ## Features and improvements
+
+* Some more shortcuts:
+    * Ctrl-(shift)-tab to switch back/forth between files (what order? order of usage or order within sidebar?)
 
 * Removal and renaming of includes (and renaming of main ink?)
     * Contextual menu on includes (Rename, Delete)
@@ -69,5 +70,7 @@
     * (VERIFY) Multiple windows - can be flaky? e.g. saving v.s. compiling etc
     * (DONE?) Reliability of story reloading - sometimes it fails
     * (DONE?) Copies of inklecate left open sometimes
+
+* Change InkFile.path to always be the relative path, remove InkFile.relativePath(), and use InkFile.absolutePath() as the special case, since we always know the relative path, even before saving, and it would simplify the code paths and make things more robust.
 
 * Convert ad-hoc style events to be proper NodeJS EventEmitters (?)

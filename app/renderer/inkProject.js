@@ -161,18 +161,6 @@ InkProject.prototype.save = function() {
     });
 }
 
-InkProject.prototype.saveCurrentFile = function(saveAs, callback) {
-    this.activeInkFile.save(() => {
-        InkProject.events.didSave();
-        if( callback )
-            callback();
-    });
-}
-
-InkProject.prototype.saveCurrentFileAs = function(saveAs) {
-    this.activeInkFile.saveAs(() => InkProject.events.didSave());
-}
-
 InkProject.prototype.tryClose = function() {
     if( this.hasUnsavedChanges ) {
         dialog.showMessageBox(remote.getCurrentWindow(), {
@@ -336,18 +324,6 @@ ipc.on("project-new-include", () => {
 ipc.on("project-save", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.save();
-    }
-});
-
-ipc.on("project-saveCurrentFile", (event) => {
-    if( InkProject.currentProject ) {
-        InkProject.currentProject.saveCurrentFile();
-    }
-});
-
-ipc.on("project-saveCurrentFileAs", (event) => {
-    if( InkProject.currentProject ) {
-        InkProject.currentProject.saveCurrentFileAs();
     }
 });
 
