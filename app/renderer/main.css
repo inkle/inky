@@ -341,6 +341,7 @@ img.issue-icon.warning {
   bottom: 0;
   height: 32px;
   border-top: 1px solid #CCC;
+  background: #f5f5f4;
   /*transition: height 0.2s;*/
   /*transition: height 3s;*/
 }
