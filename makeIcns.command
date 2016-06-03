@@ -1,3 +1,4 @@
+# http://stackoverflow.com/questions/12306223/how-to-manually-create-icns-files-using-iconutil
 mkdir Icon.iconset
 sips -z 16 16     Icon1024.png --out Icon.iconset/icon_16x16.png
 sips -z 32 32     Icon1024.png --out Icon.iconset/icon_16x16@2x.png

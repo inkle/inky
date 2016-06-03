@@ -115,6 +115,7 @@ InkFile.prototype.getAceSession = function() {
     if( this.aceSession == null ) {
         this.aceSession = new EditSession(this.aceDocument, new InkMode());
         this.aceSession.setUseWrapMode(true);
+        this.aceSession.setUndoManager(new ace.UndoManager());
     }
 
     return this.aceSession;

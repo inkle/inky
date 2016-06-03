@@ -6,8 +6,6 @@
 
 ## Need before release
 
-* Undo not working in editor??
-
 * inklecate.js should compile within a project/window specific sub-folder to avoid collisions across projects
     * Investigate fs.mkdtemp(prefix, callback)
 
@@ -18,6 +16,8 @@
 
 * Some more shortcuts:
     * Ctrl-(shift)-tab to switch back/forth between files (what order? order of usage or order within sidebar?)
+    * Back/forward shortcuts (mirroring back/forward buttons) cmd-opt-left/right?
+    * Follow symbol under cursor - cmd-opt-return? 
 
 * Removal and renaming of includes (and renaming of main ink?)
     * Contextual menu on includes (Rename, Delete)
