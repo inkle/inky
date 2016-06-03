@@ -1,5 +1,6 @@
 const electron = require('electron');
 const ipc = electron.ipcMain;
+const dialog = electron.dialog;
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 const Inklecate = require("./inklecate.js").Inklecate;
@@ -52,6 +53,10 @@ ProjectWindow.prototype.save = function() {
     this.browserWindow.webContents.send('project-save');
 }
 
+ProjectWindow.prototype.exportJson = function() {
+    this.browserWindow.webContents.send('project-export');
+}
+
 ProjectWindow.prototype.tryClose = function() {
     this.browserWindow.webContents.send('project-tryClose');
 }
@@ -91,9 +96,24 @@ ProjectWindow.withWebContents = function(webContents) {
 }
 
 ProjectWindow.open = function(filePath) {
+    if( !filePath ) {
+        var multiSelectPaths = dialog.showOpenDialog({
+            title: "Open main ink file",
+            properties: ['openFile'],
+            filters: [
+                { name: 'Ink files', extensions: ['ink'] }
+            ]
+        });
+
+        if( multiSelectPaths && multiSelectPaths.length > 0 )
+            filePath = multiSelectPaths[0];
+    }
+
     // TODO: Could check whether the filepath is relative to any of our
     // existing open projects, and switch to that window?
-    return new ProjectWindow(filePath);
+
+    if( filePath)
+        return new ProjectWindow(filePath);
 }
 
 ipc.on("project-final-close", (event) => {

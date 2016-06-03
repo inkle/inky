@@ -16,12 +16,19 @@ const tempInkPath = "/tmp/inklecatetemp/";
 var sessions = {};
 
 
-function play(compileInstruction, requester, sessionId) {
-    console.log("Playing "+sessionId);
+function compile(compileInstruction, requester) {
+    
+    var sessionId = compileInstruction.sessionId;
+
+    if( compileInstruction.play )
+        console.log("Playing "+sessionId);
+    else if( compileInstruction.exportPath )
+        console.log("Exporting session "+sessionId+" to "+compileInstruction.exportPath);
 
     // TODO: handle errors
     mkdirp.sync(tempInkPath);
 
+    // Write out updated files
     for(var relativePath in compileInstruction.updatedFiles) {
 
         console.log("Relative path: "+relativePath);
@@ -35,14 +42,26 @@ function play(compileInstruction, requester, sessionId) {
             mkdirp.sync(fullDir);
         }
 
-
         console.log("WRITING TO: "+fullInkPath);
 
         fs.writeFileSync(fullInkPath, inkFileContent);
     }
 
     var mainInkPath = path.join(tempInkPath, compileInstruction.mainName);
-    const playProcess = spawn(inklecatePath, ['-cp', mainInkPath], {
+
+    var inklecateOptions = ["-c"];
+
+    if( compileInstruction.play )
+        inklecateOptions[0] += "p";
+
+    if( compileInstruction.exportPath )  {
+        inklecateOptions.push("-o");
+        inklecateOptions.push(compileInstruction.exportPath);
+    }
+
+    inklecateOptions.push(mainInkPath);
+
+    const playProcess = spawn(inklecatePath, inklecateOptions, {
         "cwd": path.dirname(inklecatePath),
         "env": {
             "MONO_BUNDLED_OPTIONS": "--debug"
@@ -106,8 +125,8 @@ function play(compileInstruction, requester, sessionId) {
         var forceStoppedByPlayer = sessions[sessionId].stopped;
         if( !forceStoppedByPlayer ) {
             if( code == 0 ) {
-                console.log("Completed story successfully");
-                requester.send('play-story-completed', sessionId);
+                console.log("Completed story or exported successfully");
+                requester.send('inklecate-complete', sessionId);
             }
             else {
                 console.log("Story exited unexpectedly with error code "+code+" (session "+sessionId+")");
@@ -153,8 +172,8 @@ function killSessions(optionalBrowserWindow) {
     }
 }
 
-ipc.on("play-ink", (event, compileInstruction, sessionId) => {
-    play(compileInstruction, event.sender, sessionId);
+ipc.on("compile", (event, compileInstruction) => {
+    compile(compileInstruction, event.sender);
 });
 
 ipc.on("play-stop-ink", (event, sessionId) => {

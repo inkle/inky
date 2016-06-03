@@ -2,6 +2,10 @@ const ipc = require("electron").ipcRenderer;
 const _ = require("lodash");
 
 var sessionId = 0;
+
+var currentPlaySessionId = -1;
+var currentExportSessionId = -1;
+
 var lastEditorChange = null;
 
 var choiceSequence = [];
@@ -11,7 +15,7 @@ var issues = [];
 var selectedIssueIdx = -1;
 
 var project = null;
-var events = {}
+var events = {};
 
 
 function resetErrors() {
@@ -19,25 +23,15 @@ function resetErrors() {
     selectedIssueIdx = -1;
 }
 
-function reloadInklecateSession() {
-
-    lastEditorChange = null;
-
-    stopInklecateSession(sessionId);
+function buildCompileInstruction() {
 
     sessionId += 1;
-
-    if( choiceSequence.length > 0 )
-        currentReplayTurnIdx = 0;
-
-    events.resetting();
-
-    resetErrors();
 
     // Construct instruction object to send to inklecate.js
     var compileInstruction = {
         mainName: project.mainInk.filename(),
-        updatedFiles: {}
+        updatedFiles: {},
+        sessionId: sessionId
     };
 
     project.files.forEach((inkFile) => {
@@ -49,7 +43,41 @@ function reloadInklecateSession() {
         }
     });
 
-    ipc.send("play-ink", compileInstruction, sessionId);
+    return compileInstruction;
+}
+
+function sessionIsCurrent(id) {
+    return id == currentPlaySessionId || id == currentExportSessionId;
+}
+
+function reloadInklecateSession() {
+
+    lastEditorChange = null;
+
+    if( currentPlaySessionId >= 0 )
+        stopInklecateSession(currentPlaySessionId);
+
+    if( choiceSequence.length > 0 )
+        currentReplayTurnIdx = 0;
+
+    events.resetting();
+
+    resetErrors();
+
+    var instr = buildCompileInstruction();
+    instr.play = true;
+
+    currentPlaySessionId = instr.sessionId;
+
+    ipc.send("compile", instr, sessionId);
+}
+
+function exportJson(jsonPath) {
+    var instr = buildCompileInstruction();
+    instr.exportPath = jsonPath;
+    currentExportSessionId = instr.sessionId;
+
+    ipc.send("compile", instr);
 }
 
 function stopInklecateSession(idToStop) {
@@ -111,8 +139,7 @@ ipc.on("next-issue", () => {
 
 ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
-    if( fromSessionId != sessionId )
-        return;
+    if( fromSessionId != currentPlaySessionId ) return;
 
     var replaying = currentReplayTurnIdx != -1;
     events.textAdded(result, replaying);
@@ -120,8 +147,7 @@ ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
 ipc.on("play-generated-error", (event, error, fromSessionId) => {
 
-    if( sessionId != fromSessionId )
-        return;
+    if( !sessionIsCurrent(fromSessionId) ) return;
 
     issues.push(error);
     events.errorAdded(error);
@@ -129,8 +155,7 @@ ipc.on("play-generated-error", (event, error, fromSessionId) => {
 
 ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
 
-    if( fromSessionId != sessionId )
-        return;
+    if( fromSessionId != currentPlaySessionId ) return;
 
     choice.sourceSessionId = fromSessionId;
 
@@ -140,7 +165,7 @@ ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
 
 ipc.on("play-requires-input", (event, fromSessionId) => {
 
-    if( fromSessionId != sessionId )
+    if( fromSessionId != currentPlaySessionId )
         return;
 
     var replaying = currentReplayTurnIdx >= 0;
@@ -156,26 +181,24 @@ ipc.on("play-requires-input", (event, fromSessionId) => {
     }
 });
 
-ipc.on("play-story-completed", (event, fromSessionId) => {
+ipc.on("inklecate-complete", (event, fromSessionId) => {
 
-    if( fromSessionId != sessionId )
-        return;
-
-    events.storyCompleted();
+    if( fromSessionId == currentPlaySessionId )
+        events.storyCompleted();
+    else if( fromSessionId == currentExportSessionId )
+        events.exportCompleted();
 });
 
 ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
 
-    if( sessionId != fromSessionId )
-        return;
+    if( !sessionIsCurrent(fromSessionId) ) return;
 
     events.unexpectedExit();
 });
 
 ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
 
-    if( sessionId != fromSessionId )
-        return;
+    if( !sessionIsCurrent(fromSessionId) ) return;
 
     events.unexpectedError(error);
 });
@@ -187,6 +210,7 @@ ipc.on("play-story-stopped", (event, fromSessionId) => {
 exports.LiveCompiler = {
     setProject: (p) => { project = p; },
     reload: reloadInklecateSession,
+    exportJson: exportJson,
     setEdited: () => { lastEditorChange = Date.now(); },
     setEvents: (e) => { events = e; },
     getIssues: () => { return issues; },

@@ -139,9 +139,10 @@ InkFile.prototype.save = function(afterSaveCallback) {
 
     // Need to show save path dialog?
     if( !this.path ) {
-        var opts = {};
-
-        dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savedPath) => {
+        dialog.showSaveDialog(remote.getCurrentWindow(), { filters: [
+            { name: 'Ink files', extensions: ['ink'] },
+            { name: 'Text files', extensions: ['txt'] }
+        ]}, (savedPath) => {
             if( savedPath ) {
                 this.path = savedPath;
 

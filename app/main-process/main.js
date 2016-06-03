@@ -1,7 +1,6 @@
 const electron = require('electron')
 const app = electron.app
 const ipc = electron.ipcMain;
-const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const appmenus = require('./appmenus.js');
 const forceQuitDetect = require('./forceQuitDetect');
@@ -46,16 +45,15 @@ app.on('ready', function() {
             if( win ) win.newInclude();
         },
         open: () => {
-            var multiSelectPaths = dialog.showOpenDialog({
-                properties: ['openFile']
-            });
-            if( multiSelectPaths && multiSelectPaths.length > 0 ) {
-                ProjectWindow.open(multiSelectPaths[0]);
-            }
+            ProjectWindow.open();
         },
         save: () => {
             var win = ProjectWindow.focused();
             if( win ) win.save();
+        },
+        exportJson: () => {
+            var win = ProjectWindow.focused();
+            if( win ) win.exportJson();
         },
         close: (event) => {
             var win = ProjectWindow.focused();

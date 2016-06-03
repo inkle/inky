@@ -8,6 +8,7 @@ const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
 
 const InkFile = require("./inkFile.js").InkFile;
+const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 
 // -----------------------------------------------------------------
 // InkProject
@@ -149,15 +150,37 @@ InkProject.prototype.save = function() {
 
             if( allSuccess )
                 InkProject.events.didSave();
-            else
-                alert("There was an error when saving :-(");
         }
     }
 
     // Save main ink to ensure the other files have a base directory path
     this.mainInk.save(success => {
         singleFileSaveComplete(this.mainInk, success);
-        includeFiles.forEach(f => f.save(success => singleFileSaveComplete(f, success)));
+
+        // May not be a success if cancelled, in which case we stop early
+        if( success )
+            includeFiles.forEach(f => f.save(success => singleFileSaveComplete(f, success)));
+    });
+}
+
+InkProject.prototype.exportJson = function() {
+
+    if( !this.defaultExportPath && this.mainInk.path && path.isAbsolute(this.mainInk.path) ) {
+        var pathObj = path.parse(this.mainInk.path);
+        pathObj.ext = ".json";
+        this.defaultExportPath = path.format(pathObj);
+    }
+
+    dialog.showSaveDialog(remote.getCurrentWindow(), { 
+        filters: [
+            { name: 'JSON files', extensions: ['json'] }
+        ],
+        defaultPath: this.defaultExportPath
+    }, (jsonPath) => {
+        if( jsonPath ) { 
+            LiveCompiler.exportJson(jsonPath);
+            this.defaultExportPath = jsonPath;
+        }
     });
 }
 
@@ -324,6 +347,12 @@ ipc.on("project-new-include", () => {
 ipc.on("project-save", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.save();
+    }
+});
+
+ipc.on("project-export", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.exportJson();
     }
 });
 
