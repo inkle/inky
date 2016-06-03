@@ -15,7 +15,7 @@ $(document).ready(() => {
         var $grip = $split.append(`<div class="grip"></div>`);
 
         var isDragging = false;
-        var didResize = false;
+
         $grip.mousedown(function() {
             isDragging = true;
             event.preventDefault();
@@ -39,20 +39,15 @@ $(document).ready(() => {
                 $right.css({"left": fromLeft, "width": fromRight});
                 $split.css("left", fromLeft);
 
-                didResize = true;
+                // Hack... not sure of a better way to do this
+                // (always resize editor since both the centre split
+                // and the sidebar split will affect it)
+                editor.resize();
 
                 event.preventDefault();
             }
         });
         $(document).mouseup(function() {
-            
-            // Hack... not sure of a better way to do this
-            if( didResize ) {
-                if( $left.is("#editor") )
-                    editor.resize();
-                didResize = false;
-            }
-
             isDragging = false;
             event.preventDefault();
         });

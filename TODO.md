@@ -2,8 +2,6 @@
 
 ## SOON
 
-* Ability export a JSON file (to slot into other pipelines e.g. ink.js, though general Unity pipeline is fine)
-
 ## Need before release
 
 * inklecate.js should compile within a project/window specific sub-folder to avoid collisions across projects
