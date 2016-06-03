@@ -7,4 +7,11 @@ cd "`dirname "$0"`"
 #
 
 rm -rf Inky-darwin-x64/
-electron-packager . Inky --platform=darwin --arch=x64 --extend-info=info.plist
+
+# Create icon from PNG
+./makeIcns.command
+
+electron-packager . Inky --platform=darwin --icon=Icon.icns --arch=x64 --extend-info=info.plist
+
+# Remove .icns again
+rm Icon.icns
