@@ -17,6 +17,8 @@
     * Back/forward shortcuts (mirroring back/forward buttons) cmd-opt-left/right?
     * Follow symbol under cursor - cmd-opt-return? 
 
+* Set window title so it appears correctly in Window menu
+
 * Removal and renaming of includes (and renaming of main ink?)
     * Contextual menu on includes (Rename, Delete)
     * Mac-style pressing return with a file selected to rename it? Double click to rename?
