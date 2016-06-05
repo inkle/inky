@@ -1,6 +1,8 @@
 const ipc = require("electron").ipcRenderer;
 const _ = require("lodash");
+var randomstring = require("randomstring");
 
+var namespace = null;
 var sessionId = 0;
 
 var currentPlaySessionId = -1;
@@ -17,6 +19,14 @@ var selectedIssueIdx = -1;
 var project = null;
 var events = {};
 
+function setProject(p) {
+    project = p;
+
+    // Generate the namespace just once so it stays constant all the while the project/app is open
+    // otherwise when the name changes, the temp folder could go out of sync
+    var namespaceCode = randomstring.generate(7);
+    namespace = project.mainInk.filename().replace(/\./g, "_") + "_" + namespaceCode;
+}
 
 function resetErrors() {
     issues = [];
@@ -31,7 +41,8 @@ function buildCompileInstruction() {
     var compileInstruction = {
         mainName: project.mainInk.filename(),
         updatedFiles: {},
-        sessionId: sessionId
+        sessionId: sessionId,
+        namespace: namespace
     };
 
     project.files.forEach((inkFile) => {
@@ -208,7 +219,7 @@ ipc.on("play-story-stopped", (event, fromSessionId) => {
 });
 
 exports.LiveCompiler = {
-    setProject: (p) => { project = p; },
+    setProject: setProject,
     reload: reloadInklecateSession,
     exportJson: exportJson,
     setEdited: () => { lastEditorChange = Date.now(); },

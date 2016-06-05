@@ -11,7 +11,9 @@ const mkdirp = require('mkdirp');
 const inklecatePath = __dirname + "/ink/inklecate";
 
 // TODO: Customise this for different projects
-const tempInkPath = "/tmp/inklecatetemp/";
+// Is this the right temporary directory even on Mac? Seems like a bad practice
+// to keep files around in a "public" place that the user might wish to keep private.
+const tempInkPath = "/tmp/inky_compile/";
 
 var sessions = {};
 
@@ -25,15 +27,18 @@ function compile(compileInstruction, requester) {
     else if( compileInstruction.exportPath )
         console.log("Exporting session "+sessionId+" to "+compileInstruction.exportPath);
 
+    var uniqueDirPath = path.join(tempInkPath, compileInstruction.namespace);
+    console.log("Unique dir path: "+uniqueDirPath);
+
     // TODO: handle errors
-    mkdirp.sync(tempInkPath);
+    mkdirp.sync(uniqueDirPath);
 
     // Write out updated files
     for(var relativePath in compileInstruction.updatedFiles) {
 
         console.log("Relative path: "+relativePath);
 
-        var fullInkPath = path.join(tempInkPath, relativePath);
+        var fullInkPath = path.join(uniqueDirPath, relativePath);
         var inkFileContent = compileInstruction.updatedFiles[relativePath];
 
         if( path.dirname(relativePath) != "." ) {
@@ -47,7 +52,7 @@ function compile(compileInstruction, requester) {
         fs.writeFileSync(fullInkPath, inkFileContent);
     }
 
-    var mainInkPath = path.join(tempInkPath, compileInstruction.mainName);
+    var mainInkPath = path.join(uniqueDirPath, compileInstruction.mainName);
 
     var inklecateOptions = ["-c"];
 

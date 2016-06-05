@@ -4,9 +4,6 @@
 
 ## Need before release
 
-* inklecate.js should compile within a project/window specific sub-folder to avoid collisions across projects
-    * Investigate fs.mkdtemp(prefix, callback)
-
 * Bit of solid testing
     * Particularly save/load functionality
 
