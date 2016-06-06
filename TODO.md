@@ -14,7 +14,11 @@
     * Back/forward shortcuts (mirroring back/forward buttons) cmd-opt-left/right?
     * Follow symbol under cursor - cmd-opt-return? 
 
-* Set window title so it appears correctly in Window menu
+* Find in project
+    * Implement <https://ace.c9.io/#nav=api&api=search> across multiple files
+    * Replace UI for single files while you're at it?
+
+* Go to symbol in project
 
 * Removal and renaming of includes (and renaming of main ink?)
     * Contextual menu on includes (Rename, Delete)
