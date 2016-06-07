@@ -155,7 +155,7 @@ exports.EditorView = {
     gotoLine: (row, col) => { editor.gotoLine(row, col); },
     addError: addError,
     setErrors: setErrors,
-    openInkFile: (inkFile) => {
+    showInkFile: (inkFile) => {
         editor.setSession(inkFile.getAceSession());
         editor.focus();
     },

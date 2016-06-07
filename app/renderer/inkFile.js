@@ -36,7 +36,7 @@ function InkFile(filePath, mainInkFile, events) {
     this.symbols = new InkFileSymbols(this, {
         includesChanged: (includes) => {
             this.includes = includes.slice();
-            this.events.includesChanged(this.includes, this.newlyLoaded);
+            this.events.includesChanged();
         }
     });
 
@@ -53,7 +53,7 @@ function InkFile(filePath, mainInkFile, events) {
 
             this.aceDocument.setValue(data);
             this.hasUnsavedChanges = false;
-            this.events.fileChanged(this);
+            this.events.fileChanged();
 
             // Force immediate symbol re-parse (rather than the lazy scheduling)
             // in the newly loaded state so that we gather the includes and
@@ -73,7 +73,7 @@ function InkFile(filePath, mainInkFile, events) {
         this.compilerVersionDirty = true;
         
         if( !this.newlyLoaded ) 
-            this.events.fileChanged(this);
+            this.events.fileChanged();
     });
 }
 
@@ -173,7 +173,7 @@ InkFile.prototype.addIncludeLine = function(relativePath) {
     // Normally we allow the InkFileSymbols class to do this,
     // but by the time it gets round to doing parsing, it'll be too late.
     this.includes.push(relativePath);
-    this.events.includesChanged(this.includes, this.newlyLoaded);
+    this.events.includesChanged();
 
     // Insert the include text itself
     var includeText = "INCLUDE "+relativePath+"\n";

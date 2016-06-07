@@ -17,6 +17,7 @@
 * Find in project
     * Implement <https://ace.c9.io/#nav=api&api=search> across multiple files
     * Replace UI for single files while you're at it?
+        * editor.commands.removeCommand('find');
 
 * Go to symbol in project
 

@@ -12,6 +12,7 @@ var $footer = null;
 var $newIncludeForm = null;
 
 var visible = false;
+var hasBeenShown = false;
 var events = {};
 
 $(document).ready(() => {
@@ -195,6 +196,8 @@ function show() {
     if( visible )
         return;
 
+    hasBeenShown = true;
+
     // hidden class only exists in initial state
     $sidebar.removeClass("hidden");
     $sidebarSplit.removeClass("hidden");
@@ -235,6 +238,7 @@ exports.NavView = {
     setEvents: e => events = e,
     hide: hide,
     show: show,
+    initialShow: () => { if( !hasBeenShown ) show(); },
     toggle: () => { if( visible ) hide(); else show(); },
     showAddIncludeForm: () => setIncludeFormVisible(true)
 }

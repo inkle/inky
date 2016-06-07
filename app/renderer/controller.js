@@ -36,7 +36,7 @@ InkProject.setEvents({
         NavView.setMainInkFilename(InkProject.currentProject.mainInk.filename());
         NavView.highlightRelativePath(activeInk.relativePath());
     },
-    "changeOpenInkFile": (inkFile) => {
+    "didSwitchToInkFile": (inkFile) => {
         var filename = inkFile.filename();
         ToolbarView.setTitle(filename);
         remote.getCurrentWindow().setTitle(filename);
@@ -55,14 +55,14 @@ $(document).ready(() => {
 });
 
 function gotoIssue(issue) {
-    InkProject.currentProject.openInkFile(issue.filename);
+    InkProject.currentProject.showInkFile(issue.filename);
     EditorView.gotoLine(issue.lineNumber);
     NavHistory.addStep();
 }
 
 NavHistory.setEvents({
     goto: (location) => {
-        InkProject.currentProject.openInkFile(location.filePath);
+        InkProject.currentProject.showInkFile(location.filePath);
         EditorView.gotoLine(location.position.row+1);
     }
 })
@@ -136,13 +136,13 @@ EditorView.setEvents({
     "jumpToSymbol": (symbolName, contextPos) => {
         var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
         if( foundSymbol ) {
-            InkProject.currentProject.openInkFile(foundSymbol.inkFile);
+            InkProject.currentProject.showInkFile(foundSymbol.inkFile);
             EditorView.gotoLine(foundSymbol.row+1, foundSymbol.column);
             NavHistory.addStep();
         }
     },
     "jumpToInclude": (includePath) => {
-        InkProject.currentProject.openInkFile(includePath);
+        InkProject.currentProject.showInkFile(includePath);
         NavHistory.addStep();
     },
     "navigate": () => NavHistory.addStep()
@@ -160,12 +160,12 @@ ToolbarView.setEvents({
 NavView.setEvents({
     clickFileId: (fileId) => {
         var inkFile = InkProject.currentProject.inkFileWithId(fileId);
-        InkProject.currentProject.openInkFile(inkFile);
+        InkProject.currentProject.showInkFile(inkFile);
         NavHistory.addStep();
     },
     addInclude: (filename, addToMainInk) => {
         var newInkFile = InkProject.currentProject.addNewInclude(filename, addToMainInk);
-        InkProject.currentProject.openInkFile(newInkFile);
+        InkProject.currentProject.showInkFile(newInkFile);
         NavHistory.addStep();
     }
 });

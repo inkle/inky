@@ -316,6 +316,7 @@ img.issue-icon.warning {
   left: 0;
   right: 0;
   overflow: scroll;
+  padding-bottom: 40px; /* leave space for include adding UI */
 }
 
 .sidebar.hidden {

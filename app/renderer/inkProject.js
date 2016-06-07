@@ -3,6 +3,7 @@ const dialog = remote.dialog;
 const ipc = require("electron").ipcRenderer;
 const path = require("path");
 const _ = require("lodash");
+const chokidar = require('chokidar');
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -22,34 +23,43 @@ function InkProject(mainInkFilePath) {
     this.hasUnsavedChanges = false;
     this.unsavedFiles = [];
 
-    this.mainInk = new InkFile(mainInkFilePath || null, null, inkFileEvents);
-    this.files.push(this.mainInk);
+    this.mainInk = null;
+    this.mainInk = this.createInkFile(mainInkFilePath || null);
 
-    this.openInkFile(this.mainInk);
+    this.showInkFile(this.mainInk);
+
+    this.tryStartFileWatching();
 }
 
-const inkFileEvents = {
-    fileChanged: file => { 
-        var proj = InkProject.currentProject;
-        if( file.hasUnsavedChanges && !proj.unsavedFiles.contains(file) ) {
-            proj.unsavedFiles.push(file);
-            proj.refreshUnsavedChanges();
-        }
+InkProject.prototype.createInkFile = function(path) {
+    var inkFile = new InkFile(path || null, this.mainInk, {
+        fileChanged: () => { 
+            if( inkFile.hasUnsavedChanges && !this.unsavedFiles.contains(inkFile) ) {
+                this.unsavedFiles.push(inkFile);
+                this.refreshUnsavedChanges();
+            }
 
-        // When a file is changed, its state may change to have unsaved changes,
-        // which should be reflected in the sidebar (unsaved files are bold)
-        proj.refreshIncludes();
-    },
-    includesChanged: (includes, newlyLoaded) => {         
-        InkProject.currentProject.refreshIncludes();
-        if( newlyLoaded && includes.length > 0 )
-            NavView.show();
-    }
+            // When a file is changed, its state may change to have unsaved changes,
+            // which should be reflected in the sidebar (unsaved files are bold)
+            this.refreshIncludes();
+        },
+
+        // Called when InkFile finds an INCUDE line in the contents of the file
+        includesChanged: () => {         
+            this.refreshIncludes();
+            if( inkFile.includes.length > 0  )
+                NavView.initialShow();
+        }
+    });
+
+    this.files.push(inkFile);
+
+    return inkFile;
 }
 
 InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
-    var newIncludeFile = new InkFile(newIncludePath || null, this.mainInk, inkFileEvents);
-    this.files.push(newIncludeFile);
+
+    var newIncludeFile = this.createInkFile(newIncludePath || null);
 
     if( addToMainInk )
         this.mainInk.addIncludeLine(newIncludeFile.relativePath());
@@ -58,52 +68,50 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
     return newIncludeFile;
 }
 
+// - Mark old includes as spare if they're no longer included
+// - Load any newly discovered includes
+// - Refresh nav hierarchy in sidebar
 InkProject.prototype.refreshIncludes = function() {
 
     var allIncludes = [];
     var rootDirectory = path.dirname(this.mainInk.path);
 
-    // TODO: Make it recursive
-    var existingIncludePaths = _.map(_.without(this.files, this.mainInk), (f) => f.path);
+    var existingFilePaths = _.map(_.without(this.files, this.mainInk), (f) => f.path);
 
-    var latestIncludePaths = [];
-    var addIncludesFromFile = (inkFile) => {
+    var pathsFromINCLUDEs = [];
+    var addIncludePathsFromFile = (inkFile) => {
         if( !inkFile.includes )
             return;
 
         inkFile.includes.forEach(incPath => {
             var absPath = path.join(rootDirectory, incPath);
-            latestIncludePaths.push(absPath);
+            pathsFromINCLUDEs.push(absPath);
 
             var recurseInkFile = this.inkFileWithRelativePath(incPath);
             if( recurseInkFile )
-                addIncludesFromFile(recurseInkFile);
+                addIncludePathsFromFile(recurseInkFile);
         });
     }
-    addIncludesFromFile(this.mainInk);
+    addIncludePathsFromFile(this.mainInk);
 
-    var includesToAdd    = _.difference(latestIncludePaths,   existingIncludePaths)
-    var includesToRemove = _.difference(existingIncludePaths, latestIncludePaths);
+    // Includes that we don't have in this.files yet that are mentioned in other files
+    var includesToLoad = _.difference(pathsFromINCLUDEs, existingFilePaths)
 
-    // Reset spare flag
-    this.files.forEach(f => f.isSpare = false);
+    // Files that are in this.files that aren't actually mentioned anywhere
+    var spareFilePaths = _.difference(existingFilePaths,  pathsFromINCLUDEs);
 
-    var filesToRemove = _.filter(this.files, f => includesToRemove.indexOf(f.path) != -1 );
+    // Mark files that are spare, and remove those that aren't needed at all
+    var filesToRemove = [];
+    this.files.forEach(f => {
+        f.isSpare = spareFilePaths.indexOf(f.path) != -1;
 
-    // Don't remove files that have unsaved changes
-    filesToRemove = _.filter(filesToRemove, f => { 
-        if( f.hasUnsavedChanges ) 
-            f.isSpare = true;
-        return !f.hasUnsavedChanges;
+        // Remove brand new files that aren't included anywhere - otherwise they're spare
+        if( f.isSpare && f.brandNew )
+            filesToRemove.push(f);
     });
-
-    // TODO: Could iterate on the above array to process them before removal?
     this.files = _.difference(this.files, filesToRemove);
 
-    includesToAdd.forEach((newIncludePath) => {
-        var newIncludeFile = new InkFile(newIncludePath || null, this.mainInk, inkFileEvents);
-        this.files.push(newIncludeFile);
-    });
+    includesToLoad.forEach(newIncludePath => this.createInkFile(newIncludePath));
 
     NavView.setFiles(this.mainInk, this.files);
 }
@@ -122,19 +130,51 @@ InkProject.prototype.refreshUnsavedChanges = function() {
     remote.getCurrentWindow().setDocumentEdited(this.hasUnsavedChanges);
 }
 
-InkProject.prototype.openInkFile = function(inkFile) {
+InkProject.prototype.tryStartFileWatching = function() {
+    if( !this.mainInk.path || !path.isAbsolute(this.mainInk.path) )
+        return;
+
+    if( this.fileWatcher )
+        this.fileWatcher.close();
+
+    var rootDir = path.dirname(this.mainInk.path);
+    var watchPath = path.join(rootDir, "**/*.ink");
+    this.fileWatcher = chokidar.watch(watchPath);
+
+    this.fileWatcher.on("add", newlyFoundFilePath => {
+        var relPath = path.relative(rootDir, newlyFoundFilePath);
+        var existingFile = _.find(this.files, f => f.relativePath() == relPath);
+        if( !existingFile ) {
+            console.log("Watch found new file - creating it: "+newlyFoundFilePath);
+            this.createInkFile(newlyFoundFilePath);
+
+            // TODO: Find a way to refresh includes without spamming it
+            //this.refreshIncludes();
+        } else {
+            console.log("Watch found file but it already existed: "+path);
+        }
+    });
+
+    this.fileWatcher.on("change", path => console.log(`File ${path} updated`));
+    this.fileWatcher.on("unlink", path => console.log(`File ${path} removed`));
+}
+
+InkProject.prototype.showInkFile = function(inkFile) {
 
     if( _.isString(inkFile) )
         inkFile = this.inkFileWithRelativePath(inkFile);
 
     if( inkFile && inkFile != this.activeInkFile ) {
         this.activeInkFile = inkFile;
-        EditorView.openInkFile(inkFile);
-        InkProject.events.changeOpenInkFile(this.activeInkFile);
+        EditorView.showInkFile(inkFile);
+        InkProject.events.didSwitchToInkFile(this.activeInkFile);
     }
 }
 
 InkProject.prototype.save = function() {
+
+    var wasUnsaved = !this.mainInk.path;
+
     var filesRemaining = this.files.length;
     var includeFiles = _.filter(this.files, f => f != this.mainInk);
 
@@ -158,8 +198,12 @@ InkProject.prototype.save = function() {
         singleFileSaveComplete(this.mainInk, success);
 
         // May not be a success if cancelled, in which case we stop early
-        if( success )
+        if( success ) {
+
+            if( wasUnsaved ) this.tryStartFileWatching();
+
             includeFiles.forEach(f => f.save(success => singleFileSaveComplete(f, success)));
+        }
     });
 }
 
