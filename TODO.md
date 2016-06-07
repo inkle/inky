@@ -40,6 +40,8 @@
         * call `watcher.close()` to stop
     * If watching, we can live-reload files without unsaved changes, and refresh the nav
 
+* When live-reloading changed files, try to make the cursor go back to where it was
+
 * Error checking for file system integration (opening / saving files etc currently doesn't check for any errors)
 
 * Toolbar UI to jump to a particular path at the start of the story when playing

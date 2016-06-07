@@ -155,7 +155,16 @@ InkProject.prototype.tryStartFileWatching = function() {
         }
     });
 
-    this.fileWatcher.on("change", path => console.log(`File ${path} updated`));
+    this.fileWatcher.on("change", updatedFilePath => {
+        var relPath = path.relative(rootDir, updatedFilePath);
+        var inkFile = _.find(this.files, f => f.relativePath() == relPath);
+        if( inkFile ) {
+            // TODO: maybe ask user if they want to overwrite? not sure I want to though
+            if( !inkFile.hasUnsavedChanges && inkFile.canLoadFromDisk() ) {
+                inkFile.loadFromDisk();
+            }
+        }
+    });
     this.fileWatcher.on("unlink", path => console.log(`File ${path} removed`));
 }
 

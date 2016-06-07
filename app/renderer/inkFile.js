@@ -29,7 +29,7 @@ function InkFile(filePath, mainInkFile, events) {
     this.aceSession = null;
 
     this.includes = [];
-    this.newlyLoaded = true;
+    this.justLoadedContent = false;
     this.brandNew = true;
     this.compilerVersionDirty = true;
 
@@ -40,31 +40,8 @@ function InkFile(filePath, mainInkFile, events) {
         }
     });
 
-    if( this.path && path.isAbsolute(this.path) ) {
-
-        fs.readFile(this.path, 'utf8', (err, data) => {
-            if( err ) {
-                console.error("Failed to load include at: "+this.path);
-                return;
-            }
-
-            this.newlyLoaded = true;
-            this.brandNew = false;
-
-            this.aceDocument.setValue(data);
-            this.hasUnsavedChanges = false;
-            this.events.fileChanged();
-
-            // Force immediate symbol re-parse (rather than the lazy scheduling)
-            // in the newly loaded state so that we gather the includes and
-            // project structure ASAP.
-            this.symbols.parse();
-
-            this.newlyLoaded = false;
-        });
-    } else {
-        this.newlyLoaded = false;
-    }
+    if( this.canLoadFromDisk() )
+        this.loadFromDisk();
 
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
@@ -72,7 +49,7 @@ function InkFile(filePath, mainInkFile, events) {
         this.brandNew = false;
         this.compilerVersionDirty = true;
         
-        if( !this.newlyLoaded ) 
+        if( !this.justLoadedContent ) 
             this.events.fileChanged();
     });
 }
@@ -166,6 +143,40 @@ InkFile.prototype.save = function(afterSaveCallback) {
             }
         })
     }
+}
+
+InkFile.prototype.loadFromDisk = function() {
+
+    if( !this.canLoadFromDisk() ) return;
+
+    fs.readFile(this.path, 'utf8', (err, data) => {
+        if( err ) {
+            console.error("Failed to load include at: "+this.path);
+            return;
+        }
+
+        // Temporarily set justLoadedContent to true so that
+        // we don't get a double fileChanged callback before
+        // we're ready for it.
+        // TODO: Verify this is true - can we simplify?
+        this.justLoadedContent = true;
+        this.brandNew = false;
+
+        this.aceDocument.setValue(data);
+        this.hasUnsavedChanges = false;
+        this.events.fileChanged();
+
+        // Force immediate symbol re-parse (rather than the lazy scheduling)
+        // in the newly loaded state so that we gather the includes and
+        // project structure ASAP.
+        this.symbols.parse();
+
+        this.justLoadedContent = false;
+    });
+}
+
+InkFile.prototype.canLoadFromDisk = function() {
+    return this.path && path.isAbsolute(this.path);
 }
 
 InkFile.prototype.addIncludeLine = function(relativePath) {
