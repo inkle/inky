@@ -5,6 +5,8 @@ const path = require("path");
 
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
+//remote.getCurrentWindow().webContents.openDevTools();
+
 // Helpers in global objects and namespace
 require("./util.js");
 
