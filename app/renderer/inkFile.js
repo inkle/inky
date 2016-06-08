@@ -29,9 +29,31 @@ function InkFile(filePath, mainInkFile, events) {
     this.aceSession = null;
 
     this.includes = [];
+
+    // Temporarily set after fs.readFile completes so
+    // we don't get a double fileChanged callback before
+    // we're ready for it.
+    // TODO: Verify this is true - can we simplify?
     this.justLoadedContent = false;
-    this.brandNew = true;
+
+    // New empty file only just created by user. Used to detect
+    // when unsaved, unedited files can be safely removed by the project.
+    // We can't know at time of creation whether it's going to be new and empty,
+    // since it might be due to the user typing "INCLUDE x". x may be a brand
+    // new file, or it could be an existing file - we just have to try and load it.
+    // We initially set this to false so that the project doesn't immediately
+    // remove it from the project before the include link has been set up.
+    this.brandNewEmpty = false;
+
+    // Flag to detect files that have data that hasn't been saved 
+    // out into the compiler's temporary directory that needs to stay
+    // in sync with the (potentially unsaved) editor version.
     this.compilerVersionDirty = true;
+
+    // Flag used to ignore a file system watch event that causes the project
+    // to attempt to reload data that has just changed on disk. When the
+    // save was our own, we can safely ignore it.
+    this.justSaved = false;
 
     this.symbols = new InkFileSymbols(this, {
         includesChanged: (includes) => {
@@ -40,14 +62,16 @@ function InkFile(filePath, mainInkFile, events) {
         }
     });
 
-    if( this.canLoadFromDisk() )
-        this.loadFromDisk();
+    this.tryLoadFromDisk(success => {
+        this.brandNewEmpty = !success;
+    });
 
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
-        this.brandNew = false;
+        this.brandNewEmpty = false;        
         this.compilerVersionDirty = true;
+        this.justSaved = false;
         
         if( !this.justLoadedContent ) 
             this.events.fileChanged();
@@ -134,7 +158,9 @@ InkFile.prototype.save = function(afterSaveCallback) {
 
     // Quick save to existing path
     else {
+        this.justSaved = true;
         fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", (err) => {
+            this.brandNewEmpty = false;
             if( err ) 
                 afterSaveCallback(false);
             else {
@@ -145,38 +171,64 @@ InkFile.prototype.save = function(afterSaveCallback) {
     }
 }
 
-InkFile.prototype.loadFromDisk = function() {
+InkFile.prototype.deleteFromDisk = function() {
+    if( this.path && path.isAbsolute(this.path) )
+        fs.exists(this.path, (exists) => { if( exists ) fs.unlink(this.path) });
+}
 
-    if( !this.canLoadFromDisk() ) return;
+InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
 
-    fs.readFile(this.path, 'utf8', (err, data) => {
-        if( err ) {
-            console.error("Failed to load include at: "+this.path);
+    // Only being told to load from disk because the InkProject detected
+    // a change event that was our own save? Ignore it just this once.
+    if( this.justSaved ) {
+        this.justSaved = false;
+        return;
+    }
+
+    // Simplify code below by using a fallback
+    loadCallback = loadCallback || (() => {});
+
+    if( !this.path || !path.isAbsolute(this.path) ) {
+        loadCallback(false);
+        return;
+    }
+
+    fs.stat(this.path, (err, stats) => {
+        if( err || !stats.isFile() ) { 
+            loadCallback(false);
             return;
         }
 
-        // Temporarily set justLoadedContent to true so that
-        // we don't get a double fileChanged callback before
-        // we're ready for it.
-        // TODO: Verify this is true - can we simplify?
-        this.justLoadedContent = true;
-        this.brandNew = false;
+        fs.readFile(this.path, 'utf8', (err, data) => {
+            if( err ) {
+                console.error("Failed to load include at: "+this.path);
+                loadCallback(false);
+                return;
+            }
 
-        this.aceDocument.setValue(data);
-        this.hasUnsavedChanges = false;
-        this.events.fileChanged();
+            // Success - fire this callback before other callbacks 
+            // like document change get fired
+            loadCallback(true);
 
-        // Force immediate symbol re-parse (rather than the lazy scheduling)
-        // in the newly loaded state so that we gather the includes and
-        // project structure ASAP.
-        this.symbols.parse();
+            // Temporarily set justLoadedContent to true so that
+            // we don't get a double fileChanged callback before
+            // we're ready for it.
+            // TODO: Verify this is true - can we simplify?
+            this.justLoadedContent = true;
 
-        this.justLoadedContent = false;
+            this.aceDocument.setValue(data);
+            this.hasUnsavedChanges = false;
+            this.events.fileChanged();
+
+            // Force immediate symbol re-parse (rather than the lazy scheduling)
+            // in the newly loaded state so that we gather the includes and
+            // project structure ASAP.
+            this.symbols.parse();
+
+            this.justLoadedContent = false;
+        });
+
     });
-}
-
-InkFile.prototype.canLoadFromDisk = function() {
-    return this.path && path.isAbsolute(this.path);
 }
 
 InkFile.prototype.addIncludeLine = function(relativePath) {

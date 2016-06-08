@@ -2,6 +2,9 @@
 
 ## SOON
 
+* When live-reloading changed files, try to make the cursor go back to where it was
+* Check what happens when you rename files in the Finder. There's no rename event in chokadir. Does it go through change or remove and add?
+
 ## Need before release
 
 * Bit of solid testing
@@ -31,16 +34,6 @@
 * Highlight files in nav that have errors
 * Add filenames to issue browser (as headings, only when in multi-file and not in single active file)
 * Switch to specific ink file within the current project when opening an ink file externally that's related to the current project
-
-* File system watch: Automatic discovery of other nearby ink files in addition to those that are INCLUDE-ed, and detect removal and renaming of existing files
-    * Apparently `fs.watch` is crap, and you should use <https://github.com/paulmillr/chokidar>, which has been used in big popular projects successfully
-    * `var watcher = fs.watch(filename[, options][, listener])`
-        * `filename` can be a dir
-        * `options` can include `recursive`
-        * call `watcher.close()` to stop
-    * If watching, we can live-reload files without unsaved changes, and refresh the nav
-
-* When live-reloading changed files, try to make the cursor go back to where it was
 
 * Error checking for file system integration (opening / saving files etc currently doesn't check for any errors)
 

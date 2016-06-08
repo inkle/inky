@@ -102,7 +102,7 @@ InkFileSymbols.prototype.parse = function() {
         }
 
         // INCLUDE
-        else if( tok.type.indexOf("include.filepath") != -1 ) {
+        else if( tok.type.indexOf("include.filepath") != -1 && tok.value.trim().length > 0 ) {
             includes.push(tok.value);
             lastIncludeRow = it.getCurrentTokenRow();
         }

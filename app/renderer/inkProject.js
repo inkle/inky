@@ -28,7 +28,7 @@ function InkProject(mainInkFilePath) {
 
     this.showInkFile(this.mainInk);
 
-    this.tryStartFileWatching();
+    this.startFileWatching();
 }
 
 InkProject.prototype.createInkFile = function(path) {
@@ -106,7 +106,7 @@ InkProject.prototype.refreshIncludes = function() {
         f.isSpare = spareFilePaths.indexOf(f.path) != -1;
 
         // Remove brand new files that aren't included anywhere - otherwise they're spare
-        if( f.isSpare && f.brandNew )
+        if( f.isSpare && f.brandNewEmpty )
             filesToRemove.push(f);
     });
     this.files = _.difference(this.files, filesToRemove);
@@ -130,7 +130,7 @@ InkProject.prototype.refreshUnsavedChanges = function() {
     remote.getCurrentWindow().setDocumentEdited(this.hasUnsavedChanges);
 }
 
-InkProject.prototype.tryStartFileWatching = function() {
+InkProject.prototype.startFileWatching = function() {
     if( !this.mainInk.path || !path.isAbsolute(this.mainInk.path) )
         return;
 
@@ -145,13 +145,13 @@ InkProject.prototype.tryStartFileWatching = function() {
         var relPath = path.relative(rootDir, newlyFoundFilePath);
         var existingFile = _.find(this.files, f => f.relativePath() == relPath);
         if( !existingFile ) {
-            console.log("Watch found new file - creating it: "+newlyFoundFilePath);
+            console.log("Watch found new file - creating it: "+relPath);
             this.createInkFile(newlyFoundFilePath);
 
             // TODO: Find a way to refresh includes without spamming it
-            //this.refreshIncludes();
+            this.refreshIncludes();
         } else {
-            console.log("Watch found file but it already existed: "+path);
+            console.log("Watch found file but it already existed: "+relPath);
         }
     });
 
@@ -160,12 +160,19 @@ InkProject.prototype.tryStartFileWatching = function() {
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
             // TODO: maybe ask user if they want to overwrite? not sure I want to though
-            if( !inkFile.hasUnsavedChanges && inkFile.canLoadFromDisk() ) {
-                inkFile.loadFromDisk();
+            if( !inkFile.hasUnsavedChanges )
+                inkFile.tryLoadFromDisk();
+        }
+    });
+    this.fileWatcher.on("unlink", removedFilePath => {
+        var relPath = path.relative(rootDir, removedFilePath);
+        var inkFile = _.find(this.files, f => f.relativePath() == relPath);
+        if( inkFile ) {
+            if( !inkFile.hasUnsavedChanges && inkFile != this.mainInk ) {
+                this.deleteInkFile(inkFile);
             }
         }
     });
-    this.fileWatcher.on("unlink", path => console.log(`File ${path} removed`));
 }
 
 InkProject.prototype.showInkFile = function(inkFile) {
@@ -209,7 +216,7 @@ InkProject.prototype.save = function() {
         // May not be a success if cancelled, in which case we stop early
         if( success ) {
 
-            if( wasUnsaved ) this.tryStartFileWatching();
+            if( wasUnsaved ) this.startFileWatching();
 
             includeFiles.forEach(f => f.save(success => singleFileSaveComplete(f, success)));
         }
@@ -285,6 +292,18 @@ InkProject.prototype.inkFileWithRelativePath = function(relativePath) {
 
 InkProject.prototype.inkFileWithId = function(id) {
     return _.find(this.files, f => f.id == id);
+}
+
+InkProject.prototype.deleteInkFile = function(inkFile) {
+
+    if( this.activeInkFile == inkFile )
+        this.showInkFile(this.mainInk);
+
+    inkFile.deleteFromDisk();
+
+    this.files.remove(inkFile);
+
+    NavView.setFiles(this.mainInk, this.files);
 }
 
 InkProject.prototype.findSymbol = function(name, posContext) {
