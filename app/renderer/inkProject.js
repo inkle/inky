@@ -161,7 +161,14 @@ InkProject.prototype.startFileWatching = function() {
         if( inkFile ) {
             // TODO: maybe ask user if they want to overwrite? not sure I want to though
             if( !inkFile.hasUnsavedChanges )
-                inkFile.tryLoadFromDisk();
+
+                if( this.activeInkFile == inkFile )
+                    EditorView.saveCursorPos();
+
+                inkFile.tryLoadFromDisk(success => {
+                    if( success && this.activeInkFile == inkFile )
+                        setImmediate(() => EditorView.restoreCursorPos());
+                });
         }
     });
     this.fileWatcher.on("unlink", removedFilePath => {
@@ -181,7 +188,14 @@ InkProject.prototype.showInkFile = function(inkFile) {
         inkFile = this.inkFileWithRelativePath(inkFile);
 
     if( inkFile && inkFile != this.activeInkFile ) {
+        if( this.activeInkFile )
+            this.activeInkFile.isActive = false;
+
         this.activeInkFile = inkFile;
+
+        if( this.activeInkFile )
+            this.activeInkFile.isActive = true;
+
         EditorView.showInkFile(inkFile);
         InkProject.events.didSwitchToInkFile(this.activeInkFile);
     }

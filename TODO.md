@@ -2,7 +2,6 @@
 
 ## SOON
 
-* When live-reloading changed files, try to make the cursor go back to where it was
 * Check what happens when you rename files in the Finder. There's no rename event in chokadir. Does it go through change or remove and add?
 
 ## Need before release

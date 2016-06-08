@@ -6,6 +6,10 @@ const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 var editorMarkers = [];
 var editorAnnotations = [];
 
+// Used when reloading files so that cursor doesn't jump back to the top
+var savedCursorPos = null;
+var savedScrollRow = null;
+
 // Overriden by controller.js
 var events = {
     change:         () => {},
@@ -159,5 +163,15 @@ exports.EditorView = {
         editor.setSession(inkFile.getAceSession());
         editor.focus();
     },
-    focus: () => { editor.focus(); }
+    focus: () => { editor.focus(); },
+    saveCursorPos: () => { 
+        savedCursorPos = editor.getCursorPosition(); 
+        savedScrollRow = editor.getFirstVisibleRow(); 
+    },
+    restoreCursorPos: () => { 
+        if( savedCursorPos ) {
+            editor.moveCursorToPosition(savedCursorPos); 
+            editor.scrollToRow(savedScrollRow);
+        } 
+    }
 };
