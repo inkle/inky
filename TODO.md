@@ -1,9 +1,5 @@
 # TODO
 
-## SOON
-
-* Check what happens when you rename files in the Finder. There's no rename event in chokadir. Does it go through change or remove and add?
-
 ## Need before release
 
 * Bit of solid testing
@@ -25,8 +21,11 @@
 
 * Removal and renaming of includes (and renaming of main ink?)
     * Contextual menu on includes (Rename, Delete)
+        * Automatically find/replace matching include line
     * Mac-style pressing return with a file selected to rename it? Double click to rename?
     * File -> Rename current file
+* Improve behaviour for renaming files in finder
+    * Currently file watcher removes then adds, and this causes both the newly renamed file and the old one to appear. The old one appears because it's still being included from somewhere, similar to when you type a new INCLUDE line. Perhaps add a little subtitle to the filename to say "Included from xyz.ink"?
 
 * Proper hierarchy view for includes rather than currently single-level groupings?
 * Drag/drop includes between groups? (tricky!)
