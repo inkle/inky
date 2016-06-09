@@ -107,8 +107,6 @@ LiveCompiler.setEvents({
     storyCompleted: () => {
         PlayerView.addTerminatingMessage("End of story", "end");
     },
-    exportCompleted: () => {
-    },
     unexpectedExit: () => {
         PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
     },

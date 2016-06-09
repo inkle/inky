@@ -7,6 +7,7 @@ var sessionId = 0;
 
 var currentPlaySessionId = -1;
 var currentExportSessionId = -1;
+var exportCompleteCallback = null;
 
 var lastEditorChange = null;
 
@@ -83,12 +84,23 @@ function reloadInklecateSession() {
     ipc.send("compile", instr, sessionId);
 }
 
-function exportJson(jsonPath) {
+function exportJson(callback) {
+    exportCompleteCallback = callback;
+
     var instr = buildCompileInstruction();
-    instr.exportPath = jsonPath;
+    instr.export = true;
     currentExportSessionId = instr.sessionId;
 
     ipc.send("compile", instr);
+}
+
+function completeExport(error, path) {
+    var callback = exportCompleteCallback;
+    exportCompleteCallback = null;
+    if( error )
+        callback(error.message);
+    else
+        callback(null, path);
 }
 
 function stopInklecateSession(idToStop) {
@@ -160,8 +172,13 @@ ipc.on("play-generated-error", (event, error, fromSessionId) => {
 
     if( !sessionIsCurrent(fromSessionId) ) return;
 
-    issues.push(error);
-    events.errorAdded(error);
+    if( fromSessionId == currentExportSessionId ) {
+        completeExport(error);
+    } else {
+        issues.push(error);
+        events.errorAdded(error);
+    }
+
 });
 
 ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
@@ -192,26 +209,35 @@ ipc.on("play-requires-input", (event, fromSessionId) => {
     }
 });
 
-ipc.on("inklecate-complete", (event, fromSessionId) => {
+ipc.on("inklecate-complete", (event, fromSessionId, exportJsonPath) => {
 
     if( fromSessionId == currentPlaySessionId )
         events.storyCompleted();
-    else if( fromSessionId == currentExportSessionId )
-        events.exportCompleted();
+    else if( fromSessionId == currentExportSessionId ) {
+        completeExport(null, exportJsonPath);
+    }
 });
 
 ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
 
     if( !sessionIsCurrent(fromSessionId) ) return;
 
-    events.unexpectedExit();
+    if( fromSessionId == currentExportSessionId ) {
+        completeExport({message: "Unexpected exit"});
+    } else {
+        events.unexpectedExit();
+    }
 });
 
 ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
 
     if( !sessionIsCurrent(fromSessionId) ) return;
 
-    events.unexpectedError(error);
+    if( fromSessionId == currentExportSessionId ) {
+        completeExport({message: "Unexpected error"});
+    } else {
+        events.unexpectedError(error);
+    }
 });
 
 ipc.on("play-story-stopped", (event, fromSessionId) => {

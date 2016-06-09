@@ -2,6 +2,7 @@ const remote = require('electron').remote;
 const dialog = remote.dialog;
 const ipc = require("electron").ipcRenderer;
 const path = require("path");
+const fs = require("fs");
 const _ = require("lodash");
 const chokidar = require('chokidar');
 
@@ -239,22 +240,33 @@ InkProject.prototype.save = function() {
 
 InkProject.prototype.exportJson = function() {
 
-    if( !this.defaultExportPath && this.mainInk.path && path.isAbsolute(this.mainInk.path) ) {
-        var pathObj = path.parse(this.mainInk.path);
-        pathObj.ext = ".json";
-        this.defaultExportPath = path.format(pathObj);
-    }
-
-    dialog.showSaveDialog(remote.getCurrentWindow(), { 
-        filters: [
-            { name: 'JSON files', extensions: ['json'] }
-        ],
-        defaultPath: this.defaultExportPath
-    }, (jsonPath) => {
-        if( jsonPath ) { 
-            LiveCompiler.exportJson(jsonPath);
-            this.defaultExportPath = jsonPath;
+    LiveCompiler.exportJson((err, compiledJsonTempPath) => {
+        if( err ) {
+            alert("Could not export JSON because of an error: "+err);
+            return;
         }
+
+        if( !this.defaultExportPath && this.mainInk.path && path.isAbsolute(this.mainInk.path) ) {
+            var pathObj = path.parse(this.mainInk.path);
+            pathObj.ext = ".json";
+            this.defaultExportPath = path.format(pathObj);
+        }
+
+        dialog.showSaveDialog(remote.getCurrentWindow(), { 
+            filters: [
+                { name: 'JSON files', extensions: ['json'] }
+            ],
+            defaultPath: this.defaultExportPath
+        }, (targetJsonSavePath) => {
+            if( targetJsonSavePath ) { 
+                this.defaultExportPath = targetJsonSavePath;
+
+                // Move compiled json into place
+                fs.rename(compiledJsonTempPath, targetJsonSavePath, (err) => {
+                    if( err ) alert("Sorry, could not save to "+targetJsonSavePath);
+                });
+            }
+        });
     });
 }
 

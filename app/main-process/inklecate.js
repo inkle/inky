@@ -24,8 +24,9 @@ function compile(compileInstruction, requester) {
 
     if( compileInstruction.play )
         console.log("Playing "+sessionId);
-    else if( compileInstruction.exportPath )
-        console.log("Exporting session "+sessionId+" to "+compileInstruction.exportPath);
+    else if( compileInstruction.export ) {
+        console.log("Exporting session "+sessionId);
+    }
 
     var uniqueDirPath = path.join(tempInkPath, compileInstruction.namespace);
     console.log("Unique dir path: "+uniqueDirPath);
@@ -59,9 +60,11 @@ function compile(compileInstruction, requester) {
     if( compileInstruction.play )
         inklecateOptions[0] += "p";
 
-    if( compileInstruction.exportPath )  {
+    var jsonExportPath = null;
+    if( compileInstruction.export )  {
         inklecateOptions.push("-o");
-        inklecateOptions.push(compileInstruction.exportPath);
+        jsonExportPath = path.join(uniqueDirPath, `export_${sessionId}.json`);
+        inklecateOptions.push(jsonExportPath);
     }
 
     inklecateOptions.push(mainInkPath);
@@ -130,8 +133,8 @@ function compile(compileInstruction, requester) {
         var forceStoppedByPlayer = sessions[sessionId].stopped;
         if( !forceStoppedByPlayer ) {
             if( code == 0 ) {
-                console.log("Completed story or exported successfully");
-                requester.send('inklecate-complete', sessionId);
+                console.log("Completed story or exported successfully at "+jsonExportPath);
+                requester.send('inklecate-complete', sessionId, jsonExportPath);
             }
             else {
                 console.log("Story exited unexpectedly with error code "+code+" (session "+sessionId+")");
