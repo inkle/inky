@@ -11,7 +11,7 @@ rm -rf Inky-darwin-x64/
 # Create icon from PNG
 ./resources/makeIcns.command
 
-electron-packager app Inky --platform=darwin --icon=resources/Icon.icns --arch=x64 --extend-info=resources/info.plist --prune
+electron-packager app Inky --platform=darwin --icon=resources/Icon.icns --arch=x64 --extend-info=resources/info.plist --prune --asar --asar-unpack="inklecate"
 
 # Remove .icns again
 rm resources/Icon.icns

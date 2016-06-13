@@ -8,7 +8,16 @@ const ipc = electron.ipcMain;
 const util = require('util');
 const mkdirp = require('mkdirp');
 
-const inklecatePath = __dirname + "/ink/inklecate";
+// inklecate is packaged outside of the main asar bundle since it's executable
+var inklecatePath = path.join(__dirname, "../../app.asar.unpacked/main-process/ink/inklecate");
+
+// If inklecate isn't available here, we're probably in development mode (not packaged into a release asar)
+try { fs.accessSync(inklecatePath) }
+catch(e) {
+    console.log(`Inklecate not at: ${inklecatePath}`);
+    console.log(`Loading inklecate from local directory instead (we're in development mode)`);
+    inklecatePath = path.join(__dirname, "/ink/inklecate");
+}
 
 // TODO: Customise this for different projects
 // Is this the right temporary directory even on Mac? Seems like a bad practice
