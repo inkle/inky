@@ -1,7 +1,7 @@
 {
   "name": "inky",
   "productName": "Inky",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "scripts": {
