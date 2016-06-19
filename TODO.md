@@ -1,10 +1,5 @@
 # TODO
 
-## Need before release
-
-* Bit of solid testing
-    * Particularly save/load functionality
-
 ## Features and improvements
 
 * Some more shortcuts:
