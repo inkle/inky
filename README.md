@@ -22,6 +22,8 @@ Inky is in alpha, is relatively untested, and is certain to have some bugs. It i
 
 The informal [TODO.md](TODO.md) lists some missing features and known issues. If you want to discuss one, or request a new fix or feature, please [create a github issue](http://www.github.com/inkle/inky/issues).
 
+To keep up to date with the latest news about ink [sign up for the mailing list](http://www.inklestudios.com/ink#signup).
+
 ## Download
 
 ### Mac
