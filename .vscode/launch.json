@@ -9,7 +9,7 @@
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",
-            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+            "runtimeExecutable": "${workspaceRoot}/app/node_modules/.bin/electron",
             "runtimeArgs": [/*
                 ".",
                 "--enable-logging"
