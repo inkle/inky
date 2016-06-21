@@ -65,10 +65,19 @@ app.on('ready', function() {
         }
     });
 
+    let openedSpecificFile = false;
     if( process.platform == "win32" && process.argv.length > 1 ) {
-        var fileToOpen = process.argv[1];
-        ProjectWindow.open(fileToOpen);
-    } else {
+        for(let i=1; i<process.argv.length; i++) {
+            var arg = process.argv[i];
+            if( arg.indexOf(".ink") == arg.length-4 ) {
+                var fileToOpen = process.argv[1];
+                ProjectWindow.open(fileToOpen);
+                openedSpecificFile = true;
+                break;
+            }
+        }
+    } 
+    if( !openedSpecificFile ) {
         var w = ProjectWindow.createEmpty();
     }
 
