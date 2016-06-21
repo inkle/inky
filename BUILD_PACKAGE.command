@@ -13,10 +13,10 @@ rm -rf Inky-win32-x64/
 ./resources/makeIcns.command
 
 # Mac
-electron-packager app Inky --platform=darwin  --arch=x64 --icon=resources/Icon.icns --extend-info=resources/info.plist --prune --asar --asar-unpack="inklecate_mac" --ignore="inklecate_win.exe"
+electron-packager app Inky --platform=darwin  --arch=x64 --icon=resources/Icon.icns --extend-info=resources/info.plist --prune --asar --asar-unpack-dir="main-process/ink" --ignore="inklecate_win.exe"
 
 # Windows (requires Wine - `brew install wine`)
-electron-packager app Inky --platform=win32  --arch=x64 --icon=resources/Icon1024.png.ico --prune --asar --asar-unpack="inklecate_win.exe" --ignore="inklecate_mac" --version-string.ProductName="Inky" --version-string.CompanyName="inkle Ltd" --version-string.FileDescription="Inky" --version-string.OriginalFilename="Inky" --version-string.InternalName="Inky"
+electron-packager app Inky --platform=win32  --arch=x64 --icon=resources/Icon1024.png.ico --prune --asar --asar-unpack-dir="main-process/ink" --ignore="inklecate_mac" --version-string.ProductName="Inky" --version-string.CompanyName="inkle Ltd" --version-string.FileDescription="Inky" --version-string.OriginalFilename="Inky" --version-string.InternalName="Inky"
 
 # Remove .icns again
 rm resources/Icon.icns
