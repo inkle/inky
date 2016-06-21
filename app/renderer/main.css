@@ -107,11 +107,15 @@ h1.title {
   font-size: 9pt;
   line-height: 20px;
   height: 22px;
-  bottom: 0;
+  top: 26px;
   position: relative;
   text-align: center;
   margin: 0 auto;
   max-width: 200px;
+}
+
+.win32 #toolbar div.issuesSummary {
+  top: 0;
 }
 
 #toolbar div.issuesSummary .issueCount {
