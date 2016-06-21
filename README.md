@@ -30,9 +30,9 @@ To keep up to date with the latest news about ink [sign up for the mailing list]
 
 [Download the latest release](http://www.github.com/inkle/inky/releases/latest)
 
-### Windows and Linux
+### Windows and Linux - COMING SOON!
 
-Not available yet, and we're not working on it directly. However, Inky was developed in [Electron](http://electron.atom.io/) (using web technologies), so porting should be straightforward. If you can help out, please [discuss](http://github.com/inkle/inky/issues) and/or submit a pull request!
+Inky was developed in [Electron](http://electron.atom.io/) (using web technologies), so porting is straightforward, and is now a simple question of bug fixing. If you can help out, please [discuss](http://github.com/inkle/inky/issues) and/or submit a pull request!
 
 ## Implementation details
 
