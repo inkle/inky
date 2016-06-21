@@ -1,4 +1,6 @@
 node_modules
 *.sublime-workspace
 Inky-darwin-x64
+Inky-win32-x64
 UploadToMisc.command
+Inky_windows.zip
