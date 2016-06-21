@@ -168,17 +168,12 @@ ipc.on("play-generated-text", (event, result, fromSessionId) => {
     events.textAdded(result, replaying);
 });
 
-ipc.on("play-generated-error", (event, error, fromSessionId) => {
+ipc.on("play-generated-errors", (event, errors, fromSessionId) => {
 
     if( !sessionIsCurrent(fromSessionId) ) return;
 
-    if( fromSessionId == currentExportSessionId ) {
-        completeExport(error);
-    } else {
-        issues.push(error);
-        events.errorAdded(error);
-    }
-
+    issues = errors;
+    events.errorsAdded(errors);
 });
 
 ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
@@ -218,14 +213,14 @@ ipc.on("inklecate-complete", (event, fromSessionId, exportJsonPath) => {
     }
 });
 
-ipc.on("play-story-unexpected-exit", (event, fromSessionId) => {
+ipc.on("play-exit-due-to-error", (event, exitCode, fromSessionId) => {
 
     if( !sessionIsCurrent(fromSessionId) ) return;
 
     if( fromSessionId == currentExportSessionId ) {
-        completeExport({message: "Unexpected exit"});
+        completeExport({message: "Ink has errors - please fix them before exporting."});
     } else {
-        events.unexpectedExit();
+        events.exitDueToError();
     }
 });
 

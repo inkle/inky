@@ -112,6 +112,7 @@ h1.title {
   text-align: center;
   margin: 0 auto;
   max-width: 200px;
+  z-index: 1; /* On top of left/right buttons */
 }
 
 .win32 #toolbar div.issuesSummary {

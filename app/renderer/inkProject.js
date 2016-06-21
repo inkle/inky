@@ -242,7 +242,7 @@ InkProject.prototype.exportJson = function() {
 
     LiveCompiler.exportJson((err, compiledJsonTempPath) => {
         if( err ) {
-            alert("Could not export JSON because of an error: "+err);
+            alert("Could not export JSON: "+err);
             return;
         }
 

@@ -88,15 +88,17 @@ LiveCompiler.setEvents({
             });
         }
     },
-    errorAdded: (error) => {
+    errorsAdded: (errors) => {
+        for(var i=0; i<errors.length; i++) {
+            var error = errors[i];
+            if( error.filename == InkProject.currentProject.activeInkFile.relativePath() )
+                EditorView.addError(error);
 
-        if( error.filename == InkProject.currentProject.activeInkFile.relativePath() )
-            EditorView.addError(error);
-
-        if( error.type == "RUNTIME ERROR" ) {
-            PlayerView.addLineError(error, () => gotoIssue(error));
+            if( error.type == "RUNTIME ERROR" )
+                PlayerView.addLineError(error, () => gotoIssue(error));
         }
-        ToolbarView.updateIssueSummary(LiveCompiler.getIssues());
+
+        ToolbarView.updateIssueSummary(errors);
     },
     playerPrompt: (replaying, isLast) => {
         if( replaying )
@@ -107,8 +109,8 @@ LiveCompiler.setEvents({
     storyCompleted: () => {
         PlayerView.addTerminatingMessage("End of story", "end");
     },
-    unexpectedExit: () => {
-        PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
+    exitDueToError: () => {
+        // No need to do anything - errors themselves being displayed are enough
     },
     unexpectedError: (error) => {
         if( error.indexOf("Unhandled Exception") != -1 ) {

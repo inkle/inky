@@ -110,8 +110,10 @@ function compile(compileInstruction, requester) {
     });
 
     playProcess.stdin.setEncoding('utf8');
-
     playProcess.stdout.setEncoding('utf8');
+
+    var inkErrors = [];
+
     playProcess.stdout.on('data', (text) => {
         
         // Strip Byte order mark
@@ -128,12 +130,12 @@ function compile(compileInstruction, requester) {
             var promptMatches = line.match(/^\?>/);
 
             if( errorMatches ) {
-                requester.send('play-generated-error', {
+                inkErrors.push({
                     type: errorMatches[1],
                     filename: errorMatches[2],
                     lineNumber: parseInt(errorMatches[3]),
                     message: errorMatches[4]
-                }, sessionId);
+                });
             } else if( choiceMatches ) {
                 requester.send("play-generated-choice", {
                     number: parseInt(choiceMatches[1]),
@@ -157,13 +159,17 @@ function compile(compileInstruction, requester) {
 
         var forceStoppedByPlayer = sessions[sessionId].stopped;
         if( !forceStoppedByPlayer ) {
+
+            if( inkErrors.length > 0 )
+                requester.send('play-generated-errors', inkErrors, sessionId);
+
             if( code == 0 ) {
                 console.log("Completed story or exported successfully at "+jsonExportPath);
                 requester.send('inklecate-complete', sessionId, jsonExportPath);
             }
             else {
                 console.log("Story exited unexpectedly with error code "+code+" (session "+sessionId+")");
-                requester.send('play-story-unexpected-exit', code, sessionId);
+                requester.send('play-exit-due-to-error', code, sessionId);
             }
         }
 
