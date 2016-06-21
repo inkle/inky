@@ -30,7 +30,8 @@ catch(e) {
 // TODO: Customise this for different projects
 // Is this the right temporary directory even on Mac? Seems like a bad practice
 // to keep files around in a "public" place that the user might wish to keep private.
-const tempInkPath = "/tmp/inky_compile/";
+const tempInkPath = process.platform == "darwin" ? "/tmp/inky_compile" : path.join(process.env.temp, "inky_compile");
+console.log("inklcate temp directory: "+tempInkPath);
 
 var sessions = {};
 
