@@ -10,7 +10,8 @@ const electronWindowOptions = {
   height: 730, 
   minWidth: 350,
   minHeight: 250,
-  titleBarStyle: 'hidden'
+  titleBarStyle: 'hidden',
+  title: "Inky"
 };
 
 var windows = [];
