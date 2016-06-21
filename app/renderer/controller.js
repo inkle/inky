@@ -123,7 +123,7 @@ LiveCompiler.setEvents({
 
             PlayerView.addLongMessage(error, "diagnostic");
         } else {
-            PlayerView.addTerminatingMessage("Story exited unexpectedly", "error");
+            PlayerView.addTerminatingMessage("Ink compiler had an unexpected error ☹", "error");
             PlayerView.addLongMessage(error, "error");
         }
     }

@@ -9,14 +9,22 @@ const util = require('util');
 const mkdirp = require('mkdirp');
 
 // inklecate is packaged outside of the main asar bundle since it's executable
-var inklecatePath = path.join(__dirname, "../../app.asar.unpacked/main-process/ink/inklecate");
+const inklecateNames = {
+    "darwin": "/ink/inklecate_mac",
+    "win32":  "/ink/inklecate_win.exe"
+}
+const inklecateRootPathRelease = path.join(__dirname, "../../app.asar.unpacked/main-process");
+const inklecateRootPathDev = __dirname;
+
+var inklecatePath = path.join(inklecateRootPathRelease, inklecateNames[process.platform]);
 
 // If inklecate isn't available here, we're probably in development mode (not packaged into a release asar)
 try { fs.accessSync(inklecatePath) }
 catch(e) {
     console.log(`Inklecate not at: ${inklecatePath}`);
     console.log(`Loading inklecate from local directory instead (we're in development mode)`);
-    inklecatePath = path.join(__dirname, "/ink/inklecate");
+    inklecatePath = path.join(inklecateRootPathDev, inklecateNames[process.platform]);
+    console.log(inklecatePath);
 }
 
 // TODO: Customise this for different projects
@@ -93,14 +101,22 @@ function compile(compileInstruction, requester) {
 
     playProcess.stderr.setEncoding('utf8');
     playProcess.stderr.on('data', (data) => {
-        console.log(`stderr: ${data}`);
-        requester.send('play-story-unexpected-error', data, sessionId);
+        // Strip Byte order mark
+        data = data.replace(/^\uFEFF/, '');
+        if( data.length > 0 ) {
+            console.log(`stderr: ${data}`);
+            requester.send('play-story-unexpected-error', data, sessionId);
+        }
     });
 
     playProcess.stdin.setEncoding('utf8');
 
     playProcess.stdout.setEncoding('utf8');
     playProcess.stdout.on('data', (text) => {
+        
+        // Strip Byte order mark
+        text = text.replace(/^\uFEFF/, '');
+        if( text.length == 0 ) return;
 
         var lines = text.split('\n');
 
