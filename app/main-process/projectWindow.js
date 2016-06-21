@@ -42,7 +42,7 @@ function ProjectWindow(filePath) {
     this.browserWindow.on("closed", () => {
         var idx = windows.indexOf(this);
         if( idx != -1 )
-            windows.splice(idx);
+            windows.splice(idx, 1);
     });
 }
 
