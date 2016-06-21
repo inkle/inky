@@ -11,6 +11,11 @@ app.on('will-finish-launching', function() {
         ProjectWindow.open(path);
         event.preventDefault();
     });
+
+    if( process.platform == "win32" && process.argv.length > 1 ) {
+        var fileToOpen = process.argv[1];
+        ProjectWindow.open(fileToOpen);
+    }
 });
 
 let isQuitting = false;
