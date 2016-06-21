@@ -76,6 +76,15 @@ h1.title {
   pointer-events: none;
 }
 
+.win32 #toolbar {
+  height: 30px;
+  background: #f0f0f0;
+}
+
+.win32 h1.title {
+  display: none;
+}
+
 #toolbar p.issuesMessage {
   font-family: Helvetica, sans-serif;
   font-style: oblique;
@@ -84,7 +93,7 @@ h1.title {
   line-height: 20px;
   left: 110px;
   right: 110px;
-  top: 28px;
+  height: 22px;
   bottom: 0;
   position: absolute;
   text-align: center;
@@ -97,7 +106,7 @@ h1.title {
   color: #BBB;
   font-size: 9pt;
   line-height: 20px;
-  top: 28px;
+  height: 22px;
   bottom: 0;
   position: relative;
   text-align: center;
@@ -138,7 +147,7 @@ img.issue-icon.warning {
   border: 0;
   height: 30px;
   background: none;
-  top: 18px;
+  bottom: 0;
 }
 #toolbar .buttons.left {
   left: 5px;
@@ -186,6 +195,10 @@ img.issue-icon.warning {
   background: white;
   z-index: 10;
   border: 1px solid #E2E2E2;
+}
+
+.win32  #toolbar .issue-popup {
+  top: 35px;
 }
 
 #toolbar .issue-popup .table {
@@ -476,6 +489,10 @@ img.issue-icon.warning {
   right: 0;
   bottom: 0;
   background: white;
+}
+
+.win32 #main {
+  top: 30px;
 }
 
 #editor {
