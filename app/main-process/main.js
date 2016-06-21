@@ -12,10 +12,6 @@ app.on('will-finish-launching', function() {
         event.preventDefault();
     });
 
-    if( process.platform == "win32" && process.argv.length > 1 ) {
-        var fileToOpen = process.argv[1];
-        ProjectWindow.open(fileToOpen);
-    }
 });
 
 let isQuitting = false;
@@ -69,7 +65,12 @@ app.on('ready', function() {
         }
     });
 
-    var w = ProjectWindow.createEmpty();
+    if( process.platform == "win32" && process.argv.length > 1 ) {
+        var fileToOpen = process.argv[1];
+        ProjectWindow.open(fileToOpen);
+    } else {
+        var w = ProjectWindow.createEmpty();
+    }
 
     // Debug
     //w.openDevTools();
