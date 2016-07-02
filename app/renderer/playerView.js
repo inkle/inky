@@ -3,6 +3,15 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 var shouldClearPlayerContent = false;
 var lastFadeTime = 0;
 
+var events = {};
+
+document.addEventListener("keyup", function(){
+    $("#player").removeClass("altKey");
+});
+document.addEventListener("keydown", function(){
+    $("#player").addClass("altKey");
+});
+
 function fadeIn($jqueryElement) {
 
     const minimumTimeSeparation = 200;
@@ -59,8 +68,53 @@ function addTextSection(text, animated)
     clearIfNecessary();
 
     var $paragraph = $("<p class='storyText'></p>");
-    $paragraph.text(text);
-    $("#player .innerText").append($paragraph);
+
+    // Split individual words into span tags, so that they can be underlined
+    // when the user holds down the alt key, and so that they can be individually
+    // clicked in order to jump to the source.
+    var splitIntoSpans = text.split(" ");
+    var textAsSpans = "<span>" + splitIntoSpans.join("</span> <span>") + "</span>";
+
+    $paragraph.html(textAsSpans);
+    var $content = $("#player .innerText");
+
+    // Keep track of the offset of each word into the content,
+    // starting from the end of the last choice (it's global in the current play session)
+    var previousContentLength = 0;
+    var $existingLastContent = $content.children(".storyText").last();
+    if( $existingLastContent ) {
+        var range = $existingLastContent.data("range");
+        if( range ) {
+            previousContentLength = range.start + range.length + 1; // + 1 for newline
+        }
+    }
+    $paragraph.data("range", {start: previousContentLength, length: text.length});
+
+    // Append the actual content
+    $content.append($paragraph);
+
+    // Find the offset of each word in the content, for clickability
+    var offset = previousContentLength;
+    $paragraph.children("span").each((i, element) => {
+        var $span = $(element);
+        var length = $span.text().length;
+        $span.data("range", {start: offset, length: length});
+        offset += length + 1; // extra 1 for space
+    });
+
+    // Alt-click handler to jump to source
+    $paragraph.find("span").click(function(e) {
+        if( e.altKey ) {
+
+            var range = $(this).data("range");
+            if( range ) {
+                var midOffset = Math.floor(range.start + range.length/2);
+                events.jumpToSource(midOffset);
+            }
+
+            e.preventDefault();
+        }
+    });
 
     if( animated )
         fadeIn($paragraph);
@@ -131,6 +185,7 @@ function addLineError(error, callback)
 }
 
 exports.PlayerView = {
+    setEvents: (e) => { events = e; },
     scrollToBottom: scrollToBottom,
     prepareForNextContent: prepareForNextContent,
     addTextSection: addTextSection,

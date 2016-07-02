@@ -17,6 +17,8 @@ var currentReplayTurnIdx = -1;
 var issues = [];
 var selectedIssueIdx = -1;
 
+var locationInSourceCallbackObj = null;
+
 var project = null;
 var events = {};
 
@@ -122,6 +124,11 @@ function stepBack() {
     if( choiceSequence.length > 0 )
         choiceSequence.splice(-1, 1);
     reloadInklecateSession();
+}
+
+function getLocationInSource(offset, callback) {
+    ipc.send("get-location-in-source", offset, currentPlaySessionId);
+    locationInSourceCallbackObj = { callback: callback, sessionId: currentPlaySessionId };
 }
 
 // --------------------------------------------------------
@@ -239,6 +246,13 @@ ipc.on("play-story-stopped", (event, fromSessionId) => {
 
 });
 
+ipc.on("return-location-from-source", (event, fromSessionId, locationInfo) => {
+    if( fromSessionId == locationInSourceCallbackObj.sessionId ) {
+        locationInSourceCallbackObj.callback(locationInfo);
+        locationInSourceCallbackObj = null;
+    }
+});
+
 exports.LiveCompiler = {
     setProject: setProject,
     reload: reloadInklecateSession,
@@ -249,5 +263,6 @@ exports.LiveCompiler = {
     getIssuesForFilename: (filename) => _.filter(issues, i => i.filename == filename),
     choose: choose,
     rewind: rewind,
-    stepBack: stepBack
+    stepBack: stepBack,
+    getLocationInSource: getLocationInSource
 }

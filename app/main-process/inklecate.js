@@ -73,7 +73,7 @@ function compile(compileInstruction, requester) {
 
     var mainInkPath = path.join(uniqueDirPath, compileInstruction.mainName);
 
-    var inklecateOptions = ["-c"];
+    var inklecateOptions = ["-ck"];
 
     if( compileInstruction.play )
         inklecateOptions[0] += "p";
@@ -129,6 +129,8 @@ function compile(compileInstruction, requester) {
             var choiceMatches = line.match(/^(\d+):\s+(.*)/);
             var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|TODO): '([^']+)' line (\d+): (.+)/);
             var promptMatches = line.match(/^\?>/);
+            var debugSourceMatches = line.match(/^DebugSource: (line (\d+) of (.*)|Unknown source)/);
+            var endOfStoryMatches = line.match(/^--- End of story ---/);
 
             if( errorMatches ) {
                 inkErrors.push({
@@ -144,6 +146,13 @@ function compile(compileInstruction, requester) {
                 }, sessionId);
             } else if( promptMatches ) {
                 requester.send('play-requires-input', sessionId);
+            } else if( debugSourceMatches ) {
+                requester.send('return-location-from-source', sessionId, {
+                    lineNumber: parseInt(debugSourceMatches[2]),
+                    filename: debugSourceMatches[3]
+                });
+            } else if( endOfStoryMatches ) {
+                requester.send('inklecate-complete', sessionId);
             } else if( line.length > 0 ) {
                 requester.send('play-generated-text', line, sessionId);
             }
@@ -229,9 +238,18 @@ ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
         const playProcess = sessions[sessionId].process;
         if( playProcess )
             playProcess.stdin.write(""+choiceNumber+"\n");
-    }
-    
+    } 
 });
+
+ipc.on("get-location-in-source", (event, offset, sessionId) => {
+    console.log("inklecate received request for location in source: "+offset+" for session "+sessionId);
+    if( sessions[sessionId] ) {
+        const playProcess = sessions[sessionId].process;
+        if( playProcess )
+            playProcess.stdin.write("DebugSource("+offset+")\n");
+    }
+});
+
 
 
 exports.Inklecate = {

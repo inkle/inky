@@ -578,6 +578,11 @@ img.issue-icon.warning {
   padding: 0 40px 0 40px;
 }
 
+#player.altKey .innerText p span:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 #player {
   font-family: Verdana, Geneva, sans-serif;
   font-weight: lighter;

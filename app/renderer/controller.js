@@ -150,6 +150,17 @@ EditorView.setEvents({
     "navigate": () => NavHistory.addStep()
 });
 
+PlayerView.setEvents({
+    "jumpToSource": (outputTextOffset) => {
+        LiveCompiler.getLocationInSource(outputTextOffset, (result) => {
+            if( result && result.filename && result.lineNumber ) {
+                InkProject.currentProject.showInkFile(result.filename);
+                EditorView.gotoLine(result.lineNumber);
+            }
+        });
+    }
+});
+
 ToolbarView.setEvents({
     toggleSidebar: () => { NavView.toggle(); },
     navigateBack: () => NavHistory.back(),
