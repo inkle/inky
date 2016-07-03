@@ -97,7 +97,8 @@ function compile(compileInstruction, requester) {
     sessions[sessionId] = {
         process:playProcess,
         requesterWebContents: requester,
-        stopped: false
+        stopped: false,
+        ended: false
     };
 
     playProcess.stderr.setEncoding('utf8');
@@ -115,6 +116,24 @@ function compile(compileInstruction, requester) {
 
     var inkErrors = [];
     var justRequestedDebugSource = false;
+
+    var onEndOfStory = (code) => {
+        if( sessions[sessionId] && !sessions[sessionId].ended ) {
+            sessions[sessionId].ended = true;
+
+            if( inkErrors.length > 0 )
+                requester.send('play-generated-errors', inkErrors, sessionId);
+
+            if( code == 0 || code === undefined ) {
+                console.log("Completed story or exported successfully at "+jsonExportPath);
+                requester.send('inklecate-complete', sessionId, jsonExportPath);
+            }
+            else {
+                console.log("Story exited unexpectedly with error code "+code+" (session "+sessionId+")");
+                requester.send('play-exit-due-to-error', code, sessionId);
+            }
+        }
+    }
 
     playProcess.stdout.on('data', (text) => {
         
@@ -157,7 +176,8 @@ function compile(compileInstruction, requester) {
                     filename: debugSourceMatches[3]
                 });
             } else if( endOfStoryMatches ) {
-                requester.send('inklecate-complete', sessionId);
+                console.log("Matched end of story");
+                onEndOfStory();
             } else if( line.length > 0 ) {
                 requester.send('play-generated-text', line, sessionId);
             }
@@ -168,25 +188,12 @@ function compile(compileInstruction, requester) {
     })
 
     var processCloseExit = (code) => {
-
         if( !sessions[sessionId] )
             return;
 
         var forceStoppedByPlayer = sessions[sessionId].stopped;
-        if( !forceStoppedByPlayer ) {
-
-            if( inkErrors.length > 0 )
-                requester.send('play-generated-errors', inkErrors, sessionId);
-
-            if( code == 0 ) {
-                console.log("Completed story or exported successfully at "+jsonExportPath);
-                requester.send('inklecate-complete', sessionId, jsonExportPath);
-            }
-            else {
-                console.log("Story exited unexpectedly with error code "+code+" (session "+sessionId+")");
-                requester.send('play-exit-due-to-error', code, sessionId);
-            }
-        }
+        if( !forceStoppedByPlayer )
+            onEndOfStory(code);
 
         delete sessions[sessionId];
     };
