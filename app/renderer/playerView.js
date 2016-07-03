@@ -1,8 +1,8 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
-var shouldClearPlayerContent = false;
 var lastFadeTime = 0;
-var animationEnabled = true;
+
+var $textBuffer = null;
 
 var events = {};
 
@@ -12,6 +12,35 @@ document.addEventListener("keyup", function(){
 document.addEventListener("keydown", function(){
     $("#player").addClass("altKey");
 });
+
+// Initial default: append to visible buffer
+$textBuffer = $("#player .innerText.active");
+
+function shouldAnimate() {
+    return $textBuffer.hasClass("active");
+}
+
+function showSessionView(sessionId) {
+    var $player = $("#player");
+
+    var $hiddenContainer = $player.children(".hiddenBuffer");
+    var $hidden = $hiddenContainer.children(".innerText");
+
+    var $active = $("#player .innerText.active");
+    if( $active.data("sessionId") == sessionId ) {
+        return;
+    }
+
+    if( $hidden.data("sessionId") == sessionId ) {
+        $active.removeClass ("active");
+        $hiddenContainer.append($active);
+        $player.prepend($hidden);
+        $hidden.addClass("active");
+
+        // Also make this the active buffer
+        $textBuffer = $hidden;
+    }
+}
 
 function fadeIn($jqueryElement) {
 
@@ -31,43 +60,37 @@ function fadeIn($jqueryElement) {
     lastFadeTime = currentTime + delay;
 }
 
-function scrollToBottom() {
+function contentReady() {
 
-    var $lastObj = $(".innerText").children().last();
+    // Expand to fit
+    var $lastObj = $textBuffer.children().last();
     var bottomEdge = $lastObj.position().top + $lastObj.height();
     var newHeight = bottomEdge + 100;
-    if( $(".innerText").height() < newHeight )
-        $(".innerText").height(bottomEdge + 100);
+    if( $textBuffer.height() < newHeight )
+        $textBuffer.height(bottomEdge + 100);
 
-    var offset = newHeight - $("#main").height();
-    if( offset > 0 && offset > $("#player").scrollTop() ) {
-        $("#player").animate({
-            scrollTop: offset
-        }, 500);
+    // Scroll to bottom?
+    if( shouldAnimate() ) {
+        var offset = newHeight - $("#main").height();
+        if( offset > 0 && offset > $("#player").scrollTop() ) {
+            $("#player").animate({
+                scrollTop: offset
+            }, 500);
+        }
     }
 }
 
-function clearIfNecessary() {
-    if( shouldClearPlayerContent ) {
+function prepareForNewPlaythrough(sessionId) {
 
-        $("#player .innerText").text("");
+    $textBuffer = $("#player .hiddenBuffer .innerText");
+    $textBuffer.data("sessionId", sessionId);
 
-        // Temporarily set the height to zero so that it re-collapses,
-        // and then we can expand it as the content fills it later
-        $(".innerText").height(0);
-
-        shouldClearPlayerContent = false;
-    }
-}
-
-function prepareForNextContent() {
-    shouldClearPlayerContent = true;
+    $textBuffer.text("");
+    $textBuffer.height(0);
 }
 
 function addTextSection(text)
 {
-    clearIfNecessary();
-
     var $paragraph = $("<p class='storyText'></p>");
 
     // Split individual words into span tags, so that they can be underlined
@@ -77,12 +100,11 @@ function addTextSection(text)
     var textAsSpans = "<span>" + splitIntoSpans.join("</span> <span>") + "</span>";
 
     $paragraph.html(textAsSpans);
-    var $content = $("#player .innerText");
 
     // Keep track of the offset of each word into the content,
     // starting from the end of the last choice (it's global in the current play session)
     var previousContentLength = 0;
-    var $existingLastContent = $content.children(".storyText").last();
+    var $existingLastContent = $textBuffer.children(".storyText").last();
     if( $existingLastContent ) {
         var range = $existingLastContent.data("range");
         if( range ) {
@@ -92,7 +114,7 @@ function addTextSection(text)
     $paragraph.data("range", {start: previousContentLength, length: text.length});
 
     // Append the actual content
-    $content.append($paragraph);
+    $textBuffer.append($paragraph);
 
     // Find the offset of each word in the content, for clickability
     var offset = previousContentLength;
@@ -117,34 +139,32 @@ function addTextSection(text)
         }
     });
 
-    if( animationEnabled )
+    if( shouldAnimate() )
         fadeIn($paragraph);
 }
 
 function addChoice(choice, callback)
 {
-    clearIfNecessary();
-
     var $choice = $("<a href='#'>"+choice.text+"</a>");
 
     // Append the choice
     var $choicePara = $("<p class='choice'></p>");
     $choicePara.append($choice);
-    $("#player .innerText").append($choicePara);
+    $textBuffer.append($choicePara);
 
     // Fade it in
-    if( animationEnabled )
+    if( shouldAnimate() )
         fadeIn($choicePara);
 
     // When this choice is clicked...
     $choice.on("click", (event) => {
 
-        var existingHeight = $(".innerText").height();
-        $(".innerText").height(existingHeight);
+        var existingHeight = $textBuffer.height();
+        $textBuffer.height(existingHeight);
 
         // Remove any existing choices, and add a divider
         $(".choice").remove();
-        $("#player .innerText").append("<hr/>");
+        $textBuffer.append("<hr/>");
 
         event.preventDefault();
 
@@ -154,29 +174,25 @@ function addChoice(choice, callback)
 
 function addTerminatingMessage(message, cssClass)
 {
-    clearIfNecessary();
-
     var $message = $(`<p class='${cssClass}'>${message}</p>`);
-    $("#player .innerText").append($message);
+    $textBuffer.append($message);
 
-    if( animationEnabled )
+    if( shouldAnimate() )
         fadeIn($message);
 }
 
 function addLongMessage(message, cssClass)
 {
-    clearIfNecessary();
-
     var $message = $(`<pre class='${cssClass}'>${message}</pre>`);
-    $("#player .innerText").append($message);
+    $textBuffer.append($message);
 
-    if( animationEnabled )
+    if( shouldAnimate() )
         fadeIn($message);
 }
 
 function addHorizontalDivider()
 {
-    $("#player .innerText").append("<hr/>");
+    $textBuffer.append("<hr/>");
 }
 
 function addLineError(error, callback)
@@ -186,18 +202,26 @@ function addLineError(error, callback)
 
     var $paragraph = $("<p class='error'></p>");
     $paragraph.append($aError);
-    $("#player .innerText").append($paragraph);
+    $textBuffer.append($paragraph);
+}
+
+function previewStepBack()
+{
+    var $lastDivider = $("#player .innerText.active").find("hr").last();
+    $lastDivider.nextAll().remove();
+    $lastDivider.remove();
 }
 
 exports.PlayerView = {
     setEvents: (e) => { events = e; },
-    scrollToBottom: scrollToBottom,
-    prepareForNextContent: prepareForNextContent,
+    contentReady: contentReady,
+    prepareForNewPlaythrough: prepareForNewPlaythrough,
     addTextSection: addTextSection,
     addChoice: addChoice,
     addTerminatingMessage: addTerminatingMessage,
     addLongMessage: addLongMessage,
     addHorizontalDivider: addHorizontalDivider,
     addLineError: addLineError,
-    animate: (enable) => animationEnabled = enable
+    showSessionView: showSessionView,
+    previewStepBack: previewStepBack
 };  

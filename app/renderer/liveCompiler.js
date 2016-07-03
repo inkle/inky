@@ -12,7 +12,8 @@ var exportCompleteCallback = null;
 var lastEditorChange = null;
 
 var choiceSequence = [];
-var currentReplayTurnIdx = -1;
+var currentTurnIdx = -1;
+var replaying = false;
 
 var issues = [];
 var selectedIssueIdx = -1;
@@ -71,15 +72,15 @@ function reloadInklecateSession() {
     if( currentPlaySessionId >= 0 )
         stopInklecateSession(currentPlaySessionId);
 
-    if( choiceSequence.length > 0 )
-        currentReplayTurnIdx = 0;
-
-    events.resetting();
-
-    resetErrors();
+    replaying = true;
+    currentTurnIdx = 0;
 
     var instr = buildCompileInstruction();
     instr.play = true;
+
+    events.resetting(instr.sessionId);
+
+    resetErrors();
 
     currentPlaySessionId = instr.sessionId;
 
@@ -112,11 +113,12 @@ function stopInklecateSession(idToStop) {
 function choose(choice) {
     ipc.send("play-continue-with-choice-number", choice.number, choice.sourceSessionId);
     choiceSequence.push(choice.number);
+    currentTurnIdx++;
 }
 
 function rewind() {
     choiceSequence = [];
-    currentReplayTurnIdx = -1;
+    currentTurnIdx = -1;
     reloadInklecateSession();
 }
 
@@ -188,8 +190,10 @@ ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
 
     choice.sourceSessionId = fromSessionId;
 
-    var replaying = currentReplayTurnIdx >= 0;
-    events.choiceAdded(choice, replaying);
+    // If there's one choice, that means there are two turns/chunks
+    var turnCount = choiceSequence.length+1;
+    var isLatestTurn = currentTurnIdx >= turnCount-1;
+    events.choiceAdded(choice, isLatestTurn);
 });
 
 ipc.on("play-requires-input", (event, fromSessionId) => {
@@ -197,24 +201,33 @@ ipc.on("play-requires-input", (event, fromSessionId) => {
     if( fromSessionId != currentPlaySessionId )
         return;
 
-    var replaying = currentReplayTurnIdx >= 0;
-    
+    var justCompletedReplay = false;
+    if( replaying && currentTurnIdx >= choiceSequence.length ) {
+        replaying = false;
+        justCompletedReplay = true;
+    }
+
     events.playerPrompt(replaying);
 
     // Replay?
     if( replaying ) {
-        var replayChoiceNumber = choiceSequence[currentReplayTurnIdx];
-        currentReplayTurnIdx++;
-        if( currentReplayTurnIdx >= choiceSequence.length )
-            currentReplayTurnIdx = -1;
+        var replayChoiceNumber = choiceSequence[currentTurnIdx];
+        currentTurnIdx++;
         ipc.send("play-continue-with-choice-number", replayChoiceNumber, fromSessionId);
-    }
+    } 
+
+    if( justCompletedReplay ) events.replayComplete(currentPlaySessionId);
 });
 
 ipc.on("inklecate-complete", (event, fromSessionId, exportJsonPath) => {
 
     if( fromSessionId == currentPlaySessionId )
         events.storyCompleted();
+
+        if( replaying ) {
+            replaying = false;
+            events.replayComplete(currentPlaySessionId);
+        }
     else if( fromSessionId == currentExportSessionId ) {
         completeExport(null, exportJsonPath);
     }
@@ -227,6 +240,11 @@ ipc.on("play-exit-due-to-error", (event, exitCode, fromSessionId) => {
     if( fromSessionId == currentExportSessionId ) {
         completeExport({message: "Ink has errors - please fix them before exporting."});
     } else {
+        if( replaying ) {
+            replaying = false;
+            events.replayComplete();
+        }
+
         events.exitDueToError();
     }
 });
@@ -238,6 +256,11 @@ ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
     if( fromSessionId == currentExportSessionId ) {
         completeExport({message: "Unexpected error"});
     } else {
+        if( replaying ) {
+            replaying = false;
+            events.replayComplete(fromSessionId);
+        }
+
         events.unexpectedError(error);
     }
 });

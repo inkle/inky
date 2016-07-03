@@ -6,7 +6,7 @@ const path = require("path");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 // Debug
-// const loadTestInk = true;
+const loadTestInk = false;
 // remote.getCurrentWindow().webContents.openDevTools();
 
 // Helpers in global objects and namespace
@@ -78,24 +78,21 @@ NavHistory.setEvents({
     }
 })
 
+
 LiveCompiler.setEvents({
-    resetting: () => {
+    resetting: (sessionId) => {
         EditorView.clearErrors();
         ToolbarView.clearIssueSummary();
-        PlayerView.animate(false);
-        PlayerView.prepareForNextContent();
+        PlayerView.prepareForNewPlaythrough(sessionId);
     },
     selectIssue: gotoIssue,
     textAdded: (text) => {
         PlayerView.addTextSection(text);
     },
-    choiceAdded: (choice, replaying) => {
-        if( replaying ) {
-            PlayerView.addHorizontalDivider();
-        } else {
+    choiceAdded: (choice, isLatestTurn) => {
+        if( isLatestTurn ) {
             PlayerView.addChoice(choice, () => {
-                PlayerView.animate(true);
-                LiveCompiler.choose(choice);
+                LiveCompiler.choose(choice)
             });
         }
     },
@@ -115,8 +112,11 @@ LiveCompiler.setEvents({
         if( replaying ) {
             PlayerView.addHorizontalDivider();
         } else {
-            PlayerView.scrollToBottom();
+            PlayerView.contentReady();
         }
+    },
+    replayComplete: (sessionId) => {
+        PlayerView.showSessionView(sessionId);
     },
     storyCompleted: () => {
         PlayerView.addTerminatingMessage("End of story", "end");
@@ -178,7 +178,10 @@ ToolbarView.setEvents({
     navigateBack: () => NavHistory.back(),
     navigateForward: () => NavHistory.forward(),
     selectIssue: gotoIssue,
-    stepBack: () => { LiveCompiler.stepBack(); },
+    stepBack: () => { 
+        PlayerView.previewStepBack();
+        LiveCompiler.stepBack(); 
+    },
     rewind:   () => { LiveCompiler.rewind(); }
 });
 

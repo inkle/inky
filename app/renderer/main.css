@@ -566,6 +566,11 @@ img.issue-icon.warning {
   bottom: 0;
   right: 0;
   left: 50%;
+
+  font-family: Verdana, Geneva, sans-serif;
+  font-weight: lighter;
+  color: #555;
+  overflow: scroll;
 }
 
 #player .innerText {
@@ -583,12 +588,17 @@ img.issue-icon.warning {
   cursor: pointer;
 }
 
-#player {
-  font-family: Verdana, Geneva, sans-serif;
-  font-weight: lighter;
-  color: #555;
+#player .hiddenBuffer {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: scroll;
 }
+
 
 #player hr {
   border: 0;

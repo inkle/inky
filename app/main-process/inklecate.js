@@ -114,6 +114,7 @@ function compile(compileInstruction, requester) {
     playProcess.stdout.setEncoding('utf8');
 
     var inkErrors = [];
+    var justRequestedDebugSource = false;
 
     playProcess.stdout.on('data', (text) => {
         
@@ -145,8 +146,12 @@ function compile(compileInstruction, requester) {
                     text: choiceMatches[2]
                 }, sessionId);
             } else if( promptMatches ) {
-                requester.send('play-requires-input', sessionId);
+                if( justRequestedDebugSource )
+                    justRequestedDebugSource = false;
+                else
+                    requester.send('play-requires-input', sessionId);
             } else if( debugSourceMatches ) {
+                justRequestedDebugSource = true;
                 requester.send('return-location-from-source', sessionId, {
                     lineNumber: parseInt(debugSourceMatches[2]),
                     filename: debugSourceMatches[3]
