@@ -5,7 +5,9 @@ const path = require("path");
 
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
-//remote.getCurrentWindow().webContents.openDevTools();
+// Debug
+// const loadTestInk = true;
+// remote.getCurrentWindow().webContents.openDevTools();
 
 // Helpers in global objects and namespace
 require("./util.js");
@@ -52,8 +54,15 @@ InkProject.setEvents({
 // Wait for DOM to be ready before kicking most stuff off
 // (some of the views get confused otherwise)
 $(document).ready(() => { 
-    if( InkProject.currentProject == null ) 
+    if( InkProject.currentProject == null ) {
         InkProject.startNew();
+
+        // Debug
+        if( loadTestInk ) {
+            var testInk = require("fs").readFileSync(path.join(__dirname, "test.ink"), "utf8");
+            InkProject.currentProject.mainInk.setValue(testInk);
+        }
+    }
 });
 
 function gotoIssue(issue) {
