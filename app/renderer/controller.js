@@ -82,17 +82,19 @@ LiveCompiler.setEvents({
     resetting: () => {
         EditorView.clearErrors();
         ToolbarView.clearIssueSummary();
+        PlayerView.animate(false);
         PlayerView.prepareForNextContent();
     },
     selectIssue: gotoIssue,
-    textAdded: (text, replaying) => {
-        var animated = !replaying;
-        PlayerView.addTextSection(text, animated);
+    textAdded: (text) => {
+        PlayerView.addTextSection(text);
     },
     choiceAdded: (choice, replaying) => {
-        var animated = !replaying;
-        if( !replaying ) {
-            PlayerView.addChoice(choice, animated, () => {
+        if( replaying ) {
+            PlayerView.addHorizontalDivider();
+        } else {
+            PlayerView.addChoice(choice, () => {
+                PlayerView.animate(true);
                 LiveCompiler.choose(choice);
             });
         }
@@ -109,11 +111,12 @@ LiveCompiler.setEvents({
 
         ToolbarView.updateIssueSummary(errors);
     },
-    playerPrompt: (replaying, isLast) => {
-        if( replaying )
+    playerPrompt: (replaying) => {
+        if( replaying ) {
             PlayerView.addHorizontalDivider();
-        else
+        } else {
             PlayerView.scrollToBottom();
+        }
     },
     storyCompleted: () => {
         PlayerView.addTerminatingMessage("End of story", "end");

@@ -2,6 +2,7 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 var shouldClearPlayerContent = false;
 var lastFadeTime = 0;
+var animationEnabled = true;
 
 var events = {};
 
@@ -63,7 +64,7 @@ function prepareForNextContent() {
     shouldClearPlayerContent = true;
 }
 
-function addTextSection(text, animated)
+function addTextSection(text)
 {
     clearIfNecessary();
 
@@ -116,11 +117,11 @@ function addTextSection(text, animated)
         }
     });
 
-    if( animated )
+    if( animationEnabled )
         fadeIn($paragraph);
 }
 
-function addChoice(choice, animated, callback)
+function addChoice(choice, callback)
 {
     clearIfNecessary();
 
@@ -132,7 +133,7 @@ function addChoice(choice, animated, callback)
     $("#player .innerText").append($choicePara);
 
     // Fade it in
-    if( animated )
+    if( animationEnabled )
         fadeIn($choicePara);
 
     // When this choice is clicked...
@@ -156,8 +157,10 @@ function addTerminatingMessage(message, cssClass)
     clearIfNecessary();
 
     var $message = $(`<p class='${cssClass}'>${message}</p>`);
-    fadeIn($message);
     $("#player .innerText").append($message);
+
+    if( animationEnabled )
+        fadeIn($message);
 }
 
 function addLongMessage(message, cssClass)
@@ -165,8 +168,10 @@ function addLongMessage(message, cssClass)
     clearIfNecessary();
 
     var $message = $(`<pre class='${cssClass}'>${message}</pre>`);
-    fadeIn($message);
     $("#player .innerText").append($message);
+
+    if( animationEnabled )
+        fadeIn($message);
 }
 
 function addHorizontalDivider()
@@ -193,5 +198,6 @@ exports.PlayerView = {
     addTerminatingMessage: addTerminatingMessage,
     addLongMessage: addLongMessage,
     addHorizontalDivider: addHorizontalDivider,
-    addLineError: addLineError
-};
+    addLineError: addLineError,
+    animate: (enable) => animationEnabled = enable
+};  

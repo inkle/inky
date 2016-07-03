@@ -171,8 +171,7 @@ ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
     if( fromSessionId != currentPlaySessionId ) return;
 
-    var replaying = currentReplayTurnIdx != -1;
-    events.textAdded(result, replaying);
+    events.textAdded(result);
 });
 
 ipc.on("play-generated-errors", (event, errors, fromSessionId) => {
@@ -189,7 +188,7 @@ ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
 
     choice.sourceSessionId = fromSessionId;
 
-    var replaying = currentReplayTurnIdx >= 0 && currentReplayTurnIdx < choiceSequence.length;
+    var replaying = currentReplayTurnIdx >= 0;
     events.choiceAdded(choice, replaying);
 });
 
@@ -199,6 +198,7 @@ ipc.on("play-requires-input", (event, fromSessionId) => {
         return;
 
     var replaying = currentReplayTurnIdx >= 0;
+    
     events.playerPrompt(replaying);
 
     // Replay?
