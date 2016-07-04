@@ -6,6 +6,7 @@ cd "`dirname "$0"`"
 #     npm install electron-packager -g
 #
 
+rm Inky_windows.zip
 rm -rf Inky-darwin-x64/
 rm -rf Inky-win32-x64/
 
@@ -22,5 +23,5 @@ electron-packager app Inky --platform=win32  --arch=x64 --icon=resources/Icon102
 rm resources/Icon.icns
 
 # Create a zip file ready for upload
-zip -r Inky-darwin-x64/Inky.app.zip Inky-darwin-x64/Inky.app
+zip -r Inky-darwin-x64/Inky_mac.zip Inky-darwin-x64/Inky.app
 zip -r Inky_windows.zip Inky-win32-x64
