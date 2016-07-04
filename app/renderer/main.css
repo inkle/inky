@@ -76,12 +76,12 @@ h1.title {
   pointer-events: none;
 }
 
-.win32 #toolbar {
+.win32 #toolbar, .linux #toolbar {
   height: 30px;
   background: #f0f0f0;
 }
 
-.win32 h1.title {
+.win32 h1.title, .linux h1.title {
   display: none;
 }
 
@@ -115,7 +115,7 @@ h1.title {
   z-index: 1; /* On top of left/right buttons */
 }
 
-.win32 #toolbar div.issuesSummary {
+.win32 #toolbar div.issuesSummary, .linux #toolbar div.issuesSummary {
   top: 0;
 }
 
@@ -202,7 +202,7 @@ img.issue-icon.warning {
   border: 1px solid #E2E2E2;
 }
 
-.win32  #toolbar .issue-popup {
+.win32  #toolbar .issue-popup, .linux #toolbar .issue-popup {
   top: 35px;
 }
 
@@ -462,7 +462,7 @@ img.issue-icon.warning {
 .sidebar .footer .add-to-main-ink span {
   float: right;
   margin-right: 25px;
-} 
+}
 
 .sidebar .footer .form-buttons {
   position: relative;
@@ -496,7 +496,7 @@ img.issue-icon.warning {
   background: white;
 }
 
-.win32 #main {
+.win32 #main, .linux #main {
   top: 30px;
 }
 
