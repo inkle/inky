@@ -11,7 +11,8 @@ const mkdirp = require('mkdirp');
 // inklecate is packaged outside of the main asar bundle since it's executable
 const inklecateNames = {
     "darwin": "/ink/inklecate_mac",
-    "win32":  "/ink/inklecate_win.exe"
+    "win32":  "/ink/inklecate_win.exe",
+    "linux": "/ink/inklecate_win.exe"
 }
 const inklecateRootPathRelease = path.join(__dirname, "../../app.asar.unpacked/main-process");
 const inklecateRootPathDev = __dirname;
@@ -37,7 +38,7 @@ var sessions = {};
 
 
 function compile(compileInstruction, requester) {
-    
+
     var sessionId = compileInstruction.sessionId;
 
     if( compileInstruction.play )
@@ -136,7 +137,7 @@ function compile(compileInstruction, requester) {
     }
 
     playProcess.stdout.on('data', (text) => {
-        
+
         // Strip Byte order mark
         text = text.replace(/^\uFEFF/, '');
         if( text.length == 0 ) return;
@@ -250,7 +251,7 @@ ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
         const playProcess = sessions[sessionId].process;
         if( playProcess )
             playProcess.stdin.write(""+choiceNumber+"\n");
-    } 
+    }
 });
 
 ipc.on("get-location-in-source", (event, offset, sessionId) => {
