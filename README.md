@@ -26,13 +26,9 @@ To keep up to date with the latest news about ink [sign up for the mailing list]
 
 ## Download
 
-### Mac and Windows
+### Mac, Windows and Linux
 
 [Download the latest release](http://www.github.com/inkle/inky/releases/latest)
-
-### Linux
-
-Inky was developed in [Electron](http://electron.atom.io/) (using web technologies), so porting is straightforward, and producing a Linux version should be a simple question of bug fixing and adding an extra line to the packaging script. If you want to help out with testing and fixing, please [discuss](http://github.com/inkle/inky/issues) and/or submit a pull request!
 
 ## Implementation details
 
