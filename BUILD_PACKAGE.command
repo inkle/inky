@@ -6,9 +6,11 @@ cd "`dirname "$0"`"
 #     npm install electron-packager -g
 #
 
-rm Inky_windows.zip
+# Clean
 rm -rf Inky-darwin-x64/
 rm -rf Inky-win32-x64/
+rm -rf Inky-linux-x64/
+rm -rf ReleaseUpload
 
 # Create icon from PNG
 ./resources/makeIcns.command
@@ -26,5 +28,7 @@ electron-packager app Inky --platform=linux  --arch=x64 --icon=resources/Icon.ic
 rm resources/Icon.icns
 
 # Create a zip file ready for upload
-zip -r Inky-darwin-x64/Inky_mac.zip Inky-darwin-x64/Inky.app
-zip -r Inky_windows.zip Inky-win32-x64
+mkdir -p ReleaseUpload
+zip -r ReleaseUpload/Inky_mac.zip Inky-darwin-x64/Inky.app
+zip -r ReleaseUpload/Inky_windows.zip Inky-win32-x64
+zip -r ReleaseUpload/Inky_linux.zip Inky-linux-x64
