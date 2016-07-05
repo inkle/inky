@@ -37,10 +37,15 @@ function setupMenus(callbacks) {
             click: callbacks.save
           },
           {
-            label: 'Export to JSON',
+            label: 'Export to JSON...',
             accelerator: 'CmdOrCtrl+Shift+S',
             enabled: callbacks.isFocusedWindow,
             click: callbacks.exportJson
+          },
+          {
+            label: 'Export for web...',
+            enabled: callbacks.isFocusedWindow,
+            click: callbacks.exportForWeb
           },
           {
             type: 'separator'

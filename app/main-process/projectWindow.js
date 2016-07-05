@@ -58,6 +58,10 @@ ProjectWindow.prototype.exportJson = function() {
     this.browserWindow.webContents.send('project-export');
 }
 
+ProjectWindow.prototype.exportForWeb = function() {
+    this.browserWindow.webContents.send('project-export-for-web');
+}
+
 ProjectWindow.prototype.tryClose = function() {
     this.browserWindow.webContents.send('project-tryClose');
 }

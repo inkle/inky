@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const _ = require("lodash");
 const chokidar = require('chokidar');
+const mkdirp = require('mkdirp');
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -238,36 +239,121 @@ InkProject.prototype.save = function() {
     });
 }
 
-InkProject.prototype.exportJson = function() {
+// exportType is "json" or "web"
+InkProject.prototype.export = function(exportType) {
 
+    // Always start by building the JSON
     LiveCompiler.exportJson((err, compiledJsonTempPath) => {
         if( err ) {
-            alert("Could not export JSON: "+err);
+            alert("Could not export: "+err);
             return;
         }
 
-        if( !this.defaultExportPath && this.mainInk.path && path.isAbsolute(this.mainInk.path) ) {
-            var pathObj = path.parse(this.mainInk.path);
-            pathObj.ext = ".json";
+        if( !this.defaultExportPath && this.mainInk.path && path.isAbsolute(this.mainInk.path) )
+            this.defaultExportPath = this.mainInk.path;
+
+        if( this.defaultExportPath ) {
+            var pathObj = path.parse(this.defaultExportPath);
+            if( exportType == "json" ) {
+                pathObj.ext = ".json";
+            } else {
+                // Strip existing extension
+                pathObj.base = path.basename(pathObj.base, pathObj.ext);
+                pathObj.ext = "";
+            }
+
             this.defaultExportPath = path.format(pathObj);
         }
 
-        dialog.showSaveDialog(remote.getCurrentWindow(), { 
-            filters: [
-                { name: 'JSON files', extensions: ['json'] }
-            ],
+        var saveOptions = {
             defaultPath: this.defaultExportPath
-        }, (targetJsonSavePath) => {
-            if( targetJsonSavePath ) { 
-                this.defaultExportPath = targetJsonSavePath;
+        }
 
-                // Move compiled json into place
-                fs.rename(compiledJsonTempPath, targetJsonSavePath, (err) => {
-                    if( err ) alert("Sorry, could not save to "+targetJsonSavePath);
-                });
+        if( exportType == "json" ) {
+            saveOptions.filters = [
+                { name: "JSON files", extensions: ["json"] }
+            ]
+        }
+
+        dialog.showSaveDialog(remote.getCurrentWindow(), saveOptions, (targetSavePath) => {
+            if( targetSavePath ) { 
+                this.defaultExportPath = targetSavePath;
+
+                // JSON export - simply move compiled json into place
+                if( exportType == "json" ) {
+                    fs.rename(compiledJsonTempPath, targetSavePath, (err) => {
+                        if( err ) alert("Sorry, could not save to "+targetSavePath);
+                    });
+                }
+
+                // Web export
+                else {
+                    this.buildForWeb(compiledJsonTempPath, targetSavePath);
+                }
             }
         });
     });
+}
+
+InkProject.prototype.exportJson = function() {
+    this.export("json");
+}
+
+InkProject.prototype.exportForWeb = function() {
+    this.export("web");
+}
+
+InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
+
+    function copyFile(source, destination, transform) {
+        fs.readFile(source, "utf8", (err, fileContent) => {
+            if( !err && fileContent ) {
+                if( transform ) fileContent = transform(fileContent);
+                fs.writeFile(destination, fileContent, "utf8");
+            }
+        });
+    }
+
+    var templateDir = path.join(__dirname, "../export-for-web-template");
+
+    // Derive story content js file from root ink filename
+    // Remove .ink extension if it's ".ink"
+    var mainInkRootName = this.mainInk.filename();
+    if( path.extname(mainInkRootName) == ".ink" )
+        mainInkRootName = path.basename(mainInkRootName, ".ink");
+    var jsContentFilename = mainInkRootName+".js";
+
+    // Derive story title from save name
+    var storyTitle = path.basename(targetDirectory);
+
+    // Create target directory name
+    mkdirp.sync(targetDirectory);
+
+    // Convert JSON to JS file
+    copyFile(jsonFilePath, path.join(targetDirectory, jsContentFilename), (jsonContent) => {
+        return `var storyContent = ${jsonContent};`;
+    });
+
+    // Copy index.html:
+    //  - inserting the filename as the <title> and <h1>
+    //  - Inserting the correct name of the javascript file
+    copyFile(path.join(templateDir, "index.html"), 
+             path.join(targetDirectory, "index.html"), 
+             (fileContent) => {
+        fileContent = fileContent.replace(/##STORY TITLE##/g, storyTitle);
+        fileContent = fileContent.replace(/##JAVASCRIPT FILENAME##/g, jsContentFilename);
+        return fileContent;
+    });
+
+    // Copy other files verbatim
+    copyFile(path.join(__dirname, "../node_modules/inkjs/dist/ink.iife.js"), 
+             path.join(targetDirectory, "ink.iife.js"));
+
+    copyFile(path.join(templateDir, "style.css"), 
+             path.join(targetDirectory, "style.css"));
+
+    copyFile(path.join(templateDir, "main.js"), 
+         path.join(targetDirectory, "main.js"));
 }
 
 InkProject.prototype.tryClose = function() {
@@ -453,6 +539,12 @@ ipc.on("project-export", (event) => {
         InkProject.currentProject.exportJson();
     }
 });
+
+ipc.on("project-export-for-web", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.exportForWeb();
+    }
+})
 
 ipc.on("project-tryClose", (event) => {
     if( InkProject.currentProject ) {

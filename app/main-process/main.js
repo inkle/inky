@@ -56,6 +56,10 @@ app.on('ready', function() {
             var win = ProjectWindow.focused();
             if( win ) win.exportJson();
         },
+        exportForWeb: () => {
+            var win = ProjectWindow.focused();
+            if( win ) win.exportForWeb();
+        },
         close: (event) => {
             var win = ProjectWindow.focused();
             if( win ) win.tryClose();
