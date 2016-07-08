@@ -281,8 +281,25 @@ InkProject.prototype.export = function(exportType) {
 
                 // JSON export - simply move compiled json into place
                 if( exportType == "json" ) {
-                    fs.rename(compiledJsonTempPath, targetSavePath, (err) => {
-                        if( err ) alert("Sorry, could not save to "+targetSavePath);
+                    fs.stat(targetSavePath, (err, stats) => {
+
+                        // File already exists, or there's another error
+                        // (error when code == ENOENT means file doens't exist, which is fine)
+                        if( !err || err.code != "ENOENT" ) {
+                            if( err ) alert("Sorry, could not save to "+targetSavePath);
+
+                            if( stats.isFile() ) fs.unlinkSync(targetSavePath);
+
+                            if( stats.isDirectory() ) {
+                                alert("Could not save because directory exists with the given name");
+                                return
+                            }
+                        }
+
+                        // Move file into place
+                        fs.rename(compiledJsonTempPath, targetSavePath, (err) => {
+                            if( err ) alert("Sorry, could not save to "+targetSavePath);
+                        });
                     });
                 }
 
