@@ -26,8 +26,8 @@
     "electron-prebuilt": "^0.37.8"
   },
   "dependencies": {
-    "chokidar": "^1.5.1",
-    "inkjs": "^1.0.2",
+    "chokidar": "^1.6.0",
+    "inkjs": "^1.1.0",
     "lodash": "^4.13.1",
     "mkdirp": "^0.5.1",
     "randomstring": "^1.1.5"

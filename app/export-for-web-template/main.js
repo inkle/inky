@@ -5,7 +5,7 @@
     var storyContainer = document.querySelectorAll('#story')[0];
 
     function showAfter(delay, el) {
-        setTimeout(() => el.classList.add("show"), delay);
+        setTimeout(function() { el.classList.add("show") }, delay);
     }
 
     function scrollToBottom() {
@@ -49,7 +49,7 @@
         }
 
         // Create HTML choices from ink choices
-        story.currentChoices.forEach(choice => {
+        story.currentChoices.forEach(function(choice) {
 
             // Create paragraph with anchor element
             var choiceParagraphElement = document.createElement('p');
@@ -63,15 +63,17 @@
 
             // Click on choice
             var choiceAnchorEl = choiceParagraphElement.querySelectorAll("a")[0];
-            choiceAnchorEl.addEventListener("click", e => {
+            choiceAnchorEl.addEventListener("click", function(event) {
 
                 // Don't follow <a> link
-                e.preventDefault();
+                event.preventDefault();
 
                 // Remove all existing choices
-                storyContainer.querySelectorAll('p.choice').forEach(c => {
+                var existingChoices = storyContainer.querySelectorAll('p.choice');
+                for(var i=0; i<existingChoices.length; i++) {
+                    var c = existingChoices[i];
                     c.parentNode.removeChild(c);
-                });
+                }
 
                 // Tell the story where to go next
                 story.ChooseChoiceIndex(choice.index);
