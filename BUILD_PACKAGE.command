@@ -24,11 +24,15 @@ electron-packager app Inky --platform=win32  --arch=x64 --icon=resources/Icon102
 # Linux
 electron-packager app Inky --platform=linux  --arch=x64 --icon=resources/Icon.icns --extend-info=resources/info.plist --prune --asar --asar-unpack-dir="main-process/ink" --ignore="inklecate_mac"
 
-# Remove .icns again
-rm resources/Icon.icns
-
-# Create a zip file ready for upload
+# Create a zip files ready for upload on Windows/Linux
 mkdir -p ReleaseUpload
-zip -r ReleaseUpload/Inky_mac.zip Inky-darwin-x64/Inky.app
 zip -r ReleaseUpload/Inky_windows.zip Inky-win32-x64
 zip -r ReleaseUpload/Inky_linux.zip Inky-linux-x64
+
+# On Mac, create a DMG
+# Requires appdmg: npm install -g appdmg
+# https://www.npmjs.com/package/appdmg
+appdmg resources/appdmg.json ReleaseUpload/Inky_mac.dmg
+
+# Remove .icns again
+rm resources/Icon.icns
