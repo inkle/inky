@@ -1,21 +1,22 @@
-// Install Spectron
-// npm install --save-dev spectron
-// Install mocha
-// npm install -g mocha
-// in /app run 'mocha' to run tests. Remember to set path to the platform you're testing on
+// Ensure you've run 'npm install' within the /app directory to install spectron
+// Install mocha: 'npm install -g mocha'
+// Run 'mocha' in the project's root directory to run tests.
 
 var Application = require('spectron').Application
 var assert = require('assert')
+
+var inkyPathsByPlatform = {
+  "darwin": "Inky-darwin-x64/Inky.app/Contents/MacOS/Inky",
+  "linux": "Inky-linux-x64/Inky",
+  "win32": "Inky-win32-x64/Inky.exe"
+};
 
 describe('application launch', function () {
   this.timeout(10000)
 
   beforeEach(function () {
     this.app = new Application({
-      //Path for testing on Mac
-      path: 'Inky-darwin-x64/Inky.app/Contents/MacOS/Inky'
-      //Path for testing on Linux
-      //path: 'Inky-linux-x64/Inky'
+      path: inkyPathsByPlatform[process.platform]
     })
     return this.app.start()
   })

@@ -23,7 +23,8 @@
   },
   "homepage": "http://www.inklestudios.com/ink",
   "devDependencies": {
-    "electron-prebuilt": "^0.37.8"
+    "electron-prebuilt": "^0.37.8",
+    "spectron": "^3.2.6"
   },
   "dependencies": {
     "chokidar": "^1.6.0",
