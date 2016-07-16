@@ -2,12 +2,13 @@ const electron = require('electron')
 const app = electron.app
 const ipc = electron.ipcMain;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
+const DocumentationWindow = require("./DocumentationWindow.js").DocumentationWindow;
 const appmenus = require('./appmenus.js');
 const forceQuitDetect = require('./forceQuitDetect');
 const Inklecate = require("./inklecate.js").Inklecate;
 
-app.on('will-finish-launching', function() {
-    app.on("open-file", function(event, path) {
+app.on('will-finish-launching', function () {
+    app.on("open-file", function (event, path) {
         ProjectWindow.open(path);
         event.preventDefault();
     });
@@ -16,7 +17,7 @@ app.on('will-finish-launching', function() {
 
 let isQuitting = false;
 
-app.on('before-quit', function() {
+app.on('before-quit', function () {
     // We need this to differentiate between pressing quit (which should quit) or closing all windows
     // (which leaves the app open)
     isQuitting = true;
@@ -29,9 +30,9 @@ ipc.on("project-cancelled-close", (event) => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', function() {
+app.on('ready', function () {
 
-    app.on('window-all-closed', function() {
+    app.on('window-all-closed', function () {
         if (process.platform != 'darwin' || isQuitting) {
             app.quit();
         }
@@ -43,26 +44,29 @@ app.on('ready', function() {
         },
         newInclude: () => {
             var win = ProjectWindow.focused();
-            if( win ) win.newInclude();
+            if (win) win.newInclude();
         },
         open: () => {
             ProjectWindow.open();
         },
         save: () => {
             var win = ProjectWindow.focused();
-            if( win ) win.save();
+            if (win) win.save();
         },
         exportJson: () => {
             var win = ProjectWindow.focused();
-            if( win ) win.exportJson();
+            if (win) win.exportJson();
+        },
+        showDocs: () => {
+            DocumentationWindow.openDocumentation();
         },
         exportForWeb: () => {
             var win = ProjectWindow.focused();
-            if( win ) win.exportForWeb();
+            if (win) win.exportForWeb();
         },
         close: (event) => {
             var win = ProjectWindow.focused();
-            if( win ) win.tryClose();
+            if (win) win.tryClose();
         },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
@@ -70,18 +74,18 @@ app.on('ready', function() {
     });
 
     let openedSpecificFile = false;
-    if( process.platform == "win32" && process.argv.length > 1 ) {
-        for(let i=1; i<process.argv.length; i++) {
+    if (process.platform == "win32" && process.argv.length > 1) {
+        for (let i = 1; i < process.argv.length; i++) {
             var arg = process.argv[i];
-            if( arg.indexOf(".ink") == arg.length-4 ) {
+            if (arg.indexOf(".ink") == arg.length - 4) {
                 var fileToOpen = process.argv[1];
                 ProjectWindow.open(fileToOpen);
                 openedSpecificFile = true;
                 break;
             }
         }
-    } 
-    if( !openedSpecificFile ) {
+    }
+    if (!openedSpecificFile) {
         var w = ProjectWindow.createEmpty();
     }
 

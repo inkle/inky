@@ -7,56 +7,56 @@ Menu = require("menu");
 function setupMenus(callbacks) {
   const template = [
     {
-        label: 'File',
-        submenu: [
-          {
-            label: 'New Project',
-            accelerator: 'CmdOrCtrl+N',
-            click: callbacks.new
-          },
-          {
-            label: 'New Included Ink File',
-            accelerator: 'CmdOrCtrl+Alt+N',
-            click: callbacks.newInclude
-          },
-          {
-            type: 'separator'
-          },
-          {
-            label: 'Open',
-            accelerator: 'CmdOrCtrl+O',
-            click: callbacks.open
-          },
-          {
-            type: 'separator'
-          },
-          {
-            label: 'Save Project',
-            accelerator: 'CmdOrCtrl+S',
-            enabled: callbacks.isFocusedWindow,
-            click: callbacks.save
-          },
-          {
-            label: 'Export to JSON...',
-            accelerator: 'CmdOrCtrl+Shift+S',
-            enabled: callbacks.isFocusedWindow,
-            click: callbacks.exportJson
-          },
-          {
-            label: 'Export for web...',
-            enabled: callbacks.isFocusedWindow,
-            click: callbacks.exportForWeb
-          },
-          {
-            type: 'separator'
-          },
-          {
-            label: 'Close',
-            accelerator: 'CmdOrCtrl+W',
-            enabled: callbacks.isFocusedWindow,
-            click: callbacks.close
-          }
-        ]
+      label: 'File',
+      submenu: [
+        {
+          label: 'New Project',
+          accelerator: 'CmdOrCtrl+N',
+          click: callbacks.new
+        },
+        {
+          label: 'New Included Ink File',
+          accelerator: 'CmdOrCtrl+Alt+N',
+          click: callbacks.newInclude
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Open',
+          accelerator: 'CmdOrCtrl+O',
+          click: callbacks.open
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Save Project',
+          accelerator: 'CmdOrCtrl+S',
+          enabled: callbacks.isFocusedWindow,
+          click: callbacks.save
+        },
+        {
+          label: 'Export to JSON...',
+          accelerator: 'CmdOrCtrl+Shift+S',
+          enabled: callbacks.isFocusedWindow,
+          click: callbacks.exportJson
+        },
+        {
+          label: 'Export for web...',
+          enabled: callbacks.isFocusedWindow,
+          click: callbacks.exportForWeb
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Close',
+          accelerator: 'CmdOrCtrl+W',
+          enabled: callbacks.isFocusedWindow,
+          click: callbacks.close
+        }
+      ]
     },
     {
       label: 'Edit',
@@ -156,9 +156,13 @@ function setupMenus(callbacks) {
       submenu: [
         {
           label: 'Learn More',
-          click() { 
+          click() {
             inklecate("hello world");
           }
+        },
+        {
+          label: 'Show Documentation',
+          click: callbacks.showDocs
         },
       ]
     },
