@@ -41,6 +41,17 @@ Inky is built using:
 
 Inky includes a copy of **inklecate**, the command line **ink** compiler.
 
+## Help develop Inky!
+
+Take a look at the [issues page](https://github.com/inkle/inky/issues) for an issue with a "help wanted" label. We try to provide some basic instructions on how to get started with the development of the feature whenever we add the label.
+
+To build the project:
+
+* Install [node.js](https://nodejs.org/en/) if you don't already have it
+* Clone the repo
+* On Mac, double-click the `INSTALL_AND_RUN.command` script. On Windows, open Powershell, cd into the app directory, and type `npm install`, then `npm start`.
+
+
 ## License
 
 **Inky** and **ink** are released under the MIT license. Although we don't require attribution, we'd love to know if you decide to use **ink** a project! Let us know on [Twitter](http://www.twitter.com/inkleStudios) or [by email](mailto:info@inklestudios.com).
