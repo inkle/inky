@@ -52,6 +52,12 @@ To build the project:
 * On Mac, double-click the `INSTALL_AND_RUN.command` script. On Windows, open Powershell, cd into the app directory, and type `npm install`, then `npm start`.
 * For subsequent runs, if no npm packages have changed, you can run the `RUN.command` script on Mac, or type `npm start` in the shell (on Windows).
 
+### Linux
+* Install [node.js](https://nodejs.org/en/) if you don't already have it
+* Install Wine (This is needed for the compiler not to actually run Inky)
+* In the terminal run ./INSTALL_AND_RUN.command
+* cd into the app directory, and type `npm install`, then `npm start`.
+
 
 ## License
 
