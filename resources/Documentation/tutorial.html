@@ -1,0 +1,1665 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+    <style>
+        code {
+    font-family: monospace;
+}
+    </style>
+</head>
+
+<body>
+    <section class="w3-container">
+        <h1 id="writing-with-ink">Writing with ink</h1>
+        <h2 id="introduction">Introduction</h2>
+        <p><strong>ink</strong> is a scripting language built around the idea of marking up pure-text with flow in order to
+            produce interactive scripts. </p>
+        <p>At its most basic, it can be used to write a Choose Your Own-style story, or a branching dialogue tree. But its real
+            strength is in writing dialogues with lots of options and lots of recombination of the flow. </p>
+        <p><strong>ink</strong> offers several features to enable non-technical writers to branch often, and play out the consequences
+            of those branches, in both minor and major ways, without fuss. </p>
+        <p>The script aims to be clean and logically ordered, so branching dialogue can be tested &quot;by eye&quot;. The flow
+            is described in a declarative fashion where possible.</p>
+        <p>It&#39;s also designed with redrafting in mind; so editing a flow should be fast.</p>
+        <h1 id="part-one-the-basics">Part One: The Basics</h1>
+        <h2 id="1-content">1) Content</h2>
+        <h3 id="the-simplest-ink-script">The simplest ink script</h3>
+        <p>The most basic ink script is just text in a .ink file.</p>
+        <pre><code>Hello, world!
+</code></pre>
+        <p>On running, this will output the content, and then stop.</p>
+        <p>Text on separate lines produces new paragraphs. The script:</p>
+        <pre><code>Hello, world!
+Hello?
+Hello, are you there?
+</code></pre>
+        <p>produces output that looks the same.</p>
+        <h3 id="comments">Comments</h3>
+        <p>By default, all text in your file will appear in the output content, unless specially marked up. </p>
+        <p>The simplest mark-up is a comment. <strong>ink</strong> supports two kinds of comment. There&#39;s the kind used
+            for someone reading the code, which the compiler ignores:</p>
+        <pre><code>&quot;What do you make of this?&quot; she asked.
+
+// Something unprintable...
+
+&quot;I couldn&#39;t possibly comment,&quot; I replied.
+
+/*
+    ... or an unlimited block of text
+*/
+</code></pre>
+        <p>and there&#39;s the kind used for reminding the author what they need to do, that the compiler prints out during
+            compilation:</p>
+        <pre><code>TODO: Write this section properly!
+</code></pre>
+        <h2 id="2-choices">2) Choices</h2>
+        <p>Input is offered to the player via text choices. A text choice is indicated by an <code>*</code> character. </p>
+        <p>If no other flow instructions are given, once made, the choice will flow into the next line of text.</p>
+        <pre><code>Hello world!
+*    Hello back!
+    Nice to hear from you!
+</code></pre>
+        <p>This produces the following game:</p>
+        <pre><code>Hello world
+1: Hello back!
+
+&gt; 1
+Hello back!
+Nice to hear from you.
+</code></pre>
+        <p>By default, the text of a choice appears again, in the output. </p>
+        <h3 id="suppressing-choice-text">Suppressing choice text</h3>
+        <p>Some games separate the text of a choice from its outcome. In <strong>ink</strong>, if the choice text is given in
+            square brackets, the text of the choice will not be printed into response.</p>
+        <pre><code>Hello world!
+*    [Hello back!]
+    Nice to hear from you!
+</code></pre>
+        <p>produces</p>
+        <pre><code>Hello world
+1: Hello back!
+
+&gt; 1
+Nice to hear from you.
+</code></pre>
+        <h4 id="advanced-mixing-choice-and-output-text">Advanced: mixing choice and output text</h4>
+        <p>The square brackets in fact divide up the option content. What&#39;s before is printed in both choice and output;
+            what&#39;s inside only in choice; and what&#39;s after, only in output. Effectively, they provide alternative
+            ways for a line to end.</p>
+        <pre><code>Hello world!
+*    Hello [back!] right back to you!
+    Nice to hear from you!
+</code></pre>
+        <p>produces:</p>
+        <pre><code>Hello world
+1: Hello back!
+&gt; 1
+Hello right back to you!
+Nice to hear from you.
+</code></pre>
+        <p>This is most useful when writing dialogue choices:</p>
+        <pre><code>&quot;What&#39;s that?&quot; my master asked.
+*    &quot;I am somewhat tired[.&quot;],&quot; I repeated.
+    &quot;Really,&quot; he responded. &quot;How deleterious.&quot;
+</code></pre>
+        <p>produces:</p>
+        <pre><code>&quot;What&#39;s that?&quot; my master asked.
+1. &quot;I am somewhat tired.&quot;
+&gt; 1
+&quot;I am somewhat tired,&quot; I repeated.
+&quot;Really,&quot; he responded. &quot;How deleterious.&quot;
+</code></pre>
+        <h3 id="multiple-choices">Multiple Choices</h3>
+        <p>To make choices really choices, we need to provide alternatives. We can do this simply by listing them:</p>
+        <pre><code>&quot;What that&#39;s?&quot; my master asked.
+*    &quot;I am somewhat tired[.&quot;],&quot; I repeated.
+    &quot;Really,&quot; he responded. &quot;How deleterious.&quot;
+*    &quot;Nothing, Monsieur!&quot;[] I replied.
+    &quot;Very good, then.&quot;
+*  &quot;I said, this journey is appalling[.&quot;] and I want no more of it.&quot;
+    &quot;Ah,&quot; he replied, not unkindly. &quot;I see you are feeling frustrated. Tomorrow, things will improve.&quot;
+</code></pre>
+        <p>This produces the following game:</p>
+        <pre><code>&quot;What that&#39;s?&quot; my master asked.
+
+1: &quot;I am somewhat tired.&quot;
+2: &quot;Nothing, Monsieur!&quot;
+3: &quot;I said, this journey is appalling.&quot;
+
+&gt; 3
+&quot;I said, this journey is appalling and I want no more of it.&quot;
+&quot;Ah,&quot; he replied, not unkindly. &quot;I see you are feeling frustrated. Tomorrow, things will improve.&quot;
+</code></pre>
+        <p>The above syntax is enough to write a single set of choices. In a real game, we&#39;ll want to move the flow from
+            one point to another based on what the player chooses. To do that, we need to introduce a bit more structure.</p>
+        <h2 id="3-knots">3) Knots</h2>
+        <h3 id="pieces-of-content-are-called-knots">Pieces of content are called knots</h3>
+        <p>To allow the game to branch we need to mark up sections of content with names (as an old-fashioned gamebook does
+            with its &#39;Paragraph 18&#39;, and the like.) </p>
+        <p>These sections are called &quot;knots&quot; and they&#39;re the fundamental structural unit of ink content.</p>
+        <h3 id="writing-a-knot">Writing a knot</h3>
+        <p>The start of a knot is indicated by two or more equals signs, as follows.</p>
+        <pre><code>=== top_knot ===
+</code></pre>
+        <p>(The equals signs on the end are optional; and the name needs to be a single word with no spaces.)</p>
+        <p>The start of a knot is a header; the content that follows will be inside that knot.</p>
+        <pre><code>=== back_in_london ===
+
+We arrived into London at 9.45pm exactly.
+</code></pre>
+        <h4 id="advanced-a-knottier-hello-world-">Advanced: a knottier &quot;hello world&quot;</h4>
+        <p>Note that the game will automatically run the first knot it finds in a story if there is no &quot;non-knot&quot;
+            content, so the simplest script is now:</p>
+        <pre><code>=== top_knot ===
+Hello world!
+</code></pre>
+        <p>However, <strong>ink</strong> doesn&#39;t like loose ends, and produces a warning on compilation and/or run-time
+            when it thinks this has happened. The script above produces this on compilation:</p>
+        <pre><code>WARNING: Apparent loose end exists where the flow runs out. Do you need a &#39;-&gt; END&#39; statement, choice or divert? on line 3 of tests/test.ink
+</code></pre>
+        <p>and this on running:</p>
+        <pre><code>Runtime error in tests/test.ink line 3: ran out of content. Do you need a &#39;-&gt; DONE&#39; or &#39;-&gt; END&#39;?
+</code></pre>
+        <p>The following plays and compiles without error:</p>
+        <pre><code>=== top_knot ===
+Hello world!
+-&gt; END
+</code></pre>
+        <p><code>-&gt; END</code> is a marker for both the writer and the compiler; it means &quot;the story flow should now
+            stop&quot;.</p>
+        <h2 id="4-diverts">4) Diverts</h2>
+        <h3 id="knots-divert-to-knots">Knots divert to knots</h3>
+        <p>You can tell the story to move from one knot to another using <code>-&gt;</code>, a &quot;divert arrow&quot;. Diverts
+            happen immediately without any user input.</p>
+        <pre><code>=== back_in_london ===
+
+We arrived into London at 9.45pm exactly.
+-&gt; hurry_home
+
+=== hurry_home ===
+We hurried home to Savile Row as fast as we could.
+</code></pre>
+        <h4 id="diverts-are-invisible">Diverts are invisible</h4>
+        <p>Diverts are intended to be seamless and can even happen mid-sentence:</p>
+        <pre><code>=== hurry_home ===
+We hurried home to Savile Row -&gt; as_fast_as_we_could
+
+=== as_fast_as_we_could ===
+as fast as we could.
+</code></pre>
+        <p>produces the same line as above:</p>
+        <pre><code>We hurried home to Savile Row as fast as we could.
+</code></pre>
+        <h4 id="glue">Glue</h4>
+        <p>The default behaviour inserts line-breaks before every new line of content. In some cases, however, content must
+            insist on not having a line-break, and it can do so using <code>&lt;&gt;</code>, or &quot;glue&quot;.</p>
+        <pre><code>=== hurry_home ===
+We hurried home &lt;&gt;
+-&gt; to_savile_row
+
+=== to_savile_row ===
+to Savile Row
+-&gt; as_fast_as_we_could
+
+=== as_fast_as_we_could ===
+&lt;&gt; as fast as we could.
+</code></pre>
+        <p>also produces:</p>
+        <pre><code>We hurried home to Savile Row as fast as we could.
+</code></pre>
+        <p>You can&#39;t use too much glue: multiple glues next to each other have no additional effect. (And there&#39;s no
+            way to &quot;negate&quot; a glue; once a line is sticky, it&#39;ll stick.)</p>
+        <h2 id="5-branching-the-flow">5) Branching The Flow</h2>
+        <h3 id="basic-branching">Basic branching</h3>
+        <p>Combining knots, options and diverts gives us the basic structure of a choose-your-own game.</p>
+        <pre><code>== paragraph_1 ===
+You stand by the wall of Analand, sword in hand.
+* [Open the gate] -&gt; paragraph_2
+* [Smash down the gate] -&gt; paragraph_3
+* [Turn back and go home] -&gt; paragraph_4
+
+=== paragraph_2 ===
+You open the gate, and step out onto the path.
+
+...
+</code></pre>
+        <h3 id="branching-and-joining">Branching and joining</h3>
+        <p>Using diverts, the writer can branch the flow, and join it back up again, without showing the player that the flow
+            has rejoined.
+        </p>
+        <pre><code>=== back_in_london ===
+
+We arrived into London at 9.45pm exactly.
+
+*    &quot;There is not a moment to lose!&quot;[] I declared.
+    -&gt; hurry_outside
+
+*    &quot;Monsieur, let us savour this moment!&quot;[] I declared.
+    My master clouted me firmly around the head and dragged me out of the door.
+    -&gt; dragged_outside
+
+*    [We hurried home] -&gt; hurry_outside
+
+
+=== hurry_outside ===
+We hurried home to Savile Row -&gt; as_fast_as_we_could
+
+
+=== dragged_outside ===
+He insisted that we hurried home to Savile Row
+-&gt; as_fast_as_we_could
+
+
+=== as_fast_as_we_could ===
+&lt;&gt; as fast as we could.
+</code></pre>
+        <h3 id="the-story-flow">The story flow</h3>
+        <p>Knots and diverts combine to create the basic story flow of the game. This flow is &quot;flat&quot; - there&#39;s
+            no call-stack, and diverts aren&#39;t &quot;returned&quot; from. </p>
+        <p>In most ink scripts, the story flow starts at the top, bounces around in a spaghetti-like mess, and eventually, hopefully,
+            reaches a <code>-&gt; END</code>.</p>
+        <p>The very loose structure means writers can get on and write, branching and rejoining without worrying about the structure
+            that they&#39;re creating as they go. There&#39;s no boiler-plate to creating new branches or diversions, and
+            no need to track any state.</p>
+        <h4 id="advanced-loops">Advanced: Loops</h4>
+        <p>You absolutely can use diverts to create looped content, and <strong>ink</strong> has several features to exploit
+            this, including ways to make the content vary itself, and ways to control how often options can be chosen. </p>
+        <p>See the sections on Varying Text and Conditional Options for more information.</p>
+        <p>Oh, and the following is legal and not a great idea:</p>
+        <pre><code>=== round ===
+and
+-&gt; round
+</code></pre>
+        <h2 id="6-includes-and-stitches">6) Includes and Stitches</h2>
+        <h3 id="knots-can-be-subdivided">Knots can be subdivided</h3>
+        <p>As stories get longer, they become more confusing to keep organised without some additional structure. </p>
+        <p>Knots can include sub-sections called &quot;stitches&quot;. These are marked using a single equals sign.</p>
+        <pre><code>=== the_orient_express ===
+= in_first_class
+    ...
+= in_third_class
+    ...
+= in_the_guards_van
+    ...
+= missed_the_train
+    ...
+</code></pre>
+        <p>One could use a knot for a scene, for instance, and stitches for the events within the scene.</p>
+        <h3 id="stitches-have-unique-names">Stitches have unique names</h3>
+        <p>A stitch can be diverted to using its &quot;address&quot;.</p>
+        <pre><code>*    [Travel in third class]
+    -&gt; the_orient_express.in_third_class
+
+*    [Travel in the guard&#39;s van]
+    -&gt; the_orient_express.in_the_guards_van
+</code></pre>
+        <h3 id="the-first-stitch-is-the-default">The first stitch is the default</h3>
+        <p>Diverting to a knot which contains stitches will divert to the first stitch in the knot. So:</p>
+        <pre><code>*    [Travel in first class]
+    &quot;First class, Monsieur. Where else?&quot;
+    -&gt; the_orient_express
+</code></pre>
+        <p>is the same as:</p>
+        <pre><code>*    [Travel in first class]
+    &quot;First class, Monsieur. Where else?&quot;
+    -&gt; the_orient_express.in_first_class
+</code></pre>
+        <p>(...unless we move the order of the stitches around inside the knot!)</p>
+        <p>You can also include content at the top of a knot outside of any stitch. However, you need to remember to divert
+            out of it - the engine <em>won&#39;t</em> automatically enter the first stitch once it&#39;s worked its way through
+            the header content.</p>
+        <pre><code>=== the_orient_express ===
+
+We boarded the train, but where?
+*    [First class] -&gt; in_first_class
+*    [Second class] -&gt; in_second_class
+
+= in_first_class
+    ...
+= in_second_class
+    ...
+</code></pre>
+        <h3 id="local-diverts">Local diverts</h3>
+        <p>From inside a knot, you don&#39;t need to use the full address for a stitch.</p>
+        <pre><code>-&gt; the_orient_express
+
+=== the_orient_express ===
+= in_first_class
+    I settled my master.
+    *    [Move to third class]
+        -&gt; in_third_class
+
+= in_third_class
+    I put myself in third.
+</code></pre>
+        <p>This means stitches and knots can&#39;t share names, but several knots can contain the same stitch name. (So both
+            the Orient Express and the SS Mongolia can have first class.) </p>
+        <p>The compiler will warn you if ambiguous names are used.</p>
+        <h3 id="script-files-can-be-combined">Script files can be combined</h3>
+        <p>You can also split your content across multiple files, using an include statement.</p>
+        <pre><code>INCLUDE newspaper.ink
+INCLUDE cities/vienna.ink
+INCLUDE journeys/orient_express.ink
+</code></pre>
+        <p>Include statements should always go at the top of a file, and not inside knots.</p>
+        <p>There are no rules about what file a knot must be in to be diverted to. (In other words, separating files has no
+            effect on the game&#39;s namespacing).</p>
+        <h2 id="8-varying-choices">8) Varying Choices</h2>
+        <h3 id="choices-can-only-be-used-once">Choices can only be used once</h3>
+        <p>By default, every choice in the game can only be chosen once. If you don&#39;t have loops in your story, you&#39;ll
+            never notice this behaviour. But if you do use loops, you&#39;ll quickly notice your options disappearing...</p>
+        <pre><code>=== find_help ===
+
+    You search desperately for a friendly face in the crowd.
+    *    The woman in the hat[?] pushes you roughly aside. -&gt; find_help
+    *    The man with the briefcase[?] looks disgusted as you stumble past him. -&gt; find_help
+</code></pre>
+        <p>produces:</p>
+        <pre><code>You search desperately for a friendly face in the crowd.
+
+1: The woman in the hat?
+2: The man with the briefcase?
+
+&gt; 1
+The woman in the hat pushes you roughly aside.
+You search desperately for a friendly face in the crowd.
+
+1: The man with the briefcase?
+
+&gt;
+</code></pre>
+        <p>... and on the next loop you&#39;ll have no options left.</p>
+        <h4 id="fallback-choices">Fallback choices</h4>
+        <p>The above example stops where it does, because the next choice ends up in an &quot;out of content&quot; run-time
+            error.
+        </p>
+        <pre><code>&gt; 1
+The man with the briefcase looks disgusted as you stumble past him.
+You search desperately for a friendly face in the crowd.
+
+Runtime error in tests/test.ink line 6: ran out of content. Do you need a &#39;-&gt; DONE&#39; or &#39;-&gt; END&#39;?
+</code></pre>
+        <p>We can resolve this with a &#39;fallback choice&#39;. Fallback choices are never displayed to the player, but are
+            &#39;chosen&#39; by the game if no other options exist. </p>
+        <p>A fallback choice is simply a &quot;choice without choice text&quot;:</p>
+        <pre><code>*    -&gt; out_of_options
+</code></pre>
+        <p>We can use the square-bracket notation here as well:</p>
+        <pre><code>* [] Mulder never could explain how he got out of that burning box car. -&gt; season_2
+</code></pre>
+        <h4 id="example-of-a-fallback-choice">Example of a fallback choice</h4>
+        <p>Adding this into the previous example gives us: </p>
+        <pre><code>=== find_help ===
+
+    You search desperately for a friendly face in the crowd.
+    *    The woman in the hat[?] pushes you roughly aside. -&gt; find_help
+    *    The man with the briefcase[?] looks disgusted as you stumble past him. -&gt; find_help
+    *    [] But it is too late: you collapse onto the station platform. This is the end.
+        -&gt; END
+</code></pre>
+        <p>and produces:</p>
+        <pre><code>You search desperately for a friendly face in the crowd.
+
+1: The woman in the hat?
+2: The man with the briefcase?
+
+&gt; 1
+The woman in the hat pushes you roughly aside.
+You search desperately for a friendly face in the crowd.
+
+1: The man with the briefcase?
+
+&gt; 1
+The man with the briefcase looks disgusted as you stumble past him.
+You search desperately for a friendly face in the crowd.
+But it is too late: you collapse onto the station platform. This is the end.
+</code></pre>
+        <h3 id="sticky-choices">Sticky choices</h3>
+        <p>The &#39;once-only&#39; behaviour is not always what we want, of course, so we have a second kind of choice: the
+            &quot;sticky&quot; choice. A sticky choice is simply one that doesn&#39;t get used up, and is marked by a <code>+</code>            bullet.</p>
+        <pre><code>=== homers_couch ===
+    +    [Eat another donut]
+        You eat another donut. -&gt; homers_couch
+    *    [Get off the couch]
+        You struggle up off the couch to go and compose epic poetry.
+        -&gt; END
+</code></pre>
+        <h3 id="conditional-choices">Conditional Choices</h3>
+        <p>You can also turn choices on and off by hand. <strong>ink</strong> has quite a lot of logic available, but the simplest
+            tests is &quot;has the player seen a particular piece of content&quot;.</p>
+        <p>Every knot/stitch in the game has a unique address (so it can be diverted to), and we use the same address to test
+            if that piece of content has been seen. </p>
+        <pre><code>*    { not visit_paris }     [Go to Paris] -&gt; visit_paris
++     { visit_paris      }         [Return to Paris] -&gt; visit_paris
+
+*    { visit_paris.met_estelle } [ Telephone Mme Estelle ] -&gt; phone_estelle
+</code></pre>
+        <p>Note that the test <code>knot_name</code> is true if <em>any</em> stitch inside that knot has been seen.</p>
+        <p>Note also that conditionals don&#39;t override the once-only behaviour of options, so you&#39;ll still need sticky
+            options for repeatable choices.</p>
+        <h4 id="advanced-multiple-conditions">Advanced: multiple conditions</h4>
+        <p>You can use several logical tests on an option; if you do, <em>all</em> the tests must all be passed for the option
+            to appear.
+        </p>
+        <pre><code>*    { not visit_paris }     [Go to Paris] -&gt; visit_paris
++     { visit_paris } { not bored_of_paris }
+                            [Return to Paris] -&gt; visit_paris
+</code></pre>
+        <h4 id="advanced-knot-stitch-labels-are-actually-read-counts">Advanced: knot/stitch labels are actually read counts</h4>
+        <p>The test: </p>
+        <pre><code>*    {seen_clue} [Accuse Mr Jefferson]
+</code></pre>
+        <p>is actually testing an <em>integer</em> and not a true/false flag. A knot or stitch used this way is actually an
+            integer variable containing the number of times the content at the address has been seen by the player. </p>
+        <p>If it&#39;s non-zero, it&#39;ll return true in a test like the one above, but you can also be more specific as well:</p>
+        <pre><code>* {seen_clue &gt; 3} [Flat-out arrest Mr Jefferson]
+</code></pre>
+        <h4 id="advanced-more-logic">Advanced: more logic</h4>
+        <p><strong>ink</strong> supports a lot more logic and conditionality than covered here - see the section on &#39;variables
+            and logic&#39;.</p>
+        <h2 id="9-variable-text">9) Variable Text</h2>
+        <h3 id="text-can-vary">Text can vary</h3>
+        <p>So far, all the content we&#39;ve seen has been static, fixed pieces of text. But content can also vary at the moment
+            of being printed. </p>
+        <h3 id="sequences-cycles-and-other-lists">Sequences, cycles and other lists</h3>
+        <p>The simplest variations of text are from lists, which are selected from depending on some kind of rule. <strong>ink</strong>            supports several types. Lists are written inside <code>{</code>...<code>}</code> curly brackets, with elements
+            separated by <code>|</code> symbols (vertical divider lines).</p>
+        <p>These are only useful if a piece of content is visited more than once!</p>
+        <h4 id="list-types">List types</h4>
+        <p><strong>Sequences</strong> (the default):</p>
+        <p>A sequence (or a &quot;stopping list&quot;) is a list that tracks how many times its been seen, and each time, shows
+            the next element along. When it runs out of new content it continues the show the final element.</p>
+        <pre><code>The radio hissed into life. {&quot;Three!&quot;|&quot;Two!&quot;|&quot;One!&quot;|There was the white noise racket of an explosion.|But it was just static.}
+
+{I bought a coffee with my five-pound note.|I bought a second coffee for my friend.|I didn&#39;t have enough money to buy any more coffee.}
+</code></pre>
+        <p><strong>Cycles</strong> (marked with a <code>&amp;</code>): </p>
+        <p>Cycles are like sequences, but they loop their content.</p>
+        <pre><code>It was {&amp;Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday} today.
+</code></pre>
+        <p><strong>Once-only</strong> (marked with a <code>!</code>):</p>
+        <p>Once-only lists are like sequences, but when they run out of new content to display, they display nothing. (You can
+            think of a once-only list as a sequence with a blank last entry.)</p>
+        <pre><code>He told me a joke. {!I laughed politely.|I smiled.|I grimaced.|I promised myself to not react again.}
+</code></pre>
+        <p><strong>Shuffles</strong> (marked with a <code>~</code>):</p>
+        <p>Shuffles produce randomised output.</p>
+        <pre><code>I tossed the coin. {~Heads|Tails}.
+</code></pre>
+        <h4 id="features-of-lists">Features of Lists</h4>
+        <p>Lists can contain blank elements.</p>
+        <pre><code>I took a step forward. {!||||Then the lights went out. -&gt; eek}
+</code></pre>
+        <p>Lists can be nested.</p>
+        <pre><code>The Ratbear {&amp;{wastes no time and |}swipes|scratches} {&amp;at you|into your {&amp;leg|arm|cheek}}.
+</code></pre>
+        <p>Lists can include divert statements. </p>
+        <pre><code>I {waited.|waited some more.|snoozed.|woke up and waited more.|gave up and left. -&gt; leave_post_office}
+</code></pre>
+        <p>They can also be used inside choice text:</p>
+        <pre><code>+     &quot;Hello, {&amp;Master|Monsieur Fogg|you|brown-eyes}!&quot;[] I declared.
+</code></pre>
+        <p>(...with one caveat; you can&#39;t start an option&#39;s text with a <code>{</code>, as it&#39;ll look like a conditional.)</p>
+        <h4 id="examples">Examples</h4>
+        <p>Lists can be used inside loops to create the appearance of intelligent, state-tracking gameplay without particular
+            effort.</p>
+        <p>Here&#39;s a one-knot version of whack-a-mole. Note we use once-only options, and a fallback, to ensure the mole
+            doesn&#39;t move around, and the game will always end.</p>
+        <pre><code>=== whack_a_mole ===
+    {I heft the hammer.|{~Missed!|Nothing!|No good. Where is he?|Ah-ha! Got him! -&gt; END}}
+    The {&amp;mole|{&amp;nasty|blasted|foul} {&amp;creature|rodent}} is {in here somewhere|hiding somewhere|still at large|laughing at me|still unwhacked|doomed}. &lt;&gt;
+    {!I&#39;ll show him!|But this time he won&#39;t escape!}
+    *     [{&amp;Hit|Smash|Try} top-left]     -&gt; whack_a_mole
+    *  [{&amp;Whallop|Splat|Whack} top-right] -&gt; whack_a_mole
+    *  [{&amp;Blast|Hammer} middle] -&gt; whack_a_mole
+    *  [{&amp;Clobber|Bosh} bottom-left]     -&gt; whack_a_mole
+    *  [{&amp;Nail|Thump} bottom-right]     -&gt; whack_a_mole
+    *  [] Then you collapse from hunger. The mole has defeated you!
+        -&gt; END
+</code></pre>
+        <p>produces the following &#39;game&#39;:</p>
+        <pre><code>I heft the hammer.
+The mole is in here somewhere. I&#39;ll show him!
+
+1: Hit top-left
+2: Whallop top-right
+3: Blast middle
+4: Clobber bottom-left
+5: Nail bottom-right
+
+&gt; 1
+Missed!
+The nasty creature is hiding somewhere. But this time he won&#39;t escape!
+
+1: Splat top-right
+2: Hammer middle
+3: Bosh bottom-left
+4: Thump bottom-right
+
+&gt; 4
+Nothing!
+The mole is still at large.
+1: Whack top-right
+2: Blast middle
+3: Clobber bottom-left
+
+&gt; 2
+Where is he?
+The blasted rodent is laughing at me.
+1: Whallop top-right
+2: Bosh bottom-left
+
+&gt; 1
+Ah-ha! Got him!
+</code></pre>
+        <p>And here&#39;s a bit of lifestyle advice. Note the sticky choice - the lure of the television will never fade:</p>
+        <pre><code>=== turn_on_television ===
+I turned on the television {for the first time|for the second time|again|once more}, but there was {nothing good on, so I turned it off again|still nothing worth watching|even less to hold my interest than before|nothing but rubbish|a program about sharks and I don&#39;t like sharks|nothing on}.
++    [Try it again]             -&gt; turn_on_television
+*    [Go outside instead]    -&gt; go_outside_instead
+
+=== go_outside_instead ===
+-&gt; END
+</code></pre>
+        <h4 id="advanced-multiline-lists">Advanced: Multiline lists</h4>
+        <p><strong>ink</strong> has another format for making lists of varying content blocks, too. See the section on &quot;multiline
+            blocks&quot; for details.</p>
+        <h3 id="conditional-text">Conditional Text</h3>
+        <p>Text can also vary depending on logical tests, just as options can.</p>
+        <pre><code>{met_blofeld: &quot;I saw him. Only for a moment.&quot; }
+</code></pre>
+        <p>and</p>
+        <pre><code>&quot;His real name was {met_blofeld.learned_his_name: Franz|a secret}.&quot;
+</code></pre>
+        <p>These can appear as separate lines, or within a section of content. They can even be nested, so:</p>
+        <pre><code>{met_blofeld: &quot;I saw him. Only for a moment. His real name was {met_blofeld.learned_his_name: Franz|kept a secret}.&quot; | &quot;I missed him. Was he particularly evil?&quot; }
+</code></pre>
+        <p>can produce either:</p>
+        <pre><code>&quot;I saw him. Only for a moment. His real name was Franz.&quot;
+</code></pre>
+        <p>or:</p>
+        <pre><code>&quot;I saw him. Only for a moment. His real name was kept a secret.&quot;
+</code></pre>
+        <p>or: </p>
+        <pre><code>&quot;I missed him. Was he particularly evil?&quot;
+</code></pre>
+        <h2 id="10-game-queries">10) Game Queries</h2>
+        <p><strong>ink</strong> provides a few useful &#39;game level&#39; queries about game state, for use in conditional
+            logic. They&#39;re not quite parts of the language, but they&#39;re always available, and they can&#39;t be edited
+            by the author. In a sense, they&#39;re the &quot;standard library functions&quot; of the language.</p>
+        <p>The convention is to name these in capital letters.</p>
+        <h3 id="choice_count">CHOICE_COUNT</h3>
+        <p><code>CHOICE_COUNT</code> returns the number of options created so far in the current chunk. So for instance.</p>
+        <pre><code>*    {false} Option A
+*     {true} Option B
+*  {CHOICE_COUNT() == 1} Option C
+</code></pre>
+        <p>produces two options, B and C. This can be useful for controlling how many options a player gets on a turn. </p>
+        <h3 id="turns_since">TURNS_SINCE</h3>
+        <p><code>TURNS_SINCE</code> returns the number of moves (formally, player inputs) since a particular knot/stitch was
+            last visited.
+        </p>
+        <p>A value of 0 means &quot;was seen as part of the current chunk&quot;. A value of -1 means &quot;has never been seen&quot;.
+            Any other positive value means it has been seen that many turns ago.</p>
+        <pre><code>*    {TURNS_SINCE(-&gt; sleeping.intro) &gt; 10} You are feeling tired... -&gt; sleeping
+*     {TURNS_SINCE(-&gt; laugh) == 0}  You try to stop laughing.
+</code></pre>
+        <p>Note that the parameter passed to <code>TURNS_SINCE</code> is a &quot;divert target&quot;, not simply the knot address
+            itself (because the knot address is a number - the read count - not a location in the story...)</p>
+        <p>TODO: (requirement of passing <code>-c</code> to the compiler)</p>
+        <h4 id="advanced-more-queries">Advanced: more queries</h4>
+        <p>You can make your own external functions, though the syntax is a bit different: see the section on functions below.</p>
+        <h1 id="part-2-weave">Part 2: Weave</h1>
+        <p>So far, we&#39;ve been building branched stories in the simplest way, with &quot;options&quot; that link to &quot;pages&quot;.
+        </p>
+        <p>But this requires us to uniquely name every destination in the story, which can slow down writing and discourage
+            minor branching. </p>
+        <p><strong>ink</strong> has a much more powerful syntax available, designed for simplifying story flows which have an
+            always-forwards direction (as most stories do, and most computer programs don&#39;t).</p>
+        <p>This format is called &quot;weave&quot;, and its built out of the basic content/option syntax with two new features:
+            the gather mark, <code>-</code>, and the nesting of choices and gathers.</p>
+        <h2 id="1-gathers">1) Gathers</h2>
+        <h3 id="gather-points-gather-the-flow-back-together">Gather points gather the flow back together</h3>
+        <p>Let&#39;s go back to the first multi-choice example at the top of this document. </p>
+        <pre><code>&quot;What&#39;s that?&quot; my master asked.
+    *    &quot;I am somewhat tired[.&quot;],&quot; I repeated.
+        &quot;Really,&quot; he responded. &quot;How deleterious.&quot;
+    *    &quot;Nothing, Monsieur!&quot;[] I replied.
+    *  &quot;I said, this journey is appalling[.&quot;] and I want no more of it.&quot;
+        &quot;Ah,&quot; he replied, not unkindly. &quot;I see you are feeling frustrated. Tomorrow, things will improve.&quot;
+</code></pre>
+        <p>In a real game, all three of these options might well lead to the same conclusion - Monsieur Fogg leaves the room.
+            We can do this using a gather, without the need to create any new knots, or add any diverts.</p>
+        <pre><code>&quot;What that&#39;s?&quot; my master asked.
+    *    &quot;I am somewhat tired[.&quot;],&quot; I repeated.
+        &quot;Really,&quot; he responded. &quot;How deleterious.&quot;
+    *    &quot;Nothing, Monsieur!&quot;[] I replied.
+        &quot;Very good, then.&quot;
+    *  &quot;I said, this journey is appalling[.&quot;] and I want no more of it.&quot;
+    &quot;Ah,&quot; he replied, not unkindly. &quot;I see you are feeling frustrated. Tomorrow, things will improve.&quot;
+
+-    With that Monsieur Fogg left the room.
+</code></pre>
+        <p>This produces the following playthrough:</p>
+        <pre><code>&quot;What that&#39;s?&quot; my master asked.
+
+1: &quot;I am somewhat tired.&quot;
+2: &quot;Nothing, Monsieur!&quot;
+3: &quot;I said, this journey is appalling.&quot;
+
+&gt; 1
+&quot;I am somewhat tired,&quot; I repeated.
+&quot;Really,&quot; he responded. &quot;How deleterious.&quot;
+With that Monsieur Fogg left the room.
+</code></pre>
+        <h3 id="options-and-gathers-form-chains-of-content">Options and gathers form chains of content</h3>
+        <p>We can string these gather-and-branch sections together to make branchy sequences that always run forwards.</p>
+        <pre><code>=== escape ===
+I ran through the forest, the dogs snapping at my heels.
+
+    *     I checked the jewels[] were still in my pocket, and the feel of them brought a spring to my step. &lt;&gt;
+
+    *  I did not pause for breath[] but kept on running. &lt;&gt;
+
+    *    I cheered with joy. &lt;&gt;
+
+-     The road could not be much further! Mackie would have the engine running, and then I&#39;d be safe.
+
+    *    I reached the road and looked about[]. And would you believe it?
+    *     I should interrupt to say Mackie is normally very reliable[]. He&#39;s never once let me down. Or rather, never once, previously to that night.
+
+-    The road was empty. Mackie was nowhere to be seen.
+</code></pre>
+        <p>This is the most basic kind of weave. The rest of this section details additional features that allow weaves to nest,
+            contain side-tracks and diversions, divert within themselves, and above all, reference earlier choices to influence
+            later ones.</p>
+        <h4 id="the-weave-philsophy">The weave philsophy</h4>
+        <p>Weaves are more than just a convenient encapsulation of branching flow; they&#39;re also a way to author more robust
+            content. The <code>escape</code> example above has already four possible routes through, and a more complex sequence
+            might have lots and lots more. Using normal diverts, one has to check the links by chasing the diverts from point
+            to point and it&#39;s easy for errors to creep in. </p>
+        <p>With a weave, the flow is guaranteed to start at the top and &quot;fall&quot; to the bottom. Flow errors are impossible
+            in a basic weave structure, and the output text can be easily skim read. That means there&#39;s no need to actually
+            test all the branches in game to be sure they work as intended.</p>
+        <p>Weaves also allow for easy redrafting of choice-points; in particular, it&#39;s easy to break a sentence up and insert
+            additional choices for variety or pacing reasons, without having to re-engineer any flow.</p>
+        <h2 id="2-nested-flow">2) Nested Flow</h2>
+        <p>The weaves shown above are quite simple, &quot;flat&quot; structures. Whatever the player does, they take the same
+            number of turns to get from top to bottom. However, sometimes certain choices warrant a bit more depth or complexity.
+            </p>
+        <p>For that, we allow weaves to nest.</p>
+        <p>This section comes with a warning. Nested weaves are very powerful and very compact, but they can take a bit of getting
+            used to! </p>
+        <h3 id="options-can-be-nested">Options can be nested</h3>
+        <p>Consider the following scene:</p>
+        <pre><code>-     &quot;Well, Poirot? Murder or suicide?&quot;
+*    &quot;Murder!&quot;
+*     &quot;Suicide!&quot;
+-    Ms. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
+</code></pre>
+        <p>The first choice presented is &quot;Murder!&quot; or &quot;Suicide!&quot;. If Poirot declares a suicide, there&#39;s
+            no more to do, but in the case of murder, there&#39;s a follow-up question needed - who does he suspect? </p>
+        <p>We can add new options via a set of nested sub-choices. We tell the script that these new choices are &quot;part
+            of&quot; another choice by using two asterisks, instead of just one. </p>
+        <pre><code>-     &quot;Well, Poirot? Murder or suicide?&quot;
+    *    &quot;Murder!&quot;
+         &quot;And who did it?&quot;
+        * *     &quot;Detective-Inspector Japp!&quot;
+        * *     &quot;Captain Hastings!&quot;
+        * *     &quot;Myself!&quot;
+    *     &quot;Suicide!&quot;
+    -    Mrs. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
+</code></pre>
+        <p>(Note that it&#39;s good style to also indent the lines to show the nesting, but the compiler doesn&#39;t mind.)</p>
+        <p>And should we want to add new sub-options to the other route, we do that in similar fashion.</p>
+        <pre><code>-     &quot;Well, Poirot? Murder or suicide?&quot;
+    *    &quot;Murder!&quot;
+         &quot;And who did it?&quot;
+        * *     &quot;Detective-Inspector Japp!&quot;
+        * *     &quot;Captain Hastings!&quot;
+        * *     &quot;Myself!&quot;
+    *     &quot;Suicide!&quot;
+        &quot;Really, Poirot? Are you quite sure?&quot;
+        * *     &quot;Quite sure.&quot;
+        * *        &quot;It is perfectly obvious.&quot;
+    -    Mrs. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
+</code></pre>
+        <p>Now, that initial choice of accusation will lead to specific follow-up questions - but either way, the flow will
+            come back together at the gather point, for Mrs. Christie&#39;s cameo appearance.</p>
+        <p>But what if we want a more extended sub-scene?</p>
+        <h3 id="gather-points-can-be-nested-too">Gather points can be nested too</h3>
+        <p>Sometimes, it&#39;s not a question of expanding the number of options, but having more than one additional beat of
+            story. We can do this by nesting gather points as well as options.</p>
+        <pre><code>-     &quot;Well, Poirot? Murder or suicide?&quot;
+        *    &quot;Murder!&quot;
+             &quot;And who did it?&quot;
+            * *     &quot;Detective-Inspector Japp!&quot;
+            * *     &quot;Captain Hastings!&quot;
+            * *     &quot;Myself!&quot;
+            - -     &quot;You must be joking!&quot;
+            * *     &quot;Mon ami, I am deadly serious.&quot;
+            * *        &quot;If only...&quot;
+        *     &quot;Suicide!&quot;
+            &quot;Really, Poirot? Are you quite sure?&quot;
+            * *     &quot;Quite sure.&quot;
+            * *        &quot;It is perfectly obvious.&quot;
+        -    Mrs. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
+</code></pre>
+        <p>If the player chooses the &quot;murder&quot; option, they&#39;ll have two choices in a row on their sub-branch -
+            a whole flat weave, just for them. </p>
+        <h4 id="advanced-what-gathers-do">Advanced: What gathers do</h4>
+        <p>Gathers are hopefully intuitive, but their behaviour is a little harder to put into words: in general, after an option
+            has been taken, the story finds the next gather down that isn&#39;t on a lower level, and diverts to it. </p>
+        <p>The basic idea is this: options separate the paths of the story, and gathers bring them back together. (Hence the
+            name, &quot;weave&quot;!)
+        </p>
+        <h3 id="you-can-nest-as-many-levels-are-you-like">You can nest as many levels are you like</h3>
+        <p>Above, we used two levels of nesting; the main flow, and the sub-flow. But there&#39;s no limit to how many levels
+            deep you can go.</p>
+        <pre><code>-    &quot;Tell us a tale, Captain!&quot;
+    *    &quot;Very well, you sea-dogs. Here&#39;s a tale...&quot;
+        * *     &quot;It was a dark and stormy night...&quot;
+                * * *     &quot;...and the crew were restless...&quot;
+                        * * * *  &quot;... and they said to their Captain...&quot;
+                                * * * * *        &quot;...Tell us a tale Captain!&quot;
+    *    &quot;No, it&#39;s past your bed-time.&quot;
+ -    To a man, the crew began to yawn.
+</code></pre>
+        <p>After a while, this sub-nesting gets hard to read and manipulate, so it&#39;s good style to divert away to a new
+            stitch if a side-choice goes unwieldy. </p>
+        <p>But, in theory at least, you could write your entire story as a single weave.</p>
+        <h3 id="example-a-conversation-with-nested-nodes">Example: a conversation with nested nodes</h3>
+        <p>Here&#39;s a longer example:</p>
+        <pre><code>- I looked at Monsieur Fogg
+*    ... and I could contain myself no longer.
+    &#39;What is the purpose of our journey, Monsieur?&#39;
+    &#39;A wager,&#39; he replied.
+    * *     &#39;A wager!&#39;[] I returned.
+            He nodded.
+            * * *     &#39;But surely that is foolishness!&#39;
+            * * *  &#39;A most serious matter then!&#39;
+            - - -     He nodded again.
+            * * *    &#39;But can we win?&#39;
+                    &#39;That is what we will endeavour to find out,&#39; he answered.
+            * * *    &#39;A modest wager, I trust?&#39;
+                    &#39;Twenty thousand pounds,&#39; he replied, quite flatly.
+            * * *     I asked nothing further of him then[.], and after a final, polite cough, he offered nothing more to me. &lt;&gt;
+    * *     &#39;Ah[.&#39;],&#39; I replied, uncertain what I thought.
+    - -     After that, &lt;&gt;
+*    ... but I said nothing[] and &lt;&gt;
+- we passed the day in silence.
+- -&gt; END
+</code></pre>
+        <p>with a couple of possible playthroughs. A short one:</p>
+        <pre><code>I looked at Monsieur Fogg
+
+1: ... and I could contain myself no longer.
+2: ... but I said nothing
+
+&gt; 2
+... but I said nothing and we passed the day in silence.
+</code></pre>
+        <p>and a longer one:</p>
+        <pre><code>I looked at Monsieur Fogg
+
+1: ... and I could contain myself no longer.
+2: ... but I said nothing
+
+&gt; 1
+... and I could contain myself no longer.
+&#39;What is the purpose of our journey, Monsieur?&#39;
+&#39;A wager,&#39; he replied.
+
+1: &#39;A wager!&#39;
+2: &#39;Ah.&#39;
+
+&gt; 1
+&#39;A wager!&#39; I returned.
+He nodded.
+
+1: &#39;But surely that is foolishness!&#39;
+2: &#39;A most serious matter then!&#39;
+
+&gt; 2
+&#39;A most serious matter then!&#39;
+He nodded again.
+
+1: &#39;But can we win?&#39;
+2: &#39;A modest wager, I trust?&#39;
+3: I asked nothing further of him then.
+
+&gt; 2
+&#39;A modest wager, I trust?&#39;
+&#39;Twenty thousand pounds,&#39; he replied, quite flatly.
+After that, we passed the day in silence.
+</code></pre>
+        <p>Hopefully, this demonstrates the philosophy laid out above: that weaves offer a compact way to offer a lot of branching,
+            a lot of choices, but with the guarantee of getting from beginning to end!</p>
+        <h2 id="3-tracking-a-weave">3) Tracking a Weave</h2>
+        <p>Sometimes, the weave structure is sufficient. But when it&#39;s not, we need a bit more control.</p>
+        <h3 id="weaves-are-largely-unaddressed">Weaves are largely unaddressed</h3>
+        <p>By default, lines of content in a weave don&#39;t have an address or label, which means they can&#39;t be diverted
+            to, and they can&#39;t be tested for. In the most basic weave structure, choices vary the path the player takes
+            through the weave and what they see, but once the weave is finished those choices and that path are forgotten.</p>
+        <p>But should we want to remember what the player has seen, we can - we add in labels where they&#39;re needed using
+            the
+            <code>(label_name)</code> syntax.</p>
+        <h3 id="gathers-and-options-can-be-labelled">Gathers and options can be labelled</h3>
+        <p>Gather points at any nested level can be labelled using brackets.</p>
+        <pre><code>-  (top)
+</code></pre>
+        <p>Once labelled, gather points can be diverted to, or tested for in conditionals, just like knots and stitches. This
+            means you can use previous decisions to alter later outcomes inside the weave, while still keeping all the advantages
+            of a clear, reliable forward-flow.</p>
+        <p>Options can also be labelled, just like gather points, using brackets. Label brackets come before conditions in the
+            line.</p>
+        <p>These addresses can be used in conditional tests, which can be useful for creating options unlocked by other options.</p>
+        <pre><code>=== meet_guard ===
+The guard frowns at you.
+
+*     (greet) [Greet him]
+    &#39;Greetings.&#39;
+*    (get_out) &#39;Get out of my way[.&#39;],&#39; you tell the guard.
+
+-     &#39;Hmm,&#39; replies the guard.
+
+*    {greet}     &#39;Having a nice day?&#39; // only if you greeted him
+
+*     &#39;Hmm?&#39;[] you reply.
+
+*    {get_out} [Shove him aside]      // only if you threatened him
+    You shove him sharply. He stares in reply, and draws his sword!
+    -&gt; fight_guard             // this route diverts out of the weave
+
+-    &#39;Mff,&#39; the guard replies, and then offers you a paper bag. &#39;Toffee?&#39;
+</code></pre>
+        <h3 id="scope">Scope</h3>
+        <p>Inside the same block of weave, you can simply use the label name; from outside the block you need a path, either
+            to a different stitch within the same knot:</p>
+        <pre><code>=== knot ===
+= stitch_one
+    - (gatherpoint) Some content.
+= stitch_two
+    *    {stitch_one.gatherpoint} Option
+</code></pre>
+        <p>or pointing into another knot:</p>
+        <pre><code>=== knot_one ===
+-    (gather_one)
+    * {knot_two.stitch_two.gather_two} Option
+
+=== knot_two ===
+= stitch_two
+    - (gather_two)
+        *    {knot_one.gather_one} Option
+</code></pre>
+        <h4 id="advanced-all-options-can-be-labelled">Advanced: all options can be labelled</h4>
+        <p>In truth, all content in ink is a weave, even if there are no gathers in sight. That means you can label <em>any</em>            option in the game with a bracket label, and then reference it using the addressing syntax. In particular, this
+            means you can test <em>which</em> option a player took to reach a particular outcome.</p>
+        <pre><code>=== fight_guard ===
+...
+= throw_something
+*    (rock) [Throw rock at guard] -&gt; throw
+*     (sand) [Throw sand at guard] -&gt; throw
+
+= throw
+You hurl {throw_something.rock:a rock|a handful of sand} at the guard.
+</code></pre>
+        <h4 id="advanced-loops-in-a-weave">Advanced: Loops in a weave</h4>
+        <p>Labelling allows us to create loops inside weaves. Here&#39;s a standard pattern for asking questions of an NPC.</p>
+        <pre><code>- (opts)
+    *    &#39;Can I get a uniform from somewhere?&#39;[] you ask the cheerful guard.
+        &#39;Sure. In the locker.&#39; He grins. &#39;Don&#39;t think it&#39;ll fit you, thought.&#39;
+    *    &#39;Tell me about the security system.&#39;
+        &#39;It&#39;s ancient,&#39; the guard assures you. &#39;Old as coal.&#39;
+    *    &#39;Are there dogs?&#39;
+        &#39;Hundreds,&#39; the guard answers, with a toothy grin. &#39;Hungry devils, too.&#39;
+    // We require the player to ask at least one question
+    *    {loop} [Enough talking]
+        -&gt; done
+- (loop)
+    // loop a few times before the guard gets bored
+    { -&gt; opts | -&gt; opts | }
+    He scratches his head.
+    &#39;Well, can&#39;t stand around talking all day,&#39; he declares.
+- (done)
+    You thank the guard, and move away.
+</code></pre>
+        <h4 id="advanced-diverting-to-options">Advanced: diverting to options</h4>
+        <p>Options can also be diverted to: but the divert goes to the output of having chosen that choice, <em>as though the choice had been chosen</em>.
+            So the content printed will ignore square bracketed text, and if the option is once-only, it will be marked as
+            used up.
+        </p>
+        <pre><code>- (opts)
+*    [Pull a face]
+    You pull a face, and the soldier comes at you! -&gt; shove
+
+*    (shove) [Shove the guard aside] You shove the guard to one side, but he comes back swinging.
+
+*    {shove} [Grapple and fight] -&gt; fight_the_guard
+
+-     -&gt; opts
+</code></pre>
+        <p>produces: </p>
+        <pre><code>1: Pull a face
+2: Shove the guard aside
+
+&gt; 1
+You pull a face, and the soldier comes at you! You shove the guard to one side, but he comes back swinging.
+
+1: Grapple and fight
+
+&gt;
+</code></pre>
+        <h4 id="advanced-gathers-directly-after-an-option">Advanced: Gathers directly after an option</h4>
+        <p>The following is valid, and frequently useful.</p>
+        <pre><code>*    &quot;Are you quite well, Monsieur?&quot;[] I asked.
+    - - (quitewell) &quot;Quite well,&quot; he replied.
+*    &quot;How did you do at the crossword, Monsieur?&quot;[] I asked.
+    -&gt; quitewell
+*    I said nothing[] and neither did my Master.
+-    We feel into companionable silence once more.
+</code></pre>
+        <p>Note the level 2 gather point directly below the first option: there&#39;s nothing to gather here, really, but it
+            gives us a handy place to divert the second option to. </p>
+        <h1 id="part-3-variables-and-logic">Part 3: Variables and Logic</h1>
+        <p>So far we&#39;ve made conditional text, and conditional choices, using tests based on what content the player has
+            seen so far. </p>
+        <p><strong>ink</strong> also supports variables, both temporary and global, storing numerical and content data, or even
+            story flow commands. It is fully-featured in terms of logic, and contains a few additional structures to help
+            keep the often complex logic of a branching story better organised.</p>
+        <h2 id="1-global-variables">1) Global Variables</h2>
+        <p>The most powerful kind of variable, and arguably the most useful for a story, is a variable to store some unique
+            property about the state of the game - anything from the amount of money in the protagonist&#39;s pocket, to
+            a value representing the protagonist&#39;s state of mind. </p>
+        <p>This kind of variable is called &quot;global&quot; because it can be accessed from anywhere in the story - both set,
+            and read from. (Traditionally, programming tries to avoid this kind of thing, as it allows one part of a program
+            to mess with another, unrelated part. But a story is a story, and stories are all about consequences: what happens
+            in Vegas rarely stays there.)</p>
+        <h3 id="defining-global-variables">Defining Global Variables</h3>
+        <p>Global variables can be defined anywhere, via a <code>VAR</code> statement. They should be given an initial value,
+            which defines what type of variable they are - integer, floating point (decimal), content, or a story address.</p>
+        <pre><code>VAR knowledge_of_the_cure = false
+VAR players_name = &quot;Emilia&quot;
+VAR number_of_infected_people = 521
+VAR current_epilogue = -&gt; they_all_die_of_the_plague
+</code></pre>
+        <h3 id="using-global-variables">Using Global Variables</h3>
+        <p>We can test global variables to control options, and provide conditional text, in a similar way to what we have previously
+            seen.
+        </p>
+        <pre><code>=== the_train ===
+    The train jolted and rattled. { mood &gt; 0:I was feeling positive enough, however, and did not mind the odd bump|It was more than I could bear}.
+    *    { not knows_about_wager } &#39;But, Monsieur, why are we travelling?&#39;[] I asked.
+    *     { knows_about_wager} I contemplated our strange adventure[]. Would it be possible?
+</code></pre>
+        <h4 id="advanced-storing-diverts-as-variables">Advanced: storing diverts as variables</h4>
+        <p>A &quot;divert&quot; statement is actually a type of value in itself, and can be stored, altered, and diverted to.
+            </p>
+        <pre><code>VAR     current_epilogue = -&gt; everybody_dies
+
+=== continue_or_quit ===
+Give up now, or keep trying to save your Kingdom?
+*  [Keep trying!]     -&gt; more_hopeless_introspection
+*  [Give up]         -&gt; current_epilogue
+</code></pre>
+        <h4 id="advanced-global-variables-are-externally-visible">Advanced: Global variables are externally visible</h4>
+        <p>Global variables can be accessed, and altered, from the runtime as well from the story, so provide a good way to
+            communicate between the wider game and the story. </p>
+        <p>The <strong>ink</strong> layer is often be a good place to store gameplay-variables; there&#39;s no save/load issues
+            to consider, and the story itself can react to the current values. </p>
+        <h3 id="printing-variables">Printing variables</h3>
+        <p>The value of a variable can be printed as content using an inline syntax similar to sequences, and conditional text:</p>
+        <pre><code>VAR friendly_name_of_player = &quot;Jackie&quot;
+VAR age = 23
+
+&quot;My name is Jean Passepartout, but my friend&#39;s call me {friendly_name_of_player}. I&#39;m {age} years old.&quot;
+</code></pre>
+        <p>This can be useful in debugging. For more complex printing based on logic and variables, see the section on functions.</p>
+        <h2 id="2-logic">2) Logic</h2>
+        <p>Obviously, our global variables are not intended to be constants, so we need a syntax for altering them. </p>
+        <p>Since by default, any text in an <strong>ink</strong> script is printed out directly to the screen, we use a markup
+            symbol to indicate that a line of content is intended meant to be doing some numerical work, we use the <code>~</code>            mark.
+        </p>
+        <p>The following statements all assign values to variables:</p>
+        <pre><code>=== set_some_variables ===
+    ~ knows_about_wager = true
+    ~ x = (x * x) - (y * y) + c
+    ~ y = 2 * x * y
+</code></pre>
+        <h3 id="mathematics">Mathematics</h3>
+        <p><strong>ink</strong> supports the four basic mathematical operations (<code>+</code>, <code>-</code>, <code>*</code>            and <code>/</code>), as well as <code>%</code> (or <code>mod</code>), which returns the remainder after integer
+            division.
+        </p>
+        <p>If more complex operations are required, one can write functions (for recursive formulas and the like), or call out
+            to external, game-code functions (for anything more advanced). </p>
+        <h4 id="advanced-numerical-types-are-implicit">Advanced: numerical types are implicit</h4>
+        <p>Results of operations - in particular, for division - are typed based on the type of the input. So integer division
+            returns integer, but floating point division returns floating point results. </p>
+        <pre><code>~ x = 2 / 3
+~ y = 7 / 3
+~ z = 1.2 / 0.5
+</code></pre>
+        <p>assigns <code>x</code> to be 0, <code>y</code> to be 2 and <code>z</code> to be 2.4.</p>
+        <h2 id="3-conditional-blocks-if-else-">3) Conditional blocks (if/else)</h2>
+        <p>We&#39;ve seen conditionals used to control options and story content; <strong>ink</strong> also provides an equivalent
+            of the normal if/else if/else structure. </p>
+        <h3 id="a-simple-if-">A simple &#39;if&#39;</h3>
+        <p>The if syntax takes its cue from the other conditionals used so far, with the <code>{</code>...<code>}</code> syntax
+            indicating that something is being tested.</p>
+        <pre><code>{ x &gt; 0:
+    ~ y = x - 1
+}
+</code></pre>
+        <p>Else conditions can be provided:</p>
+        <pre><code>{ x &gt; 0:
+    ~ y = x - 1
+- else:
+    ~ y = x + 1
+}
+</code></pre>
+        <h3 id="extended-if-else-if-else-blocks">Extended if/else if/else blocks</h3>
+        <p>The above syntax is actually a specific case of a more general structure, something like a &quot;switch&quot; statement
+            of another language:</p>
+        <pre><code>{
+    - x &gt; 0:
+        ~ y = x - 1
+    - else:
+        ~ y = x + 1
+}
+</code></pre>
+        <p>And using this form we can include &#39;else-if&#39; conditions:</p>
+        <pre><code>{
+    - x == 0:
+        ~ y = 0
+    - x &gt; 0:
+        ~ y = x - 1
+    - else:
+        ~ y = x + 1
+}
+</code></pre>
+        <p>(Note, as with everything else, the white-space is purely for readability and has no syntactic meaning.)</p>
+        <h4 id="example-context-relevant-content">Example: context-relevant content</h4>
+        <p>Note these tests don&#39;t have to be variable-based and can use read-counts, just as other conditionals can, and
+            the following construction is quite frequent, as a way of saying &quot;do some content which is relevant to the
+            current game state&quot;:</p>
+        <pre><code>=== dream ===
+    {
+        - visited_snakes &amp;&amp; not dream_about_snakes:
+            ~ fear++
+            -&gt; dream_about_snakes
+
+        - visited_poland &amp;&amp; not dream_about_polish_beer:
+            ~ fear--
+            -&gt; dream_about_polish_beer
+
+        - else:
+            // breakfast-based dreams have no effect
+            -&gt; dream_about_marmalade
+    }
+</code></pre>
+        <p>The syntax has the advantage of being easy to extend, and prioritise.</p>
+        <h3 id="conditional-blocks-are-not-limited-to-logic">Conditional blocks are not limited to logic</h3>
+        <p>Conditional blocks can be used to control story content as well as logic:</p>
+        <pre><code>I stared at Monsieur Fogg.
+{ know_about_wager:
+    &lt;&gt; &quot;But surely you are not serious?&quot; I demanded.
+- else:
+    &lt;&gt; &quot;But there must be a reason for this trip,&quot; I observed.
+}
+He said nothing in reply, merely considering his newspaper with as much thoroughness as entomologist considering his latest pinned addition.
+</code></pre>
+        <p>You can even put options inside conditional blocks:</p>
+        <pre><code>{ door_open:
+    *     I strode out of the compartment[] and I fancied I heard my master quietly tutting to himself.             -&gt; go_outside
+- else:
+    *    I asked permission to leave[] and Monsieur Fogg looked surprised.     -&gt; open_door
+    *     I stood and went to open the door[]. Monsieur Fogg seemed untroubled by this small rebellion. -&gt; open_door
+}
+</code></pre>
+        <p>...but note that the lack of weave-syntax and nesting in the above example isn&#39;t accidental: to avoid confusing
+            the various kinds of nesting at work, you aren&#39;t allowed to include gather points inside conditional blocks.</p>
+        <h3 id="multiline-list-blocks">Multiline list blocks</h3>
+        <p>There&#39;s one other class of multiline block, which expands on the list functionality previous mentioned. The following
+            are all valid and do what you might expect:</p>
+        <pre><code> // Sequence: go through the alternatives, and stick on last
+{ stopping:
+    -    I entered the casino.
+    -  I entered the casino again.
+    -  Once more, I went inside.
+}
+
+// Shuffle: show one at random
+At the table, I drew a card. &lt;&gt;
+{ shuffle:
+    -     Ace of Hearts.
+    -     King of Spades.
+    -     2 of Diamonds.
+        &#39;You lose!&#39; crowed the croupier.
+        -&gt; leave_casino
+}
+
+// Cycle: show each in turn, and then cycle
+{ cycle:
+    - I held my breath.
+    - I waited impatiently.
+    - I paused.
+}
+
+// Once: show each, once, in turn, until all have been shown
+{ once:
+    - Would my luck hold?
+    - Could I win the hand?
+}
+</code></pre>
+        <h2 id="4-temporary-variables">4) Temporary Variables</h2>
+        <h3 id="temporary-variables-are-for-scratch-calculations">Temporary variables are for scratch calculations</h3>
+        <p>Sometimes, a global variable is unwieldy. <strong>ink</strong> provides temporary variables for quick calculations
+            of things. </p>
+        <pre><code>=== near_north_pole ===
+    ~ temp number_of_warm_things = 0
+    { blanket:
+        ~ number_of_warm_things++
+    }
+    { ear_muffs:
+        ~ number_of_warm_things++
+    }
+    { gloves:
+        ~ number_of_warm_things++
+    }
+    { number_of_warm_things &gt; 2:
+        Despite the snow, I felt incorrigibly snug.
+    - else:
+        That night I was colder than I have ever been.
+    }
+</code></pre>
+        <p>The value in a temporary variable is thrown away after the story leaves the knot in which it was defined. </p>
+        <p>TODO: check this is actually true</p>
+        <h3 id="knots-and-stitches-can-take-parameters">Knots and stitches can take parameters</h3>
+        <p>A particularly useful form of temporary variable is a parameter. Any knot or stitch can be given a value as a parameter.</p>
+        <pre><code>*    [Accuse Hasting]
+        -&gt; accuse(&quot;Hastings&quot;)
+*    [Accuse Mrs Black]
+        -&gt; accuse(&quot;Claudia&quot;)
+*    [Accuse myself]
+        -&gt; accuse(&quot;myself&quot;)
+
+=== accuse(who) ===
+    &quot;I accuse {who}!&quot; Poirot declared.
+    &quot;Really?&quot; Japp replied. &quot;{who == &quot;myself&quot;:You did it?|{who}?}&quot;
+    &quot;And why not?&quot; Poirot shot back.
+</code></pre>
+        <h4 id="example-a-recursive-knot-definition">Example: a recursive knot definition</h4>
+        <p>Temporary variables are safe to use in recursion (unlike globals), so the following will work.</p>
+        <pre><code>-&gt; add_one_to_one_hundred(0, 1)
+
+=== add_one_to_one_hundred(total, x) ===
+    ~ total = total + x
+    { x == 100:
+        -&gt; finished(total)
+    - else:
+        -&gt; add_one_to_one_hundred(total, x + 1)
+    }
+
+=== finished(total) ===
+    &quot;The result is {total}!&quot; you announce.
+    Gauss stares at you in horror.
+    -&gt; END
+</code></pre>
+        <p>(In fact, this kind of definition is useful enough that <strong>ink</strong> provides a special kind of knot, called,
+            imaginatively enough, a <code>function</code>, which comes with certain restrictions and can return a value.
+            See the section below.)</p>
+        <h4 id="advanced-sending-divert-targets-as-parameters">Advanced: sending divert targets as parameters</h4>
+        <p>Knot/stitch addresses are a type of value, indicated by a <code>-&gt;</code> character, and can be stored and passed
+            around. The following is therefore legal, and often useful:</p>
+        <pre><code>=== sleeping_in_hut ===
+    You lie down and close your eyes.
+    -&gt; generic_sleep (-&gt; waking_in_the_hut)
+
+===     generic_sleep (-&gt; waking)
+    You sleep perchance to dream etc. etc.
+    -&gt; waking
+
+=== waking_in_the_hut
+    You get back to your feet, ready to continue your journey.
+</code></pre>
+        <p>...but note the <code>-&gt;</code> in the <code>generic_sleep</code> definition: that&#39;s the one case in <strong>ink</strong>            where a parameter needs to be typed: because it&#39;s too easy to otherwise accidentally do the following:</p>
+        <pre><code>=== sleeping_in_hut ===
+    You lie down and close your eyes.
+    -&gt; generic_sleep (waking_in_the_hut)
+</code></pre>
+        <p>... which sends the read count of <code>waking_in_the_hut</code> into the sleeping knot, and then attempts to divert
+            to it.</p>
+        <h2 id="5-functions">5) Functions</h2>
+        <p>The use of parameters on knots means they are almost functions in the usual sense, but they lack one key concept
+            - that of the call stack, and the use of return values. </p>
+        <p><strong>ink</strong> includes functions: they are knots, with the following limitations and features:</p>
+        <p>A function:</p>
+        <ul>
+            <li>cannot contain stitches</li>
+            <li>cannot use diverts or offer choices</li>
+            <li>can call other functions</li>
+            <li>can include printed content </li>
+            <li>can return a value of any type</li>
+            <li>can recurse safely</li>
+        </ul>
+        <p>(Some of these may seem quite limiting, but for more story-oriented call-stack-style features, see the section of
+            Tunnels.)</p>
+        <p>Return values are provided via the <code>~ return</code> statement. </p>
+        <h3 id="defining-and-calling-functions">Defining and calling functions</h3>
+        <p>To define a function, simply declare a knot to be one:</p>
+        <pre><code>=== function say_yes_to_everything ===
+    ~ return true
+
+=== function lerp(a, b, k) ===
+    ~ return ((b - a) * k) + a
+</code></pre>
+        <p>Functions are called by name, and with brackets, even if they have no parameters:</p>
+        <pre><code>~ x = lerp(2, 8, 0.3)
+
+*    {say_yes_to_everything()} &#39;Yes.&#39;
+</code></pre>
+        <p>As in any other language, a function, once done, returns the flow to wherever it was called from - and despite not
+            being allowed to divert the flow, functions can still call other functions.</p>
+        <pre><code>=== function say_no_to_nothing ===
+    ~ return say_yes_to_everything()
+</code></pre>
+        <h3 id="functions-don-t-have-to-return-anything">Functions don&#39;t have to return anything</h3>
+        <p>A function does not need to have a return value, and can simply do something that is worth packaging up:</p>
+        <pre><code>=== function harm(x) ===
+    { stamina &lt; x:
+        ~ stamina = 0
+    - else:
+        ~ stamina = stamina - x
+    }
+</code></pre>
+        <p>...though remember a function cannot divert, so while the above prevents a negative Stamina value, it won&#39;t kill
+            a player who hits zero.</p>
+        <h3 id="functions-can-be-called-inline">Functions can be called inline</h3>
+        <p>Functions can be called on <code>~</code> content lines, but can also be called during a piece of content. In this
+            context, the return value, if there is one, is printed (as well as anything else the function wants to print.)
+            If there is no return value, nothing is printed.</p>
+        <p>Content is, by default, &#39;glued in&#39;, so the following:</p>
+        <pre><code>Monsieur Fogg was looking {describe_health(health)}.
+
+=== function describe_health(x) ===
+{
+- x == 100:
+    ~ return &quot;spritely&quot;
+- x &gt; 75:
+    ~ return &quot;chipper&quot;
+- x &gt; 45:
+    ~ return &quot;somewhat flagging&quot;
+- else:
+    ~ return &quot;despondent&quot;
+}
+</code></pre>
+        <p>produces:</p>
+        <pre><code>Monsieur Fogg was looking despondent.
+</code></pre>
+        <h4 id="examples">Examples</h4>
+        <p>For instance, you might include:</p>
+        <pre><code>=== function max(a,b) ===
+    { a &lt; b:
+        ~ return b
+    - else:
+        ~ return a
+    }
+
+=== function exp(x, e) ===
+    // returns x to the power e where e is an integer
+    { e &lt;= 0:
+        ~ return 1
+    - else:
+        ~ return x * exp(x, e - 1)
+    }
+</code></pre>
+        <p>Then:</p>
+        <pre><code>The maximum of 2^5 and 3^3 is {max(exp(2,5), exp(3,3))}.
+</code></pre>
+        <p>produces:</p>
+        <pre><code>The maximum of 2^5 and 3^3 is 32.
+</code></pre>
+        <h4 id="example-turning-numbers-into-words">Example: turning numbers into words</h4>
+        <p>The following example is long, but appears in pretty much every inkle game to date:</p>
+        <p>TODO: Explain the hyphen? (And fix glue so this actually works...!)</p>
+        <pre><code>=== function print_num(x) ===
+{
+    - x &gt;= 1000:
+        {print_num(x / 1000)} thousand { x mod 1000 &gt; 0:{print_num(x mod 1000)}}
+    - x &gt;= 100:
+        {print_num(x / 100)} hundred { x mod 100 &gt; 0:and {print_num(x mod 100)}}
+    - x == 0:
+        zero
+    - else:
+        { x &gt;= 20:
+            { x / 10:
+                - 2: twenty
+                - 3: thirty
+                - 4: forty
+                - 5: fifty
+                - 6: sixty
+                - 7: seventy
+                - 8: eighty
+                - 9: ninety
+            }
+            { x mod 10 &gt; 0:&lt;&gt;-&lt;&gt;}
+        }
+        { x &lt; 10 || x &gt; 20:
+            { x mod 10:
+                - 1: one
+                - 2: two
+                - 3: three
+                - 4: four
+                - 5: five
+                - 6: six
+                - 7: seven
+                - 8: eight
+                - 9: nine
+            }
+        - else:
+            { x:
+                - 10: ten
+                - 11: eleven
+                - 12: twelve
+                - 13: thirteen
+                - 14: fourteen
+                - 15: fifteen
+                - 16: sixteen
+                - 17: seventeen
+                - 18: eighteen
+                - 19: nineteen
+            }
+        }
+}
+</code></pre>
+        <p>which enables us to write things like:</p>
+        <pre><code>~ price = 15
+
+I pulled out {print_num(price)} coins from my pocket and slowly counted them.
+&quot;Oh, never mind,&quot; the trader replied. &quot;I&#39;ll take half.&quot; And she took {print_num(price / 2)}, and pushed the rest back over to me.
+</code></pre>
+        <h3 id="parameters-can-be-passed-by-reference">Parameters can be passed by reference</h3>
+        <p>Function parameters can also be passed &#39;by reference&#39;, meaning that the function can actually alter the the
+            variable being passed in, instead of creating a temporary variable with that value. </p>
+        <p>For instance, most <strong>inkle</strong> stories include the following:</p>
+        <pre><code>=== function alter(ref x, k) ===
+    ~ x = x + k
+</code></pre>
+        <p>Lines such as:</p>
+        <pre><code>~ gold = gold + 7
+~ health = health - 4
+</code></pre>
+        <p>then become:</p>
+        <pre><code>~ alter(gold, 7)
+~ alter(health, -4)
+</code></pre>
+        <p>which are slightly easier to read, and (more usefully) can be done inline for maximum compactness.</p>
+        <pre><code>*    I ate a biscuit[] and felt refreshed. {alter(health, 2)}
+*     I gave a biscuit to Monsieur Fogg[] and he wolfed it down most undecorously. {alter(foggs_health, 1)}
+-    &lt;&gt; Then we continued on our way.
+</code></pre>
+        <p>Wrapping up simple operations in function can also provide a simple place to put debugging information, if required.</p>
+        <h2 id="6-constants">6) Constants</h2>
+        <h3 id="global-constants">Global Constants</h3>
+        <p>Interactive stories often rely on state machines, tracking what stage some higher level process has reached. There
+            are lots of ways to do this, but the most conveninent is to use constants.</p>
+        <p>Sometimes, it&#39;s convenient to define constants to be strings, so you can print them out, for gameplay or debugging
+            purposes.
+        </p>
+        <pre><code>CONST HASTINGS = &quot;Hastings&quot;
+CONST POIROT = &quot;Poirot&quot;
+CONST JAPP = &quot;Japp&quot;
+
+VAR current_chief_suspect = HASTINGS
+
+=== review_evidence ===
+    { found_japps_bloodied_glove:
+        ~ current_chief_suspect = POIROT
+    }
+    Current Suspect: {current_chief_suspect}
+</code></pre>
+        <p>Sometimes giving them values is useful:</p>
+        <pre><code>CONST PI = 3.14
+CONST VALUE_OF_TEN_POUND_NOTE = 10
+</code></pre>
+        <p>And sometimes the numbers are useful in other ways:</p>
+        <pre><code>CONST LOBBY = 1
+CONST STAIRCASE = 2
+CONST HALLWAY = 3
+
+CONST HELD_BY_AGENT = -1
+
+VAR secret_agent_location = LOBBY
+VAR suitcase_location = HALLWAY
+
+=== report_progress ===
+{  secret_agent_location = suitcase_location:
+    The secret agent grabs the suitcase!
+    ~ suitcase_location = HELD_BY_AGENT
+
+-  secret_agent_location &lt; suitcase_location:
+    The secret agent moves forward.
+    ~ secret_agent_location++
+}
+</code></pre>
+        <p>Constants are simply a way to allow you to give story states easy-to-understand names. </p>
+        <h2 id="7-advanced-game-side-logic">7) Advanced: Game-side logic</h2>
+        <p>There are two core ways to provide game hooks in the <strong>ink</strong> engine. External function declarations
+            in ink allow you to directly call C# functions in the game, and variable observers are callbacks that are fired
+            in the game when ink variables are modified. Both of these are described in <a href="https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md">Running your ink</a>.</p>
+        <h1 id="part-4-advanced-flow-control">Part 4: Advanced Flow Control</h1>
+        <h2 id="1-tunnels">1) Tunnels</h2>
+        <p>The default structure for <strong>ink</strong> stories is a &quot;flat&quot; tree of choices, branching and joining
+            back together, perhaps looping, but with the story always being &quot;at a certain place&quot;. </p>
+        <p>But this flat structure makes certain things difficult: for example, imagine a game in which the following interaction
+            can happen:</p>
+        <pre><code>=== crossing_the_date_line ===
+*    &quot;Monsieur!&quot;[] I declared with sudden horror. &quot;I have just realised. We have crossed the international date line!&quot;
+-    Monsieur Fogg barely lifted an eyebrow. &quot;I have adjusted for it.&quot;
+*    I mopped the sweat from my brow[]. A relief!
+*     I nodded, becalmed[]. Of course he had!
+*  I cursed, under my breath[]. Once again, I had been belittled!
+</code></pre>
+        <p>...but it can happen at several different places in the story. We don&#39;t want to have to write copies of the content
+            for each different place, but when the content is finished it needs to know where to return to. We can do this
+            using parameters:
+        </p>
+        <pre><code>=== crossing_the_date_line(-&gt; return_to) ===
+...
+-    -&gt; return_to
+
+...
+
+=== outside_honolulu ===
+We arrived at the large island of Honolulu.
+- (postscript)
+    {crossing_the_date_line(-&gt; done)}
+- (done)
+    -&gt; END
+
+...
+
+=== outside_pitcairn_island ===
+The boat sailed along the water towards the tiny island.
+- (postscript)
+    {crossing_the_date_line(-&gt; done)}
+- (done)
+    -&gt; END
+</code></pre>
+        <p>Both of these locations now call and execute the same segment of storyflow, but once finished they return to where
+            they need to go next. </p>
+        <p>But what if the section of story being called is more complex - what if it spreads across several knots? Using the
+            above, we&#39;d have to keep passing the &#39;return-to&#39; parameter from knot to knot, to ensure we always
+            knew where to return.</p>
+        <p>So instead, <strong>ink</strong> integrates this into the language with a new kind of divert, that functions rather
+            like a subroutine, and is called a &#39;tunnel&#39;.</p>
+        <h3 id="tunnels-run-sub-stories">Tunnels run sub-stories</h3>
+        <p>The tunnel syntax looks like a divert, with another divert on the end:</p>
+        <pre><code>-&gt; crossing_the_date_line -&gt;
+</code></pre>
+        <p>This means &quot;do the crossing_the_date_line story, then continue from here&quot;. </p>
+        <p>Inside the tunnel itself, the syntax is simplified from the parameterised example: all we do is end the tunnel using
+            the <code>-&gt;-&gt;</code> statement which means, essentially, &quot;go on&quot;.</p>
+        <pre><code>=== crossing_the_date_line ===
+// this is a tunnel!
+...
+-     -&gt;-&gt;
+</code></pre>
+        <p>Note that tunnel knots aren&#39;t declared as such, so the compiler won&#39;t check that tunnels really do end in
+            <code>-&gt;-&gt;</code> statements, except at run-time. So you will need to write carefully to ensure that all
+            the flows into a tunnel really do come out again.</p>
+        <p>Tunnels can also be chained together, or finish on a normal divert:</p>
+        <pre><code>...
+// this runs the tunnel, then diverts to &#39;done&#39;
+-&gt; crossing_the_date_line -&gt; done
+...
+
+...
+//this runs one tunnel, then another, then diverts to &#39;done&#39;
+-&gt; crossing_the_date_line -&gt; check_foggs_health -&gt; done
+...
+</code></pre>
+        <p>Tunnels can be nested, so the following is valid:</p>
+        <pre><code>=== plains ===
+= night_time
+    The dark grass is soft under your feet.
+    +    [Sleep]
+        -&gt; sleep_here -&gt; wake_here -&gt; day_time
+= day_time
+    It is time to move on.
+
+=== wake_here ===
+    You wake as the sun rises.
+    +    [Eat something]
+        -&gt; eat_something -&gt;
+    +    [Make a move]
+    -    -&gt;-&gt;
+
+=== sleep_here ===
+    You lie down and try to close your eyes.
+    -&gt; monster_attacks -&gt;
+    Then it is time to sleep.
+    -&gt; dream -&gt;
+    -&gt;-&gt;
+</code></pre>
+        <p>... and so on.</p>
+        <h4 id="advanced-tunnels-use-a-call-stack">Advanced: Tunnels use a call-stack</h4>
+        <p>Tunnels are on a call-stack, so can safely recurse.</p>
+        <h2 id="2-threads">2) Threads</h2>
+        <p>TODO: Review this section to ensure examples are sensible!</p>
+        <p>So far, everything in ink has been entirely linear, despite all the branching and diverting. But it&#39;s actually
+            possible for a writer to &#39;fork&#39; a story into different sub-sections, to cover more possible player actions.
+            </p>
+        <p>We call this &#39;threading&#39;, though it&#39;s not really threading in the sense that computer scientists mean
+            it: it&#39;s more like stitching in new content from various places.</p>
+        <p>Note that this is definitely an advanced feature: the engineering stories becomes somewhat more complex once threads
+            are involved!</p>
+        <h3 id="threads-join-multiple-sections-together">Threads join multiple sections together</h3>
+        <p>Threads allow you to compose sections of content from multiple sources in one go. For example:</p>
+        <pre><code>== thread_example ==
+I had a headache; threading is hard to get your head around.
+&lt;- conversation
+&lt;- walking
+
+
+== conversation ==
+It was a tense moment for Monty and me.
+ * &quot;What did you have for lunch today?&quot;[] I asked.
+    &quot;Spam and eggs,&quot; he replied.
+ * &quot;Nice weather, we&#39;re having,&quot;[] I said.
+    &quot;I&#39;ve seen better,&quot; he replied.
+ - -&gt; house
+
+== walking ==
+We continued to walk down the dusty road.
+ * [Continue walking]
+    -&gt; house
+
+== house ==
+Before long, we arrived at his house.
+-&gt; END
+</code></pre>
+        <p>It allows multiple sections of story to combined together into a single section:</p>
+        <pre><code>I had a headache; threading is hard to get your head around.
+It was a tense moment for Monty and me.
+We continued to walk down the dusty road.
+1: &quot;What did you have for lunch today?&quot;
+2: &quot;Nice weather, we&#39;re having,&quot;
+3: Continue walking
+</code></pre>
+        <p>On encountering a thread statement such as <code>&lt;- conversation</code>, the compiler will fork the story flow.
+            The first fork considered will run the content at <code>conversation</code>, collecting up any options it finds.
+            Once it has run out of flow here it&#39;ll then run the other fork. </p>
+        <p>All the content is collected and shown to the player. But when a choice is chosen, the engine will move to that fork
+            of the story and collapse and discard the others.</p>
+        <p>Note that global variables are <em>not</em> forked, including the read counts of knots and stitches. </p>
+        <h3 id="uses-of-threads">Uses of threads</h3>
+        <p>In a normal story, threads might never be needed. </p>
+        <p>But for games with lots of independent moving parts, threads quickly become essential. Imagine a game in which characters
+            move independently around a map: the main story hub for a room might look like the following:</p>
+        <pre><code>CONST HALLWAY = 1
+CONST OFFICE = 2
+
+VAR player_location = HALLWAY
+VAR generals_location = HALLWAY
+VAR doctors_location = OFFICE
+
+== run_player_location
+    {
+        - player_location == HALLWAY: -&gt; hallway
+    }
+
+== hallway ==
+    &lt;- characters_present
+    *    [Drawers]    -&gt; examine_drawers
+    *     [Wardrobe] -&gt; examine_wardrobe
+    *  [Go to Office]     -&gt; go_office
+    -    -&gt; run_player_location
+= examine_drawers
+    // etc...
+
+// Here&#39;s the thread, which mixes in dialogue for characters you share the room with at the moment.
+
+== characters_present(room)
+    { generals_location == player_location:
+        &lt;- general_conversation
+    }
+    { doctors_location == room:
+        &lt;- doctor_conversation
+    }
+
+== general_conversation
+    *    [Ask the General about the bloodied knife]
+        &quot;It&#39;s a bad business, I can tell you.&quot;
+    -    -&gt; run_player_location
+
+== doctor_conversation
+    *    [Ask the Doctor about the bloodied knife]
+        &quot;There&#39;s nothing strange about blood, is there?&quot;
+    -    -&gt; run_player_location
+</code></pre>
+        <p>Note in particular, that we need an explicit way to return the player who has gone down a side-thread to return to
+            the main flow. In most cases, threads will either need a parameter telling them where to return to, or they&#39;ll
+            need to end the current story section.</p>
+        <h3 id="when-does-a-side-thread-end-">When does a side-thread end?</h3>
+        <p>Side-threads end when they run out of flow to process: and note, they collect up options to display later (unlike
+            tunnels, which collect options, display them and follow them until they hit an explicit return, possibly several
+            moves later).</p>
+        <p>Sometimes a thread has no content to offer - perhaps there is no conversation to have with a character after all,
+            or perhaps we have simply not written it yet. In that case, we must mark the end of the thread explicitly.</p>
+        <p>If we didn&#39;t, the end of content might be a story-bug or a hanging story thread, and we want the compiler to
+            tell us about those. </p>
+        <h3 id="using-done-">Using <code>-&gt; DONE</code></h3>
+        <p>So cases where we want to mark the end of a thread, we use <code>-&gt; DONE</code>: meaning &quot;the flow intentionally
+            ends here&quot;.</p>
+        <p>Note that we don&#39;t need a <code>-&gt; DONE</code> if the flow ends with options that fail their conditions. The
+            engine treats this as a valid, intentional, end of flow state.</p>
+        <p><strong>You do not need a <code>-&gt; DONE</code> in a thread after an option has been chosen</strong>. Once an option
+            is chosen, a thread is no longer a thread - it is simply the normal story flow once more.</p>
+        <p>Using <code>-&gt; END</code> in this case will not end the thread, but the whole story flow. (And this is the real
+            reason for having two different ways to end flow.)</p>
+    </section>
+</body>
+
+</html>

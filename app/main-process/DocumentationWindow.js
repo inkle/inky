@@ -15,7 +15,7 @@ const electronWindowOptions = {
 
 function DocumentationWindow() {
   this.browserWindow = new BrowserWindow(electronWindowOptions);
-  this.browserWindow.loadURL("file://" + __dirname + "/../renderer/documentation.html");
+  this.browserWindow.loadURL("file://" + __dirname + "/../renderer/documentationWindow.html");
 }
 
 DocumentationWindow.openDocumentation = function () {

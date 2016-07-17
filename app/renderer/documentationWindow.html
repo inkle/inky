@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+    <link rel="stylesheet" type="text/css" href="documentationWindow.css">
+    <script src="documentationWindow.js"></script>
+</head>
+<!-- The content view is resized every time the window is resized. It ist also resized initialy once the window is opend. -->
+<body onresize="adjustToScreen()" onload="adjustToScreen()">
+    <ul>
+        <li>
+            <header class="w3-container w3-light-grey">
+                <h4>Documentation</h4>
+            </header>
+        </li>
+        <li><a id="tutorial.html" onclick="openPath(this.id)">Tutorial</a></li>
+        <!-- Till we have a real documentation (not the WritingWitInk.md tutorial) this button can be ignored
+          <li><a id="Ducumentation.html" onclick="openPath(this.id)">Documentation</a></li>
+        -->
+    </ul>
+    <div style="margin-left:155px;padding:5px 16px;height:100%;">
+        <section class="w3-container">
+            <!-- The content view opens with the tutorial-->
+            <embed id="contentView" height="100" width="100%" type="text/html" src="../../resources/Documentation/tutorial.html">
+        </section>
+    </div>
+</body>
+
+</html>
