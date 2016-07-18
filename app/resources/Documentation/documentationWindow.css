@@ -1,12 +1,16 @@
  body {
             margin: 0;
+            font-family: Segoe UI;
         }
-
+        h1,h2,h3,h4,h5,h6, {
+            font-weight: lighter;
+        text-align: center;
+        }
         ul {
             list-style-type: none;
             margin: 0;
             padding: 0;
-            width: 155px;
+            width: 200px;
             background-color: #f1f1f1;
             position: fixed;
             height: 100%;
@@ -16,7 +20,7 @@
         li a {
             display: block;
             color: #000;
-            padding: 8px 0 8px 16px;
+            padding: 8px 0 8px 8px;
             text-decoration: none;
         }
 

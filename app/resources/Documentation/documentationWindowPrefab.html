@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Documentation</title>
+    <link rel="stylesheet" type="text/css" href="documentationWindow.css">
+    <script src="documentationWindow.js"></script>
+</head>
+<!-- The content view is resized every time the window is resized. It ist also resized initialy once the window is opend. -->
+
+<body onresize="adjustToScreen()" onload="adjustToScreen();">
+    <ul id="nav">
+        <li>
+            <header>
+                <h4>Documentation</h4>
+            </header>
+        </li>
+        <!--navigationentries-->
+    </ul>
+    <div style="margin-left:200px;padding:5px 16px;height:100%;">
+        <section>
+            <iframe id="contentView" height="100" width="100%" src="documentation.html" style="border:none;"></iframe>
+        </section>
+    </div>
+</body>
+
+</html>

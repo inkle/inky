@@ -5,7 +5,7 @@
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "scripts": {
-    "start": "electron main-process/main.js"
+    "start": "node resources/Documentation/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentationStyle.css -o resources/Documentation/documentation.html &&  electron main-process/main.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
   },
   "homepage": "http://www.inklestudios.com/ink",
   "devDependencies": {
-    "electron-prebuilt": "^0.37.8"
+    "electron-prebuilt": "^0.37.8",
+    "markdown-html": "^0.0.8"
   },
   "dependencies": {
     "chokidar": "^1.6.0",
