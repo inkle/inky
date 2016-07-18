@@ -24,7 +24,11 @@
   "homepage": "http://www.inklestudios.com/ink",
   "devDependencies": {
     "electron-prebuilt": "^0.37.8",
+<<<<<<< HEAD
     "markdown-html": "^0.0.8"
+=======
+    "spectron": "^3.2.6"
+>>>>>>> 36d36b188f8c19d6a85019be8b86de168da38ce8
   },
   "dependencies": {
     "chokidar": "^1.6.0",
