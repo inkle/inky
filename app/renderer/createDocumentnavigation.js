@@ -23,9 +23,9 @@ function initializeNavigation() {
             var headline;
             headline = line.split('#').join('').trim();
             id = headline.toLowerCase();
-
+            var activeMark;
             for(var mark of marks){
-                let activeMark = mark.split('x');
+                activeMark = mark.split('x');
                 id = id.split(activeMark[0]).join(activeMark[1]);
             }
 
