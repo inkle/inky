@@ -4,7 +4,7 @@
         code{
             font-family: monospace;
             font-size: large;
-overflow:auto;
+            overflow:auto;
         }
         pre{
             white-space:pre-wrap;

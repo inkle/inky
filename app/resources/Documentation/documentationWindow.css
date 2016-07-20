@@ -2,10 +2,6 @@
             margin: 0;
             font-family: Segoe UI;
         }
-        h1,h2,h3,h4,h5,h6, {
-            font-weight: lighter;
-        text-align: center;
-        }
         ul {
             list-style-type: none;
             margin: 0;

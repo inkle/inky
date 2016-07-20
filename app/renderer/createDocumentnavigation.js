@@ -1,14 +1,14 @@
 var fs = require('fs');
-var marks = ['#x','?x-','>x','<x',')x','(x',':x',' x-','.x','/x',"'x-",'`x-','--x-','--x-','--x-','--x-','--x-'];
+var marks = ['#x','?x-','>x','<x',')x-','(x-',':x',' x-','.x','/x-',"'x-",'`x-','--x-','--x-','--x-','--x-','--x-'];
 
 function initializeNavigation() {
-    fs.readFile('documentationWindowPrefab.html', 'utf8', function (firstErr,html) {
+    fs.readFile('resources/Documentation/documentationWindowPrefab.html', 'utf8', function (firstErr,html) {
          if (firstErr) {
             return console.log(firstErr);
         }
         var originalFile = html.split("<!--navigationentries-->");
 
-        fs.readFile('WritingWithInk.md', 'utf8', function (secErr, data) {
+        fs.readFile('resources/Documentation/WritingWithInk.md', 'utf8', function (secErr, data) {
         if (secErr) {
             return console.log(secErr);
         }
@@ -29,21 +29,21 @@ function initializeNavigation() {
                 id = id.split(activeMark[0]).join(activeMark[1]);
             }
 
-            if((numberOfOccurrences(line,'#',false) +4 ) < 6  ){
+            if((numberOfOccurrences(line,'#',false) + 3) < 6  ){
                   var headlineType;
-                  headlineType = 'h' + numberOfOccurrences(line,'#',false) +4;
+                  headlineType = 'b'//'h' + (numberOfOccurrences(line,'#',false) + 3);
                   output = output + ' ' + '<li><a id="#' + id + '"onclick="openPath(this.id)"><' + headlineType + '>' + headline +'</'+ headlineType +'></a><li>\n';
              }else{
                    output = output + ' ' + '<li><a id="#' + id + '"onclick="openPath(this.id)">' + headline + '</a><li>\n';
             }
         }
         output = output + originalFile[1];
-        fs.writeFile('documentationWindow.html', output, function(thirdErr) {
+        fs.writeFile('renderer/documentationWindow.html', output, function(thirdErr) {
     if(thirdErr) {
         return console.log(thirdErr);
     }
 
-    console.log('The file was saved!');
+    console.log('Documentation was created');
 });
     });
     });
