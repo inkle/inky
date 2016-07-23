@@ -3,13 +3,13 @@
 
 <head>
     <title>Documentation</title>
-    <link rel="stylesheet" type="text/css" href="../resources/Documentation/documentationWindow.css">
+    <link rel="stylesheet" type="text/css" href="../../resources/Documentation/documentationWindow.css">
     <script>
       function adjustToScreen() {
             document.getElementById("contentView").height = window.innerHeight - 20;
        }
       function openPath(link) {
-          var pathToDocumentation = "embeddedDocumentation.html";
+          var pathToDocumentation = "embedded.html";
           if (document.getElementById("contentView").src != pathToDocumentation + link) {
           document.getElementById("contentView").src = pathToDocumentation + link;
           }
@@ -30,7 +30,7 @@
     </ul>
     <div style="margin-left:200px;padding:5px 16px;height:100%;">
         <section>
-            <iframe id="contentView" height="100" width="100%" src="embeddedDocumentation.html" style="border:none;"></iframe>
+            <iframe id="contentView" height="100" width="100%" src="embedded.html" style="border:none;"></iframe>
         </section>
     </div>
 </body>
