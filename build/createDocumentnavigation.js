@@ -1,4 +1,6 @@
 var fs = require('fs');
+const mkdirp = require('mkdirp');
+
 /* When the documentation is generaded by the markdown-html modul, some characters are altered
    for the ids of the anchorpoints.
    To replicate this when creating the navigation, this list contains all changing characters an their replacements.
@@ -50,6 +52,9 @@ function initializeNavigation() {
 
             }
             output = output + originalFile[1];
+
+            mkdirp.sync("../app/renderer/documentation/");
+            
             fs.writeFile('../app/renderer/documentation/window.html', output, function (thirdErr) {
                 if (thirdErr) {
                     return console.log(thirdErr);
