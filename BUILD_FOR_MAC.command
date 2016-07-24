@@ -9,6 +9,9 @@ cd "`dirname "$0"`"
 # Clean
 rm -rf Inky-darwin-x64/
 
+# Ensure it's correctly/fully installed first
+( cd app && npm install )
+
 # Create icon from PNG
 ./resources/makeIcns.command
 

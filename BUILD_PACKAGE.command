@@ -15,6 +15,9 @@ rm -rf ReleaseUpload
 # Create icon from PNG
 ./resources/makeIcns.command
 
+# Ensure it's correctly/fully installed first
+( cd app && npm install )
+
 # Mac
 electron-packager app Inky --platform=darwin  --arch=x64 --icon=resources/Icon.icns --extend-info=resources/info.plist --prune --asar --asar-unpack-dir="main-process/ink" --ignore="inklecate_win.exe"
 

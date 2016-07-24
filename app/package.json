@@ -5,7 +5,8 @@
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "scripts": {
-    "start": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html &&  electron main-process/main.js"
+    "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html",
+    "start": "electron main-process/main.js"
   },
   "repository": {
     "type": "git",
