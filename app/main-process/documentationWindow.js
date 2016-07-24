@@ -3,12 +3,11 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 
 const electronWindowOptions = {
-  width: 700,
-  height: 500,
+  width: 1000,
+  height: 650,
   minWidth: 700,
   minHeight: 300,
-  titleBarStyle: 'hidden',
-  title: "Ink Documentation",
+  title: "Documentation",
   autoHideMenuBar: true
 };
 

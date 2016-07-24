@@ -1,11 +1,44 @@
- body {
-             font-family: Helvetica, sans-serif;
-        }
-        code{
-            font-family: monospace;
-            font-size: large;
-            overflow:auto;
-        }
-        pre{
-            white-space:pre-wrap;
-        }
+body {
+     font-family: Helvetica, sans-serif;
+}
+
+h1 {
+    color: #6a9ed9;
+}
+
+h1, h2 {
+    font-weight: lighter;
+    margin-top: 1.5em;
+}
+
+h3, h4, h5, h6 {
+    color: #444;
+}
+
+h3 {
+    font-size: 11pt;
+    margin-top: 2em;
+}
+
+p {
+    font-size: 11pt;
+    color: #444;
+    line-height: 1.65em;
+}
+
+code {
+    font-family: monospace;
+    font-size: large;
+    overflow:auto;
+    font-size: 11pt;
+}
+
+pre {
+    white-space:pre-wrap;
+}
+
+pre code {
+    display: block;
+    margin-left: 2em;
+    color: #666;
+}
