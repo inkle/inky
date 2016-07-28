@@ -340,6 +340,12 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
         mainInkRootName = path.basename(mainInkRootName, ".ink");
     var jsContentFilename = mainInkRootName+".js";
 
+    // Avoid naming collision with our own main.js
+    // (if user chose "main.ink" for their root ink)
+    if( jsContentFilename == "main.js" ) {
+        jsContentFilename = "story.js";
+    }
+
     // Derive story title from save name
     var storyTitle = path.basename(targetDirectory);
 
