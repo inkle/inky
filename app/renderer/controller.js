@@ -109,11 +109,18 @@ LiveCompiler.setEvents({
         ToolbarView.updateIssueSummary(errors);
     },
     playerPrompt: (replaying) => {
-        if( replaying ) {
-            PlayerView.addHorizontalDivider();
-        } else {
-            PlayerView.contentReady();
-        }
+        LiveCompiler.evaluateExpression("hello {3 + 5} world", (result) => {
+
+            PlayerView.addTextSection("EVALUATION RESULT: "+result);
+
+            if( replaying ) {
+                PlayerView.addHorizontalDivider();
+            } else {
+                PlayerView.contentReady();
+            }
+
+        });
+
     },
     replayComplete: (sessionId) => {
         PlayerView.showSessionView(sessionId);

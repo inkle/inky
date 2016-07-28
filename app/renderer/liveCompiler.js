@@ -19,6 +19,7 @@ var issues = [];
 var selectedIssueIdx = -1;
 
 var locationInSourceCallbackObj = null;
+var expressionEvaluationObj = null;
 
 var project = null;
 var events = {};
@@ -131,6 +132,11 @@ function stepBack() {
 function getLocationInSource(offset, callback) {
     ipc.send("get-location-in-source", offset, currentPlaySessionId);
     locationInSourceCallbackObj = { callback: callback, sessionId: currentPlaySessionId };
+}
+
+function evaluateExpression(expressionText, callback) {
+    ipc.send("evaluate-expression", expressionText, currentPlaySessionId);
+    expressionEvaluationObj = { callback: callback,  sessionId: currentPlaySessionId };
 }
 
 // --------------------------------------------------------
@@ -276,6 +282,13 @@ ipc.on("return-location-from-source", (event, fromSessionId, locationInfo) => {
     }
 });
 
+ipc.on("play-evaluated-expression", (event, textResult, fromSessionId) => {
+    if( fromSessionId == expressionEvaluationObj.sessionId ) {
+        expressionEvaluationObj.callback(textResult);
+        expressionEvaluationObj = null;
+    }
+});
+
 exports.LiveCompiler = {
     setProject: setProject,
     reload: reloadInklecateSession,
@@ -287,5 +300,6 @@ exports.LiveCompiler = {
     choose: choose,
     rewind: rewind,
     stepBack: stepBack,
-    getLocationInSource: getLocationInSource
+    getLocationInSource: getLocationInSource,
+    evaluateExpression: evaluateExpression
 }

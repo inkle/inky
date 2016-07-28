@@ -99,8 +99,11 @@ function compile(compileInstruction, requester) {
         process:playProcess,
         requesterWebContents: requester,
         stopped: false,
-        ended: false
+        ended: false,
+        evaluatingExpression: false,
+        justRequestedDebugSource: false
     };
+    var session = sessions[sessionId];
 
     playProcess.stderr.setEncoding('utf8');
     playProcess.stderr.on('data', (data) => {
@@ -116,7 +119,6 @@ function compile(compileInstruction, requester) {
     playProcess.stdout.setEncoding('utf8');
 
     var inkErrors = [];
-    var justRequestedDebugSource = false;
 
     var onEndOfStory = (code) => {
         if( sessions[sessionId] && !sessions[sessionId].ended ) {
@@ -166,12 +168,14 @@ function compile(compileInstruction, requester) {
                     text: choiceMatches[2]
                 }, sessionId);
             } else if( promptMatches ) {
-                if( justRequestedDebugSource )
-                    justRequestedDebugSource = false;
+                if( session.evaluatingExpression )
+                    session.evaluatingExpression = false;
+                else if( session.justRequestedDebugSource )
+                    session.justRequestedDebugSource = false;
                 else
                     requester.send('play-requires-input', sessionId);
             } else if( debugSourceMatches ) {
-                justRequestedDebugSource = true;
+                session.justRequestedDebugSource = true;
                 requester.send('return-location-from-source', sessionId, {
                     lineNumber: parseInt(debugSourceMatches[2]),
                     filename: debugSourceMatches[3]
@@ -180,7 +184,12 @@ function compile(compileInstruction, requester) {
                 console.log("Matched end of story");
                 onEndOfStory();
             } else if( line.length > 0 ) {
-                requester.send('play-generated-text', line, sessionId);
+                if( session.evaluatingExpression ) {
+                    requester.send('play-evaluated-expression', line, sessionId);
+                } else {
+                    requester.send('play-generated-text', line, sessionId);
+                }
+                
             }
 
         }
@@ -251,6 +260,17 @@ ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
         const playProcess = sessions[sessionId].process;
         if( playProcess )
             playProcess.stdin.write(""+choiceNumber+"\n");
+    }
+});
+
+ipc.on("evaluate-expression", (event, expressionText, sessionId) => {
+    console.log(`inklecate will evaluate expression: "${expressionText}" for session ${sessionId}`);
+    var session = sessions[sessionId];
+    if( session ) {
+        if( session.process ) {
+            session.evaluatingExpression = true;
+            session.process.stdin.write(`"${expressionText}"\n`);
+        }
     }
 });
 
