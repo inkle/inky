@@ -283,8 +283,15 @@ ipc.on("return-location-from-source", (event, fromSessionId, locationInfo) => {
 });
 
 ipc.on("play-evaluated-expression", (event, textResult, fromSessionId) => {
-    if( fromSessionId == expressionEvaluationObj.sessionId ) {
+    if( fromSessionId == expressionEvaluationObj.sessionId && expressionEvaluationObj ) {
         expressionEvaluationObj.callback(textResult);
+        expressionEvaluationObj = null;
+    }
+});
+
+ipc.on("play-evaluated-expression-error", (event, errorMessage, fromSessionId) => {
+    if( fromSessionId == expressionEvaluationObj.sessionId && expressionEvaluationObj ) {
+        expressionEvaluationObj.callback(null, errorMessage);
         expressionEvaluationObj = null;
     }
 });

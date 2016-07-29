@@ -1,7 +1,6 @@
 const editor = ace.edit("editor");
 const Range = ace.require("ace/range").Range;
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
-const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
 var editorMarkers = [];
 var editorAnnotations = [];

@@ -49,8 +49,8 @@ body {
   height: 49px;
   background: #FBFBFB;
   border-bottom: 1px solid #DDD;
-  cursor: default;
   z-index: 50;
+  cursor: default;
   -webkit-user-select: none;
 }
 
@@ -652,6 +652,63 @@ img.issue-icon.warning {
 #player pre.diagnostic {
   color: gray;
 }
+
+#player .expressionWatch {
+
+}
+
+#player .expressionWatch td {
+  background: red;
+  border-bottom: 1px solid #DDD;
+}
+
+#player td.expressionLabel {
+  background: #FBFBFB;
+  color: #878787;
+  width: 10%;
+  min-width: 80px;
+  text-align: right;
+  border-right: 1px solid #DDD;
+  padding-right: 5px;
+  cursor: default;
+  -webkit-user-select: none;
+}
+
+#player td.expressionInput {
+  background: white;
+  padding-left: 5px;
+  margin-top: 5px;
+}
+
+#player td.expressionInput {
+}
+
+#player td.expressionInput:focus {
+  outline: none; 
+}
+
+#player .evaluationResult {
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+#player .evaluationResult span {
+  text-align: center;
+  display: inline;
+  /*border: 1px solid #BBB;*/
+  background: #DDD;
+  color: white;
+  padding: 2px 20px 2px 20px;
+  border-radius: 20px;
+  font-size: 9pt;
+  white-space: nowrap;
+}
+
+#player .evaluationResult.error span {
+  background: #bf5e5e;
+}
+
+/* Toolbar buttons */
 
 #restart {
   right: 5px;

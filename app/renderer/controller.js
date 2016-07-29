@@ -109,17 +109,24 @@ LiveCompiler.setEvents({
         ToolbarView.updateIssueSummary(errors);
     },
     playerPrompt: (replaying) => {
-        LiveCompiler.evaluateExpression("hello {3 + 5} world", (result) => {
 
-            PlayerView.addTextSection("EVALUATION RESULT: "+result);
-
+        var then = () => {
             if( replaying ) {
                 PlayerView.addHorizontalDivider();
             } else {
                 PlayerView.contentReady();
             }
+        }
 
+        var turnExpression = PlayerView.getTurnExpression();
+        if( turnExpression && turnExpression.length > 0 ) {
+            LiveCompiler.evaluateExpression(turnExpression, (result, error) => {
+                PlayerView.addEvaluationResult(result, error);
+                then();
         });
+        } else {
+            then();
+        }
 
     },
     replayComplete: (sessionId) => {

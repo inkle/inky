@@ -150,18 +150,23 @@ function compile(compileInstruction, requester) {
             var line = lines[i].trim();
 
             var choiceMatches = line.match(/^(\d+):\s+(.*)/);
-            var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|TODO): '([^']+)' line (\d+): (.+)/);
+            var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|TODO): ('([^']+)' )?line (\d+): (.+)/);
             var promptMatches = line.match(/^\?>/);
             var debugSourceMatches = line.match(/^DebugSource: (line (\d+) of (.*)|Unknown source)/);
             var endOfStoryMatches = line.match(/^--- End of story ---/);
 
             if( errorMatches ) {
-                inkErrors.push({
-                    type: errorMatches[1],
-                    filename: errorMatches[2],
-                    lineNumber: parseInt(errorMatches[3]),
-                    message: errorMatches[4]
-                });
+                var errorMessage = errorMatches[5];
+                if( session.evaluatingExpression ) {
+                    requester.send('play-evaluated-expression-error', errorMessage, sessionId);
+                } else {
+                    inkErrors.push({
+                        type: errorMatches[1],
+                        filename: errorMatches[3],
+                        lineNumber: parseInt(errorMatches[4]),
+                        message: errorMessage
+                    });
+                }
             } else if( choiceMatches ) {
                 requester.send("play-generated-choice", {
                     number: parseInt(choiceMatches[1]),

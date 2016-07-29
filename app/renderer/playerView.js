@@ -1,5 +1,12 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
+// These lines are all only need for expression watcher view.
+// Should probably extract to expressionWatchView.js
+const expressionWatchInput = ace.edit("testExpression");
+const Document = ace.require('ace/document').Document;
+const EditSession = ace.require('ace/edit_session').EditSession;
+const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
+
 var lastFadeTime = 0;
 
 var $textBuffer = null;
@@ -15,6 +22,44 @@ document.addEventListener("keydown", function(){
 
 // Initial default: append to visible buffer
 $textBuffer = $("#player .innerText.active");
+
+function setupExpressionWatcher() {
+
+    expressionWatchInput.setOptions({
+        maxLines: 1,
+        autoScrollEditorIntoView: true,
+        highlightActiveLine: false,
+        printMargin: false,
+        showGutter: false
+    });
+
+    // remove newlines in pasted text
+    expressionWatchInput.on("paste", function(e) {
+        e.text = e.text.replace(/[\r\n]+/g, " ");
+    });
+
+    // make mouse position clipping nicer
+    expressionWatchInput.renderer.screenToTextCoordinates = function(x, y) {
+        var pos = this.pixelToScreenCoordinates(x, y);
+        return this.session.screenToDocumentPosition(
+            Math.min(this.session.getScreenLength() - 1, Math.max(pos.row, 0)),
+            Math.max(pos.column, 0)
+        );
+    };
+
+    // disable Enter Shift-Enter keys
+    expressionWatchInput.commands.bindKey("Enter|Shift-Enter", "null")
+
+    // TODO: Is there not a way to set the mode to "new InkMode()" without starting a new session?!
+    var aceDocument = new Document("hello world isn't this great yes it is {x}");
+    var aceSession = new EditSession(aceDocument, new InkMode());
+    aceSession.setUseWrapMode(false);
+    aceSession.setUndoManager(new ace.UndoManager());
+    expressionWatchInput.setSession(aceSession);
+
+    expressionWatchInput.container.style.lineHeight = 2;
+}
+setupExpressionWatcher();
 
 function shouldAnimate() {
     return $textBuffer.hasClass("active");
@@ -32,9 +77,10 @@ function showSessionView(sessionId) {
     }
 
     if( $hidden.data("sessionId") == sessionId ) {
+        // Swap buffers
         $active.removeClass ("active");
         $hiddenContainer.append($active);
-        $player.prepend($hidden);
+        $hidden.insertBefore($hiddenContainer);
         $hidden.addClass("active");
 
         // Also make this the active buffer
@@ -205,11 +251,27 @@ function addLineError(error, callback)
     $textBuffer.append($paragraph);
 }
 
+function addEvaluationResult(result, error)
+{   
+    var $result;
+    if( error ) {
+        $result = $(`<div class="evaluationResult error"><span>${error}</span></div>`);
+    } else {
+        $result = $(`<div class="evaluationResult"><span>${result}</span></div>`);
+    }
+    $textBuffer.append($result);
+}
+
 function previewStepBack()
 {
     var $lastDivider = $("#player .innerText.active").find("hr").last();
     $lastDivider.nextAll().remove();
     $lastDivider.remove();
+}
+
+function getTurnExpression()
+{
+    return expressionWatchInput.getValue();
 }
 
 exports.PlayerView = {
@@ -222,6 +284,8 @@ exports.PlayerView = {
     addLongMessage: addLongMessage,
     addHorizontalDivider: addHorizontalDivider,
     addLineError: addLineError,
+    addEvaluationResult: addEvaluationResult,
     showSessionView: showSessionView,
-    previewStepBack: previewStepBack
+    previewStepBack: previewStepBack,
+    getTurnExpression: getTurnExpression
 };  
