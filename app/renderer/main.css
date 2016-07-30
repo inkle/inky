@@ -559,6 +559,16 @@ img.issue-icon.warning {
   text-decoration: underline;
 }
 
+/* Hide cursor in unfocussed editor view */
+.ace_hidden-cursors {
+  opacity:0
+}
+
+/* Hide other marks (e.g. bracket matchers) in unfocussed editor view */
+.ace_editor:not(.ace_focus) .ace_marker-layer .ace_bracket {
+  opacity: 0;
+}
+
 #player {
   display: block;
   position: absolute;
