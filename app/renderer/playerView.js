@@ -1,8 +1,5 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
-// These lines are all only need for expression watcher view.
-// Should probably extract to expressionWatchView.js
-const expressionWatchInput = ace.edit("testExpression");
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
@@ -23,9 +20,19 @@ document.addEventListener("keydown", function(){
 // Initial default: append to visible buffer
 $textBuffer = $("#player .innerText.active");
 
+var expressionEditors = [];
+
 function setupExpressionWatcher() {
 
-    expressionWatchInput.setOptions({
+    const $expressionWatchContainer = $(".expressionWatch tbody");
+    const $expression = $(`<tr><td class="expressionLabel">Every turn:</td><td class="expressionInput"></td></tr>`);
+    $expressionWatchContainer.append($expression);
+
+    // These lines are all only need for expression watcher view.
+    // Should probably extract to expressionWatchView.js
+    const expressionAceEditor = ace.edit($expression.children(".expressionInput").get(0));
+
+    expressionAceEditor.setOptions({
         maxLines: 1,
         autoScrollEditorIntoView: true,
         highlightActiveLine: false,
@@ -34,12 +41,12 @@ function setupExpressionWatcher() {
     });
 
     // remove newlines in pasted text
-    expressionWatchInput.on("paste", function(e) {
+    expressionAceEditor.on("paste", function(e) {
         e.text = e.text.replace(/[\r\n]+/g, " ");
     });
 
     // make mouse position clipping nicer
-    expressionWatchInput.renderer.screenToTextCoordinates = function(x, y) {
+    expressionAceEditor.renderer.screenToTextCoordinates = function(x, y) {
         var pos = this.pixelToScreenCoordinates(x, y);
         return this.session.screenToDocumentPosition(
             Math.min(this.session.getScreenLength() - 1, Math.max(pos.row, 0)),
@@ -48,16 +55,18 @@ function setupExpressionWatcher() {
     };
 
     // disable Enter Shift-Enter keys
-    expressionWatchInput.commands.bindKey("Enter|Shift-Enter", "null")
+    expressionAceEditor.commands.bindKey("Enter|Shift-Enter", "null")
 
     // TODO: Is there not a way to set the mode to "new InkMode()" without starting a new session?!
     var aceDocument = new Document("hello world isn't this great yes it is {x}");
     var aceSession = new EditSession(aceDocument, new InkMode());
     aceSession.setUseWrapMode(false);
     aceSession.setUndoManager(new ace.UndoManager());
-    expressionWatchInput.setSession(aceSession);
+    expressionAceEditor.setSession(aceSession);
 
-    expressionWatchInput.container.style.lineHeight = 2;
+    expressionAceEditor.container.style.lineHeight = 2;
+
+    expressionEditors.push(expressionAceEditor);
 }
 setupExpressionWatcher();
 
@@ -271,7 +280,7 @@ function previewStepBack()
 
 function getTurnExpression()
 {
-    return expressionWatchInput.getValue();
+    return expressionEditors[0].getValue();
 }
 
 exports.PlayerView = {
