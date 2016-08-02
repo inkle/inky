@@ -109,7 +109,7 @@ LiveCompiler.setEvents({
 
         ToolbarView.updateIssueSummary(errors);
     },
-    playerPrompt: (replaying) => {
+    playerPrompt: (replaying, continueReplayCallback) => {
 
         var expressionIdx = 0;
         var tryEvaluateNextExpression = () => {
@@ -118,6 +118,7 @@ LiveCompiler.setEvents({
             if( expressionIdx >= ExpressionWatchView.numberOfExpressions() ) {
                 if( replaying ) {
                     PlayerView.addHorizontalDivider();
+                    continueReplayCallback();
                 } else {
                     PlayerView.contentReady();
                 }

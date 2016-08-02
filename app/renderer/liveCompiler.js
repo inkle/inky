@@ -213,14 +213,13 @@ ipc.on("play-requires-input", (event, fromSessionId) => {
         justCompletedReplay = true;
     }
 
-    events.playerPrompt(replaying);
-
-    // Replay?
-    if( replaying ) {
-        var replayChoiceNumber = choiceSequence[currentTurnIdx];
-        currentTurnIdx++;
-        ipc.send("play-continue-with-choice-number", replayChoiceNumber, fromSessionId);
-    } 
+    events.playerPrompt(replaying, () => {
+        if( replaying ) {
+            var replayChoiceNumber = choiceSequence[currentTurnIdx];
+            currentTurnIdx++;
+            ipc.send("play-continue-with-choice-number", replayChoiceNumber, fromSessionId);
+        } 
+    });
 
     if( justCompletedReplay ) events.replayComplete(currentPlaySessionId);
 });
