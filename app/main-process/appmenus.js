@@ -131,6 +131,10 @@ function setupMenus(callbacks) {
           label: 'Next Issue',
           accelerator: 'CmdOrCtrl+.',
           click: callbacks.nextIssue
+        },
+        {
+          label: 'Add watch expression...',
+          click: callbacks.addWatchExpression
         }
       ]
     },

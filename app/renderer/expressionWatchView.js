@@ -2,6 +2,7 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
+const Range = ace.require("ace/range").Range;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
 function ExpressionWatchView() {
@@ -37,12 +38,22 @@ function ExpressionWatchView() {
         );
     };
 
-    // TODO: Is there not a way to set the mode to "new InkMode()" without starting a new session?!
-    var aceDocument = new Document("hello world isn't this great yes it is {x}");
+    // TODO: Find a way to set the InkMode without creating a new document and session
+    const defaultContent = "x is {x}";
+    var aceDocument = new Document(defaultContent);
     var aceSession = new EditSession(aceDocument, new InkMode());
     aceSession.setUseWrapMode(false);
     aceSession.setUndoManager(new ace.UndoManager());
     this.editor.setSession(aceSession);
+
+    // Select both 'x's, ready for replacing with a different variable name
+    var x1Pos = defaultContent.indexOf("x");
+    var x2Pos = defaultContent.indexOf("x", 1);
+    this.editor.focus();
+    var selection = aceSession.getSelection();
+    selection.clearSelection();
+    selection.addRange(new Range(0, x1Pos, 0, x1Pos+1));
+    selection.addRange(new Range(0, x2Pos, 0, x2Pos+1));
 
     // This works, but I'd rather set it using CSS... haven't found
     // a way to do it robustly though.
@@ -51,6 +62,10 @@ function ExpressionWatchView() {
 
 ExpressionWatchView.prototype.getValue = function() {
     return this.editor.getValue();
+}
+
+ExpressionWatchView.prototype.focus = function() {
+    return this.editor.focus();
 }
 
 exports.ExpressionWatchView = ExpressionWatchView;

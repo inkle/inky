@@ -70,6 +70,9 @@ app.on('ready', function () {
         },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
+        },
+        addWatchExpression: (item, focusedWindow) => {
+            focusedWindow.webContents.send("add-watch-expression");
         }
     });
 
