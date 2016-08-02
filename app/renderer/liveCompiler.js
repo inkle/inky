@@ -277,22 +277,25 @@ ipc.on("play-story-stopped", (event, fromSessionId) => {
 
 ipc.on("return-location-from-source", (event, fromSessionId, locationInfo) => {
     if( fromSessionId == locationInSourceCallbackObj.sessionId ) {
-        locationInSourceCallbackObj.callback(locationInfo);
+        var callback = locationInSourceCallbackObj.callback;
         locationInSourceCallbackObj = null;
+        callback(locationInfo);
     }
 });
 
 ipc.on("play-evaluated-expression", (event, textResult, fromSessionId) => {
     if( fromSessionId == expressionEvaluationObj.sessionId && expressionEvaluationObj ) {
-        expressionEvaluationObj.callback(textResult);
+        var callback = expressionEvaluationObj.callback;
         expressionEvaluationObj = null;
+        callback(textResult);
     }
 });
 
 ipc.on("play-evaluated-expression-error", (event, errorMessage, fromSessionId) => {
     if( fromSessionId == expressionEvaluationObj.sessionId && expressionEvaluationObj ) {
-        expressionEvaluationObj.callback(null, errorMessage);
+        var callback = expressionEvaluationObj.callback;
         expressionEvaluationObj = null;
+        callback(null, errorMessage);
     }
 });
 

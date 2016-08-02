@@ -1,9 +1,13 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+const ipc = require("electron").ipcRenderer;
 
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
 const Range = ace.require("ace/range").Range;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
+
+var expressionViews = [];
+var events = {};
 
 function ExpressionWatchView() {
     this.$expression = $(`<tr><td class="expressionLabel">Every turn:</td><td class="expressionInput"></td></tr>`);
@@ -58,6 +62,10 @@ function ExpressionWatchView() {
     // This works, but I'd rather set it using CSS... haven't found
     // a way to do it robustly though.
     this.editor.container.style.lineHeight = 2;
+
+    this.editor.on("change", () => {
+        events.change();
+    });
 }
 
 ExpressionWatchView.prototype.getValue = function() {
@@ -67,5 +75,17 @@ ExpressionWatchView.prototype.getValue = function() {
 ExpressionWatchView.prototype.focus = function() {
     return this.editor.focus();
 }
+
+ExpressionWatchView.setEvents = (e) => {
+    events = e;
+}
+
+ExpressionWatchView.numberOfExpressions = () => expressionViews.length;
+ExpressionWatchView.getExpression = (i) => expressionViews[i].editor.getValue();
+
+ipc.on("add-watch-expression", () => {
+    var expressionWatchView = new ExpressionWatchView();
+    expressionViews.push(expressionWatchView);
+});
 
 exports.ExpressionWatchView = ExpressionWatchView;

@@ -18,6 +18,7 @@ const EditorView = require("./editorView.js").EditorView;
 const PlayerView = require("./playerView.js").PlayerView;
 const ToolbarView = require("./toolbarView.js").ToolbarView;
 const NavView = require("./navView.js").NavView;
+const ExpressionWatchView = require("./expressionWatchView").ExpressionWatchView;
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 const NavHistory = require("./navHistory.js").NavHistory;
@@ -110,24 +111,29 @@ LiveCompiler.setEvents({
     },
     playerPrompt: (replaying) => {
 
-        var then = () => {
-            if( replaying ) {
-                PlayerView.addHorizontalDivider();
-            } else {
-                PlayerView.contentReady();
+        var expressionIdx = 0;
+        var tryEvaluateNextExpression = () => {
+
+            // Finished evaluating expressions? End of this turn.
+            if( expressionIdx >= ExpressionWatchView.numberOfExpressions() ) {
+                if( replaying ) {
+                    PlayerView.addHorizontalDivider();
+                } else {
+                    PlayerView.contentReady();
+                }
+                return;
             }
-        }
 
-        var turnExpression = PlayerView.getTurnExpression();
-        if( turnExpression && turnExpression.length > 0 ) {
-            LiveCompiler.evaluateExpression(turnExpression, (result, error) => {
+            // Try to evaluate this expression
+            var exprText = ExpressionWatchView.getExpression(expressionIdx);
+            LiveCompiler.evaluateExpression(exprText, (result, error) => {
                 PlayerView.addEvaluationResult(result, error);
-                then();
-        });
-        } else {
-            then();
-        }
+                expressionIdx++;
+                tryEvaluateNextExpression();
+            });
+        };
 
+        tryEvaluateNextExpression();
     },
     replayComplete: (sessionId) => {
         PlayerView.showSessionView(sessionId);
@@ -184,6 +190,12 @@ PlayerView.setEvents({
                 EditorView.gotoLine(result.lineNumber);
             }
         });
+    }
+});
+
+ExpressionWatchView.setEvents({
+    "change": () => {
+        LiveCompiler.setEdited();
     }
 });
 

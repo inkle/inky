@@ -1,9 +1,6 @@
-const ipc = require("electron").ipcRenderer;
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
-const ExpressionWatchView = require("./expressionWatchView.js").ExpressionWatchView;
 
 var events = {};
-var expressionEditors = [];
 var lastFadeTime = 0;
 var $textBuffer = null;
 
@@ -225,17 +222,6 @@ function previewStepBack()
     $lastDivider.remove();
 }
 
-function getTurnExpression()
-{
-    return expressionEditors[0].getValue();
-}
-
-ipc.on("add-watch-expression", () => {
-    var expressionWatchView = new ExpressionWatchView();
-    //expressionWatchView.focus();
-    expressionEditors.push(expressionWatchView);
-});
-
 exports.PlayerView = {
     setEvents: (e) => { events = e; },
     contentReady: contentReady,
@@ -248,6 +234,5 @@ exports.PlayerView = {
     addLineError: addLineError,
     addEvaluationResult: addEvaluationResult,
     showSessionView: showSessionView,
-    previewStepBack: previewStepBack,
-    getTurnExpression: getTurnExpression
+    previewStepBack: previewStepBack
 };  
