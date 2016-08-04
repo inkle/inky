@@ -248,6 +248,31 @@ var inkHighlightRules = function() {
                 defaultToken: "include"
             }]
         }],
+
+        "#EXTERNAL": [{
+            regex: /(\s*)(EXTERNAL\b)/,
+            token: [
+                "external",
+                "external.keyword"
+            ],
+
+            // The rest of the external line unline a newline
+            push: [{
+                regex: /(\s*)([^\r\n]+)/,
+                token: [
+                    "external", // whitespace
+                    "external.declaration"
+                ]
+            }, 
+            { 
+                regex: /$/,
+                token: "external",
+                next: "pop"
+            }, {
+                defaultToken: "external"
+            }]
+        }],
+
         "#inlineConditional": [{
             regex: /(\{)(?!\s*(?:!|~|&))((?:[^:|\}]+(?:\|\|)*)+:)/,
             //          ^^^^^^ 1 ^^^^^^^
@@ -364,6 +389,8 @@ var inkHighlightRules = function() {
             include: "#TODO"
         }, {
             include: "#globalVAR"
+        }, {
+            include: "#EXTERNAL"
         }, {
             include: "#INCLUDE"
         }, {
