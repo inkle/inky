@@ -1,5 +1,9 @@
 var fs = require('fs');
-const mkdirp = require('mkdirp');
+
+// Is there a more elegant way of achieving this?
+// mkdirp isn't found during the postinstall step because I guess we're in the wrong directory.
+// But this js file doesn't really belong in app. Are we supposed to have a separate node_modules directory?
+const mkdirp = require('../app/node_modules/mkdirp');
 
 /* When the documentation is generaded by the markdown-html modul, some characters are altered
    for the ids of the anchorpoints.

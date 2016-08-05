@@ -8,7 +8,8 @@
 .ace_editor span.ace_gather.ace_bullets,
 .ace_editor span.ace_gather.ace_label,
 .ace_editor span.ace_glue,
-.ace_editor span.ace_include {
+.ace_editor span.ace_include,
+.ace_editor span.ace_external {
   color: blue;
 }
 
