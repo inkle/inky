@@ -10,7 +10,7 @@
 
     function scrollToBottom() {
         var progress = 0.0;
-        var start = document.body.scrollTop;
+        var start = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
         var dist = document.body.scrollHeight - window.innerHeight - start;
         if( dist < 0 ) return;
 
