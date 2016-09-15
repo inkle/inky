@@ -668,7 +668,7 @@ img.issue-icon.warning {
 }
 
 #player .expressionWatch td {
-  background: red;
+  /*background: red;*/
   border-bottom: 1px solid #DDD;
 }
 
@@ -686,10 +686,25 @@ img.issue-icon.warning {
 
 #player td.expressionInput {
   background: white;
+  padding: 0;
   padding-left: 5px;
+  position: relative;
 }
 
-#player td.expressionInput {
+#player td.expressionInput .removeButton {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  text-align: center;
+  color: gray;
+  font-size: 12pt;
+  line-height: 22px;
+}
+
+#player td.expressionInput .removeButton:hover {
+  color: black;
 }
 
 #player td.expressionInput:focus {

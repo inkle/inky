@@ -1,5 +1,6 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const ipc = require("electron").ipcRenderer;
+require("./util.js");
 
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
@@ -10,11 +11,18 @@ var expressionViews = [];
 var events = {};
 
 function ExpressionWatchView() {
-    this.$expression = $(`<tr><td class="expressionLabel">Every turn:</td><td class="expressionInput"></td></tr>`);
+    this.$expression = $(`
+        <tr>
+            <td class="expressionLabel">Every turn:</td>
+            <td class="expressionInput">
+                <div class="expressionEditor"></div>
+                <div class="removeButton"><span class="icon icon-cancel-circled"></span></div>
+            </td>
+        </tr>`);
     $(".expressionWatch tbody").append(this.$expression);
 
     // Create input field as an ace editor so we get full syntax highlighting etc
-    this.editor = ace.edit(this.$expression.children(".expressionInput").get(0));
+    this.editor = ace.edit(this.$expression.find(".expressionEditor").get(0));
 
     // Set up as single line editor
     this.editor.setOptions({
@@ -61,9 +69,17 @@ function ExpressionWatchView() {
 
     // This works, but I'd rather set it using CSS... haven't found
     // a way to do it robustly though.
-    this.editor.container.style.lineHeight = 2;
+    this.editor.container.style.lineHeight = 2; // em? 2x? or what?
 
     this.editor.on("change", () => {
+        events.change();
+    });
+
+    // Hook up remove button
+    this.$expression.find(".removeButton").on("click", (event) => {
+        this.$expression.remove();
+        expressionViews.remove(this);
+        event.preventDefault();
         events.change();
     });
 }
