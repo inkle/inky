@@ -21,8 +21,8 @@ function shouldAnimate() {
 function showSessionView(sessionId) {
     var $player = $("#player");
 
-    var $hiddenContainer = $player.children(".hiddenBuffer");
-    var $hidden = $hiddenContainer.children(".innerText");
+    var $hiddenContainer = $player.find(".hiddenBuffer");
+    var $hidden = $hiddenContainer.find(".innerText");
 
     var $active = $("#player .innerText.active");
     if( $active.data("sessionId") == sessionId ) {
@@ -71,8 +71,8 @@ function contentReady() {
     // Scroll to bottom?
     if( shouldAnimate() ) {
         var offset = newHeight - $("#main").height();
-        if( offset > 0 && offset > $("#player").scrollTop() ) {
-            $("#player").animate({
+        if( offset > 0 && offset > $("#player .scrollContainer").scrollTop() ) {
+            $("#player .scrollContainer").animate({
                 scrollTop: offset
             }, 500);
         }

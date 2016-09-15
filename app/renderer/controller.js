@@ -197,6 +197,7 @@ PlayerView.setEvents({
 ExpressionWatchView.setEvents({
     "change": () => {
         LiveCompiler.setEdited();
+        $("#player .scrollContainer").css("padding-top", ExpressionWatchView.totalHeight());
     }
 });
 
