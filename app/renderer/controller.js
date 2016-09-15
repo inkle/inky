@@ -109,7 +109,7 @@ LiveCompiler.setEvents({
 
         ToolbarView.updateIssueSummary(errors);
     },
-    playerPrompt: (replaying, continueReplayCallback) => {
+    playerPrompt: (replaying, doneCallback) => {
 
         var expressionIdx = 0;
         var tryEvaluateNextExpression = () => {
@@ -118,10 +118,10 @@ LiveCompiler.setEvents({
             if( expressionIdx >= ExpressionWatchView.numberOfExpressions() ) {
                 if( replaying ) {
                     PlayerView.addHorizontalDivider();
-                    continueReplayCallback();
                 } else {
                     PlayerView.contentReady();
                 }
+                doneCallback();
                 return;
             }
 
@@ -197,7 +197,7 @@ PlayerView.setEvents({
 ExpressionWatchView.setEvents({
     "change": () => {
         LiveCompiler.setEdited();
-        $("#player .scrollContainer").css("padding-top", ExpressionWatchView.totalHeight());
+        $("#player .scrollContainer").css("top", ExpressionWatchView.totalHeight()+"px");
     }
 });
 

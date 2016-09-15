@@ -99,7 +99,7 @@ ExpressionWatchView.setEvents = (e) => {
 ExpressionWatchView.numberOfExpressions = () => expressionViews.length;
 ExpressionWatchView.getExpression = (i) => expressionViews[i].editor.getValue();
 
-ExpressionWatchView.totalHeight = () => expressionViews.length * 30;
+ExpressionWatchView.totalHeight = () => $(".expressionWatch").height();
 
 ipc.on("add-watch-expression", () => {
     var expressionWatchView = new ExpressionWatchView();

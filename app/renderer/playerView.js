@@ -62,15 +62,13 @@ function fadeIn($jqueryElement) {
 function contentReady() {
 
     // Expand to fit
-    var $lastObj = $textBuffer.children().last();
-    var bottomEdge = $lastObj.position().top + $lastObj.height();
-    var newHeight = bottomEdge + 100;
+    var newHeight = $textBuffer[0].scrollHeight;
     if( $textBuffer.height() < newHeight )
-        $textBuffer.height(bottomEdge + 100);
+        $textBuffer.height(newHeight);
 
     // Scroll to bottom?
     if( shouldAnimate() ) {
-        var offset = newHeight - $("#main").height();
+        var offset = newHeight - $("#player .scrollContainer").outerHeight();
         if( offset > 0 && offset > $("#player .scrollContainer").scrollTop() ) {
             $("#player .scrollContainer").animate({
                 scrollTop: offset
