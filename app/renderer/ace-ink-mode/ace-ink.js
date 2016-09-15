@@ -274,12 +274,7 @@ var inkHighlightRules = function() {
         }],
 
         "#inlineConditional": [{
-            regex: /(\{)(?!\s*(?:!|~|&))((?:[^:|\}]+(?:\|\|)*)+:)/,
-            //          ^^^^^^ 1 ^^^^^^^
-            //                          ^^^^^^^^^^^ 2 ^^^^^^^^^^^
-            // 1: If you see sequence characters, cancel
-            // 2: Don't allow single '|' in the condition, since that
-            //    means it's more likely to be a sequence.
+            regex: /(\{)([^:\|\}]+:)/,
             token: [
                 "logic.punctuation",
                 "logic.inline.conditional.condition"
@@ -300,18 +295,18 @@ var inkHighlightRules = function() {
         "#inlineSequence": [{
             regex: /(\{)(\s*)((?:~|&|!|\$)?)(?=[^\|\}]*\|)/, // Try look ahead to make sure there's a pipe char
             token: [
-                "logic.sequence.punctuation", // {
+                "logic.punctuation", // {
                 "logic.sequence", // whitespace
                 "logic.sequence.operator" // sequence type char (~&!$)
             ],
             push: [{
-                token: "logic.sequence.punctuation", // }
+                token: "logic.punctuation", // }
                 regex: /\}/,
                 next: "pop"
             }, {
                 token: "logic.sequence.punctuation", // | (but not ||)
-                regex: /\|/
-            },  {
+                regex: /\|(?!\|)/
+            }, {
                 include: "#mixedContent"
             }, {
                 defaultToken: "logic.sequence.innerContent"
