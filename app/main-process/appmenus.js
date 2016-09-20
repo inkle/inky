@@ -1,6 +1,7 @@
 const electron = require('electron')
 const app = electron.app
 const ipc = electron.ipcMain;
+const dialog = electron.dialog;
 
 Menu = require("menu");
 
@@ -103,7 +104,15 @@ function setupMenus(callbacks) {
           label: 'Reload',
           accelerator: 'CmdOrCtrl+R',
           click(item, focusedWindow) {
-            if (focusedWindow) focusedWindow.reload();
+            if (!focusedWindow) return;
+            if( dialog.showMessageBox(focusedWindow, {
+              type: 'question',
+              buttons: ['Yes', 'Cancel'],
+              title: 'Reload?',
+              message: 'Are you sure you want to reload the current window? Any unsaved changes will be lost.'
+            }) ) {
+              focusedWindow.reload();
+            }
           }
         },
         {
