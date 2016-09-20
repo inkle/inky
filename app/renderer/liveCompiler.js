@@ -3,10 +3,10 @@ const _ = require("lodash");
 var randomstring = require("randomstring");
 
 var namespace = null;
-var sessionId = 0;
+var sessionIdx = 0;
 
-var currentPlaySessionId = -1;
-var currentExportSessionId = -1;
+var currentPlaySessionId = null;
+var currentExportSessionId = null;
 var exportCompleteCallback = null;
 
 var lastEditorChange = null;
@@ -40,13 +40,13 @@ function resetErrors() {
 
 function buildCompileInstruction() {
 
-    sessionId += 1;
+    sessionIdx += 1;
 
     // Construct instruction object to send to inklecate.js
     var compileInstruction = {
         mainName: project.mainInk.filename(),
         updatedFiles: {},
-        sessionId: sessionId,
+        sessionId: `${namespace}_${sessionIdx}`,
         namespace: namespace
     };
 
@@ -70,7 +70,7 @@ function reloadInklecateSession() {
 
     lastEditorChange = null;
 
-    if( currentPlaySessionId >= 0 )
+    if( currentPlaySessionId  )
         stopInklecateSession(currentPlaySessionId);
 
     replaying = true;
@@ -85,7 +85,8 @@ function reloadInklecateSession() {
 
     currentPlaySessionId = instr.sessionId;
 
-    ipc.send("compile", instr, sessionId);
+    console.log("This window sending session "+instr.sessionId);
+    ipc.send("compile", instr);
 }
 
 function exportJson(callback) {

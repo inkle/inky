@@ -22,17 +22,13 @@ var inklecatePath = path.join(inklecateRootPathRelease, inklecateNames[process.p
 // If inklecate isn't available here, we're probably in development mode (not packaged into a release asar)
 try { fs.accessSync(inklecatePath) }
 catch(e) {
-    console.log(`Inklecate not at: ${inklecatePath}`);
-    console.log(`Loading inklecate from local directory instead (we're in development mode)`);
     inklecatePath = path.join(inklecateRootPathDev, inklecateNames[process.platform]);
-    console.log(inklecatePath);
 }
 
 // TODO: Customise this for different projects
 // Is this the right temporary directory even on Mac? Seems like a bad practice
 // to keep files around in a "public" place that the user might wish to keep private.
 const tempInkPath = (process.platform == "darwin" || process.platform == "linux") ? "/tmp/inky_compile" : path.join(process.env.temp, "inky_compile");
-console.log("inklcate temp directory: "+tempInkPath);
 
 var sessions = {};
 
@@ -41,14 +37,9 @@ function compile(compileInstruction, requester) {
 
     var sessionId = compileInstruction.sessionId;
 
-    if( compileInstruction.play )
-        console.log("Playing "+sessionId);
-    else if( compileInstruction.export ) {
-        console.log("Exporting session "+sessionId);
-    }
+    console.log(`Launching inklecate for session id '${sessionId}'`);
 
     var uniqueDirPath = path.join(tempInkPath, compileInstruction.namespace);
-    console.log("Unique dir path: "+uniqueDirPath);
 
     // TODO: handle errors
     mkdirp.sync(uniqueDirPath);
@@ -56,18 +47,13 @@ function compile(compileInstruction, requester) {
     // Write out updated files
     for(var relativePath in compileInstruction.updatedFiles) {
 
-        console.log("Relative path: "+relativePath);
-
         var fullInkPath = path.join(uniqueDirPath, relativePath);
         var inkFileContent = compileInstruction.updatedFiles[relativePath];
 
         if( path.dirname(relativePath) != "." ) {
             var fullDir = path.dirname(fullInkPath);
-            console.log("MAKING DIR: "+fullDir);
             mkdirp.sync(fullDir);
         }
-
-        console.log("WRITING TO: "+fullInkPath);
 
         fs.writeFileSync(fullInkPath, inkFileContent);
     }
@@ -110,7 +96,6 @@ function compile(compileInstruction, requester) {
         // Strip Byte order mark
         data = data.replace(/^\uFEFF/, '');
         if( data.length > 0 ) {
-            console.log(`stderr: ${data}`);
             requester.send('play-story-unexpected-error', data, sessionId);
         }
     });
@@ -128,11 +113,9 @@ function compile(compileInstruction, requester) {
                 requester.send('play-generated-errors', inkErrors, sessionId);
 
             if( code == 0 || code === undefined ) {
-                console.log("Completed story or exported successfully at "+jsonExportPath);
                 requester.send('inklecate-complete', sessionId, jsonExportPath);
             }
             else {
-                console.log("Story exited unexpectedly with error code "+code+" (session "+sessionId+")");
                 requester.send('play-exit-due-to-error', code, sessionId);
             }
         }
@@ -186,7 +169,6 @@ function compile(compileInstruction, requester) {
                     filename: debugSourceMatches[3]
                 });
             } else if( endOfStoryMatches ) {
-                console.log("Matched end of story");
                 onEndOfStory();
             } else if( line.length > 0 ) {
                 if( session.evaluatingExpression ) {
@@ -199,18 +181,23 @@ function compile(compileInstruction, requester) {
 
         }
 
-        console.log("STORY DATA (sesssion "+sessionId+"): "+text);
     })
 
     var processCloseExit = (code) => {
-        if( !sessions[sessionId] )
+
+        if( !sessions[sessionId] ) {
             return;
+        }
 
         var forceStoppedByPlayer = sessions[sessionId].stopped;
-        if( !forceStoppedByPlayer )
+        if( !forceStoppedByPlayer ) {
             onEndOfStory(code);
+        } else {
+        }
 
         delete sessions[sessionId];
+
+        console.log(` - Ended inklecate session id ${sessionId}`);
     };
 
     playProcess.on('close', processCloseExit);
@@ -224,25 +211,15 @@ function stop(sessionId) {
         processObj.process.kill('SIGTERM');
         return true;
     } else {
-        console.log("Could not find process to stop");
         return false;
     }
 }
 
 function killSessions(optionalBrowserWindow) {
-    if( optionalBrowserWindow )
-        console.log("Kill sessions for window");
-    else
-        console.log("Kill all sessions");
-
     for(var sessionId in sessions) {
 
         if( !optionalBrowserWindow || sessions[sessionId] &&
             sessions[sessionId].requesterWebContents == optionalBrowserWindow.webContents ) {
-
-            if( optionalBrowserWindow )
-                console.log("Found session to stop: "+sessionId);
-
             stop(sessionId);
         }
     }
@@ -253,14 +230,12 @@ ipc.on("compile", (event, compileInstruction) => {
 });
 
 ipc.on("play-stop-ink", (event, sessionId) => {
-    console.log("got request to stop "+sessionId);
     const requester = event.sender;
     if( stop(sessionId) )
         requester.send('play-story-stopped', sessionId);
 });
 
 ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
-    console.log("inklecate received play choice number: "+choiceNumber+" for session "+sessionId);
     if( sessions[sessionId] ) {
         const playProcess = sessions[sessionId].process;
         if( playProcess )
@@ -269,7 +244,6 @@ ipc.on("play-continue-with-choice-number", (event, choiceNumber, sessionId) => {
 });
 
 ipc.on("evaluate-expression", (event, expressionText, sessionId) => {
-    console.log(`inklecate will evaluate expression: "${expressionText}" for session ${sessionId}`);
     var session = sessions[sessionId];
     if( session ) {
         if( session.process ) {
@@ -280,7 +254,6 @@ ipc.on("evaluate-expression", (event, expressionText, sessionId) => {
 });
 
 ipc.on("get-location-in-source", (event, offset, sessionId) => {
-    console.log("inklecate received request for location in source: "+offset+" for session "+sessionId);
     if( sessions[sessionId] ) {
         const playProcess = sessions[sessionId].process;
         if( playProcess )
