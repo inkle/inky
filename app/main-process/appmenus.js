@@ -2,6 +2,7 @@ const electron = require('electron')
 const app = electron.app
 const ipc = electron.ipcMain;
 const dialog = electron.dialog;
+const _ = require("lodash");
 
 Menu = require("menu");
 
@@ -98,39 +99,19 @@ function setupMenus(callbacks) {
       ]
     },
     {
-      label: 'View',
+      label: "View",
       submenu: [
         {
-          label: 'Reload',
-          accelerator: 'CmdOrCtrl+R',
-          click(item, focusedWindow) {
-            if (!focusedWindow) return;
-            if( dialog.showMessageBox(focusedWindow, {
-              type: 'question',
-              buttons: ['Yes', 'Cancel'],
-              title: 'Reload?',
-              message: 'Are you sure you want to reload the current window? Any unsaved changes will be lost.'
-            }) ) {
-              focusedWindow.reload();
-            }
-          }
+        label: 'Toggle Full Screen',
+        accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
+        click(item, focusedWindow) {
+          if (focusedWindow)
+            focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
+        }
         },
         {
-          label: 'Toggle Full Screen',
-          accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
-          click(item, focusedWindow) {
-            if (focusedWindow)
-              focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
-          }
-        },
-        {
-          label: 'Toggle Developer Tools',
-          accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-          click(item, focusedWindow) {
-            if (focusedWindow)
-              focusedWindow.webContents.toggleDevTools();
-          }
-        },
+          label: "TODO: zoom controls"
+        }
       ]
     },
     {
@@ -145,6 +126,34 @@ function setupMenus(callbacks) {
           label: 'Add watch expression...',
           click: callbacks.addWatchExpression
         }
+      ]
+    },
+    {
+      label: '[Inky Debug]',
+      submenu: [
+        {
+          label: 'Reload web view',
+          accelerator: 'CmdOrCtrl+R',
+          click(item, focusedWindow) {
+            if (!focusedWindow) return;
+            if( dialog.showMessageBox(focusedWindow, {
+              type: 'question',
+              buttons: ['Yes', 'Cancel'],
+              title: 'Reload?',
+              message: 'Are you sure you want to reload the current window? Any unsaved changes will be lost.'
+            }) ) {
+              focusedWindow.reload();
+            }
+          }
+        },
+        {
+          label: 'Toggle Developer Tools',
+          accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+          click(item, focusedWindow) {
+            if (focusedWindow)
+              focusedWindow.webContents.toggleDevTools();
+          }
+        },
       ]
     },
     {
@@ -181,6 +190,7 @@ function setupMenus(callbacks) {
     },
   ];
 
+  // Mac specific menus
   if (process.platform === 'darwin') {
     const name = app.getName();
     template.unshift({
@@ -225,8 +235,9 @@ function setupMenus(callbacks) {
         },
       ]
     });
-    // Window menu.
-    template[3].submenu.push(
+    
+    var windowMenu = _.find(template, menu => menu.role == "window");
+    windowMenu.submenu.push(
       {
         type: 'separator'
       },
