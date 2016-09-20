@@ -20,6 +20,8 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 InkProject.events = {};
 InkProject.currentProject = null;
 
+// mainInkFilePath is optional, if creating a brand new untitled project
+// Can also be absolute, if loading a project.
 function InkProject(mainInkFilePath) {
     this.files = [];
     this.hasUnsavedChanges = false;
@@ -33,8 +35,8 @@ function InkProject(mainInkFilePath) {
     this.startFileWatching();
 }
 
-InkProject.prototype.createInkFile = function(path) {
-    var inkFile = new InkFile(path || null, this.mainInk, {
+InkProject.prototype.createInkFile = function(anyPath) {
+    var inkFile = new InkFile(anyPath || null, this.mainInk, {
         fileChanged: () => { 
             if( inkFile.hasUnsavedChanges && !this.unsavedFiles.contains(inkFile) ) {
                 this.unsavedFiles.push(inkFile);
@@ -76,18 +78,15 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
 InkProject.prototype.refreshIncludes = function() {
 
     var allIncludes = [];
-    var rootDirectory = path.dirname(this.mainInk.path);
+    var existingRelFilePaths = _.map(_.without(this.files, this.mainInk), (f) => f.relativePath());
 
-    var existingFilePaths = _.map(_.without(this.files, this.mainInk), (f) => f.path);
-
-    var pathsFromINCLUDEs = [];
+    var relPathsFromINCLUDEs = [];
     var addIncludePathsFromFile = (inkFile) => {
         if( !inkFile.includes )
             return;
 
         inkFile.includes.forEach(incPath => {
-            var absPath = path.join(rootDirectory, incPath);
-            pathsFromINCLUDEs.push(absPath);
+            relPathsFromINCLUDEs.push(incPath);
 
             var recurseInkFile = this.inkFileWithRelativePath(incPath);
             if( recurseInkFile )
@@ -97,15 +96,15 @@ InkProject.prototype.refreshIncludes = function() {
     addIncludePathsFromFile(this.mainInk);
 
     // Includes that we don't have in this.files yet that are mentioned in other files
-    var includesToLoad = _.difference(pathsFromINCLUDEs, existingFilePaths)
+    var includeRelPathsToLoad = _.difference(relPathsFromINCLUDEs, existingRelFilePaths)
 
     // Files that are in this.files that aren't actually mentioned anywhere
-    var spareFilePaths = _.difference(existingFilePaths,  pathsFromINCLUDEs);
+    var spareRelFilePaths = _.difference(existingRelFilePaths,  relPathsFromINCLUDEs);
 
     // Mark files that are spare, and remove those that aren't needed at all
     var filesToRemove = [];
     this.files.forEach(f => {
-        f.isSpare = spareFilePaths.indexOf(f.path) != -1;
+        f.isSpare = spareRelFilePaths.indexOf(f.relativePath()) != -1;
 
         // Remove brand new files that aren't included anywhere - otherwise they're spare
         if( f.isSpare && f.brandNewEmpty )
@@ -113,7 +112,7 @@ InkProject.prototype.refreshIncludes = function() {
     });
     this.files = _.difference(this.files, filesToRemove);
 
-    includesToLoad.forEach(newIncludePath => this.createInkFile(newIncludePath));
+    includeRelPathsToLoad.forEach(newIncludeRelPath => this.createInkFile(newIncludeRelPath));
 
     NavView.setFiles(this.mainInk, this.files);
 }
@@ -133,22 +132,21 @@ InkProject.prototype.refreshUnsavedChanges = function() {
 }
 
 InkProject.prototype.startFileWatching = function() {
-    if( !this.mainInk.path || !path.isAbsolute(this.mainInk.path) )
+    if( !this.mainInk.projectDir )
         return;
 
     if( this.fileWatcher )
         this.fileWatcher.close();
 
-    var rootDir = path.dirname(this.mainInk.path);
-    var watchPath = path.join(rootDir, "**/*.ink");
+    var watchPath = path.join(this.mainInk.projectDir, "**/*.ink");
     this.fileWatcher = chokidar.watch(watchPath);
 
-    this.fileWatcher.on("add", newlyFoundFilePath => {
-        var relPath = path.relative(rootDir, newlyFoundFilePath);
+    this.fileWatcher.on("add", newlyFoundAbsFilePath => {
+        var relPath = path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath);
         var existingFile = _.find(this.files, f => f.relativePath() == relPath);
         if( !existingFile ) {
             console.log("Watch found new file - creating it: "+relPath);
-            this.createInkFile(newlyFoundFilePath);
+            this.createInkFile(newlyFoundAbsFilePath);
 
             // TODO: Find a way to refresh includes without spamming it
             this.refreshIncludes();
@@ -157,8 +155,8 @@ InkProject.prototype.startFileWatching = function() {
         }
     });
 
-    this.fileWatcher.on("change", updatedFilePath => {
-        var relPath = path.relative(rootDir, updatedFilePath);
+    this.fileWatcher.on("change", updatedAbsFilePath => {
+        var relPath = path.relative(this.mainInk.projectDir, updatedAbsFilePath);
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
             // TODO: maybe ask user if they want to overwrite? not sure I want to though
@@ -173,8 +171,8 @@ InkProject.prototype.startFileWatching = function() {
                 });
         }
     });
-    this.fileWatcher.on("unlink", removedFilePath => {
-        var relPath = path.relative(rootDir, removedFilePath);
+    this.fileWatcher.on("unlink", removedAbsFilePath => {
+        var relPath = path.relative(this.mainInk.projectDir, removedAbsFilePath);
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
             if( !inkFile.hasUnsavedChanges && inkFile != this.mainInk ) {
@@ -205,7 +203,7 @@ InkProject.prototype.showInkFile = function(inkFile) {
 
 InkProject.prototype.save = function() {
 
-    var wasUnsaved = !this.mainInk.path;
+    var wasUnsaved = !this.mainInk.projectDir;
 
     var filesRemaining = this.files.length;
     var includeFiles = _.filter(this.files, f => f != this.mainInk);
@@ -249,8 +247,8 @@ InkProject.prototype.export = function(exportType) {
             return;
         }
 
-        if( !this.defaultExportPath && this.mainInk.path && path.isAbsolute(this.mainInk.path) )
-            this.defaultExportPath = this.mainInk.path;
+        if( !this.defaultExportPath && this.mainInk.absolutePath() )
+            this.defaultExportPath = this.mainInk.absolutePath();
 
         if( this.defaultExportPath ) {
             var pathObj = path.parse(this.defaultExportPath);

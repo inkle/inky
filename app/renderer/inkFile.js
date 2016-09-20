@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const assert = require("assert");
 
 const remote = require('electron').remote;
 const dialog = remote.dialog;
@@ -16,11 +17,30 @@ var fileIdCounter = 0;
 // InkFile
 // -----------------------------------------------------------------
 
-function InkFile(filePath, mainInkFile, events) {
+// anyPath can be relative or absolute
+function InkFile(anyPath, mainInkFile, events) {
     
     this.id = fileIdCounter++;
 
-    this.path = filePath;
+    // Default filename if creating a new file, and passed null to constructor
+    anyPath = anyPath || "Untitled.ink";
+
+    // Obtain relative path by looking at main ink file
+    if( path.isAbsolute(anyPath) ) {
+        if( this.isMain() ) {
+            this.relPath = path.basename(anyPath);
+            this.projectDir = path.dirname(anyPath);
+        } else {
+            assert(this.mainInkFile.projectDir, "Main ink needs to be saved before we start loading includes with absolute paths.");
+            this.relPath = path.relative(this.mainInkFile.projectDir, anyPath);
+        }
+    } 
+
+    // Already relative
+    else {
+        this.relPath = anyPath;
+    }
+
     this.events = events;
 
     this.mainInkFile = mainInkFile;
@@ -83,25 +103,23 @@ InkFile.prototype.isMain = function() {
 }
 
 InkFile.prototype.filename = function() {
-    return this.path ? path.basename(this.path) : "Untitled.ink";
+    return path.basename(this.relPath);
 }
 
+// 20/09/2016 - Now using relative paths internally.
 InkFile.prototype.relativePath = function() {
+    return this.relPath;
+}
 
-    // Path will be relative for unsaved files
-    if( this.path && !path.isAbsolute(this.path) )
-        return this.path;
+InkFile.prototype.absolutePath = function() {
+    var mainInk = this.isMain() ? this : this.mainInkFile;
 
-    // This file is the main ink
-    if( this.isMain() ) {
-        return this.filename();
-    }
-
-    // This file is an include
-    else {
-        var mainDir = path.dirname(this.mainInkFile.path);
-        return path.relative(mainDir, this.path);
-    }
+    // Unsaved - can't get absolute path?
+    if( !mainInk.projectDir )
+        return null;
+    
+    // Normal case: combine the project directory with the file's relative path.
+    return path.join(mainInk.projectDir, this.relPath);
 }
 
 InkFile.prototype.getValue = function() {
@@ -124,28 +142,20 @@ InkFile.prototype.getAceSession = function() {
 
 InkFile.prototype.save = function(afterSaveCallback) {
 
-    // Resolve temporary relative paths in include files
-    if( (!this.path || !path.isAbsolute(this.path)) && !this.isMain() ) {
-        var mainInkPath = this.mainInkFile.path;
-        if( !mainInkPath || !path.isAbsolute(mainInkPath) ) {
-            alert("Please save the main ink before saving this include file.")
-            return;
-        }
-        var projectDir = path.dirname(mainInkPath);
-        if( !this.path )
-            this.path = this.filename();
-
-        this.path = path.join(projectDir, this.path);
-    }
+    assert(this.isMain() || this.mainInkFile.projectDir, "Main ink file must be saved before we can save include files.");
 
     // Need to show save path dialog?
-    if( !this.path ) {
+    if( !this.absolutePath() ) {
         dialog.showSaveDialog(remote.getCurrentWindow(), { filters: [
             { name: 'Ink files', extensions: ['ink'] },
             { name: 'Text files', extensions: ['txt'] }
         ]}, (savedPath) => {
             if( savedPath ) {
-                this.path = savedPath;
+
+                // If we're showing a save dialog, assume we're in the main ink file
+                assert(this.isMain());
+                this.relPath = path.basename(savedPath);
+                this.projectDir = path.dirname(savedPath);
 
                 // Loop back round for a quick save now we have the path
                 this.save(afterSaveCallback);
@@ -159,7 +169,7 @@ InkFile.prototype.save = function(afterSaveCallback) {
     // Quick save to existing path
     else {
         this.justSaved = true;
-        fs.writeFile(this.path, this.aceDocument.getValue(), "utf8", (err) => {
+        fs.writeFile(this.absolutePath(), this.aceDocument.getValue(), "utf8", (err) => {
             this.brandNewEmpty = false;
             if( err ) 
                 afterSaveCallback(false);
@@ -172,8 +182,9 @@ InkFile.prototype.save = function(afterSaveCallback) {
 }
 
 InkFile.prototype.deleteFromDisk = function() {
-    if( this.path && path.isAbsolute(this.path) )
-        fs.exists(this.path, (exists) => { if( exists ) fs.unlink(this.path) });
+    var absPath = this.absolutePath();
+    if( absPath )
+        fs.exists(absPath, (exists) => { if( exists ) fs.unlink(absPath) });
 }
 
 InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
@@ -188,20 +199,21 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
     // Simplify code below by using a fallback
     loadCallback = loadCallback || (() => {});
 
-    if( !this.path || !path.isAbsolute(this.path) ) {
+    var absPath = this.absolutePath();
+    if( !absPath ) {
         loadCallback(false);
         return;
     }
 
-    fs.stat(this.path, (err, stats) => {
+    fs.stat(absPath, (err, stats) => {
         if( err || !stats.isFile() ) { 
             loadCallback(false);
             return;
         }
 
-        fs.readFile(this.path, 'utf8', (err, data) => {
+        fs.readFile(absPath, 'utf8', (err, data) => {
             if( err ) {
-                console.error("Failed to load include at: "+this.path);
+                console.error("Failed to load include at: "+absPath);
                 loadCallback(false);
                 return;
             }
