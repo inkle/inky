@@ -367,8 +367,8 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
     });
 
     // Copy other files verbatim
-    copyFile(path.join(__dirname, "../node_modules/inkjs/dist/ink.iife.js"), 
-             path.join(targetDirectory, "ink.iife.js"));
+    copyFile(path.join(__dirname, "../node_modules/inkjs/dist/ink.js"), 
+             path.join(targetDirectory, "ink.js"));
 
     copyFile(path.join(templateDir, "style.css"), 
              path.join(targetDirectory, "style.css"));
