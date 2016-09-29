@@ -136,12 +136,13 @@ function setupMenus(callbacks) {
           accelerator: 'CmdOrCtrl+R',
           click(item, focusedWindow) {
             if (!focusedWindow) return;
-            if( dialog.showMessageBox(focusedWindow, {
+            var clickedButtonIdx = dialog.showMessageBox(focusedWindow, {
               type: 'question',
               buttons: ['Yes', 'Cancel'],
               title: 'Reload?',
               message: 'Are you sure you want to reload the current window? Any unsaved changes will be lost.'
-            }) ) {
+            });
+            if( clickedButtonIdx == 0 ) {
               focusedWindow.reload();
             }
           }
