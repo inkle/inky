@@ -18,3 +18,8 @@
 .ace_editor span.ace_logic:not(.ace_innerContent) {
   color: green;
 }
+
+/* Tags */
+.ace_editor span.ace_tag {
+    color: #AAA;
+}

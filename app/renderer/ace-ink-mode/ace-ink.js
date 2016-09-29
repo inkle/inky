@@ -364,6 +364,10 @@ var inkHighlightRules = function() {
             token: "logic.tilda",
             regex: /\s*~\s*.*$/
         }],
+        "#tags": [{
+            token: "tag",
+            regex: /#.*/
+        }],
         "#mixedContent": [{
             include: "#inlineConditional"
         }, {
@@ -374,6 +378,8 @@ var inkHighlightRules = function() {
             include: "#logicLine"
         }, {
             include: "#divert"
+        }, {
+            include: "#tags"
         }, {
             token: "glue",
             regex: /<>/
