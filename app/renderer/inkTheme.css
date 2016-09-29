@@ -23,3 +23,7 @@
 .ace_editor span.ace_tag {
     color: #AAA;
 }
+
+#main.hideTags .ace_editor span.ace_tag {
+    color: white;
+}

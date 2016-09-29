@@ -638,6 +638,10 @@ img.issue-icon.warning {
   font-family: monospace;
 }
 
+#main.hideTags #player p.tags {
+    display: none;
+}
+
 #player p.end {
   font-weight: bold;
   text-align: center;

@@ -228,3 +228,10 @@ NavView.setEvents({
         NavHistory.addStep();
     }
 });
+
+ipc.on("set-tags-visible", (event, visible) => {
+    if( visible )
+        $("#main").removeClass("hideTags");
+    else
+        $("#main").addClass("hideTags");
+});

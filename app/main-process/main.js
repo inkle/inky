@@ -68,6 +68,9 @@ app.on('ready', function () {
             var win = ProjectWindow.focused();
             if (win) win.tryClose();
         },
+        toggleTags: (item, focusedWindow, event) => {
+            focusedWindow.webContents.send("set-tags-visible", item.checked);
+        },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
         },

@@ -125,6 +125,12 @@ function setupMenus(callbacks) {
         {
           label: 'Add watch expression...',
           click: callbacks.addWatchExpression
+        },
+        {
+          label: 'Tags visible',
+          type: "checkbox",
+          checked: true,
+          click: callbacks.toggleTags
         }
       ]
     },
