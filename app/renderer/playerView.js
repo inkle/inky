@@ -140,6 +140,17 @@ function addTextSection(text)
         fadeIn($paragraph);
 }
 
+function addTags(tags)
+{
+    var tagsStr = tags.join(", ");
+    var $tags = $(`<p class='tags'># ${tagsStr}</p>`);
+
+    $textBuffer.append($tags);
+
+    if( shouldAnimate() )
+        fadeIn($tags);
+}
+
 function addChoice(choice, callback)
 {
     var $choice = $("<a href='#'>"+choice.text+"</a>");
@@ -225,6 +236,7 @@ exports.PlayerView = {
     contentReady: contentReady,
     prepareForNewPlaythrough: prepareForNewPlaythrough,
     addTextSection: addTextSection,
+    addTags: addTags,
     addChoice: addChoice,
     addTerminatingMessage: addTerminatingMessage,
     addLongMessage: addLongMessage,

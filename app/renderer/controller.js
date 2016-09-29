@@ -90,6 +90,9 @@ LiveCompiler.setEvents({
     textAdded: (text) => {
         PlayerView.addTextSection(text);
     },
+    tagsAdded: (tags) => {
+        PlayerView.addTags(tags);
+    },
     choiceAdded: (choice, isLatestTurn) => {
         if( isLatestTurn ) {
             PlayerView.addChoice(choice, () => {

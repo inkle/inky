@@ -134,6 +134,7 @@ function compile(compileInstruction, requester) {
 
             var choiceMatches = line.match(/^(\d+):\s+(.*)/);
             var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|TODO): ('([^']+)' )?line (\d+): (.+)/);
+            var tagMatches = line.match(/^(# tags:) (.+)/);
             var promptMatches = line.match(/^\?>/);
             var debugSourceMatches = line.match(/^DebugSource: (line (\d+) of (.*)|Unknown source)/);
             var endOfStoryMatches = line.match(/^--- End of story ---/);
@@ -150,6 +151,10 @@ function compile(compileInstruction, requester) {
                         message: errorMessage
                     });
                 }
+            } else if( tagMatches ) {
+                var tagsStr = tagMatches[2];
+                var tags = tagsStr.split(", ");
+                requester.send('play-generated-tags', tags, sessionId);
             } else if( choiceMatches ) {
                 requester.send("play-generated-choice", {
                     number: parseInt(choiceMatches[1]),

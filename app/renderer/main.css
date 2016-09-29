@@ -632,6 +632,12 @@ img.issue-icon.warning {
   text-decoration: underline;
 }
 
+#player p.tags {
+  color: #AAA;
+  text-align: center;
+  font-family: monospace;
+}
+
 #player p.end {
   font-weight: bold;
   text-align: center;

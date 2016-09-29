@@ -191,6 +191,13 @@ ipc.on("play-generated-errors", (event, errors, fromSessionId) => {
     events.errorsAdded(errors);
 });
 
+ipc.on("play-generated-tags", (event, tags, fromSessionId) => {
+
+    if( fromSessionId != currentPlaySessionId ) return;
+
+    events.tagsAdded(tags);
+});
+
 ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
 
     if( fromSessionId != currentPlaySessionId ) return;
