@@ -50,8 +50,11 @@ InkFileSymbols.prototype.parse = function() {
         return currElement;
     }
 
+    var globalTags = [];
+    var globalDictionaryStyleTags = {};
+
     var it = new TokenIterator(session, 0, 0);
-    it.stepForward(); // this shouldn't be necessary should it?!
+    //it.stepForward(); // this shouldn't be necessary should it?!
     for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
 
         // Token is some kind of name?
@@ -107,10 +110,27 @@ InkFileSymbols.prototype.parse = function() {
             lastIncludeRow = it.getCurrentTokenRow();
         }
 
+        // Global tags
+        else if( tok.type == "tag" && symbolStack.currentElement().flowType.level == 0 ) {
+            // Skip leading #
+            var tagContent = tok.value.substring(1).trim();
+            globalTags.push(tagContent);
+
+            var dictStyleMatches = tagContent.match(/\s*(\w+)\s*:\s*(.+)/);
+            if( dictStyleMatches ) {
+                var dictKey = dictStyleMatches[1];
+                var dictContent = dictStyleMatches[2];
+                globalDictionaryStyleTags[dictKey] = dictContent;
+            }
+        }
+
     } // for token iterator
 
     this.symbols = symbolStack[0].innerSymbols;
     this.rangeIndex = symbolStack[0].rangeIndex;
+
+    this.globalTags = globalTags;
+    this.globalDictionaryStyleTags = globalDictionaryStyleTags;
 
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];

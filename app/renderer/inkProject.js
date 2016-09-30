@@ -346,6 +346,12 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
 
     // Derive story title from save name
     var storyTitle = path.basename(targetDirectory);
+    
+    // Unless the writer explicitly provided a tag with the title
+    var mainInkTagDict = this.mainInk.symbols.globalDictionaryStyleTags;
+    if( mainInkTagDict && mainInkTagDict["title"] ) {
+        storyTitle = mainInkTagDict["title"];
+    }
 
     // Create target directory name
     mkdirp.sync(targetDirectory);
