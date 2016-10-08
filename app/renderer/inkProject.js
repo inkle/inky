@@ -237,7 +237,17 @@ InkProject.prototype.save = function() {
     });
 }
 
-// exportType is "json" or "web"
+// Helper to copy a file whilst optionally transforming the content
+function copyFile(source, destination, transform) {
+    fs.readFile(source, "utf8", (err, fileContent) => {
+        if( !err && fileContent ) {
+            if( transform ) fileContent = transform(fileContent);
+            fs.writeFile(destination, fileContent, "utf8");
+        }
+    });
+}
+
+// exportType is "json", "web", or "js"
 InkProject.prototype.export = function(exportType) {
 
     // Always start by building the JSON
@@ -247,13 +257,20 @@ InkProject.prototype.export = function(exportType) {
             return;
         }
 
-        if( !this.defaultExportPath && this.mainInk.absolutePath() )
+        if( !this.defaultExportPath && this.mainInk.absolutePath() ) {
             this.defaultExportPath = this.mainInk.absolutePath();
+        }
 
         if( this.defaultExportPath ) {
             var pathObj = path.parse(this.defaultExportPath);
             if( exportType == "json" ) {
                 pathObj.ext = ".json";
+            } else if( exportType == "js" ) {
+                // If we already have a default export path specifically for JS files
+                // then we use that, otherwise let's use the standard JS naming scheme
+                if( pathObj.ext != ".js" )
+                    pathObj.base = path.basename(this.jsFilename());
+                pathObj.ext = ".js";
             } else {
                 // Strip existing extension
                 pathObj.base = path.basename(pathObj.base, pathObj.ext);
@@ -271,6 +288,10 @@ InkProject.prototype.export = function(exportType) {
             saveOptions.filters = [
                 { name: "JSON files", extensions: ["json"] }
             ]
+        } else if( exportType == "js" ) {
+            saveOptions.filters = [
+                { name: "JavaScript files", extensions: ["js"] }
+            ]
         }
 
         dialog.showSaveDialog(remote.getCurrentWindow(), saveOptions, (targetSavePath) => {
@@ -278,7 +299,7 @@ InkProject.prototype.export = function(exportType) {
                 this.defaultExportPath = targetSavePath;
 
                 // JSON export - simply move compiled json into place
-                if( exportType == "json" ) {
+                if( exportType == "json" || exportType == "js" ) {
                     fs.stat(targetSavePath, (err, stats) => {
 
                         // File already exists, or there's another error
@@ -294,10 +315,16 @@ InkProject.prototype.export = function(exportType) {
                             }
                         }
 
-                        // Move file into place
-                        fs.rename(compiledJsonTempPath, targetSavePath, (err) => {
-                            if( err ) alert("Sorry, could not save to "+targetSavePath);
-                        });
+                        // JS file: 
+                        if( exportType == "js" ) {
+                            this.convertJSONToJS(compiledJsonTempPath, targetSavePath);
+                        } 
+
+                        // JSON: Just copy into place
+                        else {
+                            copyFile(compiledJsonTempPath, targetSavePath);
+                        }
+
                     });
                 }
 
@@ -318,19 +345,11 @@ InkProject.prototype.exportForWeb = function() {
     this.export("web");
 }
 
-InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
+InkProject.prototype.exportJSOnly = function() {
+    this.export("js");
+}
 
-    function copyFile(source, destination, transform) {
-        fs.readFile(source, "utf8", (err, fileContent) => {
-            if( !err && fileContent ) {
-                if( transform ) fileContent = transform(fileContent);
-                fs.writeFile(destination, fileContent, "utf8");
-            }
-        });
-    }
-
-    var templateDir = path.join(__dirname, "../export-for-web-template");
-
+InkProject.prototype.jsFilename = function() {
     // Derive story content js file from root ink filename
     // Remove .ink extension if it's ".ink"
     var mainInkRootName = this.mainInk.filename();
@@ -344,6 +363,20 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
         jsContentFilename = "story.js";
     }
 
+    return jsContentFilename;
+}
+
+// Convert JSON to JS file with "var storyContent = "
+InkProject.prototype.convertJSONToJS = function(jsonFilePath, targetJSPath) {
+    copyFile(jsonFilePath, targetJSPath, (jsonContent) => {
+        return `var storyContent = ${jsonContent};`;
+    });
+}
+
+InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
+
+    var templateDir = path.join(__dirname, "../export-for-web-template");
+
     // Derive story title from save name
     var storyTitle = path.basename(targetDirectory);
     
@@ -356,10 +389,9 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
     // Create target directory name
     mkdirp.sync(targetDirectory);
 
-    // Convert JSON to JS file
-    copyFile(jsonFilePath, path.join(targetDirectory, jsContentFilename), (jsonContent) => {
-        return `var storyContent = ${jsonContent};`;
-    });
+    // Create JS story file with correct name
+    var jsFullPath = path.join(targetDirectory, this.jsFilename());
+    this.convertJSONToJS(jsonFilePath, jsFullPath);
 
     // Copy index.html:
     //  - inserting the filename as the <title> and <h1>
@@ -368,7 +400,7 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
              path.join(targetDirectory, "index.html"), 
              (fileContent) => {
         fileContent = fileContent.replace(/##STORY TITLE##/g, storyTitle);
-        fileContent = fileContent.replace(/##JAVASCRIPT FILENAME##/g, jsContentFilename);
+        fileContent = fileContent.replace(/##JAVASCRIPT FILENAME##/g, this.jsFilename());
         return fileContent;
     });
 
@@ -571,7 +603,13 @@ ipc.on("project-export-for-web", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.exportForWeb();
     }
-})
+});
+
+ipc.on("project-export-js-only", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.exportJSOnly();
+    }
+});
 
 ipc.on("project-tryClose", (event) => {
     if( InkProject.currentProject ) {

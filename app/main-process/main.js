@@ -57,12 +57,13 @@ app.on('ready', function () {
             var win = ProjectWindow.focused();
             if (win) win.exportJson();
         },
-        showDocs: () => {
-            DocumentationWindow.openDocumentation();
-        },
         exportForWeb: () => {
             var win = ProjectWindow.focused();
             if (win) win.exportForWeb();
+        },
+        exportJSOnly: () => {
+            var win = ProjectWindow.focused();
+            if (win) win.exportJSOnly();
         },
         close: (event) => {
             var win = ProjectWindow.focused();
@@ -76,7 +77,10 @@ app.on('ready', function () {
         },
         addWatchExpression: (item, focusedWindow) => {
             focusedWindow.webContents.send("add-watch-expression");
-        }
+        },
+        showDocs: () => {
+            DocumentationWindow.openDocumentation();
+        },
     });
 
     let openedSpecificFile = false;

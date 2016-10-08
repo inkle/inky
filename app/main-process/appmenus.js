@@ -39,6 +39,9 @@ function setupMenus(callbacks) {
           click: callbacks.save
         },
         {
+          type: 'separator'
+        },
+        {
           label: 'Export to JSON...',
           accelerator: 'CmdOrCtrl+Shift+S',
           enabled: callbacks.isFocusedWindow,
@@ -48,6 +51,11 @@ function setupMenus(callbacks) {
           label: 'Export for web...',
           enabled: callbacks.isFocusedWindow,
           click: callbacks.exportForWeb
+        },
+        {
+          label: 'Export story.js only...',
+          enabled: callbacks.isFocusedWindow,
+          click: callbacks.exportJSOnly
         },
         {
           type: 'separator'
