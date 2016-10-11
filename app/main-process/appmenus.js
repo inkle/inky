@@ -3,8 +3,7 @@ const app = electron.app
 const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 const _ = require("lodash");
-
-Menu = require("menu");
+const Menu = electron.Menu;
 
 function setupMenus(callbacks) {
   const template = [
