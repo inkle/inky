@@ -16,7 +16,7 @@ rm -rf Inky-darwin-x64/
 ./resources/makeIcns.command
 
 # Mac
-electron-packager app Inky --platform=darwin  --arch=x64 --icon=resources/Icon.icns --extend-info=resources/info.plist --prune --asar --asar-unpack-dir="main-process/ink" --ignore="inklecate_win.exe"
+electron-packager app Inky --platform=darwin  --arch=x64 --icon=resources/Icon.icns --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_win.exe"
 
 # Remove .icns again
 rm resources/Icon.icns
