@@ -125,7 +125,7 @@ var inkHighlightRules = function() {
             ]
         }, {
             // Tunnel onwards
-            regex: /(->->)(\s*)(\w[\w\.\s]*?)/,
+            regex: /(->->)(\s*)(\w[\w\.\s]*)/,
             token: [
                 "divert.to-tunnel",      // ->->
                 "divert",                // whitespace
