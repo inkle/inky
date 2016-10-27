@@ -58,6 +58,13 @@ To build the project:
 * In the terminal run ./INSTALL_AND_RUN.command
 * cd into the app directory, and type `npm install`, then `npm start`.
 
+When launching on **Linux**, you may encounter the following error: `inklecate_win.exe: cannot execute binary file`. This is because the system doesn't know it should use **Wine** to run `inklecate_win.exe`.  
+One way of fixing this is by creating a file named `wine.conf` under `/etc/binfmt.d/` containing the following lines:
+```
+# Start WINE on Windows executables
+:DOSWin:M::MZ::/usr/bin/wine:
+```
+(You can read more about binfmt on [kernel.org](https://www.kernel.org/doc/Documentation/binfmt_misc.txt))
 
 ## License
 
