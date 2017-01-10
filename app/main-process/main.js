@@ -1,11 +1,25 @@
 const electron = require('electron')
 const app = electron.app
 const ipc = electron.ipcMain;
+const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const DocumentationWindow = require("./documentationWindow.js").DocumentationWindow;
 const appmenus = require('./appmenus.js');
 const forceQuitDetect = require('./forceQuitDetect');
 const Inklecate = require("./inklecate.js").Inklecate;
+
+function inkJSNeedsUpdating() {
+    //return false;
+
+    dialog.showMessageBox({
+      type: 'error',
+      buttons: ['Okay'],
+      title: 'Export for web unavailable',
+      message: "Sorry, export for web is currently disabled, until inkjs is updated to support the latest version of ink, which supports lists. If you don't need lists support and need to export to web, you can download version 0.6.4 of Inky and use that instead."
+    });
+    return true;
+}
+
 
 app.on('will-finish-launching', function () {
     app.on("open-file", function (event, path) {
@@ -58,10 +72,12 @@ app.on('ready', function () {
             if (win) win.exportJson();
         },
         exportForWeb: () => {
+            if( inkJSNeedsUpdating() ) return;
             var win = ProjectWindow.focused();
             if (win) win.exportForWeb();
         },
         exportJSOnly: () => {
+            if( inkJSNeedsUpdating() ) return;
             var win = ProjectWindow.focused();
             if (win) win.exportJSOnly();
         },
