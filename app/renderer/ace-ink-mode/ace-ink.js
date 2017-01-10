@@ -228,6 +228,31 @@ var inkHighlightRules = function() {
                 defaultToken: "var-decl"
             }]
         }],
+        "#listDef": [{
+            regex: /^(\s*)(LIST)\b/, // (\s*)(\w+)(\s*)
+            token: [
+                "list-decl", // whitespace
+                "list-decl.keyword"
+            ],
+
+            push: [{
+                regex: /(\s*)(\s[\w\(\),]+)(\s*)/,
+                token: [
+                    "list-decl", // whitespace
+                    "list-decl.name",
+                    "list-decl" // whitespace
+                ]
+            }, 
+
+            // The rest of the assignment line
+            { 
+                regex: /$/,
+                token: "list-decl",
+                next: "pop"
+            }, {
+                defaultToken: "list-decl"
+            }]
+        }],
         "#INCLUDE": [{
             regex: /(\s*)(INCLUDE\b)/,
             token: [
@@ -394,6 +419,8 @@ var inkHighlightRules = function() {
             include: "#TODO"
         }, {
             include: "#globalVAR"
+        }, {
+            include: "#listDef"
         }, {
             include: "#EXTERNAL"
         }, {
