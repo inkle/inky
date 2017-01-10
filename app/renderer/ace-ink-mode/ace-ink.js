@@ -229,29 +229,43 @@ var inkHighlightRules = function() {
             }]
         }],
         "#listDef": [{
-            regex: /^(\s*)(LIST)\b/, // (\s*)(\w+)(\s*)
+            regex: /(\s*)(LIST)/,
             token: [
                 "list-decl", // whitespace
                 "list-decl.keyword"
             ],
+            push: [
+                {
+                    regex: /(\s*=\s*)/,
+                    token: [
+                        "list-decl"
+                    ],
+                    next: "#listItem"
+                },
+                {
+                    regex: /$/,
+                    next: "pop"
+                },
+                {
+                    defaultToken: "list-decl"
+                }
+            ]
+        }],
 
-            push: [{
-                regex: /(\s*)(\s[\w\(\),]+)(\s*)/,
-                token: [
-                    "list-decl", // whitespace
-                    "list-decl.name",
-                    "list-decl" // whitespace
-                ]
-            }, 
+        "#listItemsSeparator": [{
+            regex: /(\s*,\s*)/,
+            token: ["list-decl"],
+            next: "#listItem"
+        }, {
+            regex: /$/,
+            token: [""],
+            next: "start"
+        }],
 
-            // The rest of the assignment line
-            { 
-                regex: /$/,
-                token: "list-decl",
-                next: "pop"
-            }, {
-                defaultToken: "list-decl"
-            }]
+        "#listItem": [{
+            regex: /([\w\(\)=\d\s]+)/,
+            token: ["list-decl.item"],
+            next: "#listItemsSeparator"
         }],
         "#INCLUDE": [{
             regex: /(\s*)(INCLUDE\b)/,
