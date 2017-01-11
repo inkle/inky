@@ -580,7 +580,6 @@ img.issue-icon.warning {
   font-family: Verdana, Geneva, sans-serif;
   font-weight: lighter;
   color: #555;
-  overflow: scroll;
 }
 
 #player .innerText {
