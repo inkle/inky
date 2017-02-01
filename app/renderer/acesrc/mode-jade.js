@@ -72,7 +72,7 @@ var JavaScriptHighlightRules = function(options) {
         "keyword":
             "const|yield|import|get|set|async|await|" +
             "break|case|catch|continue|default|delete|do|else|finally|for|function|" +
-            "if|in|instanceof|new|return|switch|throw|try|typeof|let|var|while|with|debugger|" +
+            "if|in|of|instanceof|new|return|switch|throw|try|typeof|let|var|while|with|debugger|" +
             "__parent__|__count__|escape|unescape|with|__proto__|" +
             "class|enum|extends|super|export|implements|private|public|interface|package|protected|static",
         "storage.type":
@@ -178,7 +178,7 @@ var JavaScriptHighlightRules = function(options) {
                 next  : "property"
             }, {
                 token : "keyword.operator",
-                regex : /--|\+\+|\.{3}|===|==|=|!=|!==|<+=?|>+=?|!|&&|\|\||\?\:|[!$%&*+\-~\/^]=?/,
+                regex : /--|\+\+|\.{3}|===|==|=|!=|!==|<+=?|>+=?|!|&&|\|\||\?:|[!$%&*+\-~\/^]=?/,
                 next  : "start"
             }, {
                 token : "punctuation.operator",
@@ -379,7 +379,7 @@ var JavaScriptHighlightRules = function(options) {
             }]
         });
         
-        if (!options || !options.noJSX)
+        if (!options || options.jsx != false)
             JSX.call(this);
     }
     
@@ -942,7 +942,7 @@ var HtmlHighlightRules = function() {
     });
 
     this.embedTagRules(CssHighlightRules, "css-", "style");
-    this.embedTagRules(new JavaScriptHighlightRules({noJSX: true}).getRules(), "js-", "script");
+    this.embedTagRules(new JavaScriptHighlightRules({jsx: false}).getRules(), "js-", "script");
 
     if (this.constructor === HtmlHighlightRules)
         this.normalizeRules();
@@ -1032,7 +1032,7 @@ var MarkdownHighlightRules = function() {
             regex : "^([ ]{0,3}\\[)([^\\]]+)(\\]:\\s*)([^ ]+)(\\s*(?:[\"][^\"]+[\"])?(\\s*))$"
         }, { // link by reference
             token : ["text", "string", "text", "constant", "text"],
-            regex : "(\\[)(" + escaped("]") + ")(\\]\s*\\[)("+ escaped("]") + ")(\\])"
+            regex : "(\\[)(" + escaped("]") + ")(\\]\\s*\\[)("+ escaped("]") + ")(\\])"
         }, { // link by url
             token : ["text", "string", "text", "markup.underline", "string", "text"],
             regex : "(\\[)(" +                                        // [
@@ -1563,8 +1563,7 @@ define("ace/mode/coffee_highlight_rules",["require","exports","module","ace/lib/
 
         var illegal = (
             "case|const|default|function|var|void|with|enum|export|implements|" +
-            "interface|let|package|private|protected|public|static|yield|" +
-            "__hasProp|slice|bind|indexOf"
+            "interface|let|package|private|protected|public|static|yield"
         );
 
         var supportClass = (
@@ -1595,7 +1594,7 @@ define("ace/mode/coffee_highlight_rules",["require","exports","module","ace/lib/
 
         var functionRule = {
             token: ["paren.lparen", "variable.parameter", "paren.rparen", "text", "storage.type"],
-            regex: /(?:(\()((?:"[^")]*?"|'[^')]*?'|\/[^\/)]*?\/|[^()\"'\/])*?)(\))(\s*))?([\-=]>)/.source
+            regex: /(?:(\()((?:"[^")]*?"|'[^')]*?'|\/[^\/)]*?\/|[^()"'\/])*?)(\))(\s*))?([\-=]>)/.source
         };
 
         var stringEscape = /\\(?:x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.)/;
@@ -1817,7 +1816,7 @@ var JadeHighlightRules = function() {
         },
         {
             token: "meta.tag.any.jade",
-            regex: /^\s*(?!\w+\:)(?:[\w-]+|(?=\.|#)])/,
+            regex: /^\s*(?!\w+:)(?:[\w-]+|(?=\.|#)])/,
             next: "tag_single"
         },
         {
@@ -2052,8 +2051,8 @@ var FoldMode = require("./folding/coffee").FoldMode;
 
 var Mode = function() {
     this.HighlightRules = JadeHighlightRules;
-    
     this.foldingRules = new FoldMode();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 

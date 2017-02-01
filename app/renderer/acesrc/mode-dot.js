@@ -368,6 +368,7 @@ var Mode = function() {
     this.HighlightRules = DotHighlightRules;
     this.$outdent = new MatchingBraceOutdent();
     this.foldingRules = new DotFoldMode();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 
@@ -388,7 +389,7 @@ oop.inherits(Mode, TextMode);
         }
 
         if (state == "start") {
-            var match = line.match(/^.*(?:\bcase\b.*\:|[\{\(\[])\s*$/);
+            var match = line.match(/^.*(?:\bcase\b.*:|[\{\(\[])\s*$/);
             if (match) {
                 indent += tab;
             }

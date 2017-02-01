@@ -216,7 +216,7 @@ var JavaScriptHighlightRules = function(options) {
         "keyword":
             "const|yield|import|get|set|async|await|" +
             "break|case|catch|continue|default|delete|do|else|finally|for|function|" +
-            "if|in|instanceof|new|return|switch|throw|try|typeof|let|var|while|with|debugger|" +
+            "if|in|of|instanceof|new|return|switch|throw|try|typeof|let|var|while|with|debugger|" +
             "__parent__|__count__|escape|unescape|with|__proto__|" +
             "class|enum|extends|super|export|implements|private|public|interface|package|protected|static",
         "storage.type":
@@ -322,7 +322,7 @@ var JavaScriptHighlightRules = function(options) {
                 next  : "property"
             }, {
                 token : "keyword.operator",
-                regex : /--|\+\+|\.{3}|===|==|=|!=|!==|<+=?|>+=?|!|&&|\|\||\?\:|[!$%&*+\-~\/^]=?/,
+                regex : /--|\+\+|\.{3}|===|==|=|!=|!==|<+=?|>+=?|!|&&|\|\||\?:|[!$%&*+\-~\/^]=?/,
                 next  : "start"
             }, {
                 token : "punctuation.operator",
@@ -523,7 +523,7 @@ var JavaScriptHighlightRules = function(options) {
             }]
         });
         
-        if (!options || !options.noJSX)
+        if (!options || options.jsx != false)
             JSX.call(this);
     }
     
@@ -942,7 +942,7 @@ var HtmlHighlightRules = function() {
     });
 
     this.embedTagRules(CssHighlightRules, "css-", "style");
-    this.embedTagRules(new JavaScriptHighlightRules({noJSX: true}).getRules(), "js-", "script");
+    this.embedTagRules(new JavaScriptHighlightRules({jsx: false}).getRules(), "js-", "script");
 
     if (this.constructor === HtmlHighlightRules)
         this.normalizeRules();
@@ -1025,7 +1025,7 @@ var LiquidHighlightRules = function() {
             regex : "[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
         }, {
             token : "keyword.operator",
-            regex : "\/|\\*|\\-|\\+|=|!=|\\?\\:"
+            regex : "/|\\*|\\-|\\+|=|!=|\\?\\:"
         }, {
             token : "paren.lparen",
             regex : /[\[\({]/
@@ -1085,17 +1085,17 @@ var MatchingBraceOutdent = function() {};
 exports.MatchingBraceOutdent = MatchingBraceOutdent;
 });
 
-define("ace/mode/liquid",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/liquid_highlight_rules","ace/mode/matching_brace_outdent","ace/range"], function(require, exports, module) {
+define("ace/mode/liquid",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/liquid_highlight_rules","ace/mode/matching_brace_outdent"], function(require, exports, module) {
 
 var oop = require("../lib/oop");
 var TextMode = require("./text").Mode;
 var LiquidHighlightRules = require("./liquid_highlight_rules").LiquidHighlightRules;
 var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutdent;
-var Range = require("../range").Range;
 
 var Mode = function() {
     this.HighlightRules = LiquidHighlightRules;
     this.$outdent = new MatchingBraceOutdent();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 
