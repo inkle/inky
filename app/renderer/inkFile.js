@@ -169,7 +169,10 @@ InkFile.prototype.save = function(afterSaveCallback) {
     // Quick save to existing path
     else {
         this.justSaved = true;
-        fs.writeFile(this.absolutePath(), this.aceDocument.getValue(), "utf8", (err) => {
+        var fileContent = this.aceDocument.getValue();
+        if( !fileContent || fileContent.length < 1 ) throw "Empty file content in aceDocument!";
+        
+        fs.writeFile(this.absolutePath(), fileContent, "utf8", (err) => {
             this.brandNewEmpty = false;
             if( err ) 
                 afterSaveCallback(false);

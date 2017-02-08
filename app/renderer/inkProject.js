@@ -242,6 +242,8 @@ function copyFile(source, destination, transform) {
     fs.readFile(source, "utf8", (err, fileContent) => {
         if( !err && fileContent ) {
             if( transform ) fileContent = transform(fileContent);
+            if( fileContent.length < 1 ) throw "Trying to write (copy) empty file!";
+            
             fs.writeFile(destination, fileContent, "utf8");
         }
     });
