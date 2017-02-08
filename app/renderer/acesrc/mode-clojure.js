@@ -141,16 +141,16 @@ var ClojureHighlightRules = function() {
                 regex : /:[^()\[\]{}'"\^%`,;\s]+/
             }, {
                 token : "string.regexp", //Regular Expressions
-                regex : '/#"(?:\\.|(?:\\\")|[^\""\n])*"/g'
+                regex : '/#"(?:\\.|(?:\\")|[^""\n])*"/g'
             }
 
         ],
         "string" : [
             {
-                token : "constant.language.escape",                
+                token : "constant.language.escape",
                 regex : "\\\\.|\\\\$"
             }, {
-                token : "string",                
+                token : "string",
                 regex : '[^"\\\\]+'
             }, {
                 token : "string",
@@ -222,6 +222,7 @@ var MatchingParensOutdent = require("./matching_parens_outdent").MatchingParensO
 var Mode = function() {
     this.HighlightRules = ClojureHighlightRules;
     this.$outdent = new MatchingParensOutdent();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 

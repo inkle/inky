@@ -1,0 +1,4 @@
+All code comes from Ace v1.2.6 on https://github.com/ajaxorg/ace-builds
+
+Files without a -min suffix come from the "src" build flavor.
+Files that have a -min suffix come from the "src-min" build flavor.

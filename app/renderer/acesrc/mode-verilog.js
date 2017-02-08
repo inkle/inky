@@ -40,7 +40,7 @@ var keywords = "always|and|assign|automatic|begin|buf|bufif0|bufif1|case|casex|c
             token : "comment.start",
             regex : "/\\*",
             next : [
-                { token : "comment.end", regex : "\\*/" },
+                { token : "comment.end", regex : "\\*/", next: "start" },
                 { defaultToken : "comment" }
             ]
         }, {
@@ -87,6 +87,7 @@ var Range = require("../range").Range;
 
 var Mode = function() {
     this.HighlightRules = VerilogHighlightRules;
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 

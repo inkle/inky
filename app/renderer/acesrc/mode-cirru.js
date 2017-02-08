@@ -17,11 +17,11 @@ var CirruHighlightRules = function() {
             regex: /\(/
         }, {
             token: 'storage.modifier',
-            regex: /\,/,
+            regex: /,/,
             next: 'line'
         }, {
             token: 'support.function',
-            regex: /[^\(\)\"\s]+/,
+            regex: /[^\(\)"\s]+/,
             next: 'line'
         }, {
             token: 'string.quoted.double',
@@ -33,7 +33,7 @@ var CirruHighlightRules = function() {
         }],
         comment: [{
             token: 'comment.line.double-dash',
-            regex: /\ +[^\n]+/,
+            regex: / +[^\n]+/,
             next: 'start'
         }],
         string: [{
@@ -46,7 +46,7 @@ var CirruHighlightRules = function() {
             next: 'escape'
         }, {
             token: 'string.quoted.double',
-            regex: /[^\\\"]+/
+            regex: /[^\\"]+/
         }],
         escape: [{
             token: 'constant.character.escape',
@@ -66,7 +66,7 @@ var CirruHighlightRules = function() {
             next: 'start'
         }, {
             token: 'variable.parameter',
-            regex: /[^\(\)\"\s]+/
+            regex: /[^\(\)"\s]+/
         }, {
             token: 'storage.modifier',
             regex: /\(/,
@@ -76,7 +76,7 @@ var CirruHighlightRules = function() {
             regex: /\)/
         }, {
             token: 'markup.raw',
-            regex: /^\ */,
+            regex: /^ */,
             next: 'start'
         }, {
             token: 'string.quoted.double',
@@ -190,6 +190,7 @@ var CoffeeFoldMode = require("./folding/coffee").FoldMode;
 var Mode = function() {
     this.HighlightRules = CirruHighlightRules;
     this.foldingRules = new CoffeeFoldMode();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 

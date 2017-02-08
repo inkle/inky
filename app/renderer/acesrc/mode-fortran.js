@@ -352,6 +352,7 @@ var Range = require("../range").Range;
 var Mode = function() {
     this.HighlightRules = FortranHighlightRules;
     this.foldingRules = new CStyleFoldMode();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 
@@ -370,7 +371,7 @@ oop.inherits(Mode, TextMode);
         }
 
         if (state == "start") {
-            var match = line.match(/^.*[\{\(\[\:]\s*$/);
+            var match = line.match(/^.*[\{\(\[:]\s*$/);
             if (match) {
                 indent += tab;
             }
