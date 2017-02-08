@@ -2,7 +2,6 @@ const electron = require("electron");
 const ipc = electron.ipcRenderer;
 const remote = electron.remote;
 const path = require("path");
-
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 // Debug
@@ -11,10 +10,11 @@ const loadTestInk = false;
 
 // Helpers in global objects and namespace
 require("./util.js");
-
 require("./split.js");
 
-require("./contextmenu.js"); //loads contextmenu into namespace
+// Set up context menu
+require("./contextmenu.js");
+
 const EditorView = require("./editorView.js").EditorView;
 const PlayerView = require("./playerView.js").PlayerView;
 const ToolbarView = require("./toolbarView.js").ToolbarView;
