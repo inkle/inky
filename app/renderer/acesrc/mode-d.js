@@ -130,7 +130,7 @@ var DHighlightRules = function() {
                 next : "star-comment"
             }, {
                 token: "comment.shebang",
-                regex: "^\s*#!.*"
+                regex: "^\\s*#!.*"
             }, {
                 token : "comment",
                 regex : "\\/\\+",
@@ -499,6 +499,7 @@ var FoldMode = require("./folding/cstyle").FoldMode;
 var Mode = function() {
     this.HighlightRules = DHighlightRules;
     this.foldingRules = new FoldMode();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 

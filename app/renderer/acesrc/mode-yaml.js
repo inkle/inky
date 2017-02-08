@@ -24,10 +24,10 @@ var YamlHighlightRules = function() {
                 regex: "[&\\*][a-zA-Z0-9-_]+"
             }, {
                 token: ["meta.tag", "keyword"],
-                regex: /^(\s*\w.*?)(\:(?:\s+|$))/
+                regex: /^(\s*\w.*?)(:(?:\s+|$))/
             },{
                 token: ["meta.tag", "keyword"],
-                regex: /(\w+?)(\s*\:(?:\s+|$))/
+                regex: /(\w+?)(\s*:(?:\s+|$))/
             }, {
                 token : "keyword.operator",
                 regex : "<<\\w*:\\w*"
@@ -52,7 +52,7 @@ var YamlHighlightRules = function() {
                 regex : /[+\-]?\.inf\b|NaN\b|0x[\dA-Fa-f_]+|0b[10_]+/
             }, {
                 token : "constant.language.boolean",
-                regex : "(?:true|false|TRUE|FALSE|True|False|yes|no)\\b"
+                regex : "\\b(?:true|false|TRUE|FALSE|True|False|yes|no)\\b"
             }, {
                 token : "paren.lparen",
                 regex : "[[({]"
@@ -219,6 +219,7 @@ var Mode = function() {
     this.HighlightRules = YamlHighlightRules;
     this.$outdent = new MatchingBraceOutdent();
     this.foldingRules = new FoldMode();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 

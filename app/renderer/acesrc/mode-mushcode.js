@@ -605,6 +605,7 @@ var Range = require("../range").Range;
 var Mode = function() {
     this.HighlightRules = MushCodeRules;
     this.foldingRules = new PythonFoldMode("\\:");
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 
@@ -622,7 +623,7 @@ oop.inherits(Mode, TextMode);
         }
 
         if (state == "start") {
-            var match = line.match(/^.*[\{\(\[\:]\s*$/);
+            var match = line.match(/^.*[\{\(\[:]\s*$/);
             if (match) {
                 indent += tab;
             }
