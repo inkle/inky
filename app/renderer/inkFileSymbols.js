@@ -54,7 +54,12 @@ InkFileSymbols.prototype.parse = function() {
     var globalDictionaryStyleTags = {};
 
     var it = new TokenIterator(session, 0, 0);
-    //it.stepForward(); // this shouldn't be necessary should it?!
+
+    // this shouldn't be necessary should it?!
+    // I don't understand why sometimes the TokenIterator gives something valid
+    // initially, and sometimes it doesn't?
+    if( it.getCurrentToken() === undefined ) it.stepForward();
+    
     for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
 
         // Token is some kind of name?
