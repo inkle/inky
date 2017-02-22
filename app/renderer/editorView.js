@@ -18,14 +18,12 @@ var events = {
 
 editor.setShowPrintMargin(false);
 editor.setOptions({
-    enableLiveAutocompletion: true
+    enableLiveAutocompletion: false
 });
 editor.on("change", () => {
     events.change();
 });
 
-/* TODO: It's possible to complete custom keywords.
-   Can do this when we have them parsed from the ink file.
 var staticWordCompleter = {
     getCompletions: function(editor, session, pos, prefix, callback) {
         var wordList = ["foo", "bar", "baz"];
@@ -39,8 +37,10 @@ var staticWordCompleter = {
 
     }
 }
-editor.completers = [staticWordCompleter];
-*/
+// This intentionally excludes editor.textCompleter, but it also has the effect
+// of excluding editor.snippetCompleter and editor.keyWordCompleter, which are
+// currently unused by Inky but might be useful in the future.
+editor.setCompleters([staticWordCompleter]);
 
 // Unfortunately standard jquery events don't work since
 // Ace turns pointer events off
