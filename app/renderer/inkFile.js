@@ -19,7 +19,7 @@ var fileIdCounter = 0;
 
 // anyPath can be relative or absolute
 function InkFile(anyPath, mainInkFile, events) {
-    
+
     this.id = fileIdCounter++;
 
     // Default filename if creating a new file, and passed null to constructor
@@ -34,7 +34,7 @@ function InkFile(anyPath, mainInkFile, events) {
             assert(this.mainInkFile.projectDir, "Main ink needs to be saved before we start loading includes with absolute paths.");
             this.relPath = path.relative(this.mainInkFile.projectDir, anyPath);
         }
-    } 
+    }
 
     // Already relative
     else {
@@ -65,7 +65,7 @@ function InkFile(anyPath, mainInkFile, events) {
     // remove it from the project before the include link has been set up.
     this.brandNewEmpty = false;
 
-    // Flag to detect files that have data that hasn't been saved 
+    // Flag to detect files that have data that hasn't been saved
     // out into the compiler's temporary directory that needs to stay
     // in sync with the (potentially unsaved) editor version.
     this.compilerVersionDirty = true;
@@ -89,11 +89,11 @@ function InkFile(anyPath, mainInkFile, events) {
     this.hasUnsavedChanges = false;
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
-        this.brandNewEmpty = false;        
+        this.brandNewEmpty = false;
         this.compilerVersionDirty = true;
         this.justSaved = false;
-        
-        if( !this.justLoadedContent ) 
+
+        if( !this.justLoadedContent )
             this.events.fileChanged();
     });
 }
@@ -117,7 +117,7 @@ InkFile.prototype.absolutePath = function() {
     // Unsaved - can't get absolute path?
     if( !mainInk.projectDir )
         return null;
-    
+
     // Normal case: combine the project directory with the file's relative path.
     return path.join(mainInk.projectDir, this.relPath);
 }
@@ -171,10 +171,10 @@ InkFile.prototype.save = function(afterSaveCallback) {
         this.justSaved = true;
         var fileContent = this.aceDocument.getValue();
         if( !fileContent || fileContent.length < 1 ) throw "Empty file content in aceDocument!";
-        
+
         fs.writeFile(this.absolutePath(), fileContent, "utf8", (err) => {
             this.brandNewEmpty = false;
-            if( err ) 
+            if( err )
                 afterSaveCallback(false);
             else {
                 this.hasUnsavedChanges = false;
@@ -209,7 +209,7 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
     }
 
     fs.stat(absPath, (err, stats) => {
-        if( err || !stats.isFile() ) { 
+        if( err || !stats.isFile() ) {
             loadCallback(false);
             return;
         }
@@ -221,7 +221,7 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
                 return;
             }
 
-            // Success - fire this callback before other callbacks 
+            // Success - fire this callback before other callbacks
             // like document change get fired
             loadCallback(true);
 

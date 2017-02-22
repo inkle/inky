@@ -42,7 +42,7 @@ var staticWordCompleter = {
 editor.completers = [staticWordCompleter];
 */
 
-// Unfortunately standard jquery events don't work since 
+// Unfortunately standard jquery events don't work since
 // Ace turns pointer events off
 editor.on("click", function(e){
 
@@ -98,7 +98,7 @@ editor.on("mousemove", function (e) {
             }
         }
     }
-    
+
     editor.renderer.setCursorStyle("default");
 });
 
@@ -126,7 +126,7 @@ function addError(error) {
     var aceClass = "ace-error";
     var markerId = editor.session.addMarker(
         new Range(error.lineNumber-1, 0, error.lineNumber, 0),
-        editorClass, 
+        editorClass,
         "line",
         false
     );
@@ -163,14 +163,14 @@ exports.EditorView = {
         editor.focus();
     },
     focus: () => { editor.focus(); },
-    saveCursorPos: () => { 
-        savedCursorPos = editor.getCursorPosition(); 
-        savedScrollRow = editor.getFirstVisibleRow(); 
+    saveCursorPos: () => {
+        savedCursorPos = editor.getCursorPosition();
+        savedScrollRow = editor.getFirstVisibleRow();
     },
-    restoreCursorPos: () => { 
+    restoreCursorPos: () => {
         if( savedCursorPos ) {
-            editor.moveCursorToPosition(savedCursorPos); 
+            editor.moveCursorToPosition(savedCursorPos);
             editor.scrollToRow(savedScrollRow);
-        } 
+        }
     }
 };
