@@ -3,6 +3,8 @@ const Range = ace.require("ace/range").Range;
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 const language_tools = ace.require("ace/ext/language_tools");
 
+const inkCompleter = require("./inkCompleter.js").inkCompleter;
+
 var editorMarkers = [];
 var editorAnnotations = [];
 
@@ -26,23 +28,10 @@ editor.on("change", () => {
     events.change();
 });
 
-var staticWordCompleter = {
-    getCompletions: function(editor, session, pos, prefix, callback) {
-        var wordList = ["foo", "bar", "baz"];
-        callback(null, wordList.map(function(word) {
-            return {
-                caption: word,
-                value: word,
-                meta: "static"
-            };
-        }));
-
-    }
-}
-// Exclude language_tools.textCompleter but add the static completer
+// Exclude language_tools.textCompleter but add the Ink completer
 editor.completers = editor.completers.filter(
     (completer) => completer !== language_tools.textCompleter);
-editor.completers.push(staticWordCompleter);
+editor.completers.push(inkCompleter);
 
 // Unfortunately standard jquery events don't work since
 // Ace turns pointer events off
