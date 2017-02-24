@@ -465,6 +465,26 @@ inkHighlightRules.metaData = {
 
 oop.inherits(inkHighlightRules, TextHighlightRules);
 
+// Provide Ink Keywords for Auto-Completer
+const keywords = [
+    "CONST",
+    "CHOICE_COUNT",
+    "DONE",
+    "END",
+    "INCLUDE",
+    "LIST",
+    "LIST_ALL",
+    "LIST_COUNT",
+    "LIST_INVERT",
+    "LIST_MAX",
+    "LIST_MIN",
+    "LIST_RANGE",
+    "LIST_VALUE",
+    "TODO",
+    "TURNS_SINCE",
+    "VAR",
+];
+
 var InkMode = function() {
     this.HighlightRules = inkHighlightRules;
 };
@@ -476,6 +496,14 @@ oop.inherits(InkMode, TextMode);
     this.blockComment = {start: "/*", end: "*/"};
 
     this.$id = "ace/mode/ink"
+
+    this.getCompletions = function(state, session, pos, prefix) {
+        return keywords.map((keyword) => ({
+            caption: keyword,
+            value: keyword,
+            meta: "Ink Keyword",
+        }));
+    }
 }).call(InkMode.prototype);
 
 exports.InkMode = InkMode;
