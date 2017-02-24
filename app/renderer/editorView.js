@@ -1,6 +1,7 @@
 const editor = ace.edit("editor");
 const Range = ace.require("ace/range").Range;
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+const language_tools = ace.require("ace/ext/language_tools");
 
 var editorMarkers = [];
 var editorAnnotations = [];
@@ -18,7 +19,8 @@ var events = {
 
 editor.setShowPrintMargin(false);
 editor.setOptions({
-    enableLiveAutocompletion: false
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: false,
 });
 editor.on("change", () => {
     events.change();
@@ -37,10 +39,10 @@ var staticWordCompleter = {
 
     }
 }
-// This intentionally excludes editor.textCompleter, but it also has the effect
-// of excluding editor.snippetCompleter and editor.keyWordCompleter, which are
-// currently unused by Inky but might be useful in the future.
-editor.setCompleters([staticWordCompleter]);
+// Exclude language_tools.textCompleter but add the static completer
+editor.completers = editor.completers.filter(
+    (completer) => completer !== language_tools.textCompleter);
+editor.completers.push(staticWordCompleter);
 
 // Unfortunately standard jquery events don't work since
 // Ace turns pointer events off
