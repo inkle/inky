@@ -2,7 +2,7 @@ exports.inkCompleter = {
     inkFile: null,
 
     getCompletions(editor, session, pos, prefix, callback) {
-        if (this.inkFile) {
+        if ( this.inkFile ) {
             const knots = this.inkFile.symbols.getSymbols();
             const words = Object.keys(knots);
 

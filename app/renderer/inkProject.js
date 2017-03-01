@@ -477,6 +477,7 @@ InkProject.prototype.deleteInkFile = function(inkFile) {
     this.files.remove(inkFile);
 
     NavView.setFiles(this.mainInk, this.files);
+    EditorView.setFiles(this.files);
 }
 
 InkProject.prototype.findSymbol = function(name, posContext) {
