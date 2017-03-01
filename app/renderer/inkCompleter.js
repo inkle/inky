@@ -16,4 +16,4 @@ exports.inkCompleter = {
             meta: "Knot"
         })));
     }
-}
+};
