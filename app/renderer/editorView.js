@@ -152,6 +152,7 @@ exports.EditorView = {
     showInkFile: (inkFile) => {
         editor.setSession(inkFile.getAceSession());
         editor.focus();
+        inkCompleter.inkFile = inkFile;
     },
     focus: () => { editor.focus(); },
     saveCursorPos: () => {
