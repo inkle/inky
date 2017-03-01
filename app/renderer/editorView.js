@@ -22,7 +22,7 @@ var events = {
 editor.setShowPrintMargin(false);
 editor.setOptions({
     enableBasicAutocompletion: true,
-    enableLiveAutocompletion: false,
+    enableLiveAutocompletion: true,
 });
 editor.on("change", () => {
     events.change();
