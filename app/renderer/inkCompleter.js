@@ -1,18 +1,19 @@
 exports.inkCompleter = {
-    inkFile: null,
+    inkFiles: [],
 
     getCompletions(editor, session, pos, prefix, callback) {
-        if ( this.inkFile ) {
-            const knots = this.inkFile.symbols.getSymbols();
-            const words = Object.keys(knots);
+        const wordsPerInclude = this.inkFiles.map((inkFile) => {
+            const knots = inkFile.symbols.getSymbols();
+            return Object.keys(knots);
+        });
+        const words = [].concat.apply([], wordsPerInclude);
 
-            // Ignore pos and prefix. ACE will find the most likely words in the
-            // list for the prefix automatically.
-            callback(null, words.map((word) => ({
-                caption: word,
-                value: word,
-                meta: "Knot"
-            })));
-        }
+        // Ignore pos and prefix. ACE will find the most likely words in the
+        // list for the prefix automatically.
+        callback(null, words.map((word) => ({
+            caption: word,
+            value: word,
+            meta: "Knot"
+        })));
     }
 }

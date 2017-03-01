@@ -149,10 +149,12 @@ exports.EditorView = {
     gotoLine: (row, col) => { editor.gotoLine(row, col); },
     addError: addError,
     setErrors: setErrors,
+    setFiles: (inkFiles) => {
+        inkCompleter.inkFiles = inkFiles;
+    },
     showInkFile: (inkFile) => {
         editor.setSession(inkFile.getAceSession());
         editor.focus();
-        inkCompleter.inkFile = inkFile;
     },
     focus: () => { editor.focus(); },
     saveCursorPos: () => {
