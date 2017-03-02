@@ -106,7 +106,8 @@ InkFileSymbols.prototype.parse = function() {
                 });
 
                 symbolStack.push(symbol);
-            } else if ( varType ) {
+            }
+            else if( varType ) {
                 variables.push(symbolName);
             }
             // Not a knot/stitch/gather/choice nor a variable. Do nothing.

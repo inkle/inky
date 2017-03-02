@@ -6,18 +6,18 @@ function getAllSymbols(files) {
     // Helper function that walks a symbol tree to find all the symbol names in
     // it.
     function walkSymbolTree(tree) {
-        for (const symbolName in tree) {
-            if (tree.hasOwnProperty(symbolName)) {
+        for(const symbolName in tree) {
+            if( tree.hasOwnProperty(symbolName) ) {
                 const symbol = tree[symbolName];
                 globalSymbolList.push(symbol);
-                if (symbol.innerSymbols) {
+                if( symbol.innerSymbols ) {
                     walkSymbolTree(symbol.innerSymbols);
                 }
             }
         }
     }
 
-    files.forEach((inkFile) => {
+    files.forEach(inkFile => {
         const tree = inkFile.symbols.getSymbols();
         walkSymbolTree(tree);
     });
@@ -38,7 +38,7 @@ exports.inkCompleter = {
     getCompletions(editor, session, pos, prefix, callback) {
         const symbols = getAllSymbols(this.inkFiles);
         const symbolSuggestions = symbols.map(
-            (symbol) => ({
+            symbol => ({
                 caption: symbol.name,
                 value: symbol.name,
                 meta: symbol.flowType.name,
@@ -46,7 +46,7 @@ exports.inkCompleter = {
 
         const variables = getAllVariables(this.inkFiles);
         const variableSuggestions = variables.map(
-            (variableName) => ({
+            variableName => ({
                 caption: variableName,
                 value: variableName,
                 meta: "Variable",
