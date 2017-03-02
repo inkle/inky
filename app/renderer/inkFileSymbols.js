@@ -32,12 +32,15 @@ InkFileSymbols.prototype.parse = function() {
 
     var session = this.inkFile.getAceSession();
 
-    const flowTypes = {
-        knot:   { code: ".knot.declaration",   level: 1 },
-        stitch: { code: ".stitch.declaration", level: 2 },
-        choice: { code: "choice.label",        level: 3 },
-        gather: { code: "gather.label",        level: 3 }
-    };
+    const flowTypes = [
+        { name: "Knot",   code: ".knot.declaration",   level: 1 },
+        { name: "Stitch", code: ".stitch.declaration", level: 2 },
+        { name: "Choice", code: "choice.label",        level: 3 },
+        { name: "Gather", code: "gather.label",        level: 3 },
+    ];
+    const varTypes = [
+        { name: "Variable", code: "var-decl"},
+    ];
     const topLevelInkFlow = { level: 0 };
 
     var symbolStack = [{
@@ -52,6 +55,7 @@ InkFileSymbols.prototype.parse = function() {
 
     var globalTags = [];
     var globalDictionaryStyleTags = {};
+    var variables = [];
 
     var it = new TokenIterator(session, 0, 0);
 
@@ -67,46 +71,45 @@ InkFileSymbols.prototype.parse = function() {
 
             var symbolName = tok.value;
 
-            var flowType = null;
-            for(var flowTypeName in flowTypes) {
-                var flowTypeObj = flowTypes[flowTypeName];
-                if( tok.type.indexOf(flowTypeObj.code) != -1 ) {
-                    flowType = flowTypeObj;
-                    break;
+            const findType = (token, typeList) =>
+                typeList.find(
+                    (type) => token.type.indexOf(type.code) != -1);
+
+            const flowType = findType(tok, flowTypes);
+            const varType  = findType(tok, varTypes);
+
+            if( flowType ) {
+                while( flowType.level <= symbolStack.currentElement().flowType.level )
+                    symbolStack.pop();
+
+                var symbol = {
+                    name: symbolName,
+                    flowType: flowType,
+                    row: it.getCurrentTokenRow(),
+                    column: it.getCurrentTokenColumn(),
+                    inkFile: this.inkFile
+                };
+
+                var parent = symbolStack.currentElement();
+                if( parent != symbolStack )
+                    symbol.parent = parent;
+
+                if( !parent.innerSymbols ) {
+                    parent.innerSymbols = [];
+                    parent.rangeIndex = [];
                 }
+
+                parent.innerSymbols[symbolName] = symbol;
+                parent.rangeIndex.push({
+                    rowStart: symbol.row,
+                    symbol: symbol
+                });
+
+                symbolStack.push(symbol);
+            } else if ( varType ) {
+                variables.push(symbolName);
             }
-
-            // Not a knot/stitch/gather/choice (e.g. might be a variable name)
-            if( !flowType )
-                continue;
-
-            while( flowType.level <= symbolStack.currentElement().flowType.level )
-                symbolStack.pop();
-
-            var symbol = {
-                name: symbolName,
-                flowType: flowType,
-                row: it.getCurrentTokenRow(),
-                column: it.getCurrentTokenColumn(),
-                inkFile: this.inkFile
-            };
-
-            var parent = symbolStack.currentElement();
-            if( parent != symbolStack )
-                symbol.parent = parent;
-
-            if( !parent.innerSymbols ) {
-                parent.innerSymbols = [];
-                parent.rangeIndex = [];
-            }
-
-            parent.innerSymbols[symbolName] = symbol;
-            parent.rangeIndex.push({
-                rowStart: symbol.row,
-                symbol: symbol
-            });
-
-            symbolStack.push(symbol);
+            // Not a knot/stitch/gather/choice nor a variable. Do nothing.
         }
 
         // INCLUDE
@@ -136,6 +139,7 @@ InkFileSymbols.prototype.parse = function() {
 
     this.globalTags = globalTags;
     this.globalDictionaryStyleTags = globalDictionaryStyleTags;
+    this.variables = variables;
 
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];
@@ -191,6 +195,11 @@ InkFileSymbols.prototype.symbolAtPos = function(pos) {
 InkFileSymbols.prototype.getSymbols = function() {
     if( this.dirty ) this.parse();
     return this.symbols;
+}
+
+InkFileSymbols.prototype.getVariables = function() {
+    if( this.dirty ) this.parse();
+    return this.variables;
 }
 
 InkFileSymbols.prototype.getIncludes = function() {

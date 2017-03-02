@@ -25,6 +25,13 @@ function getAllSymbols(files) {
     return globalSymbolList;
 }
 
+// Helper function that gets all the variable names from a list of InkFiles
+function getAllVariables(files) {
+    return files.reduce(
+        (acc, cur) => acc.concat(cur.symbols.getVariables()),
+        []);
+}
+
 exports.inkCompleter = {
     inkFiles: [],
 
@@ -37,9 +44,17 @@ exports.inkCompleter = {
                 meta: symbol.flowType.name,
             }));
 
+        const variables = getAllVariables(this.inkFiles);
+        const variableSuggestions = variables.map(
+            (variableName) => ({
+                caption: variableName,
+                value: variableName,
+                meta: "Variable",
+            }));
+
         // Ignore pos and prefix. ACE will find the most likely words in the
         // list for the prefix automatically.
 
-        callback(null, symbolSuggestions);
+        callback(null, symbolSuggestions.concat(variableSuggestions));
     }
 };
