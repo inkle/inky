@@ -38,7 +38,7 @@ function InkProject(mainInkFilePath) {
 
 InkProject.prototype.createInkFile = function(anyPath) {
     var inkFile = new InkFile(anyPath || null, this.mainInk, {
-        fileChanged: () => {
+        fileChanged: () => { 
             if( inkFile.hasUnsavedChanges && !this.unsavedFiles.contains(inkFile) ) {
                 this.unsavedFiles.push(inkFile);
                 this.refreshUnsavedChanges();
@@ -50,7 +50,7 @@ InkProject.prototype.createInkFile = function(anyPath) {
         },
 
         // Called when InkFile finds an INCUDE line in the contents of the file
-        includesChanged: () => {
+        includesChanged: () => {         
             this.refreshIncludes();
             if( inkFile.includes.length > 0  )
                 NavView.initialShow();
@@ -246,7 +246,7 @@ function copyFile(source, destination, transform) {
         if( !err && fileContent ) {
             if( transform ) fileContent = transform(fileContent);
             if( fileContent.length < 1 ) throw "Trying to write (copy) empty file!";
-
+            
             fs.writeFile(destination, fileContent, "utf8");
         }
     });
@@ -300,7 +300,7 @@ InkProject.prototype.export = function(exportType) {
         }
 
         dialog.showSaveDialog(remote.getCurrentWindow(), saveOptions, (targetSavePath) => {
-            if( targetSavePath ) {
+            if( targetSavePath ) { 
                 this.defaultExportPath = targetSavePath;
 
                 // JSON export - simply move compiled json into place
@@ -320,10 +320,10 @@ InkProject.prototype.export = function(exportType) {
                             }
                         }
 
-                        // JS file:
+                        // JS file: 
                         if( exportType == "js" ) {
                             this.convertJSONToJS(compiledJsonTempPath, targetSavePath);
-                        }
+                        } 
 
                         // JSON: Just copy into place
                         else {
@@ -384,7 +384,7 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
 
     // Derive story title from save name
     var storyTitle = path.basename(targetDirectory);
-
+    
     // Unless the writer explicitly provided a tag with the title
     var mainInkTagDict = this.mainInk.symbols.globalDictionaryStyleTags;
     if( mainInkTagDict && mainInkTagDict["title"] ) {
@@ -401,8 +401,8 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
     // Copy index.html:
     //  - inserting the filename as the <title> and <h1>
     //  - Inserting the correct name of the javascript file
-    copyFile(path.join(templateDir, "index.html"),
-             path.join(targetDirectory, "index.html"),
+    copyFile(path.join(templateDir, "index.html"), 
+             path.join(targetDirectory, "index.html"), 
              (fileContent) => {
         fileContent = fileContent.replace(/##STORY TITLE##/g, storyTitle);
         fileContent = fileContent.replace(/##JAVASCRIPT FILENAME##/g, this.jsFilename());
@@ -410,13 +410,13 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
     });
 
     // Copy other files verbatim
-    copyFile(path.join(__dirname, "../node_modules/inkjs/dist/ink.js"),
+    copyFile(path.join(__dirname, "../node_modules/inkjs/dist/ink.js"), 
              path.join(targetDirectory, "ink.js"));
 
-    copyFile(path.join(templateDir, "style.css"),
+    copyFile(path.join(templateDir, "style.css"), 
              path.join(targetDirectory, "style.css"));
 
-    copyFile(path.join(templateDir, "main.js"),
+    copyFile(path.join(templateDir, "main.js"), 
          path.join(targetDirectory, "main.js"));
 }
 
@@ -446,11 +446,11 @@ InkProject.prototype.tryClose = function() {
             }
 
             // Cancel
-            else {
+            else { 
                 ipc.send("project-cancelled-close");
             }
         });
-    }
+    } 
 
     // Nothing to save, just exit
     else {
@@ -542,7 +542,7 @@ InkProject.prototype.findSymbol = function(name, posContext) {
             }
         }
     }
-
+    
     if( !baseSymbol ) {
         console.log("Failed to find base symbol: "+baseName);
         return null;
@@ -557,7 +557,7 @@ InkProject.prototype.findSymbol = function(name, posContext) {
             console.log("Failed to find complete path due to not finding: "+tailComp);
             return symbol;
         }
-
+        
         symbol = tailSymbol;
     }
 

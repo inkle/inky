@@ -55,7 +55,7 @@ var inkHighlightRules = function() {
                 "choice", // whitespace
                 "choice.bullets", // * or +
                 "choice", // whitespace
-                "choice.label", // (
+                "choice.label", // ( 
                 "choice.label.name", // label_name
                 "choice.label" // )
             ],
@@ -177,7 +177,7 @@ var inkHighlightRules = function() {
         }],
 
         // Used to parse function calls within divert paramters so that
-        // the closing bracket doesn't accidentally cause the rule to end early.
+        // the closing bracket doesn't accidentally cause the rule to end early. 
         // Having it as a separate rule also allows it to be recursive.
         "#functionCallInDivertParameter": [{
             regex: /\w+\s*\(/,
@@ -197,7 +197,7 @@ var inkHighlightRules = function() {
             regex: /^(\s*)((?:-\s*)+)(?!>)(?:(\(\s*)(\w+)(\s*\)))?/,
             token: [
                 "gather", // whitespace
-                "gather.bullets", // - -
+                "gather.bullets", // - - 
                 "gather.label", // (
                 "gather.label.name", // label_name
                 "gather.label" // )
@@ -209,7 +209,7 @@ var inkHighlightRules = function() {
                 "var-decl", // whitespace
                 "var-decl.keyword"
             ],
-
+            
             push: [{
                 regex: /(\s*)(\w+)(\s*)/,
                 token: [
@@ -217,10 +217,10 @@ var inkHighlightRules = function() {
                     "var-decl.name",
                     "var-decl" // whitespace
                 ]
-            },
+            }, 
 
             // The rest of the assignment line
-            {
+            { 
                 regex: /$/,
                 token: "var-decl",
                 next: "pop"
@@ -280,10 +280,10 @@ var inkHighlightRules = function() {
                     "include", // whitespace
                     "include.filepath"
                 ]
-            },
+            }, 
 
             // The rest of the assignment line
-            {
+            { 
                 regex: /$/,
                 token: "include",
                 next: "pop"
@@ -306,8 +306,8 @@ var inkHighlightRules = function() {
                     "external", // whitespace
                     "external.declaration"
                 ]
-            },
-            {
+            }, 
+            { 
                 regex: /$/,
                 token: "external",
                 next: "pop"
@@ -453,7 +453,7 @@ var inkHighlightRules = function() {
             include: "#mixedContent"
         }]
     }
-
+    
     this.normalizeRules();
 };
 

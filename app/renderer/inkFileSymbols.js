@@ -16,7 +16,7 @@ function InkFileSymbols(inkFile, events) {
 }
 
 InkFileSymbols.prototype.scheduleParse = function() {
-    if( this.parseTimeout )
+    if( this.parseTimeout ) 
         clearTimeout(this.parseTimeout);
 
     this.parseTimeout = setTimeout(() => {
@@ -63,7 +63,7 @@ InkFileSymbols.prototype.parse = function() {
     // I don't understand why sometimes the TokenIterator gives something valid
     // initially, and sometimes it doesn't?
     if( it.getCurrentToken() === undefined ) it.stepForward();
-
+    
     for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
 
         // Token is some kind of name?
@@ -166,7 +166,7 @@ InkFileSymbols.prototype.symbolAtPos = function(pos) {
     if( this.dirty ) this.parse();
 
     // Range index is an index of all the symbols by row number,
-    // nested into a hierarchy.
+    // nested into a hierarchy. 
     function symbolWithinIndex(rangeIndex) {
 
         if( !rangeIndex )
