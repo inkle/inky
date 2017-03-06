@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "chokidar": "^1.6.0",
-    "inkjs": "^1.4.3",
+    "inkjs": "^1.5.0",
     "lodash": "^4.13.1",
     "mkdirp": "^0.5.1",
     "randomstring": "^1.1.5"
