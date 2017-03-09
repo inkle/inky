@@ -387,16 +387,7 @@ var inkHighlightRules = function() {
                     "logic.multiline.branch",
                     "logic.multiline.branch.operator",
                     "logic.multiline.branch.condition"
-                ],
-                push: [{
-                    token: "logic.multiline.branch",
-                    regex: /$/,
-                    next: "pop"
-                }, {
-                    include: "#mixedContent"
-                }, {
-                    defaultToken: "logic.multiline.branch.innerContent"
-                }]
+                ]
             }, {
                 include: "#statements"
             }, {
