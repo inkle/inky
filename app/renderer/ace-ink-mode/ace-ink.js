@@ -42,7 +42,7 @@ var inkHighlightRules = function() {
             include: "#statements"
         }],
         "#TODO": [{
-            regex: /^(\s*)(TODO\b)([:\w\ \t\"\,\;\(\)\'\.\-]+)/,
+            regex: /^(\s*)(TODO\b)([:\w\ \t\"\,\;\(\)\'\.\-\?\!\_\*]+)/,
             token: [
                 "todo", // whitespace
                 "todo.TODO", // TODO
