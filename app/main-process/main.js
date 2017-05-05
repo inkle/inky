@@ -9,17 +9,15 @@ const forceQuitDetect = require('./forceQuitDetect');
 const Inklecate = require("./inklecate.js").Inklecate;
 
 function inkJSNeedsUpdating() {
-    //return false;
-
-    dialog.showMessageBox({
-      type: 'error',
-      buttons: ['Okay'],
-      title: 'Export for web unavailable',
-      message: "Sorry, export for web is currently disabled, until inkjs is updated to support the latest version of ink, which supports lists. If you don't need lists support and need to export to web, you can download version 0.6.4 of Inky and use that instead."
-    });
-    return true;
+    return false;
+    // dialog.showMessageBox({
+    //   type: 'error',
+    //   buttons: ['Okay'],
+    //   title: 'Export for web unavailable',
+    //   message: "Sorry, export for web is currently disabled, until inkjs is updated to support the latest version of ink. You can download a previous version of Inky that supports inkjs and use that instead, although some of the latest features of ink may be missing."
+    // });
+    // return true;
 }
-
 
 app.on('will-finish-launching', function () {
     app.on("open-file", function (event, path) {
