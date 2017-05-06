@@ -135,10 +135,10 @@ InkFileSymbols.prototype.parse = function() {
         }
 
         // Prose text
-        else if ( tok.type == "text") {
+        else if( tok.type == "text" ) {
             var words = tok.value.split(/\W+/);
             words.forEach(word => {
-                if (word.length >= 3 && !_.includes(vocabWords, word)) {
+                if( word.length >= 3 && !_.includes(vocabWords, word) ) {
                     vocabWords.push(word);
                 }
             });
