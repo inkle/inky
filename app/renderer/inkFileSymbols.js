@@ -40,6 +40,7 @@ InkFileSymbols.prototype.parse = function() {
     ];
     const varTypes = [
         { name: "Variable", code: "var-decl"},
+        { name: "List", code: "list-decl"},
     ];
     const topLevelInkFlow = { level: 0 };
 
@@ -112,6 +113,18 @@ InkFileSymbols.prototype.parse = function() {
                 variables.push(symbolName);
             }
             // Not a knot/stitch/gather/choice nor a variable. Do nothing.
+        }
+
+        // LIST
+        else if( tok.type == "list-decl.item" && tok.value.trim().length > 0 ) {
+            // Extract the name from the line
+            var potentialNames = tok.value.match(/\b\w+\b/g);
+            potentialNames.forEach(potentialName => {
+                // Exclude "names" that are only numbers
+                if( !(/^\d*$/.test(potentialName)) ) {
+                    variables.push(potentialName);
+                }
+            });
         }
 
         // INCLUDE

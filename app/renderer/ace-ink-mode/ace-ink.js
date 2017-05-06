@@ -236,9 +236,10 @@ var inkHighlightRules = function() {
             ],
             push: [
                 {
-                    regex: /(\s*=\s*)/,
+                    regex: /(\w+)(\s*=\s*)/,
                     token: [
-                        "list-decl"
+                        "list-decl.name",
+                        "list-decl" // whitespace & equals sign
                     ],
                     next: "#listItem"
                 },
