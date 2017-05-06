@@ -32,6 +32,13 @@ function getAllVariables(files) {
         []);
 }
 
+// Helper function that gets all the vocabulary words from a list of InkFiles
+function getAllVocabWords(files) {
+    return files.reduce(
+        (acc, cur) => acc.concat(cur.symbols.getVocabWords()),
+        []);
+}
+
 exports.inkCompleter = {
     inkFiles: [],
 
@@ -52,9 +59,17 @@ exports.inkCompleter = {
                 meta: "Variable",
             }));
 
+        const vocabWords = getAllVocabWords(this.inkFiles);
+        const vocabSuggstions = vocabWords.map(
+            word => ({
+                caption: word,
+                value: word,
+                meta: "Vocabulary",
+            }));
+
         // Ignore pos and prefix. ACE will find the most likely words in the
         // list for the prefix automatically.
 
-        callback(null, symbolSuggestions.concat(variableSuggestions));
+        callback(null, symbolSuggestions.concat(variableSuggestions).concat(vocabSuggstions));
     }
 };

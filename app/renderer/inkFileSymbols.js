@@ -56,6 +56,7 @@ InkFileSymbols.prototype.parse = function() {
     var globalTags = [];
     var globalDictionaryStyleTags = {};
     var variables = [];
+    var vocabWords = [];
 
     var it = new TokenIterator(session, 0, 0);
 
@@ -133,6 +134,16 @@ InkFileSymbols.prototype.parse = function() {
             }
         }
 
+        // Prose text
+        else if ( tok.type == "text") {
+            var words = tok.value.split(/\W+/);
+            words.forEach(word => {
+                if (word.length >= 3 && !_.includes(vocabWords, word)) {
+                    vocabWords.push(word);
+                }
+            });
+        }
+
     } // for token iterator
 
     this.symbols = symbolStack[0].innerSymbols;
@@ -141,6 +152,7 @@ InkFileSymbols.prototype.parse = function() {
     this.globalTags = globalTags;
     this.globalDictionaryStyleTags = globalDictionaryStyleTags;
     this.variables = variables;
+    this.vocabWords = vocabWords;
 
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];
@@ -211,6 +223,11 @@ InkFileSymbols.prototype.getIncludes = function() {
 InkFileSymbols.prototype.getLastIncludeRow = function() {
     if( this.dirty ) this.parse();
     return this.lastIncludeRow;
+}
+
+InkFileSymbols.prototype.getVocabWords = function() {
+    if( this.dirty ) this.parse();
+    return this.vocabWords;
 }
 
 exports.InkFileSymbols = InkFileSymbols;
