@@ -39,8 +39,8 @@ InkFileSymbols.prototype.parse = function() {
         { name: "Gather", code: "gather.label",        level: 3 },
     ];
     const varTypes = [
-        { name: "Variable", code: "var-decl"},
-        { name: "List", code: "list-decl"},
+        { name: "Variable", code: "var-decl"  },
+        { name: "List",     code: "list-decl" },
     ];
     const topLevelInkFlow = { level: 0 };
 
