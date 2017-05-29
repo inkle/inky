@@ -39,37 +39,70 @@ function getAllVocabWords(files) {
         []);
 }
 
+// Helper function that generates suggestions for all the symbols
+function getAllSymbolSuggestions(inkFiles) {
+    const symbols = getAllSymbols(inkFiles);
+    return symbols.map(
+        symbol => ({
+            caption: symbol.name,
+            value: symbol.name,
+            meta: symbol.flowType.name,
+        }));
+}
+
+// Helper function that generates suggestions for all the variables
+function getAllVariableSuggestions(inkFiles) {
+    const variables = getAllVariables(inkFiles);
+    return variables.map(
+        variableName => ({
+            caption: variableName,
+            value: variableName,
+            meta: "Variable",
+        }));
+}
+
+// Helper function that generates suggestions for all the vocabulary
+function getAllVocabSuggestions(inkFiles) {
+    const vocabWords = getAllVocabWords(inkFiles);
+    return vocabWords.map(
+        word => ({
+            caption: word,
+            value: word,
+            meta: "Vocabulary",
+        }));
+}
+
 exports.inkCompleter = {
     inkFiles: [],
 
     getCompletions(editor, session, pos, prefix, callback) {
-        const symbols = getAllSymbols(this.inkFiles);
-        const symbolSuggestions = symbols.map(
-            symbol => ({
-                caption: symbol.name,
-                value: symbol.name,
-                meta: symbol.flowType.name,
-            }));
+        // There are three possible ways we may want to suggest completions:
+        //
+        // 1) If we are in a divert target, we should only suggest symbols.
+        // 2) If we are in a logic section, we should suggest variables,
+        //    symbols, (because they can be used as variables) and vocab words.
+        //    (because logic can output text)
+        // 3) If we are not in either, we should only suggest vocab words.
 
-        const variables = getAllVariables(this.inkFiles);
-        const variableSuggestions = variables.map(
-            variableName => ({
-                caption: variableName,
-                value: variableName,
-                meta: "Variable",
-            }));
+        const cursorToken = session.getTokenAt(pos.row, pos.column);
+        const isCursorInDivert = (cursorToken.type.indexOf("divert") != -1);
+        const isCursorInLogic = (cursorToken.type.indexOf("logic") != -1);
 
-        const vocabWords = getAllVocabWords(this.inkFiles);
-        const vocabSuggstions = vocabWords.map(
-            word => ({
-                caption: word,
-                value: word,
-                meta: "Vocabulary",
-            }));
+        // Ignore the prefix. ACE will find the most likely words in the list
+        // for the prefix automatically.
 
-        // Ignore pos and prefix. ACE will find the most likely words in the
-        // list for the prefix automatically.
+        var suggestions;
+        if( isCursorInDivert ) {
+            suggestions = getAllSymbolSuggestions(this.inkFiles);
+        } else if( isCursorInLogic ) {
+            const symbolSuggestions = getAllSymbolSuggestions(this.inkFiles);
+            const variableSuggestions = getAllVariableSuggestions(this.inkFiles);
+            const vocabSuggstions = getAllVocabSuggestions(this.inkFiles);
+            suggestions = symbolSuggestions.concat(variableSuggestions).concat(vocabSuggstions);
+        } else {
+            suggestions = getAllVocabSuggestions(this.inkFiles);
+        }
 
-        callback(null, symbolSuggestions.concat(variableSuggestions).concat(vocabSuggstions));
+        callback(null, suggestions);
     }
 };
