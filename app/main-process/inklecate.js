@@ -105,13 +105,19 @@ function compile(compileInstruction, requester) {
 
     var inkErrors = [];
 
+    var sendAnyErrors = () => {
+        if( sessions[sessionId] && inkErrors.length > 0 ) {
+            requester.send('play-generated-errors', inkErrors, sessionId);
+            inkErrors = [];
+        }
+    };
+
     var onEndOfStory = (code) => {
         if( sessions[sessionId] && !sessions[sessionId].ended ) {
             sessions[sessionId].ended = true;
 
-            if( inkErrors.length > 0 )
-                requester.send('play-generated-errors', inkErrors, sessionId);
-
+            sendAnyErrors();
+            
             if( code == 0 || code === undefined ) {
                 requester.send('inklecate-complete', sessionId, jsonExportPath);
             }
@@ -176,6 +182,12 @@ function compile(compileInstruction, requester) {
             } else if( endOfStoryMatches ) {
                 onEndOfStory();
             } else if( line.length > 0 ) {
+
+                // If this is the first line of actual generated content,
+                // then we're ready to send any warnings or todos generated
+                // during compilation.
+                sendAnyErrors();
+
                 if( session.evaluatingExpression ) {
                     requester.send('play-evaluated-expression', line, sessionId);
                 } else {
