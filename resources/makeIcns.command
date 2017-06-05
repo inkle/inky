@@ -13,4 +13,5 @@ sips -z 512 512   Icon1024.png --out Icon.iconset/icon_256x256@2x.png
 sips -z 512 512   Icon1024.png --out Icon.iconset/icon_512x512.png
 cp Icon1024.png Icon.iconset/icon_512x512@2x.png
 iconutil -c icns Icon.iconset
+cp Icon.iconset/icon_256x256.png ../app/renderer/about/icon256.png
 rm -R Icon.iconset

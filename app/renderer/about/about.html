@@ -2,21 +2,54 @@
 <html>
 
 <head>
-  <title>About Inky</title>
+    <title>About Inky</title>
 </head>
+
+<style>
+body {
+    text-align: center;
+    background: #FDFDFD;
+}
+
+img {
+    width: 100px;
+    height: 100px;
+    margin-top: 20px;
+    -webkit-user-select: none;
+}
+
+h1, p {
+    font-family: Helvetica, sans-serif;
+}
+
+h1 {
+    font-size: 12pt;
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+p {
+    font-size: 9pt;
+    padding: 0;
+    margin: 4px;
+}
+
+</style>
 
 <body>
 
-  <h1>Inky</h1>
+    <img src="icon256.png" draggable="false" />
 
-  <p id="version-inky"></p>
-  <p id="version-ink"></p>
-  <p id="version-inkjs"></p>
+    <h1>Inky</h1>
+
+    <p id="version-inky"></p>
+    <p id="version-ink"></p>
+    <p id="version-inkjs"></p>
 
 </body>
 
-  <script>
-    require('./controller.js');
-  </script>
+    <script>
+        require('./controller.js');
+    </script>
   
 </html>

@@ -7,10 +7,9 @@ const inkjsPackage = require('inkjs/package.json');
 
 
 const electronWindowOptions = {
-    width: 450,
-    height: 250,
-    minWidth: 450,
-    minHeight: 250,
+    width: 340,
+    height: 270,
+    resizable: false,
     title: "About Inky"
 };
 
