@@ -212,7 +212,8 @@ function setupMenus(callbacks) {
       submenu: [
         {
           label: 'About ' + name,
-          role: 'about'
+          click: callbacks.showAbout
+          // role: 'about'
         },
         {
           type: 'separator'

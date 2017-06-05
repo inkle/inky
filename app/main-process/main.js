@@ -4,6 +4,7 @@ const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const DocumentationWindow = require("./documentationWindow.js").DocumentationWindow;
+const AboutWindow = require("./aboutWindow.js").AboutWindow;
 const appmenus = require('./appmenus.js');
 const forceQuitDetect = require('./forceQuitDetect');
 const Inklecate = require("./inklecate.js").Inklecate;
@@ -95,6 +96,9 @@ app.on('ready', function () {
         showDocs: () => {
             DocumentationWindow.openDocumentation();
         },
+        showAbout: () => {
+            AboutWindow.showAboutWindow();
+        }
     });
 
     let openedSpecificFile = false;
