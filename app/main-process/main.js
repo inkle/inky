@@ -90,6 +90,9 @@ app.on('ready', function () {
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
         },
+        gotoAnything: (item, focusedWindow) => {
+            focusedWindow.webContents.send("goto-anything");
+        },
         addWatchExpression: (item, focusedWindow) => {
             focusedWindow.webContents.send("add-watch-expression");
         },

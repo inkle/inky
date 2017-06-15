@@ -783,3 +783,49 @@ img.issue-icon.warning {
 .button:hover {
   background: #EEE;
 }
+
+
+#goto-anything {
+  position: absolute;
+  top: 20%;
+  left: 100px;
+  right: 100px;
+  background: white;
+  border: 1px solid #DDD;
+  border-radius: 10px;
+  box-shadow: 0 5px 6px #EEE;
+  z-index: 80; /* toolbar is 50, title bar is 100 */
+  opacity: 1.0;
+  padding: 10px;
+  font-family: Monaco, sans-serif;
+  transition: opacity 0.3s;
+}
+
+#goto-anything.hidden {
+  display: block;
+  opacity: 0.0;
+}
+
+#goto-anything input {
+  width: 100%;
+  padding: 5px;
+  font-size: 16pt;
+  border-radius: 3px;
+  border: 0.5px solid #EEE;
+  outline: none;
+}
+
+#goto-anything ul.results {
+  max-height: 400px;
+  overflow-y: scroll;
+  list-style: none;
+  -webkit-padding-start: 0;
+  margin-left: 10px;
+}
+
+#goto-anything ul.results li {
+  border-bottom: 1px solid #E1E1E1;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  color: #888;
+}

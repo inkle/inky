@@ -3,12 +3,14 @@ const ipc = electron.ipcRenderer;
 const remote = electron.remote;
 const path = require("path");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+require("./goto.js");
 
 // Debug
 const loadTestInk = false;
 // remote.getCurrentWindow().webContents.openDevTools();
 
 // Helpers in global objects and namespace
+
 require("./util.js");
 require("./split.js");
 

@@ -109,12 +109,12 @@ function setupMenus(callbacks) {
       label: "View",
       submenu: [
         {
-        label: 'Toggle Full Screen',
-        accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
-        click(item, focusedWindow) {
-          if (focusedWindow)
-            focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
-        }
+          label: 'Toggle Full Screen',
+          accelerator: process.platform === 'darwin' ? 'Ctrl+Command+F' : 'F11',
+          click(item, focusedWindow) {
+            if (focusedWindow)
+              focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
+          }
         },
         {
           label: "TODO: zoom controls"
@@ -124,6 +124,11 @@ function setupMenus(callbacks) {
     {
       label: 'Story',
       submenu: [
+        {
+          label: 'Go to anything...',
+          accelerator: 'CmdOrCtrl+P',
+          click: callbacks.gotoAnything
+        },
         {
           label: 'Next Issue',
           accelerator: 'CmdOrCtrl+.',
