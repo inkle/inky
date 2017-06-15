@@ -827,7 +827,7 @@ img.issue-icon.warning {
   border-bottom: 1px solid #E1E1E1;
   padding-top: 5px;
   padding-bottom: 5px;
-  color: #888;
+  color: #666;
 }
 
 #goto-anything ul.results li.selected {
@@ -848,6 +848,10 @@ img.issue-icon.warning {
   bottom: 0;
   background: none;
   z-index: 60; /* toolbar is 50, title bar is 100, goto anything is 80 */
+}
+
+#goto-anything .ancestor {
+  color: #AAA;
 }
 
 .ignore-events {

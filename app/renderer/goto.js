@@ -47,8 +47,18 @@ function show() {
         var file = files[i];
         var fileSymbols = file.symbols.getSymbols();
         var fileSymbolsArr = _.values(fileSymbols);
-        //_.union(allSymbols, fileSymbols);
         allSymbols.push.apply(allSymbols, fileSymbolsArr);
+
+        // Include inner symbols (e.g. stitches, gathers etc) for current file
+        if( file == InkProject.currentProject.activeInkFile ) {
+            for(var j=0; j<fileSymbolsArr.length; j++) {
+                var sym = fileSymbolsArr[j];
+                if( sym.innerSymbols ) {
+                    var innerSym = _.values(sym.innerSymbols);
+                    allSymbols.push.apply(allSymbols, innerSym);
+                }
+            }
+        }
     }
     cachedSymbols = allSymbols;
 }
@@ -79,17 +89,31 @@ function refresh() {
 
     if( !searchStr ) return;
 
+    $results.scrollTop(0);
+
     var fileResults = filter(cachedFiles, searchStr, {key: "name"});
     var symResults = filter(cachedSymbols, searchStr, {key: "name"});
 
     var results = _.union(fileResults, symResults);
 
     _.each(results, result => {
+        var resultName = result.name;
+
         var wrappedResult = wrap(result.name, searchStr, { wrap: {
             tagOpen: "<span class='goto-highlight'>",
             tagClose: "</span>"
         }});
-        var $result = $(`<li>${wrappedResult}</li>`);
+
+        var ancestorStr = "";
+        var ancestor = result.parent
+        while(ancestor && ancestor.name) {
+            ancestorStr = ancestor.name + "." + ancestorStr;
+            ancestor = ancestor.parent;
+        }
+        if( ancestorStr )
+            ancestorStr = `<span class='ancestor'>${ancestorStr}</span>`;
+        
+        var $result = $(`<li>${ancestorStr}${wrappedResult}</li>`);
         $result.data("result", result);
         $result.on("click", result, () => choose($result));
         $result.on("mousemove", (e) => {
