@@ -13,10 +13,11 @@ var $results = null;
 
 var $selectedResult = null;
 
+var lastMousePos = null;
+
 var events = {
     gotoFile: () => {}
 };
-
 
 function show() {
     $goto.removeClass("hidden");
@@ -41,6 +42,8 @@ function toggle() {
     else
         hide();
 }
+
+
 
 function refresh() {
 
@@ -67,7 +70,14 @@ function refresh() {
         var $result = $(`<li>${wrappedResult}</li>`);
         $result.data("result", result);
         $result.on("click", result, () => choose($result));
-        $result.on("mouseenter", (e) => select($(e.target)));
+        $result.on("mousemove", (e) => {
+            // Only mouse-over something if it's really the mouse that moved rather than
+            // just the document scrolling under the mouse.
+            if( lastMousePos == null || lastMousePos.pageX != e.pageX || lastMousePos.pageY != e.pageY ) {
+                lastMousePos = { pageX: e.pageX, pageY: e.pageY };
+                select($(e.target))
+            }
+        });
         $results.append($result);
     });
 }
@@ -116,17 +126,33 @@ function previousResult() {
         select($prev);
 }
 
+function scrollToRevealResult() {
+    if( $selectedResult != null ) {
+        var $container = $selectedResult.parent();
+        var top = $container.offset().top;
+        var bottom = top + $container.height();
+        var mid = 0.5 * (top + bottom);
+
+        var currPos = $selectedResult.offset().top;
+        if( currPos < top || currPos+$selectedResult.height() > bottom ) {
+            $selectedResult[0].scrollIntoView(currPos < mid);
+        }
+    }
+}
+
 function gotoGlobalKeyHandler(e) {
 
     // down
     if( e.keyCode == 40 ) {
         nextResult();
+        scrollToRevealResult();
         e.preventDefault();
     } 
 
     // up
     else if( e.keyCode == 38 ) {
         previousResult();
+        scrollToRevealResult();
         e.preventDefault();
     }
 
