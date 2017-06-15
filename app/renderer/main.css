@@ -830,7 +830,7 @@ img.issue-icon.warning {
   color: #888;
 }
 
-#goto-anything ul.results li:hover {
+#goto-anything ul.results li.selected {
   background: #EEE;
   cursor: default;
 }

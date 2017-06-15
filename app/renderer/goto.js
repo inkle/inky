@@ -11,17 +11,27 @@ var $goto = null;
 var $input = null;
 var $results = null;
 
+var $selectedResult = null;
+
 var events = {
     gotoFile: () => {}
 };
 
+
 function show() {
     $goto.removeClass("hidden");
     $input.val("");
+
+    select(null);
+
     setTimeout(() => $input.focus(), 200);
+
+    $(document).on("keydown", gotoGlobalKeyHandler);
 }
 
 function hide() {
+    $(document).off("keydown", gotoGlobalKeyHandler);
+
     $goto.addClass("hidden");
 }
 
@@ -38,6 +48,8 @@ function refresh() {
 
     $results.empty();
 
+    select(null);
+
     if( !searchStr ) return;
 
     var toQuery = _.map(InkProject.currentProject.files, file => ({
@@ -47,24 +59,82 @@ function refresh() {
 
     var results = filter(toQuery, searchStr, {key: "name"});
 
-    var selectHandler = (event) => {
-        var result = event.data;
-        if( result.file )
-            events.gotoFile(result.file);
-
-        // done!
-        hide();
-    };
-
     _.each(results, result => {
         var wrappedResult = wrap(result.name, searchStr, { wrap: {
             tagOpen: "<span class='goto-highlight'>",
             tagClose: "</span>"
         }});
         var $result = $(`<li>${wrappedResult}</li>`);
-        $result.on("click keypress", result, selectHandler);
+        $result.data("result", result);
+        $result.on("click", result, () => choose($result));
+        $result.on("mouseenter", (e) => select($(e.target)));
         $results.append($result);
     });
+}
+
+function select($result)
+{
+    if( $selectedResult != null )
+        $selectedResult.removeClass("selected");
+
+    $selectedResult = $result;
+
+    if( $selectedResult != null )
+        $selectedResult.addClass("selected");
+}
+
+function choose($result)
+{
+    var result = $result.data().result;
+    if( result.file )
+        events.gotoFile(result.file);
+
+    // done!
+    hide();
+}
+
+function nextResult() {
+
+    // Select very first (after input being active)
+    if( $selectedResult == null ) {
+        var $first = $results.children("li").first();
+        if( $first.length > 0 )
+            select($first);
+        $input.blur();
+        return;
+    }
+
+    var $next = $selectedResult.next();
+    if( $next.length > 0 )
+        select($next);
+}
+
+function previousResult() {
+    if( $selectedResult == null ) return;
+    var $prev = $selectedResult.prev();
+    if( $prev.length > 0 )
+        select($prev);
+}
+
+function gotoGlobalKeyHandler(e) {
+
+    // down
+    if( e.keyCode == 40 ) {
+        nextResult();
+        e.preventDefault();
+    } 
+
+    // up
+    else if( e.keyCode == 38 ) {
+        previousResult();
+        e.preventDefault();
+    }
+
+    // return
+    else if( e.keyCode == 13 ) {
+        if( $selectedResult != null )
+            choose($selectedResult);
+    }
 }
 
 $(document).ready(() => {
@@ -72,6 +142,15 @@ $(document).ready(() => {
     $input = $goto.children("input");
     $results = $goto.children(".results");
     $input.on("input", refresh);
+    $input.on("focus", () => select(null));
+
+    // Some other events are handled global document handler
+    $input.on("keydown", (e) => {
+        if( e.keyCode == 13 ) {
+            nextResult();
+            e.preventDefault();
+        }
+    });
 });
 
 ipc.on("goto-anything", (event) => {
