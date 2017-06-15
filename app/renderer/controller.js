@@ -233,8 +233,10 @@ NavView.setEvents({
 });
 
 GotoAnything.setEvents({
-    gotoFile: file => {
+    gotoFile: (file, row) => {
         InkProject.currentProject.showInkFile(file);
+        if( typeof row !== 'undefined' )
+            EditorView.gotoLine(row+1);
         NavHistory.addStep();
     }
 });

@@ -16,6 +16,9 @@ var $selectedResult = null;
 
 var lastMousePos = null;
 
+var cachedFiles = null;
+var cachedSymbols = null;
+
 var events = {
     gotoFile: () => {}
 };
@@ -30,6 +33,24 @@ function show() {
     setTimeout(() => $input.focus(), 200);
 
     $(document).on("keydown", gotoGlobalKeyHandler);
+
+    // Collect all files
+    var files = InkProject.currentProject.files;
+    cachedFiles = _.map(files, file => ({
+        name: file.filename(),
+        file: file
+    }));
+
+    // Collect all symbols
+    var allSymbols = [];
+    for(var i=0; i<files.length; i++) {
+        var file = files[i];
+        var fileSymbols = file.symbols.getSymbols();
+        var fileSymbolsArr = _.values(fileSymbols);
+        //_.union(allSymbols, fileSymbols);
+        allSymbols.push.apply(allSymbols, fileSymbolsArr);
+    }
+    cachedSymbols = allSymbols;
 }
 
 function hide() {
@@ -58,12 +79,10 @@ function refresh() {
 
     if( !searchStr ) return;
 
-    var toQuery = _.map(InkProject.currentProject.files, file => ({
-        name: file.filename(),
-        file: file
-    }));
+    var fileResults = filter(cachedFiles, searchStr, {key: "name"});
+    var symResults = filter(cachedSymbols, searchStr, {key: "name"});
 
-    var results = filter(toQuery, searchStr, {key: "name"});
+    var results = _.union(fileResults, symResults);
 
     _.each(results, result => {
         var wrappedResult = wrap(result.name, searchStr, { wrap: {
@@ -101,6 +120,9 @@ function choose($result)
     var result = $result.data().result;
     if( result.file )
         events.gotoFile(result.file);
+
+    else if( typeof result.row !== 'undefined' )
+        events.gotoFile(result.inkFile, result.row);
 
     // done!
     hide();
