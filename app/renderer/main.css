@@ -830,6 +830,11 @@ img.issue-icon.warning {
   color: #888;
 }
 
+#goto-anything ul.results li:hover {
+  background: #EEE;
+  cursor: default;
+}
+
 .goto-highlight {
   font-weight: bold;
   color: blue;

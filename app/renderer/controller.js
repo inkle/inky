@@ -3,7 +3,6 @@ const ipc = electron.ipcRenderer;
 const remote = electron.remote;
 const path = require("path");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
-require("./goto.js");
 
 // Debug
 const loadTestInk = false;
@@ -25,6 +24,7 @@ const ExpressionWatchView = require("./expressionWatchView").ExpressionWatchView
 const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 const NavHistory = require("./navHistory.js").NavHistory;
+const GotoAnything = require("./goto.js").GotoAnything;
 
 InkProject.setEvents({
     "newProject": (project) => {
@@ -228,6 +228,13 @@ NavView.setEvents({
     addInclude: (filename, addToMainInk) => {
         var newInkFile = InkProject.currentProject.addNewInclude(filename, addToMainInk);
         InkProject.currentProject.showInkFile(newInkFile);
+        NavHistory.addStep();
+    }
+});
+
+GotoAnything.setEvents({
+    gotoFile: file => {
+        InkProject.currentProject.showInkFile(file);
         NavHistory.addStep();
     }
 });

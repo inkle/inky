@@ -11,12 +11,14 @@ var $goto = null;
 var $input = null;
 var $results = null;
 
+var events = {
+    gotoFile: () => {}
+};
 
 function show() {
     $goto.removeClass("hidden");
-
+    $input.val("");
     setTimeout(() => $input.focus(), 200);
-    
 }
 
 function hide() {
@@ -40,10 +42,19 @@ function refresh() {
 
     var toQuery = _.map(InkProject.currentProject.files, file => ({
         name: file.filename(),
-        orginal: file
+        file: file
     }));
 
     var results = filter(toQuery, searchStr, {key: "name"});
+
+    var selectHandler = (event) => {
+        var result = event.data;
+        if( result.file )
+            events.gotoFile(result.file);
+
+        // done!
+        hide();
+    };
 
     _.each(results, result => {
         var wrappedResult = wrap(result.name, searchStr, { wrap: {
@@ -51,6 +62,7 @@ function refresh() {
             tagClose: "</span>"
         }});
         var $result = $(`<li>${wrappedResult}</li>`);
+        $result.on("click keypress", result, selectHandler);
         $results.append($result);
     });
 }
@@ -68,3 +80,7 @@ ipc.on("goto-anything", (event) => {
 
 // TESTING
 setTimeout(show, 1000);
+
+exports.GotoAnything = {
+    setEvents: e => events = e,
+}
