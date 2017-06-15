@@ -1,17 +1,20 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
+const _ = require("lodash");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
-var $goto = null
+const InkProject = require("./inkProject.js").InkProject;
 
-$(document).ready(() => {
-    $goto = $("#goto-anything");
-});
+var $goto = null;
+var $input = null;
+var $results = null;
+
 
 function show() {
     $goto.removeClass("hidden");
 
-    $goto.children("input").focus();
+    setTimeout(() => $input.focus(), 200);
+    
 }
 
 function hide() {
@@ -25,9 +28,29 @@ function toggle() {
         hide();
 }
 
+function refresh() {
+
+    var searchStr = $input.val();
+
+    $results.empty();
+
+    var files = _.filter(InkProject.currentProject.files, f => f.relPath.indexOf(searchStr) != -1);
+    _.each(files, f => {
+        var $result = $(`<li>${f.relPath}</li>`);
+        $results.append($result);
+    });
+}
+
+$(document).ready(() => {
+    $goto = $("#goto-anything");
+    $input = $goto.children("input");
+    $results = $goto.children(".results");
+    $input.on("input", refresh);
+});
+
 ipc.on("goto-anything", (event) => {
     toggle();
 });
 
 // TESTING
-setTimeout(show, 800);
+setTimeout(show, 1000);
