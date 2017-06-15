@@ -46,21 +46,25 @@ function show() {
     for(var i=0; i<files.length; i++) {
         var file = files[i];
         var fileSymbols = file.symbols.getSymbols();
-        var fileSymbolsArr = _.values(fileSymbols);
-        allSymbols.push.apply(allSymbols, fileSymbolsArr);
 
-        // Include inner symbols (e.g. stitches, gathers etc) for current file
-        if( file == InkProject.currentProject.activeInkFile ) {
-            for(var j=0; j<fileSymbolsArr.length; j++) {
-                var sym = fileSymbolsArr[j];
-                if( sym.innerSymbols ) {
-                    var innerSym = _.values(sym.innerSymbols);
-                    allSymbols.push.apply(allSymbols, innerSym);
-                }
-            }
-        }
+        var recurse = file == InkProject.currentProject.activeInkFile;
+        collectSymbols(allSymbols, fileSymbols, recurse);
     }
     cachedSymbols = allSymbols;
+}
+
+function collectSymbols(allSymbols, symbolsObj, recurse)
+{
+    var symbols = _.values(symbolsObj);
+    allSymbols.push.apply(allSymbols, symbols);
+
+    if( !recurse ) return;
+
+    for(var j=0; j<symbols.length; j++) {
+        var sym = symbols[j];
+        if( sym.innerSymbols )
+            collectSymbols(allSymbols, sym.innerSymbols, recurse);
+    }
 }
 
 function hide() {
