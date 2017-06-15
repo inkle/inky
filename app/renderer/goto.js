@@ -1,6 +1,8 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
 const _ = require("lodash");
+const {filter, wrap} = require("fuzzaldrin-plus");
+
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 const InkProject = require("./inkProject.js").InkProject;
@@ -34,9 +36,21 @@ function refresh() {
 
     $results.empty();
 
-    var files = _.filter(InkProject.currentProject.files, f => f.relPath.indexOf(searchStr) != -1);
-    _.each(files, f => {
-        var $result = $(`<li>${f.relPath}</li>`);
+    if( !searchStr ) return;
+
+    var toQuery = _.map(InkProject.currentProject.files, file => ({
+        name: file.filename(),
+        orginal: file
+    }));
+
+    var results = filter(toQuery, searchStr, {key: "name"});
+
+    _.each(results, result => {
+        var wrappedResult = wrap(result.name, searchStr, { wrap: {
+            tagOpen: "<span class='goto-highlight'>",
+            tagClose: "</span>"
+        }});
+        var $result = $(`<li>${wrappedResult}</li>`);
         $results.append($result);
     });
 }

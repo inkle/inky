@@ -829,3 +829,8 @@ img.issue-icon.warning {
   padding-bottom: 5px;
   color: #888;
 }
+
+.goto-highlight {
+  font-weight: bold;
+  color: blue;
+}
