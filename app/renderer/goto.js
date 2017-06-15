@@ -8,6 +8,7 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const InkProject = require("./inkProject.js").InkProject;
 
 var $goto = null;
+var $gotoContainer = null;
 var $input = null;
 var $results = null;
 
@@ -21,6 +22,7 @@ var events = {
 
 function show() {
     $goto.removeClass("hidden");
+    $gotoContainer.removeClass("ignore-events");
     $input.val("");
 
     select(null);
@@ -34,6 +36,7 @@ function hide() {
     $(document).off("keydown", gotoGlobalKeyHandler);
 
     $goto.addClass("hidden");
+    $gotoContainer.addClass("ignore-events");
 }
 
 function toggle() {
@@ -161,14 +164,22 @@ function gotoGlobalKeyHandler(e) {
         if( $selectedResult != null )
             choose($selectedResult);
     }
+
+    // escape
+    else if( e.keyCode == 27 ) {
+        hide();
+    }
 }
 
 $(document).ready(() => {
     $goto = $("#goto-anything");
+    $gotoContainer = $("#goto-anything-container");
     $input = $goto.children("input");
     $results = $goto.children(".results");
     $input.on("input", refresh);
     $input.on("focus", () => select(null));
+
+    $gotoContainer.on("click", () => hide());
 
     // Some other events are handled global document handler
     $input.on("keydown", (e) => {
@@ -182,9 +193,6 @@ $(document).ready(() => {
 ipc.on("goto-anything", (event) => {
     toggle();
 });
-
-// TESTING
-setTimeout(show, 1000);
 
 exports.GotoAnything = {
     setEvents: e => events = e,
