@@ -2,7 +2,7 @@ const path = require("path");
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
 const _ = require("lodash");
-const {filter, wrap} = require("fuzzaldrin-plus");
+const {filter, wrap, score} = require("fuzzaldrin-plus");
 
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
@@ -108,6 +108,17 @@ function toggle() {
         hide();
 }
 
+function addThoseWithMinScore(allResults, results, searchStr, minScore)
+{
+    for(var i=0; i<results.length; i++) {
+        var result = results[i];
+        var resScore = score(result.name, searchStr);
+        result.score = resScore;
+        if( resScore > minScore )
+            allResults.push(result);
+    }
+}
+
 function refresh() {
 
     var searchStr = $input.val();
@@ -142,8 +153,8 @@ function refresh() {
     var fileResults = filter(cachedFiles, searchStr, {key: "name"});
     var symResults = filter(cachedSymbols, searchStr, {key: "name"});
 
-    results.push.apply(results, fileResults);
-    results.push.apply(results, symResults);
+    addThoseWithMinScore(results, fileResults, searchStr, 6000);
+    addThoseWithMinScore(results, symResults, searchStr, 6000);
     
     // Spread the rendering of the results over multiple frames
     // so that we don't have one big hit when there are lots of results.
