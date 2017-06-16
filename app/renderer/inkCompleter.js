@@ -1,28 +1,8 @@
-// Helper function that takes a list of InkFiles and walks their symbol trees to
-// get all the symbols in a flat list.
-function getAllSymbols(files) {
-    let globalSymbolList = [];
-
-    // Helper function that walks a symbol tree to find all the symbol names in
-    // it.
-    function walkSymbolTree(tree) {
-        for(const symbolName in tree) {
-            if( tree.hasOwnProperty(symbolName) ) {
-                const symbol = tree[symbolName];
-                globalSymbolList.push(symbol);
-                if( symbol.innerSymbols ) {
-                    walkSymbolTree(symbol.innerSymbols);
-                }
-            }
-        }
-    }
-
-    files.forEach(inkFile => {
-        const tree = inkFile.symbols.getSymbols();
-        walkSymbolTree(tree);
-    });
-
-    return globalSymbolList;
+// Helper function that gets all the divert targets from a list of InkFiles
+function getAllDivertTargets(files) {
+    return files.reduce(
+        (acc, cur) => acc.concat(cur.symbols.getDivertTargets()),
+        []);
 }
 
 // Helper function that gets all the variable names from a list of InkFiles
@@ -39,14 +19,14 @@ function getAllVocabWords(files) {
         []);
 }
 
-// Helper function that generates suggestions for all the symbols
-function getAllSymbolSuggestions(inkFiles) {
-    const symbols = getAllSymbols(inkFiles);
-    return symbols.map(
-        symbol => ({
-            caption: symbol.name,
-            value: symbol.name,
-            meta: symbol.flowType.name,
+// Helper function that generates suggestions for all the divert targets
+function getAllDivertTargetSuggestions(inkFiles) {
+    const targets = getAllDivertTargets(inkFiles);
+    return targets.map(
+        target => ({
+            caption: target,
+            value: target,
+            meta: "Divert Target",
         }));
 }
 
@@ -78,9 +58,10 @@ exports.inkCompleter = {
     getCompletions(editor, session, pos, prefix, callback) {
         // There are three possible ways we may want to suggest completions:
         //
-        // 1) If we are in a divert target, we should only suggest symbols.
+        // 1) If we are in a divert or knot name, we should only suggest divert
+        //    target names.
         // 2) If we are in a logic section, we should suggest variables,
-        //    symbols, (because they can be used as variables) and vocab words.
+        //    targets, (because they can be used as variables) and vocab words.
         //    (because logic can output text)
         // 3) If we are not in either, we should only suggest vocab words.
 
@@ -93,12 +74,13 @@ exports.inkCompleter = {
 
         var suggestions;
         if( isCursorInDivert ) {
-            suggestions = getAllSymbolSuggestions(this.inkFiles);
+            suggestions = getAllDivertTargetSuggestions(this.inkFiles);
         } else if( isCursorInLogic ) {
-            const symbolSuggestions = getAllSymbolSuggestions(this.inkFiles);
+            const divertTargetSuggestions = getAllDivertTargetSuggestions(this.inkFiles);
             const variableSuggestions = getAllVariableSuggestions(this.inkFiles);
-            const vocabSuggstions = getAllVocabSuggestions(this.inkFiles);
-            suggestions = symbolSuggestions.concat(variableSuggestions).concat(vocabSuggstions);
+            const vocabSuggestions = getAllVocabSuggestions(this.inkFiles);
+            suggestions = divertTargetSuggestions.concat(variableSuggestions).
+                    concat(vocabSuggestions);
         } else {
             suggestions = getAllVocabSuggestions(this.inkFiles);
         }
