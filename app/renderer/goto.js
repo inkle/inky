@@ -126,10 +126,24 @@ function refresh() {
 
     $results.scrollTop(0);
 
+    var results = [];
+
+    var lineNumMatch = searchStr.match(/^\s*(\d+)\s*$/);
+    if( lineNumMatch ) {
+        var lineNum = parseInt(lineNumMatch[1]);
+        var file = InkProject.currentProject.activeInkFile;
+        results.push({
+            line: lineNum-1,
+            lineContent: file.aceDocument.getLine(lineNum-1),
+            file: file
+        });
+    } 
+
     var fileResults = filter(cachedFiles, searchStr, {key: "name"});
     var symResults = filter(cachedSymbols, searchStr, {key: "name"});
 
-    var results = _.union(fileResults, symResults);
+    results.push.apply(results, fileResults);
+    results.push.apply(results, symResults);
     
     // Spread the rendering of the results over multiple frames
     // so that we don't have one big hit when there are lots of results.
@@ -183,7 +197,6 @@ function addResult(result, searchStr)
     }});
 
 
-
     var type = resultType(result);
     var $result;
 
@@ -194,6 +207,10 @@ function addResult(result, searchStr)
         if( dirName != "." )
             dirStr = `<span class='ancestor'>${dirName}/</span>`;
         $result = $(`<li class='file'>📄 ${dirStr}${wrappedResult}</li>`);
+    }
+
+    else if( type == "gotoLine" ) {
+        $result = $(`<li class='gotoLine'><p>➡︎ Go to line ${result.line+1}</p><p class='meta'>${result.lineContent}</p></li>`);
     }
 
     else if( type == "symbol" ) {
@@ -207,12 +224,14 @@ function addResult(result, searchStr)
             ancestorStr = `<span class='ancestor'>${ancestorStr}</span>`;
 
         var filePath = result.inkFile.relativePath();
-        $result = $(`<li class='symbol'><p>✎ ${ancestorStr}${wrappedResult}</p><p class='meta'>${filePath}</p></li>`);
+        var lineNo = result.row+1;
+        $result = $(`<li class='symbol'><p>✎ ${ancestorStr}${wrappedResult}</p><p class='meta'>${filePath} - line ${lineNo}</p></li>`);
     }
 
     else if( type == "content" ) {
         var filePath = result.file.relativePath();
-        $result = $(`<li class='content'><p>${wrappedResult}</p><p class='meta'>${filePath}</p></li>`);
+        var lineNo = result.row+1;
+        $result = $(`<li class='content'><p>${wrappedResult}</p><p class='meta'>${filePath} - line ${lineNo}</p></li>`);
     }
 
     $result.data("result", result);
@@ -240,7 +259,10 @@ function select($result)
 }
 
 function resultType(result)
-{
+{   
+    if( typeof result.lineContent != 'undefined' )
+        return "gotoLine";
+
     // Text content of line result
     if( typeof result.line !== 'undefined' )
         return "content";
@@ -264,6 +286,10 @@ function choose($result)
     // Text content of line result
     if( type == "content" )
         events.gotoFile(result.file, result.row);
+
+    // Go to line number
+    else if( type == "gotoLine" )
+        events.gotoFile(result.file, result.line);
 
     // File name
     if( type == "file" )
