@@ -825,12 +825,36 @@ img.issue-icon.warning {
 
 #goto-anything ul.results li {
   border-bottom: 1px solid #E1E1E1;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  color: #666;
+  font-size: 10pt;
+  position: relative;
+  height: 36px;
+  color: #444;
   cursor: default;
   user-select: none;
 }
+
+#goto-anything ul.results li.file {
+  font-size: 12pt;
+  line-height: 24pt;
+}
+
+#goto-anything ul.results li.content {
+  color: #888;
+}
+
+#goto-anything ul.results li p {
+  white-space: nowrap;
+  padding: 0;
+  margin: 0;
+  height: 19px;
+}
+
+#goto-anything ul.results li p.meta {
+  font-size: 8pt;
+  color: #AAA;
+}
+
+
 
 #goto-anything ul.results li.selected {
   background: #EEE;

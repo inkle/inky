@@ -1,3 +1,4 @@
+const path = require("path");
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
 const _ = require("lodash");
@@ -153,12 +154,15 @@ function refresh() {
         }
 
         // Render more results?
-        var maxResultIdx = Math.min(results.length, currentResultIdx+maxResultsPerInterval) - 1;
-        for(; currentResultIdx<=maxResultIdx; currentResultIdx++)
+        var maxResultIdxToRenderNow = Math.min(results.length, currentResultIdx+maxResultsPerInterval) - 1;
+        while(currentResultIdx <= maxResultIdxToRenderNow) {
             addResult(results[currentResultIdx], searchStr);
+            currentResultIdx++;
+        }
 
         // Done building results?
-        if( currentResultIdx >= maxResultIdx && currentLineGroupIdx >= cachedLineGroups.length ) {
+        const maxEverResults = 1000;
+        if( currentResultIdx >= results.length-1 && currentLineGroupIdx >= cachedLineGroups.length || currentResultIdx >= maxEverResults ) {
             clearInterval(resultsBuildInterval);
             resultsBuildInterval = null;
         }
@@ -178,16 +182,39 @@ function addResult(result, searchStr)
         tagClose: "</span>"
     }});
 
-    var ancestorStr = "";
-    var ancestor = result.parent
-    while(ancestor && ancestor.name) {
-        ancestorStr = ancestor.name + "." + ancestorStr;
-        ancestor = ancestor.parent;
+
+
+    var type = resultType(result);
+    var $result;
+
+    if( type == "file" ) {
+        var dirStr = "";
+        var file = result.file;
+        var dirName = path.dirname(file.relativePath());
+        if( dirName != "." )
+            dirStr = `<span class='ancestor'>${dirName}/</span>`;
+        $result = $(`<li class='file'>📄 ${dirStr}${wrappedResult}</li>`);
     }
-    if( ancestorStr )
-        ancestorStr = `<span class='ancestor'>${ancestorStr}</span>`;
-    
-    var $result = $(`<li>${ancestorStr}${wrappedResult}</li>`);
+
+    else if( type == "symbol" ) {
+        var ancestorStr = "";
+        var ancestor = result.parent
+        while(ancestor && ancestor.name) {
+            ancestorStr = ancestor.name + "." + ancestorStr;
+            ancestor = ancestor.parent;
+        }
+        if( ancestorStr )
+            ancestorStr = `<span class='ancestor'>${ancestorStr}</span>`;
+
+        var filePath = result.inkFile.relativePath();
+        $result = $(`<li class='symbol'><p>✎ ${ancestorStr}${wrappedResult}</p><p class='meta'>${filePath}</p></li>`);
+    }
+
+    else if( type == "content" ) {
+        var filePath = result.file.relativePath();
+        $result = $(`<li class='content'><p>${wrappedResult}</p><p class='meta'>${filePath}</p></li>`);
+    }
+
     $result.data("result", result);
     $result.on("click", result, () => choose($result));
     $result.on("mousemove", (e) => {
@@ -195,7 +222,7 @@ function addResult(result, searchStr)
         // just the document scrolling under the mouse.
         if( lastMousePos == null || lastMousePos.pageX != e.pageX || lastMousePos.pageY != e.pageY ) {
             lastMousePos = { pageX: e.pageX, pageY: e.pageY };
-            select($(e.target))
+            select($result);
         }
     });
     $results.append($result);
@@ -212,20 +239,38 @@ function select($result)
         $selectedResult.addClass("selected");
 }
 
-function choose($result)
+function resultType(result)
 {
-    var result = $result.data().result;
-
     // Text content of line result
     if( typeof result.line !== 'undefined' )
-        events.gotoFile(result.file, result.row);
+        return "content";
 
     // File name
     if( result.file )
-        events.gotoFile(result.file);
+        return "file";
 
     // Symbol
     else if( typeof result.row !== 'undefined' )
+        return "symbol";
+
+    return null;
+}
+
+function choose($result)
+{
+    var result = $result.data().result;
+    var type = resultType(result);
+
+    // Text content of line result
+    if( type == "content" )
+        events.gotoFile(result.file, result.row);
+
+    // File name
+    if( type == "file" )
+        events.gotoFile(result.file);
+
+    // Symbol
+    else if( type == "symbol" )
         events.gotoFile(result.inkFile, result.row);
 
     // done!
