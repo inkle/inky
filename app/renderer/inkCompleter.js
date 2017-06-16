@@ -1,55 +1,74 @@
+function union(...sets) {
+    const u = new Set();
+    for (const set of sets) {
+        for (const elem of set) {
+            u.add(elem);
+        }
+    }
+    return u;
+}
+
 // Helper function that gets all the divert targets from a list of InkFiles
 function getAllDivertTargets(files) {
     return files.reduce(
-        (acc, cur) => acc.concat(cur.symbols.getDivertTargets()),
+        (acc, cur) => union(acc, cur.symbols.getDivertTargets()),
         []);
 }
 
 // Helper function that gets all the variable names from a list of InkFiles
 function getAllVariables(files) {
     return files.reduce(
-        (acc, cur) => acc.concat(cur.symbols.getVariables()),
+        (acc, cur) => union(acc, cur.symbols.getVariables()),
         []);
 }
 
 // Helper function that gets all the vocabulary words from a list of InkFiles
 function getAllVocabWords(files) {
     return files.reduce(
-        (acc, cur) => acc.concat(cur.symbols.getVocabWords()),
+        (acc, cur) => union(acc, cur.symbols.getVocabWords()),
         []);
 }
 
 // Helper function that generates suggestions for all the divert targets
 function getAllDivertTargetSuggestions(inkFiles) {
     const targets = getAllDivertTargets(inkFiles);
-    return targets.map(
-        target => ({
+    const suggestions = [];
+    for (const target of targets) {
+        suggestions.push({
             caption: target,
             value: target,
             meta: "Divert Target",
-        }));
+        });
+    }
+    return suggestions;
 }
 
 // Helper function that generates suggestions for all the variables
 function getAllVariableSuggestions(inkFiles) {
     const variables = getAllVariables(inkFiles);
-    return variables.map(
-        variableName => ({
-            caption: variableName,
-            value: variableName,
+    const suggestions = [];
+    for (const variable of variables) {
+        suggestions.push({
+            caption: variable,
+            value: variable,
             meta: "Variable",
-        }));
+        });
+    }
+    return suggestions;
 }
 
 // Helper function that generates suggestions for all the vocabulary
 function getAllVocabSuggestions(inkFiles) {
     const vocabWords = getAllVocabWords(inkFiles);
-    return vocabWords.map(
-        word => ({
-            caption: word,
-            value: word,
+    const suggestions = [];
+    for (const vocabWord of vocabWords) {
+        suggestions.push({
+            caption: vocabWord,
+            value: vocabWord,
             meta: "Vocabulary",
-        }));
+        });
+    }
+    return suggestions;
 }
 
 exports.inkCompleter = {

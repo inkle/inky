@@ -56,9 +56,9 @@ InkFileSymbols.prototype.parse = function() {
 
     var globalTags = [];
     var globalDictionaryStyleTags = {};
-    var divertTargets = [];
-    var variables = [];
-    var vocabWords = [];
+    var divertTargets = new Set();
+    var variables = new Set();
+    var vocabWords = new Set();
 
     var it = new TokenIterator(session, 0, 0);
 
@@ -109,17 +109,17 @@ InkFileSymbols.prototype.parse = function() {
                 });
 
                 symbolStack.push(symbol);
-                divertTargets.push(symbolName);
+                divertTargets.add(symbolName);
             }
             else if( varType ) {
-                variables.push(symbolName);
+                variables.add(symbolName);
             }
             // Not a knot/stitch/gather/choice nor a variable. Do nothing.
         }
 
         // DIVERT
         else if( tok.type == "divert.target" && tok.value.trim().length > 0 ) {
-            divertTargets.push(tok.value);
+            divertTargets.add(tok.value);
         }
 
         // LIST
@@ -129,7 +129,7 @@ InkFileSymbols.prototype.parse = function() {
             potentialNames.forEach(potentialName => {
                 // Exclude "names" that are only numbers
                 if( !(/^\d*$/.test(potentialName)) ) {
-                    variables.push(potentialName);
+                    variables.add(potentialName);
                 }
             });
         }
@@ -158,8 +158,8 @@ InkFileSymbols.prototype.parse = function() {
         else if( tok.type == "text" ) {
             var words = tok.value.split(/\W+/);
             words.forEach(word => {
-                if( word.length >= 3 && !_.includes(vocabWords, word) ) {
-                    vocabWords.push(word);
+                if( word.length >= 3 ) {
+                    vocabWords.add(word);
                 }
             });
         }
