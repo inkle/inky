@@ -828,6 +828,8 @@ img.issue-icon.warning {
   padding-top: 5px;
   padding-bottom: 5px;
   color: #666;
+  cursor: default;
+  user-select: none;
 }
 
 #goto-anything ul.results li.selected {
