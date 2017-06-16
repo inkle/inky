@@ -19,6 +19,8 @@ var lastMousePos = null;
 var cachedFiles = null;
 var cachedSymbols = null;
 
+var resultsBuildInterval = null;
+
 var events = {
     gotoFile: () => {}
 };
@@ -81,8 +83,6 @@ function toggle() {
         hide();
 }
 
-
-
 function refresh() {
 
     var searchStr = $input.val();
@@ -93,43 +93,66 @@ function refresh() {
 
     if( !searchStr ) return;
 
+    // Cancel previous build of results
+    if( resultsBuildInterval != null ) {
+        clearInterval(resultsBuildInterval);
+        resultsBuildInterval = null;
+    }
+
     $results.scrollTop(0);
 
     var fileResults = filter(cachedFiles, searchStr, {key: "name"});
     var symResults = filter(cachedSymbols, searchStr, {key: "name"});
 
     var results = _.union(fileResults, symResults);
+    
+    // Spread the rendering of the results over multiple frames
+    // so that we don't have one big hit when there are lots of results.
+    const buildInterval = 200;          // add more every X ms
+    const maxResultsPerInterval = 20;   // how many results to add each interval
 
-    _.each(results, result => {
-        var resultName = result.name;
+    var currentResultIdx = 0;
+    var resultBuildTick = () => {
+        var maxResultIdx = Math.min(results.length, currentResultIdx+maxResultsPerInterval) - 1;
+        for(; currentResultIdx<=maxResultIdx; currentResultIdx++)
+            addResult(results[currentResultIdx], searchStr);
+    };
 
-        var wrappedResult = wrap(result.name, searchStr, { wrap: {
-            tagOpen: "<span class='goto-highlight'>",
-            tagClose: "</span>"
-        }});
+    // Run the first build tick immediately to fill up the view
+    resultBuildTick();
+    resultsBuildInterval = setInterval(resultBuildTick, buildInterval);
+}
 
-        var ancestorStr = "";
-        var ancestor = result.parent
-        while(ancestor && ancestor.name) {
-            ancestorStr = ancestor.name + "." + ancestorStr;
-            ancestor = ancestor.parent;
+function addResult(result, searchStr)
+{
+    var resultName = result.name;
+
+    var wrappedResult = wrap(result.name, searchStr, { wrap: {
+        tagOpen: "<span class='goto-highlight'>",
+        tagClose: "</span>"
+    }});
+
+    var ancestorStr = "";
+    var ancestor = result.parent
+    while(ancestor && ancestor.name) {
+        ancestorStr = ancestor.name + "." + ancestorStr;
+        ancestor = ancestor.parent;
+    }
+    if( ancestorStr )
+        ancestorStr = `<span class='ancestor'>${ancestorStr}</span>`;
+    
+    var $result = $(`<li>${ancestorStr}${wrappedResult}</li>`);
+    $result.data("result", result);
+    $result.on("click", result, () => choose($result));
+    $result.on("mousemove", (e) => {
+        // Only mouse-over something if it's really the mouse that moved rather than
+        // just the document scrolling under the mouse.
+        if( lastMousePos == null || lastMousePos.pageX != e.pageX || lastMousePos.pageY != e.pageY ) {
+            lastMousePos = { pageX: e.pageX, pageY: e.pageY };
+            select($(e.target))
         }
-        if( ancestorStr )
-            ancestorStr = `<span class='ancestor'>${ancestorStr}</span>`;
-        
-        var $result = $(`<li>${ancestorStr}${wrappedResult}</li>`);
-        $result.data("result", result);
-        $result.on("click", result, () => choose($result));
-        $result.on("mousemove", (e) => {
-            // Only mouse-over something if it's really the mouse that moved rather than
-            // just the document scrolling under the mouse.
-            if( lastMousePos == null || lastMousePos.pageX != e.pageX || lastMousePos.pageY != e.pageY ) {
-                lastMousePos = { pageX: e.pageX, pageY: e.pageY };
-                select($(e.target))
-            }
-        });
-        $results.append($result);
     });
+    $results.append($result);
 }
 
 function select($result)
