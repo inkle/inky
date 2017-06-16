@@ -18,7 +18,8 @@ var lastMousePos = null;
 
 var cachedFiles = null;
 var cachedSymbols = null;
-var cachedLines = null;
+var cachedLineGroups = null;
+const linesPerGroup = 20000;
 
 var resultsBuildInterval = null;
 
@@ -56,19 +57,26 @@ function show() {
     cachedSymbols = allSymbols;
 
     // Collect individual lines of all files
-    cachedLines = [];
+    cachedLineGroups = [];
+    var currentLines = [];
     for(var i=0; i<files.length; i++) {
         var file = files[i];
         var lines = file.getValue().split("\n");
         for(var row=0; row<lines.length; row++) {
             var line = lines[row];
-            cachedLines.push({
+            currentLines.push({
                 line: line,
+                lineLower: line.toLowerCase(),
                 row: row,
                 file: file
             });
+            if( currentLines.length > linesPerGroup ) {
+                cachedLineGroups.push(currentLines);
+                currentLines = [];
+            }
         }
     }
+    cachedLineGroups.push(currentLines);
 }
 
 function collectSymbols(allSymbols, symbolsObj, recurse)
@@ -119,20 +127,41 @@ function refresh() {
 
     var fileResults = filter(cachedFiles, searchStr, {key: "name"});
     var symResults = filter(cachedSymbols, searchStr, {key: "name"});
-    var lineResults = filter(cachedLines, searchStr, {key: "line"});
 
-    var results = _.union(fileResults, symResults, lineResults);
+    var results = _.union(fileResults, symResults);
     
     // Spread the rendering of the results over multiple frames
     // so that we don't have one big hit when there are lots of results.
-    const buildInterval = 200;          // add more every X ms
-    const maxResultsPerInterval = 20;   // how many results to add each interval
+    const buildInterval = 35;           // add more every X ms
+    const maxResultsPerInterval = 10;   // how many results to add each interval
 
     var currentResultIdx = 0;
+    var currentLineGroupIdx = 0;
+
     var resultBuildTick = () => {
+
+        // Search the text of more lines?
+        if( currentLineGroupIdx < cachedLineGroups.length ) {
+            var linesToSearch = cachedLineGroups[currentLineGroupIdx];
+            var searchStrLower = searchStr.toLowerCase();
+            for(var i=0; i<linesToSearch.length; i++) {
+                var line = linesToSearch[i];
+                if( line.lineLower.indexOf(searchStrLower) != -1 )
+                    results.push(line);
+            }
+            currentLineGroupIdx++;
+        }
+
+        // Render more results?
         var maxResultIdx = Math.min(results.length, currentResultIdx+maxResultsPerInterval) - 1;
         for(; currentResultIdx<=maxResultIdx; currentResultIdx++)
             addResult(results[currentResultIdx], searchStr);
+
+        // Done building results?
+        if( currentResultIdx >= maxResultIdx && currentLineGroupIdx >= cachedLineGroups.length ) {
+            clearInterval(resultsBuildInterval);
+            resultsBuildInterval = null;
+        }
     };
 
     // Run the first build tick immediately to fill up the view
