@@ -117,6 +117,11 @@ InkFileSymbols.prototype.parse = function() {
             // Not a knot/stitch/gather/choice nor a variable. Do nothing.
         }
 
+        // DIVERT
+        else if( tok.type == "divert.target" && tok.value.trim().length > 0 ) {
+            divertTargets.push(tok.value);
+        }
+
         // LIST
         else if( tok.type == "list-decl.item" && tok.value.trim().length > 0 ) {
             // Extract the name from the line

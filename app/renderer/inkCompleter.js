@@ -58,7 +58,7 @@ exports.inkCompleter = {
     getCompletions(editor, session, pos, prefix, callback) {
         // There are three possible ways we may want to suggest completions:
         //
-        // 1) If we are in a divert or knot name, we should only suggest divert
+        // 1) If we are in a divert or divert target, we should only suggest
         //    target names.
         // 2) If we are in a logic section, we should suggest variables,
         //    targets, (because they can be used as variables) and vocab words.
@@ -67,13 +67,15 @@ exports.inkCompleter = {
 
         const cursorToken = session.getTokenAt(pos.row, pos.column);
         const isCursorInDivert = (cursorToken.type.indexOf("divert") != -1);
+        const isCursorInFlow = (cursorToken.type.indexOf("flow") != -1);
+        const isCursorInLabel = (cursorToken.type.indexOf(".label") != -1);
         const isCursorInLogic = (cursorToken.type.indexOf("logic") != -1);
 
         // Ignore the prefix. ACE will find the most likely words in the list
         // for the prefix automatically.
 
         var suggestions;
-        if( isCursorInDivert ) {
+        if( isCursorInDivert || isCursorInFlow || isCursorInLabel ) {
             suggestions = getAllDivertTargetSuggestions(this.inkFiles);
         } else if( isCursorInLogic ) {
             const divertTargetSuggestions = getAllDivertTargetSuggestions(this.inkFiles);
