@@ -62,8 +62,7 @@ function setupMenus(callbacks) {
         {
           label: 'Close',
           accelerator: 'CmdOrCtrl+W',
-          enabled: callbacks.isFocusedWindow,
-          click: callbacks.close
+          role: 'close'
         }
       ]
     },
