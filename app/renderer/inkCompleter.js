@@ -1,4 +1,4 @@
-function union(...sets) {
+function union(sets) {
     const u = new Set();
     for (const set of sets) {
         for (const elem of set) {
@@ -10,23 +10,17 @@ function union(...sets) {
 
 // Helper function that gets all the divert targets from a list of InkFiles
 function getAllDivertTargets(files) {
-    return files.reduce(
-        (acc, cur) => union(acc, cur.symbols.getDivertTargets()),
-        []);
+    return union(files.map((file) => file.symbols.getDivertTargets()));
 }
 
 // Helper function that gets all the variable names from a list of InkFiles
 function getAllVariables(files) {
-    return files.reduce(
-        (acc, cur) => union(acc, cur.symbols.getVariables()),
-        []);
+    return union(files.map((file) => file.symbols.getVariables()));
 }
 
 // Helper function that gets all the vocabulary words from a list of InkFiles
 function getAllVocabWords(files) {
-    return files.reduce(
-        (acc, cur) => union(acc, cur.symbols.getVocabWords()),
-        []);
+    return union(files.map((file) => file.symbols.getVocabWords()));
 }
 
 // Helper function that generates suggestions for all the divert targets
