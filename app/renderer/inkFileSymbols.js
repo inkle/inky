@@ -9,6 +9,10 @@ function InkFileSymbols(inkFile, events) {
     this.dirty = true;
     this.parseTimeout = null;
 
+    this.divertTargets = new Set();
+    this.variables = new Set();
+    this.vocabWords = new Set();
+
     this.inkFile.aceDocument.on("change", () => {
         this.dirty = true;
         this.scheduleParse();
@@ -56,6 +60,7 @@ InkFileSymbols.prototype.parse = function() {
 
     var globalTags = [];
     var globalDictionaryStyleTags = {};
+
     var divertTargets = new Set();
     var variables = new Set();
     var vocabWords = new Set();
@@ -171,6 +176,7 @@ InkFileSymbols.prototype.parse = function() {
 
     this.globalTags = globalTags;
     this.globalDictionaryStyleTags = globalDictionaryStyleTags;
+
     this.divertTargets = divertTargets;
     this.variables = variables;
     this.vocabWords = vocabWords;
@@ -231,16 +237,6 @@ InkFileSymbols.prototype.getSymbols = function() {
     return this.symbols;
 }
 
-InkFileSymbols.prototype.getDivertTargets = function() {
-    if( this.dirty ) this.parse();
-    return this.divertTargets;
-}
-
-InkFileSymbols.prototype.getVariables = function() {
-    if( this.dirty ) this.parse();
-    return this.variables;
-}
-
 InkFileSymbols.prototype.getIncludes = function() {
     if( this.dirty ) this.parse();
     return this.includes;
@@ -251,8 +247,15 @@ InkFileSymbols.prototype.getLastIncludeRow = function() {
     return this.lastIncludeRow;
 }
 
-InkFileSymbols.prototype.getVocabWords = function() {
-    if( this.dirty ) this.parse();
+InkFileSymbols.prototype.getCachedDivertTargets = function() {
+    return this.divertTargets;
+}
+
+InkFileSymbols.prototype.getCachedVariables = function() {
+    return this.variables;
+}
+
+InkFileSymbols.prototype.getCachedVocabWords = function() {
     return this.vocabWords;
 }
 

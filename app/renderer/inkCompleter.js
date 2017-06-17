@@ -10,17 +10,17 @@ function union(sets) {
 
 // Helper function that gets all the divert targets from a list of InkFiles
 function getAllDivertTargets(files) {
-    return union(files.map((file) => file.symbols.getDivertTargets()));
+    return union(files.map((file) => file.symbols.getCachedDivertTargets()));
 }
 
 // Helper function that gets all the variable names from a list of InkFiles
 function getAllVariables(files) {
-    return union(files.map((file) => file.symbols.getVariables()));
+    return union(files.map((file) => file.symbols.getCachedVariables()));
 }
 
 // Helper function that gets all the vocabulary words from a list of InkFiles
 function getAllVocabWords(files) {
-    return union(files.map((file) => file.symbols.getVocabWords()));
+    return union(files.map((file) => file.symbols.getCachedVocabWords()));
 }
 
 // Helper function that generates suggestions for all the divert targets
