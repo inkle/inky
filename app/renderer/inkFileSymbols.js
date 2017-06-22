@@ -9,6 +9,10 @@ function InkFileSymbols(inkFile, events) {
     this.dirty = true;
     this.parseTimeout = null;
 
+    this.divertTargets = new Set();
+    this.variables = new Set();
+    this.vocabWords = new Set();
+
     this.inkFile.aceDocument.on("change", () => {
         this.dirty = true;
         this.scheduleParse();
@@ -32,12 +36,16 @@ InkFileSymbols.prototype.parse = function() {
 
     var session = this.inkFile.getAceSession();
 
-    const flowTypes = {
-        knot:   { code: ".knot.declaration",   level: 1 },
-        stitch: { code: ".stitch.declaration", level: 2 },
-        choice: { code: "choice.label",        level: 3 },
-        gather: { code: "gather.label",        level: 3 }
-    };
+    const flowTypes = [
+        { name: "Knot",   code: ".knot.declaration",   level: 1 },
+        { name: "Stitch", code: ".stitch.declaration", level: 2 },
+        { name: "Choice", code: "choice.label",        level: 3 },
+        { name: "Gather", code: "gather.label",        level: 3 },
+    ];
+    const varTypes = [
+        { name: "Variable", code: "var-decl"  },
+        { name: "List",     code: "list-decl" },
+    ];
     const topLevelInkFlow = { level: 0 };
 
     var symbolStack = [{
@@ -53,6 +61,10 @@ InkFileSymbols.prototype.parse = function() {
     var globalTags = [];
     var globalDictionaryStyleTags = {};
 
+    var divertTargets = new Set();
+    var variables = new Set();
+    var vocabWords = new Set();
+
     var it = new TokenIterator(session, 0, 0);
 
     // this shouldn't be necessary should it?!
@@ -67,46 +79,64 @@ InkFileSymbols.prototype.parse = function() {
 
             var symbolName = tok.value;
 
-            var flowType = null;
-            for(var flowTypeName in flowTypes) {
-                var flowTypeObj = flowTypes[flowTypeName];
-                if( tok.type.indexOf(flowTypeObj.code) != -1 ) {
-                    flowType = flowTypeObj;
-                    break;
+            const findType = (token, typeList) =>
+                typeList.find(
+                    (type) => token.type.indexOf(type.code) != -1);
+
+            const flowType = findType(tok, flowTypes);
+            const varType  = findType(tok, varTypes);
+
+            if( flowType ) {
+                while( flowType.level <= symbolStack.currentElement().flowType.level )
+                    symbolStack.pop();
+
+                var symbol = {
+                    name: symbolName,
+                    flowType: flowType,
+                    row: it.getCurrentTokenRow(),
+                    column: it.getCurrentTokenColumn(),
+                    inkFile: this.inkFile
+                };
+
+                var parent = symbolStack.currentElement();
+                if( parent != symbolStack )
+                    symbol.parent = parent;
+
+                if( !parent.innerSymbols ) {
+                    parent.innerSymbols = [];
+                    parent.rangeIndex = [];
                 }
+
+                parent.innerSymbols[symbolName] = symbol;
+                parent.rangeIndex.push({
+                    rowStart: symbol.row,
+                    symbol: symbol
+                });
+
+                symbolStack.push(symbol);
+                divertTargets.add(symbolName);
             }
-
-            // Not a knot/stitch/gather/choice (e.g. might be a variable name)
-            if( !flowType )
-                continue;
-            
-            while( flowType.level <= symbolStack.currentElement().flowType.level )
-                symbolStack.pop();
-
-            var symbol = {
-                name: symbolName,
-                flowType: flowType,
-                row: it.getCurrentTokenRow(),
-                column: it.getCurrentTokenColumn(),
-                inkFile: this.inkFile
-            };
-            
-            var parent = symbolStack.currentElement();
-            if( parent != symbolStack )
-                symbol.parent = parent;
-
-            if( !parent.innerSymbols ) {
-                parent.innerSymbols = [];
-                parent.rangeIndex = [];
+            else if( varType ) {
+                variables.add(symbolName);
             }
+            // Not a knot/stitch/gather/choice nor a variable. Do nothing.
+        }
 
-            parent.innerSymbols[symbolName] = symbol;
-            parent.rangeIndex.push({
-                rowStart: symbol.row,
-                symbol: symbol
+        // DIVERT
+        else if( tok.type == "divert.target" && tok.value.trim().length > 0 ) {
+            divertTargets.add(tok.value);
+        }
+
+        // LIST
+        else if( tok.type == "list-decl.item" && tok.value.trim().length > 0 ) {
+            // Extract the name from the line
+            var potentialNames = tok.value.match(/\b\w+\b/g);
+            potentialNames.forEach(potentialName => {
+                // Exclude "names" that are only numbers
+                if( !(/^\d*$/.test(potentialName)) ) {
+                    variables.add(potentialName);
+                }
             });
-
-            symbolStack.push(symbol);
         }
 
         // INCLUDE
@@ -129,6 +159,16 @@ InkFileSymbols.prototype.parse = function() {
             }
         }
 
+        // Prose text
+        else if( tok.type == "text" ) {
+            var words = tok.value.split(/\W+/);
+            words.forEach(word => {
+                if( word.length >= 3 ) {
+                    vocabWords.add(word);
+                }
+            });
+        }
+
     } // for token iterator
 
     this.symbols = symbolStack[0].innerSymbols;
@@ -136,6 +176,10 @@ InkFileSymbols.prototype.parse = function() {
 
     this.globalTags = globalTags;
     this.globalDictionaryStyleTags = globalDictionaryStyleTags;
+
+    this.divertTargets = divertTargets;
+    this.variables = variables;
+    this.vocabWords = vocabWords;
 
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];
@@ -201,6 +245,18 @@ InkFileSymbols.prototype.getIncludes = function() {
 InkFileSymbols.prototype.getLastIncludeRow = function() {
     if( this.dirty ) this.parse();
     return this.lastIncludeRow;
+}
+
+InkFileSymbols.prototype.getCachedDivertTargets = function() {
+    return this.divertTargets;
+}
+
+InkFileSymbols.prototype.getCachedVariables = function() {
+    return this.variables;
+}
+
+InkFileSymbols.prototype.getCachedVocabWords = function() {
+    return this.vocabWords;
 }
 
 exports.InkFileSymbols = InkFileSymbols;

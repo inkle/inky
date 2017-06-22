@@ -30,6 +30,7 @@ function InkProject(mainInkFilePath) {
     this.mainInk = null;
     this.mainInk = this.createInkFile(mainInkFilePath || null);
 
+    EditorView.setFiles(this.files);
     this.showInkFile(this.mainInk);
 
     this.startFileWatching();
@@ -69,6 +70,7 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
         this.mainInk.addIncludeLine(newIncludeFile.relativePath());
 
     NavView.setFiles(this.mainInk, this.files);
+    EditorView.setFiles(this.files);
     return newIncludeFile;
 }
 
@@ -115,6 +117,7 @@ InkProject.prototype.refreshIncludes = function() {
     includeRelPathsToLoad.forEach(newIncludeRelPath => this.createInkFile(newIncludeRelPath));
 
     NavView.setFiles(this.mainInk, this.files);
+    EditorView.setFiles(this.files);
 }
 
 InkProject.prototype.refreshUnsavedChanges = function() {
@@ -477,6 +480,7 @@ InkProject.prototype.deleteInkFile = function(inkFile) {
     this.files.remove(inkFile);
 
     NavView.setFiles(this.mainInk, this.files);
+    EditorView.setFiles(this.files);
 }
 
 InkProject.prototype.findSymbol = function(name, posContext) {
