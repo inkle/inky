@@ -19,6 +19,7 @@ var lastMousePos = null;
 
 var cachedFiles = null;
 var cachedSymbols = null;
+var cachedActiveFileSymbols = null;
 var cachedLineGroups = null;
 const linesPerGroup = 20000;
 
@@ -48,20 +49,35 @@ function show() {
 
     // Collect all symbols
     var allSymbols = [];
+    var activeFileSymbols = [];
     for(var i=0; i<files.length; i++) {
         var file = files[i];
         var fileSymbols = file.symbols.getSymbols();
 
-        var recurse = file == InkProject.currentProject.activeInkFile;
-        collectSymbols(allSymbols, fileSymbols, recurse);
+        if( file == InkProject.currentProject.activeInkFile ) {
+            collectSymbols(activeFileSymbols, fileSymbols, true);
+        } else {
+            collectSymbols(allSymbols, fileSymbols, false);
+        }
     }
     cachedSymbols = allSymbols;
+    cachedActiveFileSymbols = activeFileSymbols;
 
     // Collect individual lines of all files
+    // First, put the active file at the start so it gets searched first
+    var filesSorted = [];
+    filesSorted.push(InkProject.currentProject.activeInkFile);
+    for(var i=0; i<files.length; i++) {
+        var f = files[i];
+        if( f != InkProject.currentProject.activeInkFile )
+            filesSorted.push(f);
+    }
+
+    // Split files into lines for faster repeated searchability
     cachedLineGroups = [];
     var currentLines = [];
-    for(var i=0; i<files.length; i++) {
-        var file = files[i];
+    for(var i=0; i<filesSorted.length; i++) {
+        var file = filesSorted[i];
         var lines = file.getValue().split("\n");
         for(var row=0; row<lines.length; row++) {
             var line = lines[row];
@@ -151,9 +167,11 @@ function refresh() {
     } 
 
     var fileResults = filter(cachedFiles, searchStr, {key: "name"});
+    var activeFileSymResults = filter(cachedActiveFileSymbols, searchStr, {key: "name"});
     var symResults = filter(cachedSymbols, searchStr, {key: "name"});
 
     addThoseWithMinScore(results, fileResults, searchStr, 6000);
+    addThoseWithMinScore(results, activeFileSymResults, searchStr, 6000);
     addThoseWithMinScore(results, symResults, searchStr, 6000);
     
     // Spread the rendering of the results over multiple frames
