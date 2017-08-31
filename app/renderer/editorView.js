@@ -146,7 +146,7 @@ exports.EditorView = {
     setEvents: (e) => { events = e; },
     getValue: () => { return editor.getValue(); },
     setValue: (v) => { editor.setValue(v); },
-    gotoLine: (row, col) => { editor.gotoLine(row, col); },
+    gotoLine: (row, col) => { editor.gotoLine(row, col); editor.focus(); },
     addError: addError,
     setErrors: setErrors,
     setFiles: (inkFiles) => {

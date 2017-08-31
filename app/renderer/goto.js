@@ -7,6 +7,7 @@ const {filter, wrap, score} = require("fuzzaldrin-plus");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 const InkProject = require("./inkProject.js").InkProject;
+const EditorView = require("./editorView.js").EditorView;
 
 var $goto = null;
 var $gotoContainer = null;
@@ -30,15 +31,23 @@ var events = {
 };
 
 function show() {
+
+    EditorView.saveCursorPos();
+
+    // Immediately focus the input box even if it's not
+    // quite visible yet so that if you CMD-P and start typing immediately
+    // the text goes in the right place.
+    $input.focus();
+
+    $(document).on("keydown", gotoGlobalKeyHandler);
+
+    // Show goto view
     $goto.removeClass("hidden");
     $gotoContainer.removeClass("ignore-events");
     $input.val("");
 
+    // Deselect any previously selected result
     select(null);
-
-    setTimeout(() => $input.focus(), 200);
-
-    $(document).on("keydown", gotoGlobalKeyHandler);
 
     // Collect all files
     var files = InkProject.currentProject.files;
@@ -110,11 +119,16 @@ function collectSymbols(allSymbols, symbolsObj, recurse)
     }
 }
 
-function hide() {
+function hide({restoreCursor=true}={}) {
     $(document).off("keydown", gotoGlobalKeyHandler);
 
     $goto.addClass("hidden");
     $gotoContainer.addClass("ignore-events");
+
+    if( restoreCursor ) {
+        EditorView.focus();
+        EditorView.restoreCursorPos();
+    }
 }
 
 function toggle() {
@@ -329,7 +343,7 @@ function choose($result)
         events.gotoFile(result.inkFile, result.row);
 
     // done!
-    hide();
+    hide({restoreCursor: false});
 }
 
 function nextResult() {
@@ -373,26 +387,28 @@ function gotoGlobalKeyHandler(e) {
 
     // down
     if( e.keyCode == 40 ) {
+        e.preventDefault();
         nextResult();
         scrollToRevealResult();
-        e.preventDefault();
     } 
 
     // up
     else if( e.keyCode == 38 ) {
+        e.preventDefault();
         previousResult();
         scrollToRevealResult();
-        e.preventDefault();
     }
 
     // return
     else if( e.keyCode == 13 ) {
+        e.preventDefault();
         if( $selectedResult != null )
             choose($selectedResult);
     }
 
     // escape
     else if( e.keyCode == 27 ) {
+        e.preventDefault();
         hide();
     }
 }
