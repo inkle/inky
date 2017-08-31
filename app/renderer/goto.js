@@ -278,7 +278,7 @@ function addResult(result, searchStr)
     }
 
     $result.data("result", result);
-    $result.on("click", result, () => choose($result));
+    $result.on("click", result, (e) => { choose($result); e.preventDefault(); return false; });
     $result.on("mousemove", (e) => {
         // Only mouse-over something if it's really the mouse that moved rather than
         // just the document scrolling under the mouse.
