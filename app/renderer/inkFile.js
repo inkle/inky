@@ -4,6 +4,7 @@ const assert = require("assert");
 
 const remote = require('electron').remote;
 const dialog = remote.dialog;
+const mkdirp = require('mkdirp');
 
 const InkFileSymbols = require("./inkFileSymbols.js").InkFileSymbols;
 
@@ -172,7 +173,12 @@ InkFile.prototype.save = function(afterSaveCallback) {
         var fileContent = this.aceDocument.getValue();
         if( !fileContent || fileContent.length < 1 ) throw "Empty file content in aceDocument!";
         
-        fs.writeFile(this.absolutePath(), fileContent, "utf8", (err) => {
+        // Ensure that the enclosing folder exists beforehand
+        var fileAbsPath = this.absolutePath();
+        var fileDirectory = path.dirname(fileAbsPath);
+        mkdirp.sync(fileDirectory);
+
+        fs.writeFile(fileAbsPath, fileContent, "utf8", (err) => {
             this.brandNewEmpty = false;
             if( err ) 
                 afterSaveCallback(false);
