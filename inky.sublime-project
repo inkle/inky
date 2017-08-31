@@ -4,5 +4,12 @@
 		{
 			"path": "."
 		}
-	]
+	],
+    "build_systems":
+    [
+        {
+            "name": "Run Inky",
+            "shell_cmd": "cd $project_path/app && npm start"
+        }
+    ]
 }
