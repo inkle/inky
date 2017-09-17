@@ -47,22 +47,10 @@ Take a look at the [issues page](https://github.com/inkle/inky/issues) for an is
 
 To build the project:
 
-### Mac
-
 * Install [node.js](https://nodejs.org/en/) if you don't already have it
 * Clone the repo
-* Double-click the `INSTALL_AND_RUN.command` script.
-* For subsequent runs, if no npm packages have changed, you can run the `RUN.command` script. or type `npm start` in the shell (on Windows).
-
-### Windows
-
-* Install [node.js](https://nodejs.org/en/) if you don't already have it
-* Install git if you don't already have it
-* Clone the repo
-* Open Powershell, cd into the app directory, and type `npm install`, then `npm start`.
-* For subsequent runs, if no npm packages have changed, you can run the `RUN_FOR_WINDOWS.bat` script.
-* Install VSCode if you want to edit the editor. Use open file and select /Inky/
-* To launch Inky editor from VSCode open up terminal and enter .\RUN_FOR_WINDOWS.bat
+* On Mac, double-click the `INSTALL_AND_RUN.command` script. On Windows, open Powershell, cd into the app directory, and type `npm install`, then `npm start`.
+* For subsequent runs, if no npm packages have changed, you can run the `RUN.command` script on Mac, or type `npm start` in the shell (on Windows).
 
 ### Linux
 * Install [node.js](https://nodejs.org/en/) if you don't already have it
