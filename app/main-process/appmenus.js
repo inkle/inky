@@ -208,14 +208,15 @@ function setupMenus(callbacks) {
     },
   ];
 
+  const name = app.getName();
+  const aboutWindowLabel = 'About ' + name;
   // Mac specific menus
   if (process.platform === 'darwin') {
-    const name = app.getName();
     template.unshift({
       label: name,
       submenu: [
         {
-          label: 'About ' + name,
+          label: aboutWindowLabel,
           click: callbacks.showAbout
           // role: 'about'
         },
@@ -266,9 +267,23 @@ function setupMenus(callbacks) {
       }
     );
   }
+  else
+  {
+    // Windows specific menu items
+    template.find(x => x.label === "Help").submenu.push(
+      {
+        label: aboutWindowLabel,
+        click: callbacks.showAbout
+      }
+    );
+  }
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
+}
+
+function labelIsHelp(menuItem) {
+  return menuItem.label === 'Help';
 }
 
 exports.setupMenus = setupMenus;
