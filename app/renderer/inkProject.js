@@ -176,7 +176,7 @@ InkProject.prototype.startFileWatching = function() {
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
             // TODO: maybe ask user if they want to overwrite? not sure I want to though
-            if( !inkFile.hasUnsavedChanges )
+            if( !inkFile.hasUnsavedChanges ) {
 
                 if( this.activeInkFile == inkFile )
                     EditorView.saveCursorPos();
@@ -185,6 +185,7 @@ InkProject.prototype.startFileWatching = function() {
                     if( success && this.activeInkFile == inkFile )
                         setImmediate(() => EditorView.restoreCursorPos());
                 });
+            }
         }
     });
     this.fileWatcher.on("unlink", removedAbsFilePath => {
