@@ -57,9 +57,10 @@ $(document).ready(() => {
             $inputBox.addClass("error");
             setImmediate(() => $inputBox.focus());
         } else {
-            setIncludeFormVisible(false);
+            
             var shouldAddToMainInk = $addToMainInkCheckbox.get(0).checked;
-            events.addInclude(confirmedFilename, shouldAddToMainInk);
+            var success = events.addInclude(confirmedFilename, shouldAddToMainInk);
+            if( success ) setIncludeFormVisible(false);
         }
     }
 

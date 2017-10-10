@@ -227,8 +227,12 @@ NavView.setEvents({
     },
     addInclude: (filename, addToMainInk) => {
         var newInkFile = InkProject.currentProject.addNewInclude(filename, addToMainInk);
-        InkProject.currentProject.showInkFile(newInkFile);
-        NavHistory.addStep();
+        if( newInkFile ) {
+            InkProject.currentProject.showInkFile(newInkFile);
+            NavHistory.addStep();
+            return true;
+        }
+        return false;
     }
 });
 

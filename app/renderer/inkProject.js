@@ -64,6 +64,19 @@ InkProject.prototype.createInkFile = function(anyPath) {
 
 InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
 
+    // Convert new include path to relative if it's not already
+    if( path.isAbsolute(newIncludePath) ) {
+        assert(this.mainInkFile.projectDir, "Main ink needs to be saved before we start loading includes with absolute paths.");
+        newIncludePath = path.relative(this.mainInk.projectDir, newIncludePath);
+    }
+
+    // Make sure it doesn't already exist
+    var alreadyExists = _.some(this.files, (f) => f.relativePath() == newIncludePath);
+    if( alreadyExists ) {
+        alert("Could not create new include file at "+newIncludePath+" because it already exists!");
+        return null;
+    }
+
     var newIncludeFile = this.createInkFile(newIncludePath || null);
 
     if( addToMainInk )
