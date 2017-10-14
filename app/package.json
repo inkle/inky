@@ -6,7 +6,8 @@
   "main": "main-process/main.js",
   "scripts": {
     "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html",
-    "start": "electron main-process/main.js"
+    "start": "electron main-process/main.js",
+    "test": "./node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -24,8 +25,11 @@
   },
   "homepage": "http://www.inklestudios.com/ink",
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "electron": "^1.4.3",
     "markdown-html": "^0.0.8",
+    "mocha": "^4.0.1",
     "spectron": "^3.2.6"
   },
   "dependencies": {
