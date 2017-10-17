@@ -51,3 +51,61 @@ describe('application launch tests', function () {
   })
 })
 
+describe('compiles hello world game', function () {
+  this.timeout(10000)
+
+  beforeEach(function () {
+    this.app = new Application({
+      path: inkyPathsByPlatform[process.platform]
+    })
+    return this.app.start().then(function (app) {
+        chaiAsPromised.transferPromiseness = app.transferPromiseness;
+        return app;
+    });
+  })
+
+  afterEach(function () {
+    if (this.app && this.app.isRunning()) {
+      return this.app.stop()
+    }
+  })
+
+  it('writes and reads hello world', function () {
+    const input = "Hello World!";
+    return this.app.client
+      .setValue('.ace_text-input', input)
+      .pause(2000)
+      .getText('.storyText')
+      .should.eventually.equal(input)
+  })
+
+  it('writes and selects a choice', function () {
+    const input = "Hello World! \n * Hello back \n Nice to hear from you! \n -> END";
+    const resultChoice = "Hello back";
+    const resultAnswer = "Nice to hear from you!";
+
+    return this.app.client
+      .setValue('.ace_text-input', input)
+      .pause(2000)
+      .click('.choice')
+      .pause(2000)
+      .getText('.storyText:nth-of-type(2)')
+      .should.eventually.equal(resultChoice)
+      .getText('.storyText:nth-of-type(3)')
+      .should.eventually.equal(resultAnswer)
+  })
+
+  it('suppresses choice text', function () {
+    const input = "Hello World! \n * [Hello back] \n Nice to hear from you! \n -> END";
+    const resultAnswer = "Nice to hear from you!";
+
+    return this.app.client
+      .setValue('.ace_text-input', input)
+      .pause(2000)
+      .click('.choice')
+      .pause(2000)
+      .getText('.storyText:nth-of-type(2)')
+      .should.eventually.equal(resultAnswer)
+  })
+})
+
