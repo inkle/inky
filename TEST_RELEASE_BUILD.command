@@ -1,2 +1,3 @@
 cd "`dirname "$0"`"
-mocha
+cd app
+npm test
