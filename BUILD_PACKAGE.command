@@ -17,7 +17,7 @@ rm -rf ReleaseUpload
 ./resources/makeIcns.command
 
 # Ensure it's correctly/fully installed first
-( cd app && npm install )
+( cd app && npm install && ./node_modules/.bin/electron-rebuild )
 
 # Mac
 electron-packager app Inky --platform=darwin --arch=x64 --icon=resources/Icon.icns --extend-info=resources/info.plist --app-bundle-id=com.inkle.inky --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_win.exe"

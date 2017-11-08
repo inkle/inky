@@ -25,6 +25,7 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 const NavHistory = require("./navHistory.js").NavHistory;
 const GotoAnything = require("./goto.js").GotoAnything;
+const SpellChecker = require("./spellChecker.js");
 
 InkProject.setEvents({
     "newProject": (project) => {
@@ -37,6 +38,7 @@ InkProject.setEvents({
         NavView.setMainInkFilename(filename);
         NavHistory.reset();
         NavHistory.addStep();
+        SpellChecker.spellCheck(undefined, 0);
     },
     "didSave": () => {
         var activeInk = InkProject.currentProject.activeInkFile;
@@ -171,8 +173,9 @@ LiveCompiler.setEvents({
 });
 
 EditorView.setEvents({
-    "change": () => {
+    "change": (e) => {
         LiveCompiler.setEdited();
+        SpellChecker.spellCheck(e);
     },
     "jumpToSymbol": (symbolName, contextPos) => {
         var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);

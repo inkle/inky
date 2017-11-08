@@ -11,7 +11,7 @@ rm -rf Inky-darwin-x64/
 rm ReleaseUpload/Inky_mac.dmg
 
 # Ensure it's correctly/fully installed first
-( cd app && npm install )
+( cd app && npm install && ./node_modules/.bin/electron-rebuild )
 
 # Create icon from PNG
 ./resources/makeIcns.command
