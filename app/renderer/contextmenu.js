@@ -1,6 +1,8 @@
 const {remote} = require('electron')
 const {Menu, MenuItem} = remote
-const SpellChecker = require("./spellChecker.js")
+const SpellChecker = require('./spellChecker.js')
+
+const maxSpellingSuggestions = 4;
 
 const playerViewMenu = new Menu()
 playerViewMenu.append(new MenuItem({ role: 'copy' }))
@@ -31,7 +33,7 @@ function withSpellingSuggestions(template, editor) {
     const pos = editor.getCursorPosition()
     var suggestions = SpellChecker.getSuggestions(pos)
     if (suggestions instanceof Array) {
-        suggestions = suggestions.map(suggestion => {
+        suggestions = suggestions.slice(0, maxSpellingSuggestions).map(suggestion => {
             return {
                 label: suggestion.word,
                 click() {
@@ -39,10 +41,14 @@ function withSpellingSuggestions(template, editor) {
                 }
             }
         })
-        if (!suggestions.length) {
+        if (suggestions.length) {
+            suggestions.push({ type: 'separator' });
+            suggestions.push({ label: 'Ignore Spelling', click: () => SpellChecker.ignoreWordAt(pos) });
+            suggestions.push({ label: 'Learn Spelling', click: () => SpellChecker.learnWordAt(pos) });
+        } else {
             suggestions = [{ label: 'No Guesses Found' }]
         }
-        template = suggestions.slice(0, 3).concat({ type: 'separator' }, template)
+        template = suggestions.concat({ type: 'separator' }, template)
     }
     return template
 }

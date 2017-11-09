@@ -1,5 +1,7 @@
+const ipc = require("electron").ipcRenderer;
 const SpellChecker = require("spellchecker");
 const Range = ace.require('ace/range').Range;
+const preferences = require('./preferences.js');
 
 const defaultDelay = 500;
 const scrollCheckDelay = 2000;
@@ -15,12 +17,14 @@ const checkableTypes = [
     "logic.sequence.innerContent",
     "logic.multiline.innerContent"
 ];
+exports.checkableTypes = checkableTypes;
 
 var range;
 var previousCursor;
 var previousVisibleRow;
 var spellcheckTimerID;
 var markers = {};
+var ignoredWords = [];
 
 setInterval(() => {
     const firstVisibleRow = ace.edit("editor").getFirstVisibleRow();
@@ -30,7 +34,23 @@ setInterval(() => {
     previousVisibleRow = firstVisibleRow;
 }, scrollCheckDelay);
 
+ipc.on("toggle-spell-check", () => {
+    if (preferences.checkSpelling) {
+        exports.spellCheck(null, 0);
+    } else {
+        const session = ace.edit("editor").getSession();
+        for (var markerID in markers) {
+            session.removeMarker(markerID);
+        }
+        markers = {};
+    }
+});
+
 exports.spellCheck = function (scope, delay) {
+    if (!preferences.checkSpelling) {
+        return;
+    }
+
     if (spellcheckTimerID) {
         clearTimeout(spellcheckTimerID);
     }
@@ -108,12 +128,16 @@ function doSpellCheck() {
                         continue;
                     }
 
+                    const word = line.substring(misspellings[j].start, misspellings[j].end);
+                    if (ignoredWords.indexOf(word) !== -1) {
+                        continue;
+                    }
+
                     // anchor the marker in the document
                     where.start = session.doc.createAnchor(where.start);
                     where.end = session.doc.createAnchor(where.end);
 
                     var markerID = session.addMarker(where, "ace-misspelled", "typo", false);
-                    const word = line.substring(misspellings[j].start, misspellings[j].end);
                     markers[markerID] = { where: where, word: word };
                 }
             }));
@@ -132,7 +156,11 @@ function isTypingWord(cursor, where) {
             (previousCursor.row === cursor.row && previousCursor.column === cursor.column - 1));
 }
 
-exports.getSuggestions = function(pos) {
+exports.getSuggestions = function (pos) {
+    if (!preferences.checkSpelling) {
+        return;
+    }
+
     var suggestions;
     for (var markerID in markers) {
         if (markers[markerID].where.contains(pos.row, pos.column)) {
@@ -147,4 +175,32 @@ exports.getSuggestions = function(pos) {
         }
     }
     return suggestions;
+}
+
+exports.ignoreWordAt = function (pos) {
+    const word = getWordAt(pos);
+    ignoredWords.push(word);
+    removeMarkersForWord(word);
+}
+
+exports.learnWordAt = function (pos) {
+    const word = getWordAt(pos);
+    SpellChecker.add(word);
+    removeMarkersForWord(word);
+}
+
+function getWordAt(pos) {
+    const session = ace.edit("editor").getSession();
+    const range = session.getWordRange(pos.row, pos.column);
+    return session.getDocument().getTextRange(range);
+}
+
+function removeMarkersForWord(word) {
+    const session = ace.edit("editor").getSession();
+    for (var markerID in markers) {
+        if (markers[markerID].word === word) {
+            session.removeMarker(markerID);
+            delete markers[markerID];
+        }
+    }
 }

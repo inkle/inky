@@ -4,6 +4,7 @@ const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 const _ = require("lodash");
 const Menu = electron.Menu;
+const preferences = require("../renderer/preferences.js");
 
 function setupMenus(callbacks) {
   const template = [
@@ -102,6 +103,23 @@ function setupMenus(callbacks) {
           accelerator: 'CmdOrCtrl+A',
           role: 'selectall'
         },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Spell Checking',
+          type: "checkbox",
+          checked: preferences.checkSpelling,
+          click: callbacks.toggleSpelling
+        },
+        {
+          label: 'Smart Quotes && Dashes',
+          type: "checkbox",
+          checked: preferences.smartQuotesAndDashes,
+          click(item) {
+            preferences.smartQuotesAndDashes = item.checked;
+          }
+        },
       ]
     },
     {
@@ -140,7 +158,7 @@ function setupMenus(callbacks) {
         {
           label: 'Tags visible',
           type: "checkbox",
-          checked: true,
+          checked: preferences.tagsVisible,
           click: callbacks.toggleTags
         },
         {
@@ -260,7 +278,7 @@ function setupMenus(callbacks) {
         },
       ]
     });
-    
+
     var windowMenu = _.find(template, menu => menu.role == "window");
     windowMenu.submenu.push(
       {

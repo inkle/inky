@@ -36,6 +36,7 @@
   "dependencies": {
     "chokidar": "^1.6.0",
     "fuzzaldrin-plus": "^0.5",
+    "electron-settings": "^3.1.4",
     "inkjs": "^1.6.0",
     "lodash": "^4.13.1",
     "mkdirp": "^0.5.1",
