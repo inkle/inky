@@ -3,6 +3,18 @@ const Range = ace.require('ace/range').Range;
 
 const defaultDelay = 500;
 const scrollCheckDelay = 2000;
+const checkableTypes = [
+    "text",
+    "choice.weaveInsideBrackets",
+    "todo",
+    "comment.block.json",
+    "comment.block.documentation.json",
+    "comment.line.double-slash.js",
+    "list-decl.item",
+    "logic.inline.innerContent",
+    "logic.sequence.innerContent",
+    "logic.multiline.innerContent"
+];
 
 var range;
 var previousCursor;
@@ -87,6 +99,12 @@ function doSpellCheck() {
 
                     // don't mark in-progress words as misspelled
                     if (isTypingWord(cursor, where)) {
+                        continue;
+                    }
+
+                    // only check text
+                    const cursorToken = session.getTokenAt(where.start.row, where.start.column + 1);
+                    if (!cursorToken || checkableTypes.indexOf(cursorToken.type) === -1) {
                         continue;
                     }
 
