@@ -2,17 +2,28 @@ const SpellChecker = require("spellchecker");
 const Range = ace.require('ace/range').Range;
 
 const defaultDelay = 500;
+const scrollCheckDelay = 2000;
 
 var range;
 var previousCursor;
+var previousVisibleRow;
 var spellcheckTimerID;
 var markers = {};
+
+setInterval(() => {
+    const firstVisibleRow = ace.edit("editor").getFirstVisibleRow();
+    if (firstVisibleRow !== previousVisibleRow) {
+        exports.spellCheck();
+    }
+    previousVisibleRow = firstVisibleRow;
+}, scrollCheckDelay);
 
 exports.spellCheck = function (scope, delay) {
     if (spellcheckTimerID) {
         clearTimeout(spellcheckTimerID);
     }
 
+    delay = delay || defaultDelay;
     if (range) {
         delay = Math.max(delay, defaultDelay);
     }
@@ -22,7 +33,8 @@ exports.spellCheck = function (scope, delay) {
 }
 
 function setRange(scope) {
-    const document = ace.edit("editor").getSession().getDocument();
+    const editor = ace.edit("editor");
+    const document = editor.getSession().getDocument();
 
     if (scope && scope.start && scope.end) {
         if (range) {
@@ -36,6 +48,8 @@ function setRange(scope) {
         const lastColumn = Math.max(0, document.getLine(lastRow).length - 1);
         range = new Range(0, 0, lastRow, lastColumn);
     }
+
+    range = range.clipRows(editor.getFirstVisibleRow(), editor.getLastVisibleRow());
 
     while (range.end.row > 0 && range.end.column === 0) {
         const endRow = range.end.row - 1;
