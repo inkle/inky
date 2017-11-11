@@ -33,7 +33,7 @@ exports.smarten = function (e) {
         const char = document.getTextRange(range);
         const prevChar = prevRange.start.column < 0 ? '' : document.getTextRange(prevRange);
 
-        if (prevChar === '-' && char !== '-') {
+        if (prevChar === '-' && char !== '-' && char !== '>') {
             document.replace(prevRange, '–'); // en dash
         } else if (prevChar === '.' && prevRange.start.column > 1) {
             const ellipsisRange = range.extend(prevRange.start.row, prevRange.start.column - 2);
@@ -64,6 +64,12 @@ exports.smarten = function (e) {
                 if (prevChar === '-') {
                     range = range.extend(range.start.row, prevRange.start.column);
                     document.replace(range, '—'); // em dash
+                    avoidSteppingForward(e, range, document);
+                }
+            case '>':
+                if (prevChar === '–' || prevChar === '—') { // en or em dash
+                    range = range.extend(range.start.row, prevRange.start.column);
+                    document.replace(range, '->');
                     avoidSteppingForward(e, range, document);
                 }
                 break;
