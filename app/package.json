@@ -27,8 +27,7 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "electron": "^1.4.3",
-    "electron-rebuild": "^1.6.0",
+    "electron": "^1.7.6",
     "markdown-html": "^0.0.8",
     "mocha": "^4.0.1",
     "spectron": "^3.2.6"
@@ -37,10 +36,10 @@
     "chokidar": "^1.6.0",
     "fuzzaldrin-plus": "^0.5",
     "electron-settings": "^3.1.4",
+    "glob": "^7.1.2",
     "inkjs": "^1.6.0",
     "lodash": "^4.13.1",
     "mkdirp": "^0.5.1",
-    "randomstring": "^1.1.5",
-    "spellchecker": "^3.4.4"
+    "randomstring": "^1.1.5"
   }
 }

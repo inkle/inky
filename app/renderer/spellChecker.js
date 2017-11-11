@@ -1,5 +1,5 @@
 const ipc = require("electron").ipcRenderer;
-const SpellChecker = require("spellchecker");
+const SpellChecker = require("./spellchecker/bindings.js");
 const Range = ace.require('ace/range').Range;
 const preferences = require('./preferences.js');
 
