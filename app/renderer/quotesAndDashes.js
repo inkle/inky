@@ -53,6 +53,9 @@ exports.smarten = function (e) {
                 avoidSteppingForward(e, range, document);
                 break;
             case '"':
+                if (document.getLine(e.start.row).trim().charAt(0) === '{') {
+                    break;
+                }
                 if (prevChar === ' ' || prevChar === '') {
                     document.replace(range, '“');
                 } else {
