@@ -583,9 +583,10 @@ InkProject.prototype.countWords = function() {
     let n = 0;
 
     const wordsRegExp = /\w+/g;
+    const logicLineFilterRegExp = /^(\~|VAR|=)/;
 
-    // TODO: filter out logic lines, stitch names, etc.
-    const countWordsInFile = (file) => file.aceDocument.$lines.reduce((n, line) => n + (line.match(wordsRegExp) || []).length, 0);
+    const filterLines = (lines) => lines.filter(line => line.match(logicLineFilterRegExp) == null);
+    const countWordsInFile = (file) => filterLines(file.aceDocument.$lines).reduce((n, line) => n + (line.match(wordsRegExp) || []).length, 0);
 
     // For now, count words in active ink file
     n += countWordsInFile(this.activeInkFile);
