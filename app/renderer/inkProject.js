@@ -579,6 +579,22 @@ InkProject.prototype.findSymbol = function(name, posContext) {
     return symbol;
 }
 
+InkProject.prototype.countWords = function() {
+    let n = 0;
+
+    const wordsRegExp = /\w+/g;
+    const countWordsInFile = (file) => {
+        let n = 0;
+        for (let i = 0; i < file.aceDocument.$lines.length; ++i) {
+            n += (file.aceDocument.$lines[i].match(wordsRegExp) || []).length;
+        }
+        return n;
+    };
+
+    // For now, count words in active ink file
+    n += countWordsInFile(this.activeInkFile);
+}
+
 InkProject.setEvents = function(e) {
     InkProject.events = e;
 }
@@ -637,5 +653,10 @@ ipc.on("project-tryClose", (event) => {
     }
 });
 
+ipc.on("project-count-words", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.countWords();
+    }
+});
 
 exports.InkProject = InkProject;
