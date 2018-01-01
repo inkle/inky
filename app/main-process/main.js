@@ -97,6 +97,10 @@ app.on('ready', function () {
         },
         showAbout: () => {
             AboutWindow.showAboutWindow();
+        },
+        countWords: () => {
+            var win = ProjectWindow.focused();
+            if (win) win.countWords();
         }
     });
 
