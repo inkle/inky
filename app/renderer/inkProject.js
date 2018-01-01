@@ -590,7 +590,7 @@ InkProject.prototype.countWords = function() {
 
     // TODO: use countWordsInFile on included ink files
 
-    // TODO: open a window show the result
+    alert(`There is ${n} word${n > 1 ? 's' : ''} in this file.`);
 }
 
 InkProject.setEvents = function(e) {
