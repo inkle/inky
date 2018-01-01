@@ -586,6 +586,7 @@ InkProject.prototype.countWords = function() {
     const countWordsInFile = (file) => {
         let n = 0;
         for (let i = 0; i < file.aceDocument.$lines.length; ++i) {
+            // TODO: filter out logic lines, stitch names, etc.
             n += (file.aceDocument.$lines[i].match(wordsRegExp) || []).length;
         }
         return n;
@@ -593,6 +594,10 @@ InkProject.prototype.countWords = function() {
 
     // For now, count words in active ink file
     n += countWordsInFile(this.activeInkFile);
+
+    // TODO: use countWordsInFile on included ink files
+
+    // TODO: open a window show the result
 }
 
 InkProject.setEvents = function(e) {
