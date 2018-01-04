@@ -593,18 +593,14 @@ InkProject.prototype.countWords = function() {
     const countWordsInFile = (file) => filterLines(file.aceDocument.$lines).reduce((n, line) => n + (cleanLine(line).match(wordsRegExp) || []).length, 0);
 
     const recur = (file) => {
+        // Safety measure
         if (file == null) return 0;
 
-        let n = countWordsInFile(file);
         filesDone.push(file.relPath);
-
-        file.includes.forEach((fileName) => {
-            if (!filesDone.contains(fileName)) {
-                n += recur(this.files.find((file) => file.relPath === fileName));
-            }
-        });
-
-        return n;
+        return file.includes.reduce((n, fileName) => {
+            // Do not count a file for a second time
+            return (!filesDone.contains(fileName)) ? n + recur(this.files.find((file) => file.relPath === fileName)) : n;
+        }, countWordsInFile(file));
     };
 
     let n = recur(this.activeInkFile);
