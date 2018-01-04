@@ -586,9 +586,11 @@ InkProject.prototype.countWords = function() {
 
     const wordsRegExp = /\w+/g;
     const logicLineFilterRegExp = /^(\~|VAR|=|INCLUDE)/;
+    const lineCleanerRegExp = /->.*$/;
 
     const filterLines = (lines) => lines.filter(line => line.match(logicLineFilterRegExp) == null);
-    const countWordsInFile = (file) => filterLines(file.aceDocument.$lines).reduce((n, line) => n + (line.match(wordsRegExp) || []).length, 0);
+    const cleanLine = (line) => line.replace(lineCleanerRegExp, "");
+    const countWordsInFile = (file) => filterLines(file.aceDocument.$lines).reduce((n, line) => n + (cleanLine(line).match(wordsRegExp) || []).length, 0);
 
     const recur = (file) => {
         if (file == null) return 0;
