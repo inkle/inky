@@ -580,7 +580,9 @@ InkProject.prototype.findSymbol = function(name, posContext) {
 }
 
 InkProject.prototype.countWords = function() {
-    let n = 0;
+    // We need to be sure to count each file only one time
+    // And this prevents issues with circular includes
+    let filesDone = [];
 
     const wordsRegExp = /\w+/g;
     const logicLineFilterRegExp = /^(\~|VAR|=|INCLUDE)/;
@@ -588,12 +590,23 @@ InkProject.prototype.countWords = function() {
     const filterLines = (lines) => lines.filter(line => line.match(logicLineFilterRegExp) == null);
     const countWordsInFile = (file) => filterLines(file.aceDocument.$lines).reduce((n, line) => n + (line.match(wordsRegExp) || []).length, 0);
 
-    // For now, count words in active ink file
-    n += countWordsInFile(this.activeInkFile);
+    const recur = (file) => {
+        if (file == null) return 0;
 
-    // TODO: use countWordsInFile on included ink files
+        let n = countWordsInFile(file);
+        filesDone.push(file.relPath);
 
-    alert(`There is ${n.toLocaleString()} word${n > 1 ? 's' : ''} in this file.`);
+        file.includes.forEach((fileName) => {
+            if (!filesDone.contains(fileName)) {
+                n += recur(this.files.find((file) => file.relPath === fileName));
+            }
+        });
+
+        return n;
+    };
+
+    let n = recur(this.activeInkFile);
+    alert(`There is ${n.toLocaleString()} word${n > 1 ? 's' : ''} in this project.`);
 }
 
 InkProject.setEvents = function(e) {
