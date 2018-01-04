@@ -585,7 +585,7 @@ InkProject.prototype.countWords = function() {
     let filesDone = [];
 
     const wordsRegExp = /\w+/g;
-    const logicLineFilterRegExp = /^(\~|VAR|=|INCLUDE)/;
+    const logicLineFilterRegExp = /^\s*(\~|VAR|=|INCLUDE)/;
     const lineCleanerRegExp = /->.*$/;
 
     const filterLines = (lines) => lines.filter(line => line.match(logicLineFilterRegExp) == null);
