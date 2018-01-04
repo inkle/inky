@@ -580,17 +580,22 @@ InkProject.prototype.findSymbol = function(name, posContext) {
 }
 
 InkProject.prototype.countWords = function() {
+    const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+
     // We need to be sure to count each file only one time
     // And this prevents issues with circular includes
     let filesDone = [];
 
-    const wordsRegExp = /\w+/g;
-    const logicLineFilterRegExp = /^\s*(\~|VAR|=|INCLUDE)/;
-    const lineCleanerRegExp = /->.*$/;
+    const countWordsInFile = (file) => {
+        let iterator = new TokenIterator(file.getAceSession(), 0, 0);
+        let n = 0;
 
-    const filterLines = (lines) => lines.filter(line => line.match(logicLineFilterRegExp) == null);
-    const cleanLine = (line) => line.replace(lineCleanerRegExp, "");
-    const countWordsInFile = (file) => filterLines(file.aceDocument.$lines).reduce((n, line) => n + (cleanLine(line).match(wordsRegExp) || []).length, 0);
+        for (let token = iterator.getCurrentToken(); token != null; token = iterator.stepForward())
+            if (["text", "choice"].contains(token.type))
+                n += (token.value.match(/\w+/g) || []).length;
+
+        return n;
+    };
 
     const recur = (file) => {
         // Safety measure
