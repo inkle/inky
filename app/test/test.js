@@ -107,5 +107,15 @@ describe('compiles hello world game', function () {
       .getText('.storyText:nth-of-type(2)')
       .should.eventually.equal(resultAnswer)
   })
+
+  it('shows TODOs', function() {
+    const input = "-\n * Rock\n * Paper\n * Scissors\nTODO: Make this more interesting"
+
+    return this.app.client
+      .setValue('.ace_text-input', input)
+      .pause(2000)
+      .getText('.issuesMessage')
+      .should.eventually.not.equal('No issues.')
+  })
 })
 
