@@ -34,10 +34,9 @@ function initializeNavigation() {
             for (var line of data.split("\n")) {
                 /*
                 checks whether the line does NOT contain a headline (indicated by the character '#'; the indexOf method will return -1 if the string does not contain the argument).
-                The second part checks whether the found '#' was written in the context of the programming language c#.
-                The third part checks whether the found '#' is past the index of 5 (which would be larger than 'h6').
+                The second part checks if the first character of a line is a '#' (a markdown header).
                 */
-                if (line.indexOf('#') === -1 || line.substr(line.indexOf('#') - 1, 2).toLowerCase() === "c#".toLowerCase() || line.indexOf('#') > 5) {
+                if (line.indexOf('#') === -1 || line.charAt(0) != '#') {
                     continue;
                 }
                 var headline;
