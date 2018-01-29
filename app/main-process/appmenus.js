@@ -287,8 +287,4 @@ function setupMenus(callbacks) {
   Menu.setApplicationMenu(menu);
 }
 
-function labelIsHelp(menuItem) {
-  return menuItem.label === 'Help';
-}
-
 exports.setupMenus = setupMenus;
