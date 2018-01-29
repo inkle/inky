@@ -101,10 +101,12 @@ InkProject.prototype.refreshIncludes = function() {
             return;
 
         inkFile.includes.forEach(incPath => {
+            let alreadyDone = relPathsFromINCLUDEs.contains(incPath);
+
             relPathsFromINCLUDEs.push(incPath);
 
             var recurseInkFile = this.inkFileWithRelativePath(incPath);
-            if( recurseInkFile )
+            if( recurseInkFile && !alreadyDone )
                 addIncludePathsFromFile(recurseInkFile);
         });
     }
