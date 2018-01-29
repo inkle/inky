@@ -70,6 +70,10 @@ ProjectWindow.prototype.tryClose = function() {
     this.browserWindow.webContents.send('project-tryClose');
 }
 
+ProjectWindow.prototype.countWords = function() {
+    this.browserWindow.webContents.send('project-count-words');
+}
+
 ProjectWindow.prototype.finalClose = function() {
     this.safeToClose = true;
     Inklecate.killSessions(this.browserWindow);

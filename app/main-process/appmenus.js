@@ -142,6 +142,11 @@ function setupMenus(callbacks) {
           type: "checkbox",
           checked: true,
           click: callbacks.toggleTags
+        },
+        {
+            label: 'Count words',
+            enabled: callbacks.isFocusedWindow,
+            click: callbacks.countWords
         }
       ]
     },
