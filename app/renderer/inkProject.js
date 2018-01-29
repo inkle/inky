@@ -579,6 +579,39 @@ InkProject.prototype.findSymbol = function(name, posContext) {
     return symbol;
 }
 
+InkProject.prototype.countWords = function() {
+    const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
+
+    // We need to be sure to count each file only one time
+    // And this prevents issues with circular includes
+    let filesDone = [];
+
+    const countWordsInFile = (file) => {
+        let iterator = new TokenIterator(file.getAceSession(), 0, 0);
+        let n = 0;
+
+        for (let token = iterator.getCurrentToken(); token != null; token = iterator.stepForward())
+            if (["text", "choice"].contains(token.type))
+                n += (token.value.match(/\w+/g) || []).length;
+
+        return n;
+    };
+
+    const recur = (file) => {
+        // Safety measure
+        if (file == null) return 0;
+
+        filesDone.push(file.relPath);
+        return file.includes.reduce((n, fileName) => {
+            // Do not count a file for a second time
+            return (!filesDone.contains(fileName)) ? n + recur(this.files.find((file) => file.relPath === fileName)) : n;
+        }, countWordsInFile(file));
+    };
+
+    let n = recur(this.activeInkFile);
+    alert(`There is ${n.toLocaleString()} word${n > 1 ? 's' : ''} in this project.`);
+}
+
 InkProject.setEvents = function(e) {
     InkProject.events = e;
 }
@@ -637,5 +670,10 @@ ipc.on("project-tryClose", (event) => {
     }
 });
 
+ipc.on("project-count-words", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.countWords();
+    }
+});
 
 exports.InkProject = InkProject;
