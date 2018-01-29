@@ -10,7 +10,8 @@ const electronWindowOptions = {
     width: 340,
     height: 270,
     resizable: false,
-    title: "About Inky"
+    title: "About Inky",
+    show: false
 };
 
 const versionFilePath = "ink/version.txt";
@@ -43,6 +44,8 @@ function AboutWindow() {
             "inkVersion": inkVersion,
             "inkjsVersion": inkjsPackage.version
         });
+        w.setMenu(null);
+        w.show();
     });
 
     this.browserWindow = w;
