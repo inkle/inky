@@ -167,6 +167,7 @@ function compile(compileInstruction, requester) {
                     text: choiceMatches[2]
                 }, sessionId);
             } else if( promptMatches ) {
+                sendAnyErrors();
                 if( session.evaluatingExpression )
                     session.evaluatingExpression = false;
                 else if( session.justRequestedDebugSource )
