@@ -368,6 +368,14 @@ var inkHighlightRules = function() {
             }]
         }],
         "#multiLineLogic": [{
+            // e.g. \\{this = 5} // should not be highlighted
+            token: "doubleescape",
+            regex: /\\\\/
+        }, {
+            // e.g. \{this = 5\} // should not be highlighted
+            token: "escape",
+            regex: /\\[{}]/
+        }, {
             regex: /^(\s*)(\{)(?:([^}:]+)(:))?(?=[^}]*$)/,
             token: [
                 "logic", // whitespace
@@ -397,7 +405,7 @@ var inkHighlightRules = function() {
         }],
         "#logicLine": [{
             token: "logic.tilda",
-            regex: /\s*~\s*.*$/
+            regex: /^\s*~\s*.*$/
         }],
         "#tags": [{
             // e.g. \\#tag should be highlighted
