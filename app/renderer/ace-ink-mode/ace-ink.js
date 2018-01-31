@@ -401,7 +401,7 @@ var inkHighlightRules = function() {
         }],
         "#tags": [{
             token: "tag",
-            regex: /#.*/
+            regex: /(?:(?!\\).|^)#.*/
         }],
         "#mixedContent": [{
             include: "#inlineConditional"
