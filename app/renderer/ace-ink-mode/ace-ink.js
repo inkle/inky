@@ -410,7 +410,7 @@ var inkHighlightRules = function() {
         }, {
             // e.g. #tag should be highlighted
             token: "tag",
-            regex: /#.*/
+            regex: /(?:(?!\\).|^)#.*/
         }],
         "#mixedContent": [{
             include: "#inlineConditional"
