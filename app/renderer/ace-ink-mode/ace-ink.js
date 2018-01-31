@@ -400,8 +400,17 @@ var inkHighlightRules = function() {
             regex: /\s*~\s*.*$/
         }],
         "#tags": [{
+            // e.g. \\#tag should be highlighted
+            token: "doubleescape",
+            regex: /\\\\/
+        }, {
+            // e.g. \#tag should not be highlighted
+            token: "escape",
+            regex: /\\#/
+        }, {
+            // e.g. #tag should be highlighted
             token: "tag",
-            regex: /(?:(?!\\).|^)#.*/
+            regex: /#.*/
         }],
         "#mixedContent": [{
             include: "#inlineConditional"
