@@ -107,15 +107,11 @@ function setupMenus(callbacks) {
     {
       label: "View",
       submenu: [
-        {role: 'reload'},
-        {role: 'forcereload'},
-        {role: 'toggledevtools'},
+        {role: 'togglefullscreen'},
         {type: 'separator'},
         {role: 'resetzoom'},
         {role: 'zoomin'},
-        {role: 'zoomout'},
-        {type: 'separator'},
-        {role: 'togglefullscreen'}
+        {role: 'zoomout'}
       ]
     },
     {
