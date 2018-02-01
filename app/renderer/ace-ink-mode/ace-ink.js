@@ -82,6 +82,10 @@ var inkHighlightRules = function() {
                 defaultToken: "choice"
             }]
         }],
+        "#escapes": [{
+            token: "escape",
+            regex: /\\[()\\~{}\/#]/
+        }],
         "#comments": [{
             token: "punctuation.definition.comment.json",
             regex: /\/\*\*/,
@@ -194,14 +198,31 @@ var inkHighlightRules = function() {
         }],
 
         "#gather": [{
-            regex: /^(\s*)((?:-\s*)+)(?!>)(?:(\(\s*)(\w+)(\s*\)))?/,
+            regex: /^(\s*)((?:-\s*)+)/,
             token: [
                 "gather", // whitespace
                 "gather.bullets", // - - 
-                "gather.label", // (
-                "gather.label.name", // label_name
-                "gather.label" // )
-            ]
+            ],
+            push: [{
+                regex: /$/,
+                token: "gather",
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, {
+                include: "#logicLineInsert"
+            }, {
+                regex: /(\(\s*)(\w+)(\s*\)\s*)/,
+                token: [
+                    "gather.label", // (
+                    "gather.label.name", // label_name
+                    "gather.label" // )
+                ],
+            }, {
+                defaultToken: "gather.innerContent"
+            }]
         }],
         "#globalVAR": [{
             regex: /^(\s*)(VAR|CONST)\b/, // (\s*)(\w+)(\s*)
@@ -225,6 +246,8 @@ var inkHighlightRules = function() {
                 token: "var-decl",
                 next: "pop"
             }, {
+                include: "#comments"
+            }, {
                 defaultToken: "var-decl"
             }]
         }],
@@ -234,20 +257,17 @@ var inkHighlightRules = function() {
                 "list-decl", // whitespace
                 "list-decl.keyword"
             ],
-            push: [
-                {
+            push: [ {
                     regex: /(\w+)(\s*=\s*)/,
                     token: [
                         "list-decl.name",
                         "list-decl" // whitespace & equals sign
                     ],
                     next: "#listItem"
-                },
-                {
+                }, {
                     regex: /$/,
                     next: "pop"
-                },
-                {
+                }, {
                     defaultToken: "list-decl"
                 }
             ]
@@ -369,7 +389,7 @@ var inkHighlightRules = function() {
         }],
         "#multiLineLogic": [{
             // e.g. \\{this = 5} // should not be highlighted
-            token: "doubleescape",
+            token: "escape",
             regex: /\\\\/
         }, {
             // e.g. \{this = 5\} // should not be highlighted
@@ -405,20 +425,47 @@ var inkHighlightRules = function() {
         }],
         "#logicLine": [{
             token: "logic.tilda",
-            regex: /^\s*~\s*.*$/
+            regex: /^\s*~\s*/,
+            push: [{
+                token: "logic.tilda",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "logic.tilda"
+            }]
+        }],
+        "#logicLineInsert": [{
+            token: "logic.tilda",
+            regex: /\s*~\s*/,
+            push: [{
+                token: "logic.tilda",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "logic.tilda"
+            }]
         }],
         "#tags": [{
-            // e.g. \\#tag should be highlighted
-            token: "doubleescape",
-            regex: /\\\\/
-        }, {
-            // e.g. \#tag should not be highlighted
-            token: "escape",
-            regex: /\\#/
-        }, {
             // e.g. #tag should be highlighted
             token: "tag",
-            regex: /#.*/
+            regex: /#/,
+            push: [{
+                token:"tag",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "tag.innerContent"
+            }]
         }],
         "#mixedContent": [{
             include: "#inlineConditional"
@@ -426,8 +473,6 @@ var inkHighlightRules = function() {
             include: "#inlineSequence"
         }, {
             include: "#inlineLogic"
-        }, {
-            include: "#logicLine"
         }, {
             include: "#divert"
         }, {
@@ -438,6 +483,8 @@ var inkHighlightRules = function() {
         }],
         "#statements": [{
             include: "#comments"
+        }, {
+            include: "#escapes"
         }, {
             include: "#TODO"
         }, {
