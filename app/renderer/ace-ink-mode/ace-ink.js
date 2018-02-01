@@ -66,6 +66,8 @@ var inkHighlightRules = function() {
                 regex: /$/,
                 next: "pop"
             }, {
+                include: "#escapes"
+            }, {
                 include: "#comments"
             }, {
                 token: [
@@ -84,7 +86,7 @@ var inkHighlightRules = function() {
         }],
         "#escapes": [{
             token: "escape",
-            regex: /\\[()\\~{}\/#]/
+            regex: /\\[\[\]()\\~{}\/#*+-]/
         }],
         "#comments": [{
             token: "punctuation.definition.comment.json",
@@ -198,7 +200,7 @@ var inkHighlightRules = function() {
         }],
 
         "#gather": [{
-            regex: /^(\s*)((?:-\s*)+)/,
+            regex: /^(\s*)((?:-(?!>)\s*)+)/,
             token: [
                 "gather", // whitespace
                 "gather.bullets", // - - 
@@ -220,6 +222,8 @@ var inkHighlightRules = function() {
                     "gather.label.name", // label_name
                     "gather.label" // )
                 ],
+            }, {
+                include: "#mixedContent"
             }, {
                 defaultToken: "gather.innerContent"
             }]
@@ -388,14 +392,6 @@ var inkHighlightRules = function() {
             }]
         }],
         "#multiLineLogic": [{
-            // e.g. \\{this = 5} // should not be highlighted
-            token: "escape",
-            regex: /\\\\/
-        }, {
-            // e.g. \{this = 5\} // should not be highlighted
-            token: "escape",
-            regex: /\\[{}]/
-        }, {
             regex: /^(\s*)(\{)(?:([^}:]+)(:))?(?=[^}]*$)/,
             token: [
                 "logic", // whitespace
