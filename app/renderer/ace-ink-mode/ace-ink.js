@@ -9,6 +9,8 @@ var inkHighlightRules = function() {
 
     this.$rules = {
         start: [{
+            include: "#escapes"
+        }, {
             include: "#comments"
         }, {
             regex: /^(\s*)(={2,})(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/,
@@ -35,10 +37,6 @@ var inkHighlightRules = function() {
                 "flow.stitch.declaration.parameters" // parameters
             ]
         }, {
-            include: "#choice"
-        }, {
-            include: "#gather"
-        }, {
             include: "#statements"
         }],
         "#TODO": [{
@@ -50,7 +48,7 @@ var inkHighlightRules = function() {
             ]
         }],
         "#choice": [{
-            regex: /^(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
+            regex: /(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
             token: [
                 "choice", // whitespace
                 "choice.bullets", // * or +
@@ -66,18 +64,17 @@ var inkHighlightRules = function() {
                 regex: /$/,
                 next: "pop"
             }, {
-                include: "#escapes"
-            }, {
-                include: "#comments"
-            }, {
-                token: [
-                    "choice.weaveBracket",
-                    "choice.weaveInsideBrackets",
-                    "choice.weaveBracket"
-                ],
-                regex: /(\[)([^\]]*)(\])/
-            }, {
-                include: "#divert"
+                token: "choice.weaveBracket", 
+                regex: /\s*\[\s*/,                  // [ weave start 
+                push: [{ 
+                    token: "choice.weaveBracket", 
+                    regex: /\s*\]\s*/,              // ] weave end 
+                    next: "pop" 
+                }, {
+                    include: "#inlineContent" 
+                }, {
+                    defaultToken: "choice.weaveInsideBrackets" 
+                }]
             }, {
                 include: "#mixedContent"
             }, {
@@ -224,6 +221,8 @@ var inkHighlightRules = function() {
                 ],
             }, {
                 include: "#mixedContent"
+            }, {
+                defaultToken: "choice"
             }, {
                 defaultToken: "gather.innerContent"
             }]
@@ -463,12 +462,15 @@ var inkHighlightRules = function() {
                 defaultToken: "tag.innerContent"
             }]
         }],
-        "#mixedContent": [{
+        "#inlineContent": [{ 
             include: "#inlineConditional"
         }, {
             include: "#inlineSequence"
         }, {
             include: "#inlineLogic"
+        }], 
+        "#mixedContent": [{ 
+            include: "#inlineContent" 
         }, {
             include: "#divert"
         }, {
