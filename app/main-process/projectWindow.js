@@ -93,6 +93,8 @@ ProjectWindow.prototype.openDevTools = function() {
     this.browserWindow.webContents.openDevTools();
 }
 
+ProjectWindow.all = () => windows;
+
 ProjectWindow.createEmpty = function() {
     return new ProjectWindow(); 
 }

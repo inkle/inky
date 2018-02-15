@@ -7,6 +7,11 @@
     background-color: #444;
 }
 
+.window.dark .ace_editor .ace_marker-layer .ace_selected-word {
+    background-color: #999;
+    border-color: #dedede;
+}
+
 .window.dark #editor,
 .window.dark #player,
 .window.dark .ace_editor .ace_cursor {
@@ -32,6 +37,10 @@
 .window.dark #editor .ace_gutter-layer,
 .window.dark .split {
     background: #444;
+}
+
+.window.dark #editor .ace-error {
+    background: darkred;
 }
 
 .window.dark .ace_editor span.ace_flow.ace_declaration,

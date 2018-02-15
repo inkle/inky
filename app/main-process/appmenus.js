@@ -4,6 +4,7 @@ const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 const _ = require("lodash");
 const Menu = electron.Menu;
+const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 
 function setupMenus(callbacks) {
   let themes = [];
@@ -13,8 +14,8 @@ function setupMenus(callbacks) {
       label: theme.substring(0, 1).toUpperCase() + theme.substring(1),
       type: 'radio',
       checked: theme === defaultTheme,
-      click: (item, window, event) => {
-        window.webContents.send('change-theme', theme);
+      click: () => {
+        ProjectWindow.all().forEach(window => window.browserWindow.webContents.send('change-theme', theme));
       }
     });
   }
