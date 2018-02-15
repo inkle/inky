@@ -28,30 +28,3 @@
 #main.hideTags .ace_editor span.ace_tag {
     color: white;
 }
-
-/* Dark theme below */
-
-/* Flow related stuff in cyan */
-.window.dark .ace_editor span.ace_flow.ace_declaration,
-.window.dark .ace_editor span.ace_divert,
-.window.dark .ace_editor span.ace_choice.ace_bullets,
-.window.dark .ace_editor span.ace_choice.ace_label,
-.window.dark .ace_editor span.ace_choice.ace_weaveBracket,
-.window.dark .ace_editor span.ace_gather.ace_bullets,
-.window.dark .ace_editor span.ace_gather.ace_label,
-.window.dark .ace_editor span.ace_glue,
-.window.dark .ace_editor span.ace_include,
-.window.dark .ace_editor span.ace_external {
-  color: cyan;
-}
-
-/* Logic */
-.window.dark .ace_editor span.ace_var-decl,
-.window.dark .ace_editor span.ace_list-decl,
-.window.dark .ace_editor span.ace_logic:not(.ace_innerContent) {
-  color: lightgreen;
-}
-
-.window.dark #main.hideTags .ace_editor span.ace_tag {
-    color: #333;
-}

@@ -883,21 +883,3 @@ img.issue-icon.warning {
 .ignore-events {
   pointer-events: none;
 }
-
-.window.dark #main,
-.window.dark #editor {
-    background-color: #333;
-}
-
-.window.dark #editor {
-    color: #f0f0f0;
-}
-
-.window.dark #editor .ace_gutter-layer,
-.window.dark .split {
-    background: #444;
-}
-
-.window.dark #player {
-    color: #f0f0f0;
-}
