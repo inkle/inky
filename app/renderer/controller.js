@@ -109,7 +109,7 @@ LiveCompiler.setEvents({
             if( error.filename == InkProject.currentProject.activeInkFile.relativePath() )
                 EditorView.addError(error);
 
-            if( error.type == "RUNTIME ERROR" )
+            if( error.type == "RUNTIME ERROR" || error.type == "RUNTIME WARNING" )
                 PlayerView.addLineError(error, () => gotoIssue(error));
         }
 

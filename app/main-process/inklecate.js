@@ -139,7 +139,7 @@ function compile(compileInstruction, requester) {
             var line = lines[i].trim();
 
             var choiceMatches = line.match(/^(\d+):\s*(.*)/);
-            var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|TODO): ('([^']+)' )?line (\d+): (.+)/);
+            var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?line (\d+): (.+)/);
             var tagMatches = line.match(/^(# tags:) (.+)/);
             var promptMatches = line.match(/^\?>/);
             var debugSourceMatches = line.match(/^DebugSource: (line (\d+) of (.*)|Unknown source)/);
