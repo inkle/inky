@@ -89,11 +89,12 @@ function reloadInklecateSession() {
     ipc.send("compile", instr);
 }
 
-function exportJson(callback) {
+function exportJson(inkJsCompatible, callback) {
     exportCompleteCallback = callback;
 
     var instr = buildCompileInstruction();
     instr.export = true;
+    instr.inkJsCompatible = inkJsCompatible;
     currentExportSessionId = instr.sessionId;
 
     ipc.send("compile", instr);
