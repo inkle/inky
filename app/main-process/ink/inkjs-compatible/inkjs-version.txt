@@ -1,0 +1,4 @@
+inkjs is currently:     1.6.0
+compatible with ink:    0.7.5 + 32fa48a251826d82b9e4e36b04f147bf577a05e5
+
+..which is the version of inklecate in this folder.

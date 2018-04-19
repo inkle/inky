@@ -272,7 +272,8 @@ function copyFile(source, destination, transform) {
 InkProject.prototype.export = function(exportType) {
 
     // Always start by building the JSON
-    LiveCompiler.exportJson((err, compiledJsonTempPath) => {
+    var inkJsCompatible = exportType == "js" || exportType == "web";
+    LiveCompiler.exportJson(inkJsCompatible, (err, compiledJsonTempPath) => {
         if( err ) {
             alert("Could not export: "+err);
             return;
