@@ -53,18 +53,50 @@ To build the project:
 * For subsequent runs, if no npm packages have changed, you can run the `RUN.command` script on Mac, or type `npm start` in the shell (on Windows).
 
 ### Linux
-* Install [node.js](https://nodejs.org/en/) if you don't already have it
-* Install Wine (This is needed for the compiler not to actually run Inky)
-* In the terminal run ./INSTALL_AND_RUN.command
-* cd into the app directory, and type `npm install`, then `npm start`.
 
-When launching on **Linux**, you may encounter the following error: `inklecate_win.exe: cannot execute binary file`. This is because the system doesn't know it should use **Wine** to run `inklecate_win.exe`.  
-One way of fixing this is by creating a file named `wine.conf` under `/etc/binfmt.d/` containing the following lines:
-```
-# Start WINE on Windows executables
-:DOSWin:M::MZ::/usr/bin/wine:
-```
-(You can read more about binfmt on [kernel.org](https://www.kernel.org/doc/Documentation/binfmt_misc.txt))
+Tested on a fresh **Ubuntu 16.04 LTS** VM installation (_equivalent processes should work for other distributions_)
+
+* Install build tools
+
+`sudo apt-get install -y dkms build-essential linux-headers-generic linux-headers-$(uname -r)`
+
+* Pre-requisites
+
+`sudo apt install git`
+
+`sudo apt install curl`
+
+* Install node and npm
+
+`curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -`
+
+`sudo apt-get install -y nodejs`
+
+* Install mono as per http://www.mono-project.com/download/stable/#download-lin
+
+`sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF`
+
+`echo "deb http://download.mono-project.com/repo/ubuntu stable-xenial main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list`
+
+`sudo apt-get update`
+
+`sudo apt-get install mono-complete`
+
+* Clone the inky repo
+
+`git clone https://github.com/inkle/inky.git`
+
+* Test inklecate_win with mono (_should output usage info_)
+
+`mono app/main-process/ink/inklecate_win.exe`
+
+* Install and run inky
+
+`./INSTALL_AND_RUN.command`
+
+* For subsequent runs, if no npm packages have changed, launch inky as below (otherwise re-run previous step):
+
+`./RUN.command`
 
 ## License
 

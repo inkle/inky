@@ -12,7 +12,7 @@ const mkdirp = require('mkdirp');
 const inklecateNames = {
     "darwin": "/ink/inklecate_mac",
     "win32":  "/ink/inklecate_win.exe",
-    "linux": "/ink/inklecate_win.exe"
+    "linux": "/ink/inklecate_linux"
 }
 const inklecateRootPathRelease = path.join(__dirname, "../../app.asar.unpacked/main-process");
 const inklecateRootPathDev = __dirname;
