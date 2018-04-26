@@ -27,7 +27,8 @@ const linesPerGroup = 20000;
 var resultsBuildInterval = null;
 
 var events = {
-    gotoFile: () => {}
+    gotoFile: () => {},
+    lookupRuntimePath: () => {}
 };
 
 function show() {
@@ -178,7 +179,24 @@ function refresh() {
             lineContent: file.aceDocument.getLine(lineNum-1),
             file: file
         });
-    } 
+    }
+
+    var runtimePathMatch = searchStr.match(/^(?:(?:[\w-]+)\.)+[\w-]+$/);
+    if( runtimePathMatch ) {
+        var path = runtimePathMatch[0];
+        events.lookupRuntimePath(path, result => {
+            if( result && result.filename && result.lineNumber ) {
+                var lineNum = result.lineNumber;
+                var file = InkProject.currentProject.inkFileWithRelativePath(result.filename);
+                results.push({
+                    runtimePath: path,
+                    line: lineNum-1,
+                    lineContent: file.aceDocument.getLine(lineNum-1),
+                    file: file
+                });
+            }
+        });
+    }
 
     var fileResults = filter(cachedFiles, searchStr, {key: "name"});
     var activeFileSymResults = filter(cachedActiveFileSymbols, searchStr, {key: "name"});
@@ -256,6 +274,11 @@ function addResult(result, searchStr)
         $result = $(`<li class='gotoLine'><p>➡︎ Go to line ${result.line+1}</p><p class='meta'>${result.lineContent}</p></li>`);
     }
 
+    else if( type == "runtimePath" ) {
+        $result = $(`<li class='runtimePath'><p>🔎 ${result.lineContent}</p><p class='meta'>${result.file.filename()} - line ${result.line+1} (looked up internal runtime path ${result.runtimePath})</p></li>`);
+        //$result = $(`<li class='runtimePath'><p>🔎 <strong>${result.file.relativePath()}, line ${result.line+1} (looked up internal path ${result.runtimePath})</p><p class='meta'>${result.lineContent}</p></li>`);
+    }
+
     else if( type == "symbol" ) {
         var ancestorStr = "";
         var ancestor = result.parent
@@ -303,6 +326,9 @@ function select($result)
 
 function resultType(result)
 {   
+    if( typeof result.runtimePath != 'undefined' )
+        return "runtimePath";
+
     if( typeof result.lineContent != 'undefined' )
         return "gotoLine";
 
@@ -330,8 +356,8 @@ function choose($result)
     if( type == "content" )
         events.gotoFile(result.file, result.row);
 
-    // Go to line number
-    else if( type == "gotoLine" )
+    // Go to line number / runtime path
+    else if( type == "gotoLine" || type == "runtimePath" )
         events.gotoFile(result.file, result.line);
 
     // File name

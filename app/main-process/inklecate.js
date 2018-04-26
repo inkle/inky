@@ -286,6 +286,14 @@ ipc.on("get-location-in-source", (event, offset, sessionId) => {
     }
 });
 
+ipc.on("get-runtime-path-in-source", (event, runtimePath, sessionId) => {
+    if( sessions[sessionId] ) {
+        const playProcess = sessions[sessionId].process;
+        if( playProcess )
+            playProcess.stdin.write("DebugPath "+runtimePath+"\n");
+    }
+});
+
 
 
 exports.Inklecate = {

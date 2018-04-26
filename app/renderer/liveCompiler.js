@@ -136,6 +136,11 @@ function getLocationInSource(offset, callback) {
     locationInSourceCallbackObj = { callback: callback, sessionId: currentPlaySessionId };
 }
 
+function getRuntimePathInSource(runtimePath, callback) {
+    ipc.send("get-runtime-path-in-source", runtimePath, currentPlaySessionId);
+    locationInSourceCallbackObj = { callback: callback, sessionId: currentPlaySessionId };
+}
+
 function evaluateExpression(expressionText, callback) {
     ipc.send("evaluate-expression", expressionText, currentPlaySessionId);
     expressionEvaluationObj = { callback: callback,  sessionId: currentPlaySessionId };
@@ -320,5 +325,6 @@ exports.LiveCompiler = {
     rewind: rewind,
     stepBack: stepBack,
     getLocationInSource: getLocationInSource,
+    getRuntimePathInSource: getRuntimePathInSource,
     evaluateExpression: evaluateExpression
 }

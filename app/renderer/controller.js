@@ -242,6 +242,9 @@ GotoAnything.setEvents({
         if( typeof row !== 'undefined' )
             EditorView.gotoLine(row+1);
         NavHistory.addStep();
+    },
+    lookupRuntimePath: (path, resultHandler) => {
+        LiveCompiler.getRuntimePathInSource(path, resultHandler);
     }
 });
 
