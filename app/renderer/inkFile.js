@@ -227,6 +227,10 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
                 return;
             }
 
+            // Strip any BOM
+            // https://en.wikipedia.org/wiki/Byte_order_mark
+            data = data.replace(/^\uFEFF/, '');
+
             // Success - fire this callback before other callbacks 
             // like document change get fired
             loadCallback(true);
