@@ -2,6 +2,7 @@ const electron = require('electron')
 const app = electron.app
 const ipc = electron.ipcMain;
 const dialog = electron.dialog;
+const preferences = require("../renderer/preferences.js");
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const DocumentationWindow = require("./documentationWindow.js").DocumentationWindow;
 const AboutWindow = require("./aboutWindow.js").AboutWindow;
@@ -81,7 +82,12 @@ app.on('ready', function () {
             if (win) win.exportJSOnly();
         },
         toggleTags: (item, focusedWindow, event) => {
+            preferences.tagsVisible = item.checked;
             focusedWindow.webContents.send("set-tags-visible", item.checked);
+        },
+        toggleSpelling: (item, focusedWindow) => {
+            preferences.checkSpelling = item.checked;
+            focusedWindow.webContents.send("toggle-spell-check");
         },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");

@@ -3,6 +3,7 @@ const ipc = electron.ipcRenderer;
 const remote = electron.remote;
 const path = require("path");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+const preferences = require('./preferences.js')
 
 // Debug
 const loadTestInk = false;
@@ -25,6 +26,8 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 const NavHistory = require("./navHistory.js").NavHistory;
 const GotoAnything = require("./goto.js").GotoAnything;
+const SpellChecker = require("./spellChecker.js");
+const QuotesAndDashes = require("./quotesAndDashes.js");
 
 InkProject.setEvents({
     "newProject": (project) => {
@@ -37,6 +40,7 @@ InkProject.setEvents({
         NavView.setMainInkFilename(filename);
         NavHistory.reset();
         NavHistory.addStep();
+        SpellChecker.spellCheck(undefined, 0);
     },
     "didSave": () => {
         var activeInk = InkProject.currentProject.activeInkFile;
@@ -66,6 +70,8 @@ $(document).ready(() => {
             var testInk = require("fs").readFileSync(path.join(__dirname, "test.ink"), "utf8");
             InkProject.currentProject.mainInk.setValue(testInk);
         }
+
+        setTagsVisible(preferences.tagsVisible);
     }
 });
 
@@ -171,8 +177,10 @@ LiveCompiler.setEvents({
 });
 
 EditorView.setEvents({
-    "change": () => {
+    "change": (e) => {
         LiveCompiler.setEdited();
+        SpellChecker.spellCheck(e);
+        QuotesAndDashes.smarten(e);
     },
     "jumpToSymbol": (symbolName, contextPos) => {
         var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
@@ -249,8 +257,12 @@ GotoAnything.setEvents({
 });
 
 ipc.on("set-tags-visible", (event, visible) => {
-    if( visible )
+    setTagsVisible(visible);
+});
+
+function setTagsVisible(visible) {
+    if (visible)
         $("#main").removeClass("hideTags");
     else
         $("#main").addClass("hideTags");
-});
+}

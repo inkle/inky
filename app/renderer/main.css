@@ -536,6 +536,12 @@ img.issue-icon.warning {
   background: #bffff1;
 }
 
+#editor .ace-misspelled {
+  border-bottom: dotted 2px red;
+  margin-bottom: -1px;
+  position:absolute;
+}
+
 #editor .ace_gutter-layer {
   background: white;
   border-right: none;
@@ -731,7 +737,7 @@ img.issue-icon.warning {
 }
 
 #player td.expressionInput:focus {
-  outline: none; 
+  outline: none;
 }
 
 #player .evaluationResult {
