@@ -1,3 +1,5 @@
+const electron = require("electron");
+const remote = electron.remote;
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 // Overriden by external setButtonActions call
@@ -151,6 +153,9 @@ $(document).ready(function() {
 
 function setTitle(title) {
     $("h1.title").text(title);
+
+    // Not visible on macOS
+    remote.getCurrentWindow().setTitle(title);
 }
 
 exports.ToolbarView = {
