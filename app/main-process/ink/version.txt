@@ -1,1 +1,1 @@
-0.8.1 (with latest changes from master)
+0.8.2
