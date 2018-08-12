@@ -1,6 +1,6 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
-const remote = electron.remote;
+
 const path = require("path");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
@@ -30,10 +30,8 @@ InkProject.setEvents({
     "newProject": (project) => {
         EditorView.focus();
         LiveCompiler.setProject(project);
-
         var filename = project.activeInkFile.filename();
         ToolbarView.setTitle(filename);
-        remote.getCurrentWindow().setTitle(filename);
         NavView.setMainInkFilename(filename);
         NavHistory.reset();
         NavHistory.addStep();
@@ -47,7 +45,6 @@ InkProject.setEvents({
     "didSwitchToInkFile": (inkFile) => {
         var filename = inkFile.filename();
         ToolbarView.setTitle(filename);
-        remote.getCurrentWindow().setTitle(filename);
         NavView.highlightRelativePath(inkFile.relativePath());
         var fileIssues = LiveCompiler.getIssuesForFilename(inkFile.relativePath());
         setImmediate(() => EditorView.setErrors(fileIssues));

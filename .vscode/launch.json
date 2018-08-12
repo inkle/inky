@@ -15,9 +15,8 @@
                 "--enable-logging"
             */],
             "env": {},
-            "externalConsole": true,
+            "console": "integratedTerminal",
             "sourceMaps": false,
-            "outDir": null
         },
         {
             "name": "Attach",
@@ -25,7 +24,6 @@
             "request": "attach",
             "port": 5858,
             "sourceMaps": false,
-            "outDir": null
         }
     ]
 }

@@ -33,6 +33,10 @@ editor.completers = editor.completers.filter(
     (completer) => completer !== language_tools.textCompleter);
 editor.completers.push(inkCompleter);
 
+// Unbind windows CTRL-P: "Jump to matching bracket" since it collides with
+// our "go to anything" command.
+editor.commands.removeCommand("jumptomatching")
+
 // Unfortunately standard jquery events don't work since 
 // Ace turns pointer events off
 editor.on("click", function(e){
