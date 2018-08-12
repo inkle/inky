@@ -1,33 +1,46 @@
+
 body {
     font-family: sans-serif;
     font-weight: lighter;
+    background: white;
 }
 
 h1 {
     text-align: center;
     font-weight: lighter;
+    font-size: 30pt;
 }
 
 .container {
     display: block;
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+    background: white;
+}
+
+p {
+    font-size: 16pt;
 }
 
 p, a {
     color: gray;
     line-height: 1.7em;
-    font-size: 13pt;
 }
 
-p {
+img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+.container .hide {
     opacity: 0.0;
-    transition: opacity 1.0s;
 }
 
-p.show {
+.container * {
     opacity: 1.0;
+    transition: opacity 1.0s;
 }
 
 p.choice {

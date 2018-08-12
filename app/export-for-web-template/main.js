@@ -4,8 +4,10 @@
 
     var storyContainer = document.querySelectorAll('#story')[0];
 
+    // Fades in an element after a specified delay
     function showAfter(delay, el) {
-        setTimeout(function() { el.classList.add("show") }, delay);
+        el.classList.add("hide");
+        setTimeout(function() { el.classList.remove("hide") }, delay);
     }
 
     function scrollToBottom() {
@@ -26,6 +28,15 @@
         requestAnimationFrame(step);
     }
 
+    function removeAll(selector)
+    {
+        var allElements = storyContainer.querySelectorAll(selector);
+        for(var i=0; i<allElements.length; i++) {
+            var el = allElements[i];
+            el.parentNode.removeChild(el);
+        }
+    }
+
     function continueStory() {
 
         var paragraphIndex = 0;
@@ -36,15 +47,59 @@
 
             // Get ink to generate the next paragraph
             var paragraphText = story.Continue();
+            var tags = story.currentTags;
+            
+            // Any special tags included with this line
+            var customClasses = [];
+            for(var i=0; i<tags.length; i++) {
+                var tag = tags[i];
 
-            // Create paragraph element
+                // Remove all existing content.
+                if( tag == "CLEAR" ) {
+                    removeAll("p");
+                    removeAll("img");
+                    
+                    // Comment out this line if you want to leave the header visible when clearing
+                    removeAll("h1");
+                }
+
+                // Detect tags of the form "X: Y". Currently used for IMAGE but could be
+                // customised to be used for other things too.
+                else {
+                    var propertySplitIdx = tag.indexOf(":");
+                    if( propertySplitIdx != null ) {
+                        var property = tag.substr(0, propertySplitIdx).trim();
+                        var val = tag.substr(propertySplitIdx+1).trim();    
+
+                        // IMAGE
+                        if( property == "IMAGE" ) {
+                            var imageElement = document.createElement('img');
+                            imageElement.src = val;
+                            storyContainer.appendChild(imageElement);
+
+                            showAfter(delay, imageElement);
+                            delay += 200.0;
+                        }
+
+                        // CLASS
+                        if( property == "CLASS" ) {
+                            customClasses.push(val);
+                        }
+                    }
+                }
+            }
+
+            // Create paragraph element (initially hidden)
             var paragraphElement = document.createElement('p');
             paragraphElement.innerHTML = paragraphText;
             storyContainer.appendChild(paragraphElement);
+            
+            // Add any custom classes derived from ink tags
+            for(var i=0; i<customClasses.length; i++)
+                paragraphElement.classList.add(customClasses[i]);
 
             // Fade in paragraph after a short delay
             showAfter(delay, paragraphElement);
-
             delay += 200.0;
         }
 
@@ -69,11 +124,7 @@
                 event.preventDefault();
 
                 // Remove all existing choices
-                var existingChoices = storyContainer.querySelectorAll('p.choice');
-                for(var i=0; i<existingChoices.length; i++) {
-                    var c = existingChoices[i];
-                    c.parentNode.removeChild(c);
-                }
+                removeAll("p.choice");
 
                 // Tell the story where to go next
                 story.ChooseChoiceIndex(choice.index);
