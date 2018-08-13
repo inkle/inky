@@ -49,6 +49,18 @@
         }
     }
 
+    function setVisible(selector, visible)
+    {
+        var allElements = storyContainer.querySelectorAll(selector);
+        for(var i=0; i<allElements.length; i++) {
+            var el = allElements[i];
+            if( !visible )
+                el.classList.add("invisible");
+            else
+                el.classList.remove("invisible");
+        }
+    }
+
     function continueStory(firstTime) {
 
         var paragraphIndex = 0;
@@ -70,12 +82,17 @@
                 var tag = tags[i];
 
                 // Remove all existing content.
-                if( tag == "CLEAR" ) {
+                if( tag == "CLEAR" || tag == "RESTART" ) {
                     removeAll("p");
                     removeAll("img");
                     
                     // Comment out this line if you want to leave the header visible when clearing
-                    removeAll("h1");
+                    setVisible("h1", false);
+
+                    if( tag == "RESTART" ) {
+                        restart();
+                        return;
+                    }
                 }
 
                 // Detect tags of the form "X: Y". Currently used for IMAGE but could be
@@ -154,7 +171,18 @@
         // cause the height (and therefore scroll) to jump backwards temporarily.
         storyContainer.style.height = contentBottomEdgeY()+"px";
 
-        scrollDown(previousBottomEdge);
+        if( !firstTime )
+            scrollDown(previousBottomEdge);
+    }
+
+    function restart() {
+        story.ResetState();
+
+        setVisible("h1", true);
+
+        continueStory(true);
+
+        outerScrollContainer.scrollTo(0);
     }
 
     continueStory(true);
