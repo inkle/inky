@@ -3,6 +3,7 @@
     var story = new inkjs.Story(storyContent);
 
     var storyContainer = document.querySelectorAll('#story')[0];
+    var outerScrollContainer = document.querySelectorAll('.outerContainer')[0];
 
     // Fades in an element after a specified delay
     function showAfter(delay, el) {
@@ -10,22 +11,33 @@
         setTimeout(function() { el.classList.remove("hide") }, delay);
     }
 
-    function scrollToBottom() {
-        var progress = 0.0;
-        var start = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        var dist = document.body.scrollHeight - window.innerHeight - start;
-        if( dist < 0 ) return;
+    function scrollDown(previousBottomEdge) {
 
+        // Line up top of screen with the bottom of where the previous content ended
+        var target = previousBottomEdge;
+        
+        // Can't go further than the very bottom of the page
+        var limit = outerScrollContainer.scrollHeight - outerScrollContainer.clientHeight;
+        if( target > limit ) target = limit;
+
+        var start = outerScrollContainer.scrollTop;
+
+        var dist = target - start;
         var duration = 300 + 300*dist/100;
         var startTime = null;
         function step(time) {
             if( startTime == null ) startTime = time;
             var t = (time-startTime) / duration;
-            var lerp = 3*t*t - 2*t*t*t;
-            window.scrollTo(0, start + lerp*dist);
+            var lerp = 3*t*t - 2*t*t*t; // ease in/out
+            outerScrollContainer.scrollTo(0, (1.0-lerp)*start + lerp*target);
             if( t < 1 ) requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
+    }
+
+    function contentBottomEdgeY() {
+        var bottomElement = storyContainer.lastElementChild;
+        return bottomElement ? bottomElement.offsetTop + bottomElement.offsetHeight : 0;
     }
 
     function removeAll(selector)
@@ -37,10 +49,13 @@
         }
     }
 
-    function continueStory() {
+    function continueStory(firstTime) {
 
         var paragraphIndex = 0;
         var delay = 0.0;
+        
+        // Don't over-scroll past new content
+        var previousBottomEdge = firstTime ? 0 : contentBottomEdgeY();
 
         // Generate story text - loop through available content
         while(story.canContinue) {
@@ -134,9 +149,14 @@
             });
         });
 
-        scrollToBottom();
+        // Extend height to fit
+        // We do this manually so that removing elements and creating new ones doesn't
+        // cause the height (and therefore scroll) to jump backwards temporarily.
+        storyContainer.style.height = contentBottomEdgeY()+"px";
+
+        scrollDown(previousBottomEdge);
     }
 
-    continueStory();
+    continueStory(true);
 
 })(storyContent);
