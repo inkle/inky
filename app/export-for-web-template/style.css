@@ -1,15 +1,64 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300|Quattrocento:700');
 
 body {
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: lighter;
     background: white;
 }
 
-h1 {
-    text-align: center;
-    font-weight: lighter;
-    font-size: 30pt;
+body.dark {
+    background: black;
+    color: white;
 }
+
+h1, h2 {
+    text-align: center;
+    font-family: "Quattrocento", Georgia, 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-size: 30pt;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 14pt;
+    font-style: italic;
+    font-family: sans-serif;
+    font-weight: lighter;
+    color: #BBB;
+}
+
+.dark h2 {
+    color: #666;
+}
+
+.header {
+    padding-top: 3em;
+    padding-bottom: 3em;
+}
+
+h3.written-in-ink {
+    font-size: 9pt;
+    font-family: sans-serif;
+    text-align: center;
+    font-weight: 700;
+    position: fixed;
+    display: block;
+    width: 100%;
+    background: white;
+    margin: 0;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    top: 0;
+}
+
+.dark h3.written-in-ink {
+    background: black;
+}
+
 
 /* Seems necessary to make iframes work on itch.io on mobile iOS :-( */
 .outerContainer {
@@ -27,19 +76,54 @@ h1 {
 
 .container {
     display: block;
-    max-width: 800px;
+    max-width: 600px;
     margin: 0 auto;
     padding: 20px;
+    padding-top: 4em;
     background: white;
 }
 
-p {
-    font-size: 16pt;
+.dark .container {
+    background: black;
 }
 
-p, a {
-    color: gray;
+p {
+    font-size: 13pt;
+    color: #888;
     line-height: 1.7em;
+    font-weight: lighter;
+}
+
+a {
+    font-weight: 700;
+    color: #CCC;
+    font-family: sans-serif;
+    transition: color 0.6s;
+    text-decoration: none;
+}
+
+.dark a {
+    color: #555;
+    transition: color 0.6s;
+}
+
+
+a:hover {
+    color: black;
+    transition: color 0.1s;
+}
+
+.dark a:hover {
+    color: white;
+}
+
+strong {
+    color: black;
+    font-weight: bold;
+}
+
+.dark strong {
+    color: white;
 }
 
 img {
@@ -52,6 +136,10 @@ img {
     opacity: 0.0;
 }
 
+.container .invisible {
+    display: none;
+}
+
 .container * {
     opacity: 1.0;
     transition: opacity 1.0s;
@@ -59,8 +147,15 @@ img {
 
 p.choice {
     text-align: center;
+    line-height: 1.7em;
 }
 
-a:hover {
-    color: black;
+/* first choice */
+:not(.choice) + .choice {
+    padding-top: 1em; 
+}
+
+
+p.choice a {
+    font-size: 15pt;
 }

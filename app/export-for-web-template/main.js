@@ -1,9 +1,27 @@
 (function(storyContent) {
 
     var story = new inkjs.Story(storyContent);
+    var globalTags = story.globalTags;
+    if( globalTags ) {
+        for(var i=0; i<story.globalTags.length; i++) {
+            var globalTag = story.globalTags[i];
+            var splitTag = splitPropertyTag(globalTag);
+            
+            // THEME: dark
+            if( splitTag && splitTag.property == "theme" ) {
+                document.body.classList.add(splitTag.val);
+            }
+            
+            // author: Your Name
+            else if( splitTag && splitTag.property == "author" ) {
+                var byline = document.querySelector('.byline');
+                byline.innerHTML = "by "+splitTag.val;
+            }
+        }
+    }
 
-    var storyContainer = document.querySelectorAll('#story')[0];
-    var outerScrollContainer = document.querySelectorAll('.outerContainer')[0];
+    var storyContainer = document.querySelector('#story');
+    var outerScrollContainer = document.querySelector('.outerContainer');
 
     // Fades in an element after a specified delay
     function showAfter(delay, el) {
@@ -61,6 +79,20 @@
         }
     }
 
+    function splitPropertyTag(tag) {
+        var propertySplitIdx = tag.indexOf(":");
+        if( propertySplitIdx != null ) {
+            var property = tag.substr(0, propertySplitIdx).trim();
+            var val = tag.substr(propertySplitIdx+1).trim(); 
+            return {
+                property: property,
+                val: val
+            };
+        }
+
+        return null;
+    }
+
     function continueStory(firstTime) {
 
         var paragraphIndex = 0;
@@ -81,42 +113,36 @@
             for(var i=0; i<tags.length; i++) {
                 var tag = tags[i];
 
+                // Detect tags of the form "X: Y". Currently used for IMAGE and CLASS but could be
+                // customised to be used for other things too.
+                var splitTag = splitPropertyTag(tag);
+
+                // IMAGE: src
+                if( splitTag && splitTag.property == "IMAGE" ) {
+                    var imageElement = document.createElement('img');
+                    imageElement.src = splitTag.val;
+                    storyContainer.appendChild(imageElement);
+
+                    showAfter(delay, imageElement);
+                    delay += 200.0;
+                }
+
+                // CLASS: className
+                else if( splitTag && splitTag.property == "CLASS" ) {
+                    customClasses.push(splitTag.val);
+                }
+
                 // Remove all existing content.
-                if( tag == "CLEAR" || tag == "RESTART" ) {
+                else if( tag == "CLEAR" || tag == "RESTART" ) {
                     removeAll("p");
                     removeAll("img");
                     
                     // Comment out this line if you want to leave the header visible when clearing
-                    setVisible("h1", false);
+                    setVisible(".header", false);
 
                     if( tag == "RESTART" ) {
                         restart();
                         return;
-                    }
-                }
-
-                // Detect tags of the form "X: Y". Currently used for IMAGE but could be
-                // customised to be used for other things too.
-                else {
-                    var propertySplitIdx = tag.indexOf(":");
-                    if( propertySplitIdx != null ) {
-                        var property = tag.substr(0, propertySplitIdx).trim();
-                        var val = tag.substr(propertySplitIdx+1).trim();    
-
-                        // IMAGE
-                        if( property == "IMAGE" ) {
-                            var imageElement = document.createElement('img');
-                            imageElement.src = val;
-                            storyContainer.appendChild(imageElement);
-
-                            showAfter(delay, imageElement);
-                            delay += 200.0;
-                        }
-
-                        // CLASS
-                        if( property == "CLASS" ) {
-                            customClasses.push(val);
-                        }
                     }
                 }
             }
@@ -178,11 +204,11 @@
     function restart() {
         story.ResetState();
 
-        setVisible("h1", true);
+        setVisible(".header", true);
 
         continueStory(true);
 
-        outerScrollContainer.scrollTo(0);
+        outerScrollContainer.scrollTo(0, 0);
     }
 
     continueStory(true);
