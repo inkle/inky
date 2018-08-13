@@ -1,6 +1,12 @@
 (function(storyContent) {
 
+    // Create ink story from the content using inkjs
     var story = new inkjs.Story(storyContent);
+
+    // Global tags - those at the top of the ink file
+    // We support:
+    //  # theme: dark
+    //  # author: Your Name
     var globalTags = story.globalTags;
     if( globalTags ) {
         for(var i=0; i<story.globalTags.length; i++) {
@@ -23,76 +29,11 @@
     var storyContainer = document.querySelector('#story');
     var outerScrollContainer = document.querySelector('.outerContainer');
 
-    // Fades in an element after a specified delay
-    function showAfter(delay, el) {
-        el.classList.add("hide");
-        setTimeout(function() { el.classList.remove("hide") }, delay);
-    }
+    // Kick off the start of the story!
+    continueStory(true);
 
-    function scrollDown(previousBottomEdge) {
-
-        // Line up top of screen with the bottom of where the previous content ended
-        var target = previousBottomEdge;
-        
-        // Can't go further than the very bottom of the page
-        var limit = outerScrollContainer.scrollHeight - outerScrollContainer.clientHeight;
-        if( target > limit ) target = limit;
-
-        var start = outerScrollContainer.scrollTop;
-
-        var dist = target - start;
-        var duration = 300 + 300*dist/100;
-        var startTime = null;
-        function step(time) {
-            if( startTime == null ) startTime = time;
-            var t = (time-startTime) / duration;
-            var lerp = 3*t*t - 2*t*t*t; // ease in/out
-            outerScrollContainer.scrollTo(0, (1.0-lerp)*start + lerp*target);
-            if( t < 1 ) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-    }
-
-    function contentBottomEdgeY() {
-        var bottomElement = storyContainer.lastElementChild;
-        return bottomElement ? bottomElement.offsetTop + bottomElement.offsetHeight : 0;
-    }
-
-    function removeAll(selector)
-    {
-        var allElements = storyContainer.querySelectorAll(selector);
-        for(var i=0; i<allElements.length; i++) {
-            var el = allElements[i];
-            el.parentNode.removeChild(el);
-        }
-    }
-
-    function setVisible(selector, visible)
-    {
-        var allElements = storyContainer.querySelectorAll(selector);
-        for(var i=0; i<allElements.length; i++) {
-            var el = allElements[i];
-            if( !visible )
-                el.classList.add("invisible");
-            else
-                el.classList.remove("invisible");
-        }
-    }
-
-    function splitPropertyTag(tag) {
-        var propertySplitIdx = tag.indexOf(":");
-        if( propertySplitIdx != null ) {
-            var property = tag.substr(0, propertySplitIdx).trim();
-            var val = tag.substr(propertySplitIdx+1).trim(); 
-            return {
-                property: property,
-                val: val
-            };
-        }
-
-        return null;
-    }
-
+    // Main story processing function. Each time this is called it generates
+    // all the next content up as far as the next set of choices.
     function continueStory(firstTime) {
 
         var paragraphIndex = 0;
@@ -132,7 +73,8 @@
                     customClasses.push(splitTag.val);
                 }
 
-                // Remove all existing content.
+                // CLEAR - removes all existing content.
+                // RESTART - clears everything and restarts the story from the beginning
                 else if( tag == "CLEAR" || tag == "RESTART" ) {
                     removeAll("p");
                     removeAll("img");
@@ -211,6 +153,88 @@
         outerScrollContainer.scrollTo(0, 0);
     }
 
-    continueStory(true);
+    // -----------------------------------
+    // Various Helper functions
+    // -----------------------------------
+
+    // Fades in an element after a specified delay
+    function showAfter(delay, el) {
+        el.classList.add("hide");
+        setTimeout(function() { el.classList.remove("hide") }, delay);
+    }
+
+    // Scrolls the page down, but no further than the bottom edge of what you could
+    // see previously, so it doesn't go too far.
+    function scrollDown(previousBottomEdge) {
+
+        // Line up top of screen with the bottom of where the previous content ended
+        var target = previousBottomEdge;
+        
+        // Can't go further than the very bottom of the page
+        var limit = outerScrollContainer.scrollHeight - outerScrollContainer.clientHeight;
+        if( target > limit ) target = limit;
+
+        var start = outerScrollContainer.scrollTop;
+
+        var dist = target - start;
+        var duration = 300 + 300*dist/100;
+        var startTime = null;
+        function step(time) {
+            if( startTime == null ) startTime = time;
+            var t = (time-startTime) / duration;
+            var lerp = 3*t*t - 2*t*t*t; // ease in/out
+            outerScrollContainer.scrollTo(0, (1.0-lerp)*start + lerp*target);
+            if( t < 1 ) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    // The Y coordinate of the bottom end of all the story content, used
+    // for growing the container, and deciding how far to scroll.
+    function contentBottomEdgeY() {
+        var bottomElement = storyContainer.lastElementChild;
+        return bottomElement ? bottomElement.offsetTop + bottomElement.offsetHeight : 0;
+    }
+
+    // Remove all elements that match the given selector. Used for removing choices after
+    // you've picked one, as well as for the CLEAR and RESTART tags.
+    function removeAll(selector)
+    {
+        var allElements = storyContainer.querySelectorAll(selector);
+        for(var i=0; i<allElements.length; i++) {
+            var el = allElements[i];
+            el.parentNode.removeChild(el);
+        }
+    }
+
+    // Used for hiding and showing the header when you CLEAR or RESTART the story respectively.
+    function setVisible(selector, visible)
+    {
+        var allElements = storyContainer.querySelectorAll(selector);
+        for(var i=0; i<allElements.length; i++) {
+            var el = allElements[i];
+            if( !visible )
+                el.classList.add("invisible");
+            else
+                el.classList.remove("invisible");
+        }
+    }
+
+    // Helper for parsing out tags of the form:
+    //  # PROPERTY: value
+    // e.g. IMAGE: source path
+    function splitPropertyTag(tag) {
+        var propertySplitIdx = tag.indexOf(":");
+        if( propertySplitIdx != null ) {
+            var property = tag.substr(0, propertySplitIdx).trim();
+            var val = tag.substr(propertySplitIdx+1).trim(); 
+            return {
+                property: property,
+                val: val
+            };
+        }
+
+        return null;
+    }
 
 })(storyContent);

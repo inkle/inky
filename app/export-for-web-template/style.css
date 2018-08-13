@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300|Quattrocento:700');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,700|Quattrocento:700');
 
 body {
     font-family: 'Open Sans', sans-serif;
@@ -96,14 +96,14 @@ p {
 
 a {
     font-weight: 700;
-    color: #CCC;
+    color: #b97c2c;
     font-family: sans-serif;
     transition: color 0.6s;
     text-decoration: none;
 }
 
 .dark a {
-    color: #555;
+    color: #cc8f1a;
     transition: color 0.6s;
 }
 
@@ -158,4 +158,15 @@ p.choice {
 
 p.choice a {
     font-size: 15pt;
+}
+
+/* Built in class if you want to write:
+     The End # CLASS: end
+*/
+.end {
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
