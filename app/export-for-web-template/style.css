@@ -11,6 +11,20 @@ h1 {
     font-size: 30pt;
 }
 
+/* Seems necessary to make iframes work on itch.io on mobile iOS :-( */
+.outerContainer {
+    position: absolute;
+    display: block;
+    margin: 0;
+    padding: 0;
+    -webkit-overflow-scrolling: touch;
+    overflow: scroll;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
 .container {
     display: block;
     max-width: 800px;
