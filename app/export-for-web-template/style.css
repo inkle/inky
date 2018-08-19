@@ -166,7 +166,11 @@ p.choice a {
 .end {
     text-align: center;
     font-weight: bold;
-    color: white;
+    color: black;
     padding-top: 20px;
     padding-bottom: 20px;
+}
+
+.dark .end {
+    color: white;
 }
