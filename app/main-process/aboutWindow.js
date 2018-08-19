@@ -42,7 +42,7 @@ function AboutWindow() {
         w.webContents.send("set-about-data", {
             "inkyVersion": electron.app.getVersion(),
             "inkVersion": inkVersion,
-            "inkjsVersion": inkjsPackage.version
+            "inkjsVersion": "1.7.1 with hotfix"// inkjsPackage.version
         });
         w.setMenu(null);
         w.show();
