@@ -53,6 +53,7 @@ function setupMenus(callbacks) {
         },
         {
           label: 'Export story.js only...',
+          accelerator: 'CmdOrCtrl+Alt+S',
           enabled: callbacks.isFocusedWindow,
           click: callbacks.exportJSOnly
         },

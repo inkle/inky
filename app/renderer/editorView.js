@@ -37,6 +37,9 @@ editor.completers.push(inkCompleter);
 // our "go to anything" command.
 editor.commands.removeCommand("jumptomatching")
 
+// Unbind CMD-ALT-S from Ace so we can use it for save js only
+editor.commands.removeCommand("sortlines");
+
 // Unfortunately standard jquery events don't work since 
 // Ace turns pointer events off
 editor.on("click", function(e){
