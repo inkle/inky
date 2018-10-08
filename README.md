@@ -54,49 +54,13 @@ To build the project:
 
 ### Linux
 
-Tested on a fresh **Ubuntu 16.04 LTS** VM installation (_equivalent processes should work for other distributions_)
+For building Inky on Linux, first install `npm` and `electron-packager`.
 
-* Install build tools
-
-`sudo apt-get install -y dkms build-essential linux-headers-generic linux-headers-$(uname -r)`
-
-* Pre-requisites
-
-`sudo apt install git`
-
-`sudo apt install curl`
-
-* Install node and npm
-
-`curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -`
-
-`sudo apt-get install -y nodejs`
-
-* Install mono as per http://www.mono-project.com/download/stable/#download-lin
-
-`sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF`
-
-`echo "deb http://download.mono-project.com/repo/ubuntu stable-xenial main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list`
-
-`sudo apt-get update`
-
-`sudo apt-get install mono-complete`
-
-* Clone the inky repo
-
-`git clone https://github.com/inkle/inky.git`
-
-* Test inklecate_win with mono (_should output usage info_)
-
-`mono app/main-process/ink/inklecate_win.exe`
-
-* Install and run inky
-
-`./INSTALL_AND_RUN.command`
-
-* For subsequent runs, if no npm packages have changed, launch inky as below (otherwise re-run previous step):
-
-`./RUN.command`
+```bash
+sudo apt install -y npm
+sudo npm install electron-packager -g
+```
+Then you can use the script `build-for-linux.sh`. Once the script finishes, you will find a executable file called `Inky` under `./Inky-linux-x64`.
 
 ## License
 
