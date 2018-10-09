@@ -57,7 +57,7 @@ To build the project:
 For building Inky on Linux, first install `npm` and `electron-packager`.
 
 ```bash
-sudo apt install -y npm
+sudo apt install -y npm mono-complete
 sudo npm install electron-packager -g
 ```
 Then you can use the script `build-for-linux.sh`. Once the script finishes, you will find a executable file called `Inky` under `./Inky-linux-x64`.
