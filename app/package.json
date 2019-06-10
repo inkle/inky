@@ -1,7 +1,7 @@
 {
   "name": "inky",
   "productName": "Inky",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "scripts": {
@@ -35,7 +35,7 @@
   "dependencies": {
     "chokidar": "^2.0.4",
     "fuzzaldrin-plus": "^0.5",
-    "inkjs": "^1.7.1",
+    "inkjs": "^1.10.2",
     "lodash": "^4.17.10",
     "mkdirp": "^0.5.1",
     "randomstring": "^1.1.5"
