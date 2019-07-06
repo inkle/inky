@@ -160,6 +160,7 @@ exports.EditorView = {
         inkCompleter.inkFiles = inkFiles;
     },
     showInkFile: (inkFile) => {
+        clearErrors();
         editor.setSession(inkFile.getAceSession());
         editor.focus();
     },
