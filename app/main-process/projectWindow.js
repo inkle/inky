@@ -4,6 +4,7 @@ const dialog = electron.dialog;
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 const Inklecate = require("./inklecate.js").Inklecate;
+const Menu = electron.Menu;
 
 const electronWindowOptions = {
   width: 1300, 
@@ -17,6 +18,14 @@ const electronWindowOptions = {
 var windows = [];
 
 function ProjectWindow(filePath) {
+    const getThemeFromMenu = () => Menu.getApplicationMenu().items.find(
+        e => e.label.toLowerCase() === 'view'
+    ).submenu.items.find(
+        e => e.label.toLowerCase() === 'theme'
+    ).submenu.items.find(
+        e => e.checked
+    ).label.toLowerCase();
+
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/../renderer/index.html");
     this.browserWindow.setSheetOffset(49);
@@ -43,6 +52,10 @@ function ProjectWindow(filePath) {
         var idx = windows.indexOf(this);
         if( idx != -1 )
             windows.splice(idx, 1);
+    });
+
+    this.browserWindow.webContents.on('dom-ready', () => {
+        this.browserWindow.send("change-theme", getThemeFromMenu());
     });
 }
 
@@ -83,6 +96,8 @@ ProjectWindow.prototype.finalClose = function() {
 ProjectWindow.prototype.openDevTools = function() {
     this.browserWindow.webContents.openDevTools();
 }
+
+ProjectWindow.all = () => windows;
 
 ProjectWindow.createEmpty = function() {
     return new ProjectWindow(); 

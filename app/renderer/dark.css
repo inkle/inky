@@ -1,0 +1,67 @@
+.window.dark #main,
+.window.dark #editor {
+    background-color: #333;
+}
+
+.window.dark .ace_editor .ace_marker-layer .ace_selection {
+    background-color: #444;
+}
+
+.window.dark .ace_editor .ace_marker-layer .ace_selected-word {
+    background-color: #999;
+    border-color: #dedede;
+}
+
+.window.dark #editor,
+.window.dark #player,
+.window.dark .ace_editor .ace_cursor {
+    color: #f0f0f0;
+}
+
+.window.dark .ace_editor .ace_indent-guide {
+    opacity: .1;
+}
+
+.window.dark .ace_editor .ace_marker-layer .ace_active-line {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.window.dark #player hr {
+    border-top-color: #444;
+}
+
+.window.dark #player p.choice a:hover {
+    color: #999;
+}
+
+.window.dark #editor .ace_gutter-layer,
+.window.dark .split {
+    background: #444;
+}
+
+.window.dark #editor .ace-error {
+    background: darkred;
+}
+
+.window.dark .ace_editor span.ace_flow.ace_declaration,
+.window.dark .ace_editor span.ace_divert,
+.window.dark .ace_editor span.ace_choice.ace_bullets,
+.window.dark .ace_editor span.ace_choice.ace_label,
+.window.dark .ace_editor span.ace_choice.ace_weaveBracket,
+.window.dark .ace_editor span.ace_gather.ace_bullets,
+.window.dark .ace_editor span.ace_gather.ace_label,
+.window.dark .ace_editor span.ace_glue,
+.window.dark .ace_editor span.ace_include,
+.window.dark .ace_editor span.ace_external {
+  color: cyan;
+}
+
+.window.dark .ace_editor span.ace_var-decl,
+.window.dark .ace_editor span.ace_list-decl,
+.window.dark .ace_editor span.ace_logic:not(.ace_innerContent) {
+  color: lightgreen;
+}
+
+.window.dark #main.hideTags .ace_editor span.ace_tag {
+    color: #333;
+}

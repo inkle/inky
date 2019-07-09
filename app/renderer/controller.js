@@ -251,3 +251,11 @@ ipc.on("set-tags-visible", (event, visible) => {
     else
         $("#main").addClass("hideTags");
 });
+
+ipc.on("change-theme", (event, newTheme) => {
+    if (newTheme.toLowerCase() === 'dark') {
+        $(".window").addClass("dark");
+    } else {
+        $(".window").removeClass("dark");
+    }
+});

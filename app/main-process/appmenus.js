@@ -4,8 +4,22 @@ const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 const _ = require("lodash");
 const Menu = electron.Menu;
+const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 
 function setupMenus(callbacks) {
+  let themes = [];
+  const defaultTheme = 'light';
+  for (const theme of ['light', 'dark']) {
+    themes.push({
+      label: theme.substring(0, 1).toUpperCase() + theme.substring(1),
+      type: 'radio',
+      checked: theme === defaultTheme,
+      click: () => {
+        ProjectWindow.all().forEach(window => window.browserWindow.webContents.send('change-theme', theme));
+      }
+    });
+  }
+
   const template = [
     {
       label: 'File',
@@ -115,6 +129,10 @@ function setupMenus(callbacks) {
             if (focusedWindow)
               focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
           }
+        },
+        {
+          label: 'Theme',
+          submenu: themes
         },
         {
           label: "TODO: zoom controls"
