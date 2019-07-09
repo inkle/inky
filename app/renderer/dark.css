@@ -1,7 +1,62 @@
 .window.dark #main,
-.window.dark #editor {
+.window.dark #editor,
+.window.dark #toolbar {
     background-color: #333;
 }
+
+.window.dark #main .sidebar,
+.window.dark #main .sidebar .footer {
+    background-color: #282828;
+}
+
+.window.dark h1.title {
+    color: white;
+}
+
+
+.window.dark #main .sidebar .filename,
+.window.dark #main .sidebar .footer .add-include-button,
+.window.dark #main .sidebar .footer .new-include-form h5 {
+    color: #888;
+}
+
+.window.dark #main .sidebar .nav-group-item.active {
+    background: #666;
+}
+
+.window.dark #main .sidebar .nav-group-item.active .filename {
+    color: #CCC;
+}
+
+.window.dark #toolbar .button:hover .icon {
+    color: #CCC;
+}
+
+/* e.g. filename input */
+.window.dark #main .sidebar .footer input {
+    background: #333;
+    border: 1px solid #888;
+    color: #888;
+}
+
+.window.dark #main .sidebar .footer .checkbox {
+    color: #888;
+}
+
+
+
+.window.dark #toolbar {
+    border-bottom: 1px solid #888;
+}
+
+.window.dark #toolbar div.issuesSummary .issueCount {
+    color: #888;
+}
+
+.window.dark #main .sidebar .footer {
+    border-top: 1px solid #555;
+}
+
 
 .window.dark .ace_editor .ace_marker-layer .ace_selection {
     background-color: #444;
