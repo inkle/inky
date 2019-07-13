@@ -219,12 +219,6 @@ function setupMenus(callbacks) {
       role: 'help',
       submenu: [
         {
-          label: 'Learn More',
-          click() {
-            inklecate("hello world");
-          }
-        },
-        {
           label: 'Show Documentation',
           click: callbacks.showDocs
         },
