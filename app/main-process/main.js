@@ -101,6 +101,18 @@ app.on('ready', function () {
         countWords: () => {
             var win = ProjectWindow.focused();
             if (win) win.countWords();
+        },
+        zoomIn: () => {
+          var win = ProjectWindow.focused();
+          if (win != null) {
+            win.zoom(2);
+          }
+        },
+        zoomOut: () => {
+          var win = ProjectWindow.focused();
+          if (win != null) {
+            win.zoom(-2);
+          }
         }
     });
 
