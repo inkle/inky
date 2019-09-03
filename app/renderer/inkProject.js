@@ -157,10 +157,17 @@ InkProject.prototype.startFileWatching = function() {
     if( this.fileWatcher )
         this.fileWatcher.close();
 
-    var watchPath = path.join(this.mainInk.projectDir, "**/*.ink");
-    this.fileWatcher = chokidar.watch(watchPath);
+    this.fileWatcher = chokidar.watch(this.mainInk.projectDir, {
+        disableGlobbing: true
+    });
+
+    const isInkFile = fileAbsPath => {
+        return fileAbsPath.split(".").pop() == "ink";
+    };
 
     this.fileWatcher.on("add", newlyFoundAbsFilePath => {
+        if (!isInkFile(newlyFoundAbsFilePath)) { return; }
+
         var relPath = path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath);
         var existingFile = _.find(this.files, f => f.relativePath() == relPath);
         if( !existingFile ) {
@@ -175,6 +182,8 @@ InkProject.prototype.startFileWatching = function() {
     });
 
     this.fileWatcher.on("change", updatedAbsFilePath => {
+        if (!isInkFile(updatedAbsFilePath)) { return; }
+
         var relPath = path.relative(this.mainInk.projectDir, updatedAbsFilePath);
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
@@ -192,6 +201,8 @@ InkProject.prototype.startFileWatching = function() {
         }
     });
     this.fileWatcher.on("unlink", removedAbsFilePath => {
+        if (!isInkFile(removedAbsFilePath)) { return; }
+
         var relPath = path.relative(this.mainInk.projectDir, removedAbsFilePath);
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
