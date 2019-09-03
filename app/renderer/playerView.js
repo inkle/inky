@@ -61,19 +61,41 @@ function fadeIn($jqueryElement) {
 
 function contentReady() {
 
-    // Expand to fit
-    var newHeight = $textBuffer[0].scrollHeight;
-    if( $textBuffer.height() < newHeight )
-        $textBuffer.height(newHeight);
+    var $scrollContainer = $("#player .scrollContainer");
+    $scrollContainer.stop();
 
-    // Scroll to bottom?
+    // Need to save these ones because we are reseting height, so these are lost
+    var savedScrollTop = $scrollContainer.scrollTop();
+    var prevHeight = $textBuffer.height();
+
+    // Need to reset first, otherwise ($textBuffer[0].scrollHeight) is always not less than $textBuffer.height() and it only expands (bad when story has huge list of choises)
+    $textBuffer.height(0);
+    var newHeight = $textBuffer[0].scrollHeight;
+
+    // Expand to fit or keep same (we will shrink it later, after animating scroll, this way scroll animation is prettier)
+    if( prevHeight < newHeight ) {
+        $textBuffer.height(newHeight);
+    } else {
+        $textBuffer.height(prevHeight);
+    }
+
+    // Scroll?
     if( shouldAnimate() ) {
-        var offset = newHeight - $("#player .scrollContainer").outerHeight();
-        if( offset > 0 && offset > $("#player .scrollContainer").scrollTop() ) {
-            $("#player .scrollContainer").animate({
-                scrollTop: offset
-            }, 500);
-        }
+        
+        var offset = newHeight + 60 - $scrollContainer.outerHeight(); // +60 because: ("#player .innerText { padding: 10px 0 50px 0; }")
+
+        // Need to set previous, as it was reset when we reset height
+        $scrollContainer.animate({scrollTop: savedScrollTop}, 0);
+
+        $scrollContainer.animate({
+            scrollTop: (offset)
+        }, 500, function(){
+            // Shrink, if needed
+            if( prevHeight > newHeight ) {
+                $textBuffer.height(newHeight);
+            }
+        });
+
     }
 }
 
