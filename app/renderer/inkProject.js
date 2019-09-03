@@ -101,6 +101,7 @@ InkProject.prototype.refreshIncludes = function() {
             return;
 
         inkFile.includes.forEach(incPath => {
+            incPath = path.format(path.parse(incPath));
             let alreadyDone = relPathsFromINCLUDEs.contains(incPath);
 
             relPathsFromINCLUDEs.push(incPath);
