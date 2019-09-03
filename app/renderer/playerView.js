@@ -172,7 +172,10 @@ function addChoice(choice, callback)
 
         // Remove any existing choices, and add a divider
         $(".choice").remove();
-        $textBuffer.append("<hr/>");
+
+        if (($textBuffer[0].lastChild == null) || ($textBuffer[0].lastChild.tagName != "HR")) {
+            $textBuffer.append("<hr/>");
+        }
 
         event.preventDefault();
 
@@ -200,7 +203,9 @@ function addLongMessage(message, cssClass)
 
 function addHorizontalDivider()
 {
-    $textBuffer.append("<hr/>");
+    if (($textBuffer[0].lastChild == null) || ($textBuffer[0].lastChild.tagName != "HR")) {
+        $textBuffer.append("<hr/>");
+    }
 }
 
 function addLineError(error, callback)
