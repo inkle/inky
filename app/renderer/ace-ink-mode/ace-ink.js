@@ -104,6 +104,12 @@ var inkHighlightRules = function() {
             }]
         }, {
             token: [
+                "punctuation.definition.comment.json.comment-note",
+                "comment.line.double-slash.js.comment-note"
+            ],
+            regex: /(\/\/)( NOTE: .*$)/
+        }, {
+            token: [
                 "punctuation.definition.comment.json",
                 "comment.line.double-slash.js"
             ],

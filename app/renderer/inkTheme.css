@@ -28,3 +28,15 @@
 #main.hideTags .ace_editor span.ace_tag {
     color: white;
 }
+
+
+/* Comments */
+.ace_editor span.ace_comment {
+  color:  #ca6f1e;
+}
+
+/* This type of comment: // NOTE: any text here */
+.ace_editor span.ace_comment-note {
+  color: #ca6f1e;
+  background-color: #f9e79f;
+}
