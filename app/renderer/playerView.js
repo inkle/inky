@@ -195,9 +195,7 @@ function addChoice(choice, callback)
         // Remove any existing choices, and add a divider
         $(".choice").remove();
 
-        if (($textBuffer[0].lastChild == null) || ($textBuffer[0].lastChild.tagName != "HR")) {
-            $textBuffer.append("<hr/>");
-        }
+        addHorizontalDivider();
 
         event.preventDefault();
 
