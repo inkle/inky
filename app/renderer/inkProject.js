@@ -6,6 +6,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const chokidar = require('chokidar');
 const mkdirp = require('mkdirp');
+const slash = require("slash");
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -156,11 +157,16 @@ InkProject.prototype.startFileWatching = function() {
     if( this.fileWatcher )
         this.fileWatcher.close();
 
-    var watchPath = path.join(this.mainInk.projectDir, "**/*.ink");
-    this.fileWatcher = chokidar.watch(watchPath);
+    
+    // From chokidar changelog: "v2 (Dec 29, 2017): Globs are now posix-style-only; without windows support. Tons of bugfixes."
+    // So now filter for *.ink files on our own
+    this.fileWatcher = chokidar.watch(this.mainInk.projectDir); 
 
     this.fileWatcher.on("add", newlyFoundAbsFilePath => {
-        var relPath = path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath);
+        if (path.extname(newlyFoundAbsFilePath) != ".ink")
+            return;
+
+        var relPath = slash(path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath));
         var existingFile = _.find(this.files, f => f.relativePath() == relPath);
         if( !existingFile ) {
             console.log("Watch found new file - creating it: "+relPath);
@@ -174,7 +180,11 @@ InkProject.prototype.startFileWatching = function() {
     });
 
     this.fileWatcher.on("change", updatedAbsFilePath => {
-        var relPath = path.relative(this.mainInk.projectDir, updatedAbsFilePath);
+        if (path.extname(updatedAbsFilePath) != ".ink")
+            return;
+
+        var relPath = slash(path.relative(this.mainInk.projectDir, updatedAbsFilePath));
+
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
             // TODO: maybe ask user if they want to overwrite? not sure I want to though
@@ -191,7 +201,10 @@ InkProject.prototype.startFileWatching = function() {
         }
     });
     this.fileWatcher.on("unlink", removedAbsFilePath => {
-        var relPath = path.relative(this.mainInk.projectDir, removedAbsFilePath);
+        if (path.extname(removedAbsFilePath) != ".ink")
+            return;
+
+        var relPath = slash(path.relative(this.mainInk.projectDir, removedAbsFilePath));
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
             if( !inkFile.hasUnsavedChanges && inkFile != this.mainInk ) {
