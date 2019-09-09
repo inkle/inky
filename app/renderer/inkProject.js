@@ -189,8 +189,10 @@ InkProject.prototype.startFileWatching = function() {
 
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
-            if( inkFile.justSaved )
+            if( inkFile.justSaved ) {
+                inkFile.justSaved = false;
                 return;
+            }
             
             //console.log("Changed %o", inkFile);
 
