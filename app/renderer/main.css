@@ -9,10 +9,6 @@ div {
   margin: 0;
 }
 
-body {
-  background: yellow; /* Debug */
-}
-
 .hidden {
   display: none;
 }
@@ -489,7 +485,7 @@ img.issue-icon.warning {
 #main {
   display: block;
   position: absolute;
-  top: 50px;
+  top: 49px;
   left: 0;
   right: 0;
   bottom: 0;

@@ -25,9 +25,7 @@ catch(e) {
 }
 
 
-var inkyVersion = null;
 var inkVersion = fs.readFileSync(fullVersionFilePath, "utf8");
-var inkjsVersion = null;
 
 var aboutWindow = null;
 
@@ -42,7 +40,7 @@ function AboutWindow() {
         w.webContents.send("set-about-data", {
             "inkyVersion": electron.app.getVersion(),
             "inkVersion": inkVersion,
-            "inkjsVersion": "1.7.1 with hotfix"// inkjsPackage.version
+            "inkjsVersion": inkjsPackage.version
         });
         w.setMenu(null);
         w.show();
