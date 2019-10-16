@@ -38,6 +38,7 @@
     "inkjs": "^1.10.2",
     "lodash": "^4.17.15",
     "mkdirp": "^0.5.1",
-    "randomstring": "^1.1.5"
+    "randomstring": "^1.1.5",
+    "slash": "^3.0.0"
   }
 }

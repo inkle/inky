@@ -6,6 +6,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const chokidar = require('chokidar');
 const mkdirp = require('mkdirp');
+const slash = require("slash");
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -156,11 +157,16 @@ InkProject.prototype.startFileWatching = function() {
     if( this.fileWatcher )
         this.fileWatcher.close();
 
-    var watchPath = path.join(this.mainInk.projectDir, "**/*.ink");
-    this.fileWatcher = chokidar.watch(watchPath);
+    
+    // From chokidar changelog: "v2 (Dec 29, 2017): Globs are now posix-style-only; without windows support. Tons of bugfixes."
+    // So now filter for *.ink files on our own
+    this.fileWatcher = chokidar.watch(this.mainInk.projectDir); 
 
     this.fileWatcher.on("add", newlyFoundAbsFilePath => {
-        var relPath = path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath);
+        if (path.extname(newlyFoundAbsFilePath) != ".ink")
+            return;
+
+        var relPath = slash(path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath));
         var existingFile = _.find(this.files, f => f.relativePath() == relPath);
         if( !existingFile ) {
             console.log("Watch found new file - creating it: "+relPath);
@@ -174,12 +180,24 @@ InkProject.prototype.startFileWatching = function() {
     });
 
     this.fileWatcher.on("change", updatedAbsFilePath => {
-        var relPath = path.relative(this.mainInk.projectDir, updatedAbsFilePath);
+        if (path.extname(updatedAbsFilePath) != ".ink")
+            return;
+
+        var relPath = slash(path.relative(this.mainInk.projectDir, updatedAbsFilePath));
+
+        //console.log("File %o has changed! (%s)", updatedAbsFilePath, relPath);
+
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
-            // TODO: maybe ask user if they want to overwrite? not sure I want to though
-            if( !inkFile.hasUnsavedChanges ) {
+            if( inkFile.justSaved ) {
+                inkFile.justSaved = false;
+                return;
+            }
+            
+            //console.log("Changed %o", inkFile);
 
+            if( !inkFile.hasUnsavedChanges ) {
+                //console.log("RELOADED %s!", relPath);
                 if( this.activeInkFile == inkFile )
                     EditorView.saveCursorPos();
 
@@ -187,15 +205,91 @@ InkProject.prototype.startFileWatching = function() {
                     if( success && this.activeInkFile == inkFile )
                         setImmediate(() => EditorView.restoreCursorPos());
                 });
+
+            } else {
+                this.showInkFile(inkFile);
+                var response = dialog.showMessageBox(
+                    remote.getCurrentWindow(), 
+                    {
+                        type: "warning",
+                        defaultId: 0,
+                        title: "File changed externally",
+                        message: relPath,
+                        detail: "The file has unsaved changes in this editor and has been changed externally.\nDo you want to reload it and loose the changes made in this editor?",
+                        buttons: ["Yes", "No"],
+                    }
+                );
+
+                if( response == 0 ) {
+                    // Reload from file
+                    //console.log("RELOAD FROM FILE %s", relPath);
+                    if( this.activeInkFile == inkFile )
+                        EditorView.saveCursorPos();
+
+                    inkFile.tryLoadFromDisk(success => {
+                        if( success ) {
+                            if( this.unsavedFiles.contains(inkFile) ) {
+                                this.unsavedFiles.remove(inkFile);
+                                this.refreshUnsavedChanges();
+                            }
+                            if( this.activeInkFile == inkFile )
+                                setImmediate(() => EditorView.restoreCursorPos());
+                        }
+                    });
+                } else {
+                    // Keep from editor
+                    //console.log("KEEP FROM EDITOR %s", relPath);
+                }
             }
         }
     });
     this.fileWatcher.on("unlink", removedAbsFilePath => {
-        var relPath = path.relative(this.mainInk.projectDir, removedAbsFilePath);
+        if (path.extname(removedAbsFilePath) != ".ink")
+            return;
+
+        var relPath = slash(path.relative(this.mainInk.projectDir, removedAbsFilePath));
         var inkFile = _.find(this.files, f => f.relativePath() == relPath);
         if( inkFile ) {
-            if( !inkFile.hasUnsavedChanges && inkFile != this.mainInk ) {
-                this.deleteInkFile(inkFile);
+            if( inkFile != this.mainInk ) {
+                if( !inkFile.hasUnsavedChanges ) {
+                    this.deleteInkFile(inkFile);
+
+                } else {
+                    // Deleted file has unsaved changes. Ask if user wants to delete it
+                    var response = dialog.showMessageBox(
+                        remote.getCurrentWindow(), 
+                        {
+                            type: "warning",
+                            defaultId: 0,
+                            title: "File deleted externally",
+                            message: relPath,
+                            detail: "The file has unsaved changes in this editor and has been deleted externally.\nDo you want to delete it and loose the changes made in this editor?",
+                            buttons: ["Yes", "No"],
+                        }
+                    );
+
+                    if (response == 0) {
+                        this.deleteInkFile(inkFile);
+                    }
+                }
+
+            } else {
+                // Main ink file deleted. Ask to close the project
+                var response = dialog.showMessageBox(
+                    remote.getCurrentWindow(), 
+                    {
+                        type: "warning",
+                        defaultId: 0,
+                        title: "File deleted externally",
+                        message: relPath,
+                        detail: "Main ink file deleted externally.\nDo you want to close the project?",
+                        buttons: ["Yes", "No"],
+                    }
+                );
+
+                if (response == 0) {
+                    this.closeImmediate();
+                }
             }
         }
     });

@@ -173,6 +173,7 @@ exports.EditorView = {
         if( savedCursorPos ) {
             editor.moveCursorToPosition(savedCursorPos); 
             editor.scrollToRow(savedScrollRow);
+            editor.clearSelection();
         } 
     }
 };
