@@ -259,3 +259,33 @@ ipc.on("change-theme", (event, newTheme) => {
         $(".window").removeClass("dark");
     }
 });
+
+ipc.on("zoom", (event, amount) => {
+
+    // Search manually for element by ID
+    // (jQuery wrapping mutates attributes!)
+    let editorEl = document.getElementById("editor");
+    let playerEl = document.getElementById("player");
+
+    let currentSize = editorEl.style.fontSize;
+
+    if(currentSize == "") {
+
+      if(amount > 0) {
+        currentSize = "14";
+      } else {
+        currentSize = "10";
+      }
+
+    } else {
+
+      currentSize = currentSize.substring(0, currentSize.length - 2);
+      currentSize = parseInt(currentSize);
+      currentSize += amount;
+
+    }
+
+    editorEl.style.fontSize = currentSize + "px";
+    playerEl.style.fontSize = currentSize + "px";
+
+});

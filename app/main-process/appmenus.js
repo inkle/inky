@@ -135,7 +135,14 @@ function setupMenus(callbacks) {
           submenu: themes
         },
         {
-          label: "TODO: zoom controls"
+          label: "Zoom (Increase) ",
+          accelerator: 'CmdOrCtrl+K',
+          click: callbacks.zoomIn
+        },
+        {
+          label: "Zoom (Decrease) ",
+          accelerator: 'CmdOrCtrl+L',
+          click: callbacks.zoomOut
         }
       ]
     },
@@ -273,7 +280,7 @@ function setupMenus(callbacks) {
         },
       ]
     });
-    
+
     var windowMenu = _.find(template, menu => menu.role == "window");
     windowMenu.submenu.push(
       {

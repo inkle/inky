@@ -7,8 +7,8 @@ const Inklecate = require("./inklecate.js").Inklecate;
 const Menu = electron.Menu;
 
 const electronWindowOptions = {
-  width: 1300, 
-  height: 730, 
+  width: 1300,
+  height: 730,
   minWidth: 350,
   minHeight: 250,
   titleBarStyle: 'hidden',
@@ -97,10 +97,14 @@ ProjectWindow.prototype.openDevTools = function() {
     this.browserWindow.webContents.openDevTools();
 }
 
+ProjectWindow.prototype.zoom = function(amount) {
+    this.browserWindow.webContents.send('zoom', amount);
+}
+
 ProjectWindow.all = () => windows;
 
 ProjectWindow.createEmpty = function() {
-    return new ProjectWindow(); 
+    return new ProjectWindow();
 }
 
 ProjectWindow.focused = function() {
