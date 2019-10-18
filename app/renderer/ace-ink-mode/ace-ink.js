@@ -9,55 +9,53 @@ var inkHighlightRules = function() {
 
     this.$rules = {
         start: [{
+            include: "#escapes"
+        }, {
             include: "#comments"
         }, {
             regex: /^(\s*)(={2,})(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/,
             token: [
                 "",
-                "flow.knot.declaration.punctuation", // ===
-                "flow.knot.declaration", // whitespace
-                "flow.knot.declaration.function", // function (optional)
-                "flow.knot.declaration", // whitespace
-                "flow.knot.declaration.name", // knot_name
-                "flow.knot.declaration", // whitespace
-                "flow.knot.declaration.parameters", // (arg1, arg2)
-                "flow.knot.declaration", // whitespace
-                "flow.knot.declaration.punctuation" // ====
+                "flow.knot.declaration.punctuation",  // ===
+                "flow.knot.declaration",              // whitespace
+                "flow.knot.declaration.function",     // function (optional)
+                "flow.knot.declaration",              // whitespace
+                "flow.knot.declaration.name",         // knot_name
+                "flow.knot.declaration",              // whitespace
+                "flow.knot.declaration.parameters",   // (arg1, arg2)
+                "flow.knot.declaration",              // whitespace
+                "flow.knot.declaration.punctuation"   // ====
             ]
         }, {
             regex: /^(\s*)(=)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?/,
             token: [
-                "flow.stitch.declaration", // whitespace
+                "flow.stitch.declaration",             // whitespace
                 "flow.stitch.declaration.punctuation", // =
-                "flow.stitch.declaration", // whitespace
-                "flow.stitch.declaration.name", // stitch_name
-                "flow.stitch.declaration", // whitespace
-                "flow.stitch.declaration.parameters" // parameters
+                "flow.stitch.declaration",             // whitespace
+                "flow.stitch.declaration.name",        // stitch_name
+                "flow.stitch.declaration",             // whitespace
+                "flow.stitch.declaration.parameters"   // parameters
             ]
-        }, {
-            include: "#choice"
-        }, {
-            include: "#gather"
         }, {
             include: "#statements"
         }],
         "#TODO": [{
             regex: /^(\s*)(TODO\b)(.*)/,
             token: [
-                "todo", // whitespace
-                "todo.TODO", // TODO
-                "todo" // user text
+                "todo",         // whitespace
+                "todo.TODO",    // TODO
+                "todo"          // user text
             ]
         }],
         "#choice": [{
-            regex: /^(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
+            regex: /(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
             token: [
-                "choice", // whitespace
-                "choice.bullets", // * or +
-                "choice", // whitespace
-                "choice.label", // ( 
-                "choice.label.name", // label_name
-                "choice.label" // )
+                "choice",                           // whitespace
+                "choice.bullets",                   // * or +
+                "choice",                           // whitespace
+                "choice.label",                     // ( 
+                "choice.label.name",                // label_name
+                "choice.label"                      // )
             ],
 
             // Sub section within choice
@@ -66,38 +64,43 @@ var inkHighlightRules = function() {
                 regex: /$/,
                 next: "pop"
             }, {
-                include: "#comments"
-            }, {
-                token: [
-                    "choice.weaveBracket",
-                    "choice.weaveInsideBrackets",
-                    "choice.weaveBracket"
-                ],
-                regex: /(\[)([^\]]*)(\])/
-            }, {
-                include: "#divert"
+                token: "choice.weaveBracket", 
+                regex: /\s*\[\s*/,                  // [ weave start 
+                push: [{ 
+                    token: "choice.weaveBracket", 
+                    regex: /\s*\]\s*/,              // ] weave end 
+                    next: "pop" 
+                }, {
+                    include: "#inlineContent" 
+                }, {
+                    defaultToken: "choice.weaveInsideBrackets" 
+                }]
             }, {
                 include: "#mixedContent"
             }, {
                 defaultToken: "choice"
             }]
         }],
+        "#escapes": [{
+            token: "escape",
+            regex: /\\[\[\]()\\~{}\/#*+-]/  // backslash escape sequences (e.g. \\ or \[ or \] or \~ or \#)
+        }],
         "#comments": [{
             token: "punctuation.definition.comment.json",
-            regex: /\/\*\*/,
+            regex: /\/\*\*/,            // /** comment block
             push: [{
                 token: "punctuation.definition.comment.json",
-                regex: /\*\//,
+                regex: /\*\//,          // end comment block */
                 next: "pop"
             }, {
                 defaultToken: "comment.block.documentation.json"
             }]
         }, {
             token: "punctuation.definition.comment.json",
-            regex: /\/\*/,
+            regex: /\/\*/,              // /* comment block 
             push: [{
                 token: "punctuation.definition.comment.json",
-                regex: /\*\//,
+                regex: /\*\//,          // end comment block */
                 next: "pop"
             }, {
                 defaultToken: "comment.block.json"
@@ -107,7 +110,7 @@ var inkHighlightRules = function() {
                 "punctuation.definition.comment.json",
                 "comment.line.double-slash.js"
             ],
-            regex: /(\/\/)(.*$)/
+            regex: /(\/\/)(.*$)/        // // comment
         }],
 
         // Try different types of divert in sequence, since it's a bit complicated
@@ -167,7 +170,7 @@ var inkHighlightRules = function() {
             token: [
                 "divert.operator",  // -> | <-
                 "divert",           // whitespace
-                "divert.target",              // target.name
+                "divert.target",    // target.name
                 "divert"            // whitespace
             ]
         }, {
@@ -194,14 +197,35 @@ var inkHighlightRules = function() {
         }],
 
         "#gather": [{
-            regex: /^(\s*)((?:-\s*)+)(?!>)(?:(\(\s*)(\w+)(\s*\)))?/,
+            regex: /^(\s*)((?:-(?!>)\s*)+)/,
             token: [
-                "gather", // whitespace
+                "gather",         // whitespace
                 "gather.bullets", // - - 
-                "gather.label", // (
-                "gather.label.name", // label_name
-                "gather.label" // )
-            ]
+            ],
+            push: [{
+                regex: /$/,
+                token: "gather",
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, {
+                include: "#logicLineInsert"
+            }, {
+                regex: /(\(\s*)(\w+)(\s*\)\s*)/,
+                token: [
+                    "gather.label",      // (
+                    "gather.label.name", // label_name
+                    "gather.label"       // )
+                ],
+            }, {
+                include: "#choice"
+            }, {
+                include: "#mixedContent"
+            }, {
+                defaultToken: "gather.innerContent"
+            }]
         }],
         "#globalVAR": [{
             regex: /^(\s*)(VAR|CONST)\b/, // (\s*)(\w+)(\s*)
@@ -213,9 +237,9 @@ var inkHighlightRules = function() {
             push: [{
                 regex: /(\s*)(\w+)(\s*)/,
                 token: [
-                    "var-decl", // whitespace
-                    "var-decl.name",
-                    "var-decl" // whitespace
+                    "var-decl",      // whitespace
+                    "var-decl.name", // var_name
+                    "var-decl"       // whitespace
                 ]
             }, 
 
@@ -225,29 +249,28 @@ var inkHighlightRules = function() {
                 token: "var-decl",
                 next: "pop"
             }, {
+                include: "#comments"
+            }, {
                 defaultToken: "var-decl"
             }]
         }],
         "#listDef": [{
             regex: /(\s*)(LIST)/,
             token: [
-                "list-decl", // whitespace
-                "list-decl.keyword"
+                "list-decl",          // whitespace
+                "list-decl.keyword"   // LIST
             ],
-            push: [
-                {
+            push: [ {
                     regex: /(\w+)(\s*=\s*)/,
                     token: [
-                        "list-decl.name",
-                        "list-decl" // whitespace & equals sign
+                        "list-decl.name", // list_name
+                        "list-decl"       // whitespace & equals sign
                     ],
                     next: "#listItem"
-                },
-                {
+                }, {
                     regex: /$/,
                     next: "pop"
-                },
-                {
+                }, {
                     defaultToken: "list-decl"
                 }
             ]
@@ -370,24 +393,24 @@ var inkHighlightRules = function() {
         "#multiLineLogic": [{
             regex: /^(\s*)(\{)(?:([^}:]+)(:))?(?=[^}]*$)/,
             token: [
-                "logic", // whitespace
-                "logic.punctuation", // {
-                "logic.conditional.multiline.condition", // optional initial condition
-                "logic.conditional.multiline.condition.punctuation" // :
+                "logic",                                             // whitespace
+                "logic.punctuation",                                 // {
+                "logic.conditional.multiline.condition",             // optional initial condition
+                "logic.conditional.multiline.condition.punctuation"  // :
             ],
             push: [{
-                token: "logic.punctuation",
-                regex: /\}/,
+                token: "logic.punctuation",                          // }
+                regex: /\}/, 
                 next: "pop"
             }, {
-                regex: /^\s*else\s*\:/,
-                token: "conditional.multiline.else"
+                regex: /^\s*else\s*\:/,             
+                token: "conditional.multiline.else"                  // else :
             }, {
                 regex: /^(\s*)(-)(?!>)((?:\s?[^:\{}]+):)?/,
                 token: [
-                    "logic.multiline.branch",
-                    "logic.multiline.branch.operator",
-                    "logic.multiline.branch.condition"
+                    "logic.multiline.branch",                       // whitespace
+                    "logic.multiline.branch.operator",              // - 
+                    "logic.multiline.branch.condition"              // 
                 ]
             }, {
                 include: "#statements"
@@ -397,29 +420,57 @@ var inkHighlightRules = function() {
         }],
         "#logicLine": [{
             token: "logic.tilda",
-            regex: /\s*~\s*.*$/
+            regex: /^\s*~\s*/,
+            push: [{
+                token: "logic.tilda",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "logic.tilda"
+            }]
+        }],
+        "#logicLineInsert": [{
+            token: "logic.tilda",
+            regex: /\s*~\s*/,
+            push: [{
+                token: "logic.tilda",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "logic.tilda"
+            }]
         }],
         "#tags": [{
-            // e.g. \\#tag should be highlighted
-            token: "doubleescape",
-            regex: /\\\\/
-        }, {
-            // e.g. \#tag should not be highlighted
-            token: "escape",
-            regex: /\\#/
-        }, {
             // e.g. #tag should be highlighted
             token: "tag",
-            regex: /#.*/
+            regex: /#/,
+            push: [{
+                token:"tag",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "tag.innerContent"
+            }]
         }],
-        "#mixedContent": [{
+        "#inlineContent": [{ 
             include: "#inlineConditional"
         }, {
             include: "#inlineSequence"
         }, {
             include: "#inlineLogic"
-        }, {
-            include: "#logicLine"
+        }], 
+        "#mixedContent": [{ 
+            include: "#inlineContent" 
         }, {
             include: "#divert"
         }, {
@@ -430,6 +481,8 @@ var inkHighlightRules = function() {
         }],
         "#statements": [{
             include: "#comments"
+        }, {
+            include: "#escapes"
         }, {
             include: "#TODO"
         }, {
