@@ -280,7 +280,9 @@ function copyFile(source, destination, transform) {
             if( transform ) fileContent = transform(fileContent);
             if( fileContent.length < 1 ) throw "Trying to write (copy) empty file!";
             
-            fs.writeFile(destination, fileContent, "utf8");
+            fs.writeFile(destination, fileContent, "utf8", err => {
+                if( err ) alert(`Failed to save file '${destination}'`);
+            });
         }
     });
 }
