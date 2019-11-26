@@ -113,6 +113,10 @@ app.on('ready', function () {
           if (win != null) {
             win.zoom(-2);
           }
+        },
+        insertSnippet: (focussedWindow, snippet) => {
+            if( focussedWindow )
+                focussedWindow.webContents.send('insertSnippet', snippet);
         }
     });
 

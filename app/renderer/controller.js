@@ -289,3 +289,7 @@ ipc.on("zoom", (event, amount) => {
     playerEl.style.fontSize = currentSize + "px";
 
 });
+
+ipc.on("insertSnippet", (event, snippetContent) => {
+    EditorView.insert(snippetContent);
+});
