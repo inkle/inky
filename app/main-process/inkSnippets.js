@@ -146,7 +146,7 @@ exports.snippets = [
         snippets: [
             {
                 name: "The Intercept",
-                ink: loadLongerSnippet("theIntercept.ink")
+                ink: loadLongerSnippet("theintercept.ink")
             }
         ]
     }
