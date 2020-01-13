@@ -1,11 +1,9 @@
 const child_process = require('child_process');
-const exec = child_process.exec;
 const spawn = child_process.spawn;
 const fs = require('fs');
 const path = require("path");
 const electron = require('electron');
 const ipc = electron.ipcMain;
-const util = require('util');
 const mkdirp = require('mkdirp');
 
 // inklecate is packaged outside of the main asar bundle since it's executable
@@ -25,10 +23,12 @@ catch(e) {
     inklecatePath = path.join(inklecateRootPathDev, inklecateNames[process.platform]);
 }
 
-// TODO: Customise this for different projects
-// Is this the right temporary directory even on Mac? Seems like a bad practice
-// to keep files around in a "public" place that the user might wish to keep private.
-const tempInkPath = (process.platform == "darwin" || process.platform == "linux") ? "/tmp/inky_compile" : path.join(process.env.temp, "inky_compile");
+var tempInkPath;
+if (process.platform == "darwin" || process.platform == "linux") {
+    tempInkPath = process.env.TMPDIR ? path.join(process.env.TMPDIR, "inky_compile") : "/tmp/inky_compile";
+} else {
+    tempInkPath = path.join(process.env.temp, "inky_compile")
+}
 
 var sessions = {};
 
@@ -124,7 +124,7 @@ function compile(compileInstruction, requester) {
             sessions[sessionId].ended = true;
 
             sendAnyErrors();
-            
+
             if( code == 0 || code === undefined ) {
                 requester.send('inklecate-complete', sessionId, jsonExportPath);
             }
@@ -201,7 +201,7 @@ function compile(compileInstruction, requester) {
                 } else {
                     requester.send('play-generated-text', line, sessionId);
                 }
-                
+
             }
 
         }
