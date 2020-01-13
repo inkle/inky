@@ -23,10 +23,12 @@ catch(e) {
     inklecatePath = path.join(inklecateRootPathDev, inklecateNames[process.platform]);
 }
 
-// TODO: Customise this for different projects
-// Is this the right temporary directory even on Mac? Seems like a bad practice
-// to keep files around in a "public" place that the user might wish to keep private.
-const tempInkPath = (process.platform == "darwin" || process.platform == "linux") ? "/tmp/inky_compile" : path.join(process.env.temp, "inky_compile");
+var tempInkPath;
+if (process.platform == "darwin" || process.platform == "linux") {
+    tempInkPath = process.env.TMPDIR ? path.join(process.env.TMPDIR, "inky_compile") : "/tmp/inky_compile";
+} else {
+    tempInkPath = path.join(process.env.temp, "inky_compile")
+}
 
 var sessions = {};
 
