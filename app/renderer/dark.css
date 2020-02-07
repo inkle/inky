@@ -98,6 +98,11 @@
     background: darkred;
 }
 
+.window.dark #editor .ace_todo,
+.window.dark #editor .ace-todo {
+    background: darkcyan;
+}
+
 .window.dark .ace_editor span.ace_flow.ace_declaration,
 .window.dark .ace_editor span.ace_divert,
 .window.dark .ace_editor span.ace_choice.ace_bullets,
