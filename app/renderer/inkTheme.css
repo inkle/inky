@@ -13,6 +13,11 @@
   color: blue;
 }
 
+/* Comments */
+.ace-tm .ace_comment {
+  color: #bb5018;
+}
+
 /* Logic */
 .ace_editor span.ace_var-decl,
 .ace_editor span.ace_list-decl,
