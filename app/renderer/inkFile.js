@@ -46,7 +46,11 @@ function InkFile(anyPath, mainInkFile, events) {
 
     this.mainInkFile = mainInkFile;
 
-    this.aceDocument = new Document("");
+    // Create new Inky files with a comment already embedded placeholder comment.
+    // This is a temporary solution to prevent the "INCLUDE x" blank file destructive deletion
+    // issue, where saving automatically created blank files prevented properly saving and
+    // removed Included files without warning the user.
+    this.aceDocument = new Document("//Replace this comment with Ink and start writing!");
     this.aceSession = null;
 
     this.includes = [];
