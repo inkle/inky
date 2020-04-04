@@ -125,3 +125,23 @@
 .window.dark #main.hideTags .ace_editor span.ace_tag {
     color: #333;
 }
+
+/* scrollbars */
+.window.dark *::-webkit-scrollbar {
+	width: auto;
+}
+
+.window.dark *::-webkit-scrollbar-track {
+	background-color: #222;
+}
+
+.window.dark *::-webkit-scrollbar-thumb {
+	background-color: #777;
+	transition: background-color 0.6s;
+	box-shadow: inset 0px 0px 10px 0px #00000061;
+}
+
+.window.dark *::-webkit-scrollbar-thumb:hover {
+	background-color: #999;
+	transition: background-color 0.6s;
+}
