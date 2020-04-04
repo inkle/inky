@@ -140,7 +140,7 @@ img {
     display: none;
 }
 
-.container * {
+.container > * {
     opacity: 1.0;
     transition: opacity 1.0s;
 }
