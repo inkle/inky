@@ -31,12 +31,12 @@
         }
     }
 
-    setupTheme(globalTagTheme);
-    var hasSave = loadSavePoint();
-
     var storyContainer = document.querySelector('#story');
     var outerScrollContainer = document.querySelector('.outerContainer');
 
+    // page features setup
+    setupTheme(globalTagTheme);
+    var hasSave = loadSavePoint();
     setupButtons(hasSave);
 
     // Set initial save point
