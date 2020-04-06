@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Categories=Development;IDE;
+Name=Inky
+Comment=Inky
+Exec=/opt/inky/Inky
+Path=/opt/inky/
+Icon=inky

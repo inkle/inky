@@ -1,0 +1,6 @@
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "${0}")")"
+export LD_LIBRARY_PATH=${HERE}/opt/inky/:$LD_LIBRARY_PATH
+cd "${HERE}/opt/inky"
+"${HERE}/opt/inky/Inky" "$@"
+exit $?
