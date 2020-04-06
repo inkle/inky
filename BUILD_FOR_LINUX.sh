@@ -22,7 +22,7 @@ zip -r ReleaseUpload/Inky_linux.zip Inky-linux-x64
 
 # Ensure a copy of the AppImage tool is available
 if [[ ! -e "appimagetool-x86_64.AppImage" ]]; then
-    curl -O -J -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+    curl -O -J -L https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage
     echo Need to make appimagetool executable:
     sudo chmod +x appimagetool-x86_64.AppImage
 fi
