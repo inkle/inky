@@ -131,7 +131,10 @@
 	width: auto;
 }
 
-.window.dark *::-webkit-scrollbar-track {
+.window.dark *::-webkit-scrollbar-track,
+.window.dark *::-webkit-scrollbar-track-piece,
+.window.dark *::-webkit-scrollbar-corner,
+.window.dark *::-webkit-resizer {
 	background-color: #222;
 }
 
