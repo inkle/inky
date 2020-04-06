@@ -1,0 +1,8 @@
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "${0}")")"
+GAME_DIR=/opt/inky
+GAME_EXEC=Inky
+export LD_LIBRARY_PATH=${HERE}/$GAME_DIR/:$LD_LIBRARY_PATH
+cd "${HERE}/$GAME_DIR"
+"${HERE}/$GAME_DIR/$GAME_EXEC" "$@"
+exit $?

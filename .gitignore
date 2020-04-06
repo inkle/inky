@@ -8,3 +8,5 @@ Inky_windows.zip
 ReleaseUpload
 app/renderer/documentation/
 .idea/
+*.AppImage
+AppImage
