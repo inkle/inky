@@ -145,3 +145,27 @@
 	background-color: #999;
 	transition: background-color 0.6s;
 }
+
+/* Issues Pop-up */
+#toolbar .issue-popup {
+    background-color: #222;
+    border-color: #444;
+}
+
+#toolbar .issue-popup img.nubbin {
+    filter: brightness(12%);
+}
+
+#toolbar .issue-popup .row:hover {
+background: #444;
+}
+
+#toolbar .issue-popup .row {
+    border-bottom-color: #333;
+}
+
+#toolbar .issue-popup .line-no {
+    background: #222;
+    color: #ccc;
+    border-right-color: #333;
+}
