@@ -5,10 +5,8 @@
 
     var savePoint = "";
 
-    let saving = true;
     let savedTheme;
     let globalTagTheme;
-
 
     // Global tags - those at the top of the ink file
     // We support:
@@ -30,121 +28,16 @@
                 var byline = document.querySelector('.byline');
                 byline.innerHTML = "by "+splitTag.val;
             }
-
-            // disable saving
-            else if( globalTag == "no-save" ) {
-                saving = false;
-            }
         }
     }
 
-    if ('localStorage' in window === false) {
-        saving = false;
-    }
-
-    var hasSave = false;
-
-    if (saving) {
-        // load theme from save
-        try {
-            savedTheme = window.localStorage.getItem('bit-theme');
-        } catch (e) {
-            console.debug("Couldn't load save theme");
-        }
-
-        // Load from saved state
-        try {
-            let savedState = window.localStorage.getItem('bit-save-state');
-            if (savedState) {
-                story.state.LoadJson(savedState);
-                hasSave = true;
-            }
-        } catch (e) {
-            console.debug("Couldn't load save state");
-        }
-    }
-
-    var browserDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-    if (savedTheme === "dark"
-        || (savedTheme == undefined && globalTagTheme === "dark")
-        || (savedTheme == undefined && globalTagTheme == undefined && browserDark))
-        document.body.classList.add("dark");
+    setupTheme(globalTagTheme);
+    var hasSave = loadSavePoint();
 
     var storyContainer = document.querySelector('#story');
     var outerScrollContainer = document.querySelector('.outerContainer');
-    var isInIframe = window!=window.top;
 
-    var controlsEl = document.getElementById("controls");
-    var clickWork = function(clickedEl, secondsDisabled) {
-        clickedEl.classList.add("working"); // for adding "transitioning" animations
-        clickedEl.setAttribute("disabled", "disabled");
-        setTimeout(function() {
-            clickedEl.classList.remove("working");
-            clickedEl.removeAttribute("disabled");
-        }, secondsDisabled * 1000);
-    };
-
-    let rewindEl = document.getElementById("rewind");
-    if (rewindEl) rewindEl.addEventListener("click", function(event) {
-        clickWork(rewindEl, 0.6);
-
-        removeAll("p");
-        removeAll("img");
-        setVisible(".header", false);
-        restart();
-    });
-
-    let saveEl = document.getElementById("save");
-    if (!saving) {
-        // author has requested no saving (or loading)
-        saveEl.style.display = 'none';
-    } else if (saveEl) saveEl.addEventListener("click", function(event) {
-        clickWork(saveEl, 0.6);
-
-        try {
-            window.localStorage.setItem('bit-save-state', savePoint);
-            document.getElementById("reload").removeAttribute("disabled");
-            window.localStorage.setItem('bit-theme', document.body.classList.contains("dark") ? "dark" : "");
-        } catch (e) {
-            console.warn("Couldn't save state");
-        }
-
-    });
-
-    let reloadEl = document.getElementById("reload");
-    if (!saving) {
-        // author has requested no saving (or loading)
-        reloadEl.style.display = 'none';
-    } else {
-        if (!hasSave) {
-            reloadEl.setAttribute("disabled", "disabled");
-        }
-        reloadEl.addEventListener("click", function(event) {
-            if (reloadEl.getAttribute("disabled"))
-                return;
-            clickWork(reloadEl, 1);
-
-            removeAll("p");
-            removeAll("img");
-            try {
-                let savedState = window.localStorage.getItem('bit-save-state');
-                if (savedState) story.state.LoadJson(savedState);
-            } catch (e) {
-                console.debug("Couldn't load save state");
-            }
-            continueStory(true);
-        });
-    }
-
-    let themeSwitchEl = document.getElementById("theme-switch");
-    if (themeSwitchEl) themeSwitchEl.addEventListener("click", function(event) {
-        clickWork(themeSwitchEl, 0);
-
-        document.body.classList.add("switched");
-        document.body.classList.toggle("dark");
-    });
-
+    setupButtons(hasSave);
 
     // Set initial save point
     savePoint = story.state.toJson();
@@ -362,6 +255,91 @@
         }
 
         return null;
+    }
+
+    // Loads save state if exists in the browser memory
+    function loadSavePoint() {
+
+        try {
+            let savedState = window.localStorage.getItem('save-state');
+            if (savedState) {
+                story.state.LoadJson(savedState);
+                return true;
+            }
+        } catch (e) {
+            console.debug("Couldn't load save state");
+        }
+        return false;
+    }
+
+    // Detects which theme (light or dark) to use
+    function setupTheme(globalTagTheme) {
+
+        // load theme from browser memory
+        var savedTheme;
+        try {
+            savedTheme = window.localStorage.getItem('theme');
+        } catch (e) {
+            console.debug("Couldn't load saved theme");
+        }
+
+        // Check whether the OS/browser is configured for dark mode
+        var browserDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        if (savedTheme === "dark"
+            || (savedTheme == undefined && globalTagTheme === "dark")
+            || (savedTheme == undefined && globalTagTheme == undefined && browserDark))
+            document.body.classList.add("dark");
+    }
+
+    // Used to hook up the functionality for global functionality buttons
+    function setupButtons(hasSave) {
+        var controlsEl = document.getElementById("controls");
+
+        let rewindEl = document.getElementById("rewind");
+        if (rewindEl) rewindEl.addEventListener("click", function(event) {
+            removeAll("p");
+            removeAll("img");
+            setVisible(".header", false);
+            restart();
+        });
+
+        let saveEl = document.getElementById("save");
+        if (saveEl) saveEl.addEventListener("click", function(event) {
+            try {
+                window.localStorage.setItem('save-state', savePoint);
+                document.getElementById("reload").removeAttribute("disabled");
+                window.localStorage.setItem('theme', document.body.classList.contains("dark") ? "dark" : "");
+            } catch (e) {
+                console.warn("Couldn't save state");
+            }
+
+        });
+
+        let reloadEl = document.getElementById("reload");
+        if (!hasSave) {
+            reloadEl.setAttribute("disabled", "disabled");
+        }
+        reloadEl.addEventListener("click", function(event) {
+            if (reloadEl.getAttribute("disabled"))
+                return;
+
+            removeAll("p");
+            removeAll("img");
+            try {
+                let savedState = window.localStorage.getItem('save-state');
+                if (savedState) story.state.LoadJson(savedState);
+            } catch (e) {
+                console.debug("Couldn't load save state");
+            }
+            continueStory(true);
+        });
+
+        let themeSwitchEl = document.getElementById("theme-switch");
+        if (themeSwitchEl) themeSwitchEl.addEventListener("click", function(event) {
+            document.body.classList.add("switched");
+            document.body.classList.toggle("dark");
+        });
     }
 
 })(storyContent);
