@@ -294,7 +294,6 @@
 
     // Used to hook up the functionality for global functionality buttons
     function setupButtons(hasSave) {
-        var controlsEl = document.getElementById("controls");
 
         let rewindEl = document.getElementById("rewind");
         if (rewindEl) rewindEl.addEventListener("click", function(event) {
