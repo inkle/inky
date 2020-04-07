@@ -135,7 +135,7 @@ function compile(compileInstruction, requester) {
     }
 
     playProcess.stdout.on('data', (text) => {
-
+			
         // Strip Byte order mark
         text = text.replace(/^\uFEFF/, '');
         if( text.length == 0 ) return;
@@ -196,12 +196,17 @@ function compile(compileInstruction, requester) {
                 // during compilation.
                 sendAnyErrors();
 
-                if( session.evaluatingExpression ) {
-                    requester.send('play-evaluated-expression', line, sessionId);
-                } else {
-                    requester.send('play-generated-text', line, sessionId);
-                }
-
+								// try, because it can be destroyed while sending
+								try {
+									if (session.evaluatingExpression ) {
+											requester.send('play-evaluated-expression', line, sessionId);
+									} else {
+											requester.send('play-generated-text', line, sessionId);
+									}
+								} catch (e) {
+									if (!e.message.startsWith("Object has been destroyed"))
+										throw e; // not expected
+								}
             }
 
         }
