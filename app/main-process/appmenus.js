@@ -16,7 +16,10 @@ function setupMenus(callbacks) {
             type: 'radio',
             checked: theme === defaultTheme,
             click: () => {
-                ProjectWindow.all().forEach(window => window.browserWindow.webContents.send('change-theme', theme));
+                ProjectWindow.all().forEach(window => {
+                    window.browserWindow.webContents.send('change-theme', theme);
+                    callbacks.changeTheme(theme);
+                });
             }
         });
     }
