@@ -183,7 +183,7 @@ function setupMenus(callbacks) {
                 // Filled in by the code at the bottom from the content in inkSnippets.js
             ]
         },
-        {
+        /*{
             label: '[Inky Debug]',
             submenu: [
                 {
@@ -211,7 +211,7 @@ function setupMenus(callbacks) {
                     }
                 },
             ]
-        },
+        },*/
         {
             label: 'Window',
             role: 'window',
