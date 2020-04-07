@@ -31,7 +31,7 @@ var inkVersion = fs.readFileSync(fullVersionFilePath, "utf8");
 var aboutWindow = null;
 
 
-function AboutWindow() {
+function AboutWindow(theme) {
     var w = new BrowserWindow(electronWindowOptions);
     w.loadURL("file://" + __dirname + "/../renderer/about/about.html");
 
@@ -43,6 +43,7 @@ function AboutWindow() {
             "inkVersion": inkVersion,
             "inkjsVersion": inkjsPackage.version
         });
+        w.webContents.send("change-theme", theme);
         w.setMenu(null);
         w.show();
     });
@@ -53,10 +54,15 @@ function AboutWindow() {
         aboutWindow = null;
     });
 }
-AboutWindow.showAboutWindow = function () {
+AboutWindow.showAboutWindow = function (theme) {
     if( aboutWindow == null ) {
-        aboutWindow = new AboutWindow();
+        aboutWindow = new AboutWindow(theme);
         return aboutWindow;
+    }
+}
+AboutWindow.changeTheme = function (theme) {
+    if( aboutWindow != null ) {
+        aboutWindow.browserWindow.webContents.send("change-theme", theme);
     }
 }
 

@@ -29,6 +29,7 @@ app.on('will-finish-launching', function () {
 });
 
 let isQuitting = false;
+let theme = "light";
 
 app.on('before-quit', function () {
     // We need this to differentiate between pressing quit (which should quit) or closing all windows
@@ -93,10 +94,10 @@ app.on('ready', function () {
             focusedWindow.webContents.send("add-watch-expression");
         },
         showDocs: () => {
-            DocumentationWindow.openDocumentation();
+            DocumentationWindow.openDocumentation(theme);
         },
         showAbout: () => {
-            AboutWindow.showAboutWindow();
+            AboutWindow.showAboutWindow(theme);
         },
         countWords: () => {
             var win = ProjectWindow.focused();
@@ -117,6 +118,11 @@ app.on('ready', function () {
         insertSnippet: (focussedWindow, snippet) => {
             if( focussedWindow )
                 focussedWindow.webContents.send('insertSnippet', snippet);
+        },
+        changeTheme: (newTheme) => {
+          theme = newTheme;
+          AboutWindow.changeTheme(newTheme);
+          DocumentationWindow.changeTheme(newTheme);
         }
     });
 
