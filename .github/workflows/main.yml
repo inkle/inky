@@ -1,0 +1,61 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  release:
+    branches: [ master ]
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+
+      - name: Install Global Dependencies
+        run: npm install electron-packager -g
+
+      - name: Build
+        run: "sh BUILD_FOR_LINUX.sh"
+
+      - uses: actions/upload-artifact@v2-preview
+        with:
+            name: Linux
+            path: ReleaseUpload/
+
+  MacOS:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+
+      - name: Install Global Dependencies
+        run: npm install electron-packager appdmg -g
+
+      - name: Build For Release
+        run: "sh BUILD_FOR_MAC.command"
+
+      - uses: actions/upload-artifact@v2-preview
+        with:
+            name: MacOS
+            path: ReleaseUpload/
+
+  Windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+
+      - name: Install Install Global Dependencies
+        run: npm install electron-packager -g
+
+      - name: Build
+        shell: cmd
+        run: "BUILD_FOR_WINDOWS.bat"
+
+      - uses: actions/upload-artifact@v2-preview
+        with:
+            name: Windows
+            path: ReleaseUpload/
+
