@@ -50,7 +50,8 @@ function InkFile(anyPath, mainInkFile, events) {
     // This is a temporary solution to prevent the "INCLUDE x" blank file destructive deletion
     // issue, where saving automatically created blank files prevented properly saving and
     // removed Included files without warning the user.
-    this.aceDocument = new Document("//Replace this comment with Ink and start writing!");
+    var initialContent = mainInkFile == null ? "Once upon a time..." : "// Replace this comment with Ink and start writing!";
+    this.aceDocument = new Document(initialContent);
     this.aceSession = null;
 
     this.includes = [];
