@@ -135,7 +135,7 @@ function compile(compileInstruction, requester) {
     }
 
     playProcess.stdout.on('data', (text) => {
-      
+
         // Strip Byte order mark
         text = text.replace(/^\uFEFF/, '');
         if( text.length == 0 ) return;
