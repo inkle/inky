@@ -3,6 +3,11 @@
     // Create ink story from the content using inkjs
     var story = new inkjs.Story(storyContent);
 
+    var savePoint = "";
+
+    let savedTheme;
+    let globalTagTheme;
+
     // Global tags - those at the top of the ink file
     // We support:
     //  # theme: dark
@@ -12,12 +17,12 @@
         for(var i=0; i<story.globalTags.length; i++) {
             var globalTag = story.globalTags[i];
             var splitTag = splitPropertyTag(globalTag);
-            
+
             // THEME: dark
             if( splitTag && splitTag.property == "theme" ) {
-                document.body.classList.add(splitTag.val);
+                globalTagTheme = splitTag.val;
             }
-            
+
             // author: Your Name
             else if( splitTag && splitTag.property == "author" ) {
                 var byline = document.querySelector('.byline');
@@ -29,6 +34,14 @@
     var storyContainer = document.querySelector('#story');
     var outerScrollContainer = document.querySelector('.outerContainer');
 
+    // page features setup
+    setupTheme(globalTagTheme);
+    var hasSave = loadSavePoint();
+    setupButtons(hasSave);
+
+    // Set initial save point
+    savePoint = story.state.toJson();
+
     // Kick off the start of the story!
     continueStory(true);
 
@@ -38,7 +51,7 @@
 
         var paragraphIndex = 0;
         var delay = 0.0;
-        
+
         // Don't over-scroll past new content
         var previousBottomEdge = firstTime ? 0 : contentBottomEdgeY();
 
@@ -48,7 +61,7 @@
             // Get ink to generate the next paragraph
             var paragraphText = story.Continue();
             var tags = story.currentTags;
-            
+
             // Any special tags included with this line
             var customClasses = [];
             for(var i=0; i<tags.length; i++) {
@@ -78,7 +91,7 @@
                 else if( tag == "CLEAR" || tag == "RESTART" ) {
                     removeAll("p");
                     removeAll("img");
-                    
+
                     // Comment out this line if you want to leave the header visible when clearing
                     setVisible(".header", false);
 
@@ -93,7 +106,7 @@
             var paragraphElement = document.createElement('p');
             paragraphElement.innerHTML = paragraphText;
             storyContainer.appendChild(paragraphElement);
-            
+
             // Add any custom classes derived from ink tags
             for(var i=0; i<customClasses.length; i++)
                 paragraphElement.classList.add(customClasses[i]);
@@ -129,6 +142,9 @@
                 // Tell the story where to go next
                 story.ChooseChoiceIndex(choice.index);
 
+                // This is where the save button will save from
+                savePoint = story.state.toJson();
+
                 // Aaand loop
                 continueStory();
             });
@@ -141,12 +157,16 @@
 
         if( !firstTime )
             scrollDown(previousBottomEdge);
+
     }
 
     function restart() {
         story.ResetState();
 
         setVisible(".header", true);
+
+        // set save point to here
+        savePoint = story.state.toJson();
 
         continueStory(true);
 
@@ -169,7 +189,7 @@
 
         // Line up top of screen with the bottom of where the previous content ended
         var target = previousBottomEdge;
-        
+
         // Can't go further than the very bottom of the page
         var limit = outerScrollContainer.scrollHeight - outerScrollContainer.clientHeight;
         if( target > limit ) target = limit;
@@ -227,7 +247,7 @@
         var propertySplitIdx = tag.indexOf(":");
         if( propertySplitIdx != null ) {
             var property = tag.substr(0, propertySplitIdx).trim();
-            var val = tag.substr(propertySplitIdx+1).trim(); 
+            var val = tag.substr(propertySplitIdx+1).trim();
             return {
                 property: property,
                 val: val
@@ -235,6 +255,90 @@
         }
 
         return null;
+    }
+
+    // Loads save state if exists in the browser memory
+    function loadSavePoint() {
+
+        try {
+            let savedState = window.localStorage.getItem('save-state');
+            if (savedState) {
+                story.state.LoadJson(savedState);
+                return true;
+            }
+        } catch (e) {
+            console.debug("Couldn't load save state");
+        }
+        return false;
+    }
+
+    // Detects which theme (light or dark) to use
+    function setupTheme(globalTagTheme) {
+
+        // load theme from browser memory
+        var savedTheme;
+        try {
+            savedTheme = window.localStorage.getItem('theme');
+        } catch (e) {
+            console.debug("Couldn't load saved theme");
+        }
+
+        // Check whether the OS/browser is configured for dark mode
+        var browserDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        if (savedTheme === "dark"
+            || (savedTheme == undefined && globalTagTheme === "dark")
+            || (savedTheme == undefined && globalTagTheme == undefined && browserDark))
+            document.body.classList.add("dark");
+    }
+
+    // Used to hook up the functionality for global functionality buttons
+    function setupButtons(hasSave) {
+
+        let rewindEl = document.getElementById("rewind");
+        if (rewindEl) rewindEl.addEventListener("click", function(event) {
+            removeAll("p");
+            removeAll("img");
+            setVisible(".header", false);
+            restart();
+        });
+
+        let saveEl = document.getElementById("save");
+        if (saveEl) saveEl.addEventListener("click", function(event) {
+            try {
+                window.localStorage.setItem('save-state', savePoint);
+                document.getElementById("reload").removeAttribute("disabled");
+                window.localStorage.setItem('theme', document.body.classList.contains("dark") ? "dark" : "");
+            } catch (e) {
+                console.warn("Couldn't save state");
+            }
+
+        });
+
+        let reloadEl = document.getElementById("reload");
+        if (!hasSave) {
+            reloadEl.setAttribute("disabled", "disabled");
+        }
+        reloadEl.addEventListener("click", function(event) {
+            if (reloadEl.getAttribute("disabled"))
+                return;
+
+            removeAll("p");
+            removeAll("img");
+            try {
+                let savedState = window.localStorage.getItem('save-state');
+                if (savedState) story.state.LoadJson(savedState);
+            } catch (e) {
+                console.debug("Couldn't load save state");
+            }
+            continueStory(true);
+        });
+
+        let themeSwitchEl = document.getElementById("theme-switch");
+        if (themeSwitchEl) themeSwitchEl.addEventListener("click", function(event) {
+            document.body.classList.add("switched");
+            document.body.classList.toggle("dark");
+        });
     }
 
 })(storyContent);

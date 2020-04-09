@@ -4,11 +4,16 @@ body {
     font-family: 'Open Sans', sans-serif;
     font-weight: lighter;
     background: white;
+    overflow: hidden;
 }
 
 body.dark {
     background: black;
     color: white;
+}
+
+body.switched {
+    transition: color 0.6s, background-color 0.6s;
 }
 
 h1, h2 {
@@ -41,6 +46,7 @@ h2 {
 }
 
 h3.written-in-ink {
+    z-index: 3;
     font-size: 9pt;
     font-family: sans-serif;
     text-align: center;
@@ -49,9 +55,11 @@ h3.written-in-ink {
     display: block;
     width: 100%;
     background: white;
+    transition: color 0.6s, background 0.6s;
     margin: 0;
     padding-top: 6px;
     padding-bottom: 6px;
+    height: 14px;
     top: 0;
 }
 
@@ -68,10 +76,18 @@ h3.written-in-ink {
     padding: 0;
     -webkit-overflow-scrolling: touch;
     overflow: scroll;
+    overflow-x: hidden;
     height: 100%;
     width: 100%;
     top: 0;
     left: 0;
+    margin-top: 24px;
+}
+
+@media screen and (max-width: 980px) {
+    .outerContainer {
+        margin-top: 44px;
+    }
 }
 
 .container {
@@ -85,6 +101,10 @@ h3.written-in-ink {
 
 .dark .container {
     background: black;
+}
+
+.switched .container {
+    transition: background-color 0.6s;
 }
 
 p {
@@ -152,7 +172,7 @@ p.choice {
 
 /* first choice */
 :not(.choice) + .choice {
-    padding-top: 1em; 
+    padding-top: 1em;
 }
 
 
@@ -173,4 +193,44 @@ p.choice a {
 
 .dark .end {
     color: white;
+}
+
+
+#controls {
+    z-index: 4;
+    font-size: 9pt;
+    text-align: center;
+    padding-bottom: 6px;
+    position: fixed;
+    right: 14px;
+    top: 4px;
+    user-select: none;
+    background: white;
+    transition: color 0.6s, background 0.6s;
+}
+
+.dark #controls {
+    background: black;
+}
+
+#controls [disabled] {
+color: #ccc;
+}
+
+.dark #controls [disabled] {
+color: #444;
+}
+
+#controls > *:not(:last-child):after {
+    content: " | ";
+}
+
+@media screen and (max-width: 980px) {
+	#controls {
+        z-index: 2;
+        padding-top: 24px;
+        top: 0;
+        left: 0;
+        right: 0;
+	}
 }
