@@ -196,7 +196,7 @@ function compile(compileInstruction, requester) {
                 // during compilation.
                 sendAnyErrors();
 
-								if (!requester.isDestroyed()) {
+                if (!requester.isDestroyed()) {
                   if (session.evaluatingExpression ) {
                       requester.send('play-evaluated-expression', line, sessionId);
                   } else {
