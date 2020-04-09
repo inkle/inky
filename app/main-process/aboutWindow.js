@@ -11,7 +11,8 @@ const electronWindowOptions = {
     height: 270,
     resizable: false,
     title: "About Inky",
-    show: false
+    show: false,
+    autoHideMenuBar: true
 };
 
 const versionFilePath = "ink/version.txt";
