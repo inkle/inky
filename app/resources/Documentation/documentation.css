@@ -44,48 +44,48 @@ pre code {
 }
 
 /* Dark Mode Colors */
-body.dark {
+html.dark body {
     background-color: #222;
     color: #eee;
 }
 
-body.dark p {
+html.dark p {
     color: #ccc;
 }
 
-body.dark h1 {
+html.dark h1 {
     color: #6a9ed9;
 }
 
-body.dark h3, body.dark h4, body.dark h5, body.dark h6 {
+html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
     color: #bbb;
 }
 
 
-body.dark pre code {
+html.dark pre code {
     color: #bbb;
 }
 
 
 /* scrollbars */
-body.dark *::-webkit-scrollbar {
+html.dark *::-webkit-scrollbar {
     width: auto;
 }
 
-body.dark *::-webkit-scrollbar-track,
-body.dark *::-webkit-scrollbar-track-piece,
-body.dark *::-webkit-scrollbar-corner,
-body.dark *::-webkit-resizer {
+html.dark *::-webkit-scrollbar-track,
+html.dark *::-webkit-scrollbar-track-piece,
+html.dark *::-webkit-scrollbar-corner,
+html.dark *::-webkit-resizer {
     background-color: #222;
 }
 
-body.dark *::-webkit-scrollbar-thumb {
+html.dark *::-webkit-scrollbar-thumb {
     background-color: #777;
     transition: background-color 0.6s;
     box-shadow: inset 0px 0px 10px 0px #00000061;
 }
 
-body.dark *::-webkit-scrollbar-thumb:hover {
+html.dark *::-webkit-scrollbar-thumb:hover {
     background-color: #999;
     transition: background-color 0.6s;
 }
