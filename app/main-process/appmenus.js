@@ -183,35 +183,7 @@ function setupMenus(callbacks) {
                 // Filled in by the code at the bottom from the content in inkSnippets.js
             ]
         },
-        {
-            label: '[Inky Debug]',
-            submenu: [
-                {
-                    label: 'Reload web view',
-                    accelerator: 'CmdOrCtrl+R',
-                    click(item, focusedWindow) {
-                        if (!focusedWindow) return;
-                        var clickedButtonIdx = dialog.showMessageBox(focusedWindow, {
-                            type: 'question',
-                            buttons: ['Yes', 'Cancel'],
-                            title: 'Reload?',
-                            message: 'Are you sure you want to reload the current window? Any unsaved changes will be lost.'
-                        });
-                        if( clickedButtonIdx == 0 ) {
-                            focusedWindow.reload();
-                        }
-                    }
-                },
-                {
-                    label: 'Toggle Developer Tools',
-                    accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-                    click(item, focusedWindow) {
-                        if (focusedWindow)
-                            focusedWindow.webContents.toggleDevTools();
-                    }
-                },
-            ]
-        },
+        
         {
             label: 'Window',
             role: 'window',
@@ -225,6 +197,35 @@ function setupMenus(callbacks) {
                     label: 'Close',
                     accelerator: 'CmdOrCtrl+W',
                     role: 'close'
+                },
+                {
+                    label: 'Developer',
+                    submenu: [
+                        {
+                            label: 'Reload web view',
+                            accelerator: 'CmdOrCtrl+R',
+                            click(item, focusedWindow) {
+                                if (!focusedWindow) return;
+                                var clickedButtonIdx = dialog.showMessageBox(focusedWindow, {
+                                    type: 'question',
+                                    buttons: ['Yes', 'Cancel'],
+                                    title: 'Reload?',
+                                    message: 'Are you sure you want to reload the current window? Any unsaved changes will be lost.'
+                                });
+                                if( clickedButtonIdx == 0 ) {
+                                    focusedWindow.reload();
+                                }
+                            }
+                        },
+                        {
+                            label: 'Toggle Developer Tools',
+                            accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+                            click(item, focusedWindow) {
+                                if (focusedWindow)
+                                    focusedWindow.webContents.toggleDevTools();
+                            }
+                        },
+                    ]
                 },
             ]
         },
