@@ -196,16 +196,12 @@ function compile(compileInstruction, requester) {
                 // during compilation.
                 sendAnyErrors();
 
-                // try, because it can be destroyed while sending
-                try {
+								if (!requester.isDestroyed()) {
                   if (session.evaluatingExpression ) {
                       requester.send('play-evaluated-expression', line, sessionId);
                   } else {
                       requester.send('play-generated-text', line, sessionId);
                   }
-                } catch (e) {
-                  if (!e.message.startsWith("Object has been destroyed"))
-                    throw e; // not expected
                 }
             }
 
