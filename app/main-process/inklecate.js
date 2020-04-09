@@ -196,12 +196,13 @@ function compile(compileInstruction, requester) {
                 // during compilation.
                 sendAnyErrors();
 
-                if( session.evaluatingExpression ) {
-                    requester.send('play-evaluated-expression', line, sessionId);
-                } else {
-                    requester.send('play-generated-text', line, sessionId);
+                if (!requester.isDestroyed()) {
+                  if (session.evaluatingExpression ) {
+                      requester.send('play-evaluated-expression', line, sessionId);
+                  } else {
+                      requester.send('play-generated-text', line, sessionId);
+                  }
                 }
-
             }
 
         }
