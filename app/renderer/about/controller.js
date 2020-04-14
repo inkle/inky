@@ -10,7 +10,7 @@ ipc.on("set-about-data", (event, data) => {
 });
 
 function updateTheme(event, newTheme) {
-    if (newTheme.toLowerCase() === 'dark') {
+		if (newTheme && newTheme.toLowerCase() === 'dark') {
         $("body").addClass("dark");
     } else {
         $("body").removeClass("dark");

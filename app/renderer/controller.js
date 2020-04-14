@@ -255,7 +255,7 @@ ipc.on("set-tags-visible", (event, visible) => {
 
 
 function updateTheme(event, newTheme) {
-	if (newTheme.toLowerCase() === 'dark') {
+	if (newTheme && newTheme.toLowerCase() === 'dark') {
 		$(".window").addClass("dark");
 	} else {
 		$(".window").removeClass("dark");
