@@ -260,6 +260,7 @@ function updateTheme(event, newTheme) {
 	} else {
 		$(".window").removeClass("dark");
 	}
+	LiveCompiler.setEdited();
 }
 
 updateTheme(null, window.localStorage.getItem("theme"));
