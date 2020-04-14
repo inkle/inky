@@ -14,11 +14,12 @@ const electronWindowOptions = {
 var documentationWindow = null;
 
 function DocumentationWindow(theme) {
+	electronWindowOptions.theme = theme;
   var w = new BrowserWindow(electronWindowOptions);
   w.loadURL("file://" + __dirname + "/../renderer/documentation/window.html");
 
   // w.webContents.openDevTools();
-
+	
   w.webContents.on("did-finish-load", () => {
     w.webContents.send("change-theme", theme);
     w.setMenu(null);

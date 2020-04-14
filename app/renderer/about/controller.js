@@ -9,10 +9,13 @@ ipc.on("set-about-data", (event, data) => {
     $("#version-inkjs").text("inkjs version: "+data.inkjsVersion);
 });
 
-ipc.on("change-theme", (event, newTheme) => {
+function updateTheme(event, newTheme) {
     if (newTheme.toLowerCase() === 'dark') {
         $("body").addClass("dark");
     } else {
         $("body").removeClass("dark");
     }
-});
+}
+
+updateTheme(null, window.localStorage.getItem("theme"));
+ipc.on("change-theme", updateTheme);

@@ -252,13 +252,23 @@ ipc.on("set-tags-visible", (event, visible) => {
         $("#main").addClass("hideTags");
 });
 
+
+
+function updateTheme(event, newTheme) {
+	if (newTheme.toLowerCase() === 'dark') {
+		$(".window").addClass("dark");
+	} else {
+		$(".window").removeClass("dark");
+	}
+}
+
+updateTheme(null, window.localStorage.getItem("theme"));
 ipc.on("change-theme", (event, newTheme) => {
-    if (newTheme.toLowerCase() === 'dark') {
-        $(".window").addClass("dark");
-    } else {
-        $(".window").removeClass("dark");
-    }
+		updateTheme(event, newTheme);
+    window.localStorage.setItem("theme", newTheme);
 });
+
+
 
 ipc.on("zoom", (event, amount) => {
 
