@@ -2,7 +2,7 @@ const electron = require("electron");
 const ipc = electron.ipcRenderer;
 
 function updateTheme(event, newTheme) {
-	if (newTheme.toLowerCase() === 'dark') {
+	if (newTheme && newTheme.toLowerCase() === 'dark') {
 		document.body.classList.add("dark");
 		document.getElementById("contentView").contentDocument.documentElement.classList.add("dark");
 	} else {
