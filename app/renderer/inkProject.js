@@ -631,8 +631,8 @@ InkProject.prototype.countWords = function() {
     };
 
     let n = recur(this.activeInkFile);
-    alert(`There is ${n.toLocaleString()} word${n > 1 ? 's' : ''} in this project.`);
-}
+    alert(`There ${n != 1 ? 'are' : 'is'} ${n.toLocaleString()} word${n != 1 ? 's' : ''} in this project.`);
+} 
 
 InkProject.setEvents = function(e) {
     InkProject.events = e;
