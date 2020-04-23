@@ -82,11 +82,15 @@ h3.written-in-ink {
     top: 0;
     left: 0;
     margin-top: 24px;
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 @media screen and (max-width: 980px) {
     .outerContainer {
         margin-top: 44px;
+        background-size: cover;
+        background-repeat: no-repeat;
     }
 }
 

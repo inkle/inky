@@ -91,6 +91,11 @@
                     window.open(splitTag.val);
                 }
 
+                // BACKGROUND: src
+                else if( splitTag && splitTag.property == "BACKGROUND" ) {
+                    outerScrollContainer.style.backgroundImage = 'url('+splitTag.val+')';
+                }
+
                 // CLASS: className
                 else if( splitTag && splitTag.property == "CLASS" ) {
                     customClasses.push(splitTag.val);
