@@ -82,6 +82,18 @@
                   this.audio.play();
                 }
 
+                // AUDIOLOOP: src
+                else if( splitTag && splitTag.property == "AUDIOLOOP" ) {
+                  if('audioLoop' in this) {
+                    this.audioLoop.pause();
+                    this.audioLoop.removeAttribute('src');
+                    this.audioLoop.load();
+                  }
+                  this.audioLoop = new Audio(splitTag.val);
+                  this.audioLoop.play();
+                  this.audioLoop.loop = true;
+                }
+
                 // IMAGE: src
                 if( splitTag && splitTag.property == "IMAGE" ) {
                     var imageElement = document.createElement('img');
