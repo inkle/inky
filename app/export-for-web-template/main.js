@@ -71,6 +71,17 @@
                 // customised to be used for other things too.
                 var splitTag = splitPropertyTag(tag);
 
+                // AUDIO: src
+                else if( splitTag && splitTag.property == "AUDIO" ) {
+                  if('audio' in this) {
+                    this.audio.pause();
+                    this.audio.removeAttribute('src');
+                    this.audio.load();
+                  }
+                  this.audio = new Audio(splitTag.val);
+                  this.audio.play();
+                }
+
                 // IMAGE: src
                 if( splitTag && splitTag.property == "IMAGE" ) {
                     var imageElement = document.createElement('img');
