@@ -98,6 +98,10 @@
     background: darkred;
 }
 
+.window.dark #editor .ace-warning {
+    background-color: #7d6015;
+}
+
 .window.dark #editor .ace_todo,
 .window.dark #editor .ace-todo {
     background: darkcyan;
