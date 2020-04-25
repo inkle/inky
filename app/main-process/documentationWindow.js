@@ -11,12 +11,41 @@ const electronWindowOptions = {
   autoHideMenuBar: true
 };
 
-function DocumentationWindow() {
-  this.browserWindow = new BrowserWindow(electronWindowOptions);
-  this.browserWindow.loadURL("file://" + __dirname + "/../renderer/documentation/window.html");
+var documentationWindow = null;
+
+function DocumentationWindow(theme) {
+	electronWindowOptions.theme = theme;
+  var w = new BrowserWindow(electronWindowOptions);
+  w.loadURL("file://" + __dirname + "/../renderer/documentation/window.html");
+
+  // w.webContents.openDevTools();
+	
+  w.webContents.on("did-finish-load", () => {
+    w.webContents.send("change-theme", theme);
+    w.setMenu(null);
+    w.show();
+  });
+
+  this.browserWindow = w;
+
+  w.on("close", () => {
+    documentationWindow = null;
+  });
 }
-DocumentationWindow.openDocumentation = function () {
-  return new DocumentationWindow();
+
+DocumentationWindow.openDocumentation = function (theme) {
+
+  if( documentationWindow == null ) {
+    documentationWindow = new DocumentationWindow(theme);
+  }
+  return documentationWindow;
+}
+
+
+DocumentationWindow.changeTheme = function (theme) {
+  if( documentationWindow != null ) {
+    documentationWindow.browserWindow.webContents.send("change-theme", theme);
+  }
 }
 
 exports.DocumentationWindow = DocumentationWindow;
