@@ -42,3 +42,50 @@ pre code {
     margin-left: 2em;
     color: #666;
 }
+
+/* Dark Mode Colors */
+html.dark body {
+    background-color: #222;
+    color: #eee;
+}
+
+html.dark p {
+    color: #ccc;
+}
+
+html.dark h1 {
+    color: #6a9ed9;
+}
+
+html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+    color: #bbb;
+}
+
+
+html.dark pre code {
+    color: #bbb;
+}
+
+
+/* scrollbars */
+html.dark *::-webkit-scrollbar {
+    width: auto;
+}
+
+html.dark *::-webkit-scrollbar-track,
+html.dark *::-webkit-scrollbar-track-piece,
+html.dark *::-webkit-scrollbar-corner,
+html.dark *::-webkit-resizer {
+    background-color: #222;
+}
+
+html.dark *::-webkit-scrollbar-thumb {
+    background-color: #777;
+    transition: background-color 0.6s;
+    box-shadow: inset 0px 0px 10px 0px #00000061;
+}
+
+html.dark *::-webkit-scrollbar-thumb:hover {
+    background-color: #999;
+    transition: background-color 0.6s;
+}
