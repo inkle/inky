@@ -244,7 +244,7 @@ function setupMenus(callbacks) {
         },
     ];
 
-    const name = app.getName();
+    const name = app.name;
     const aboutWindowLabel = 'About ' + name;
     // Mac specific menus
     if (process.platform === 'darwin') {

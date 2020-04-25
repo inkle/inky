@@ -20,6 +20,9 @@ function inkJSNeedsUpdating() {
     // return true;
 }
 
+// Will change to true in Electron 9. Start testing.
+app.allowRendererProcessReuse = true;
+
 app.on('will-finish-launching', function () {
     app.on("open-file", function (event, path) {
         ProjectWindow.open(path);

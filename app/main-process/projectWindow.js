@@ -12,7 +12,10 @@ const electronWindowOptions = {
   minWidth: 350,
   minHeight: 250,
   titleBarStyle: 'hidden',
-  title: "Inky"
+  title: "Inky",
+  webPreferences: {
+    nodeIntegration: true
+  }
 };
 
 var windows = [];
@@ -29,15 +32,15 @@ function ProjectWindow(filePath) {
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/../renderer/index.html");
     this.browserWindow.setSheetOffset(49);
-
+    
     this.safeToClose = false;
 
     if( filePath ) {
-        this.browserWindow.webContents.on('dom-ready', () => {
+    this.browserWindow.webContents.on('dom-ready', () => {
             this.browserWindow.setRepresentedFilename(filePath);
             this.browserWindow.webContents.send('set-project-main-ink-filepath', filePath);
         });
-    }
+        }
 
     windows.push(this);
 
