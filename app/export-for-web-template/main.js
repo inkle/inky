@@ -81,6 +81,16 @@
                     delay += 200.0;
                 }
 
+                // LINK: url
+                else if( splitTag && splitTag.property == "LINK" ) {
+                    window.location.href = splitTag.val;
+                }
+
+                // LINKOPEN: url
+                else if( splitTag && splitTag.property == "LINKOPEN" ) {
+                    window.open(splitTag.val);
+                }
+
                 // CLASS: className
                 else if( splitTag && splitTag.property == "CLASS" ) {
                     customClasses.push(splitTag.val);
