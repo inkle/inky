@@ -72,7 +72,7 @@
                 var splitTag = splitPropertyTag(tag);
 
                 // AUDIO: src
-                else if( splitTag && splitTag.property == "AUDIO" ) {
+                if( splitTag && splitTag.property == "AUDIO" ) {
                   if('audio' in this) {
                     this.audio.pause();
                     this.audio.removeAttribute('src');
