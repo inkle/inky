@@ -83,8 +83,8 @@ ProjectWindow.prototype.tryClose = function() {
     this.browserWindow.webContents.send('project-tryClose');
 }
 
-ProjectWindow.prototype.countWords = function() {
-    this.browserWindow.webContents.send('project-count-words');
+ProjectWindow.prototype.stats = function() {
+    this.browserWindow.webContents.send('project-stats');
 }
 
 ProjectWindow.prototype.finalClose = function() {

@@ -99,9 +99,9 @@ app.on('ready', function () {
         showAbout: () => {
             AboutWindow.showAboutWindow(theme);
         },
-        countWords: () => {
+        stats: () => {
             var win = ProjectWindow.focused();
-            if (win) win.countWords();
+            if (win) win.stats();
         },
         zoomIn: () => {
           var win = ProjectWindow.focused();

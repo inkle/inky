@@ -72,6 +72,10 @@ function compile(compileInstruction, requester) {
         inklecateOptions.push(jsonExportPath);
     }
 
+    if( compileInstruction.stats ) {
+        inklecateOptions.push("-s");
+    }
+
     inklecateOptions.push(mainInkPath);
 
     var inklecatePathToUse = inklecatePath;
@@ -199,8 +203,10 @@ function compile(compileInstruction, requester) {
                 if (!requester.isDestroyed()) {
                   if (session.evaluatingExpression ) {
                       requester.send('play-evaluated-expression', line, sessionId);
+                  } else if( compileInstruction.stats ) {
+                    requester.send('return-stats', JSON.parse(text), sessionId);
                   } else {
-                      requester.send('play-generated-text', line, sessionId);
+                    requester.send('play-generated-text', line, sessionId);
                   }
                 }
             }

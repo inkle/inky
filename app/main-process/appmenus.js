@@ -174,9 +174,9 @@ function setupMenus(callbacks) {
                     click: callbacks.toggleTags
                 },
                 {
-                        label: 'Count words',
+                        label: 'Word count and more',
                         enabled: callbacks.isFocusedWindow,
-                        click: callbacks.countWords
+                        click: callbacks.stats
                 }
             ]
         },

@@ -7,6 +7,7 @@ var sessionIdx = 0;
 
 var currentPlaySessionId = null;
 var currentExportSessionId = null;
+var currentStatsSessionId = null;
 var exportCompleteCallback = null;
 
 var lastEditorChange = null;
@@ -96,6 +97,17 @@ function exportJson(inkJsCompatible, callback) {
     instr.export = true;
     instr.inkJsCompatible = inkJsCompatible;
     currentExportSessionId = instr.sessionId;
+
+    ipc.send("compile", instr);
+}
+
+function getStats(callback) {
+    statsCompleteCallback = callback;
+
+    var instr = buildCompileInstruction();
+    instr.stats = true;
+    instr.inkJsCompatible = false;
+    currentStatsSessionId = instr.sessionId;
 
     ipc.send("compile", instr);
 }
@@ -241,13 +253,14 @@ ipc.on("play-requires-input", (event, fromSessionId) => {
 
 ipc.on("inklecate-complete", (event, fromSessionId, exportJsonPath) => {
 
-    if( fromSessionId == currentPlaySessionId )
+    if( fromSessionId == currentPlaySessionId ) {
         events.storyCompleted();
 
         if( replaying ) {
             replaying = false;
             events.replayComplete(currentPlaySessionId);
         }
+    }
     else if( fromSessionId == currentExportSessionId ) {
         completeExport(null, exportJsonPath);
     }
@@ -313,6 +326,18 @@ ipc.on("play-evaluated-expression-error", (event, errorMessage, fromSessionId) =
     }
 });
 
+ipc.on("return-stats", (event, statsObj, fromSessionId) => {
+
+    if( fromSessionId != currentStatsSessionId ) return;
+    
+    var callback = statsCompleteCallback;
+    statsCompleteCallback = null;
+    callback(statsObj);
+
+    currentStatsSessionId = null
+});
+
+
 exports.LiveCompiler = {
     setProject: setProject,
     reload: reloadInklecateSession,
@@ -326,5 +351,6 @@ exports.LiveCompiler = {
     stepBack: stepBack,
     getLocationInSource: getLocationInSource,
     getRuntimePathInSource: getRuntimePathInSource,
-    evaluateExpression: evaluateExpression
+    evaluateExpression: evaluateExpression,
+    getStats: getStats
 }

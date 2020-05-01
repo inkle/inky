@@ -167,6 +167,29 @@ LiveCompiler.setEvents({
     }
 });
 
+ipc.on("project-stats", (event, visible) => {
+    LiveCompiler.getStats((statsObj) => {
+        
+        let messageLines = [];
+        messageLines.push("Project statistics:");
+        messageLines.push("");
+        
+        messageLines.push("Words: "+statsObj["words"]);
+        messageLines.push("");
+
+        messageLines.push("Knots: "+statsObj["knots"]);
+        messageLines.push("Stitches: "+statsObj["stitches"]);
+        messageLines.push("Functions: "+statsObj["functions"]);
+        messageLines.push("");
+
+        messageLines.push("Choices: "+statsObj["choices"]);
+        messageLines.push("Gathers: "+statsObj["gathers"]);
+        messageLines.push("Diverts: "+statsObj["diverts"]);
+
+        alert(messageLines.join("\n"));
+    });
+});
+
 EditorView.setEvents({
     "change": () => {
         LiveCompiler.setEdited();
