@@ -28,6 +28,10 @@
     color: #CCC;
 }
 
+.window.dark .busySpinner {
+    background-image: url(img/busy-dark.gif);
+}
+
 .window.dark #toolbar .button:hover .icon {
     color: #CCC;
 }

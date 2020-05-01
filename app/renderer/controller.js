@@ -164,6 +164,9 @@ LiveCompiler.setEvents({
             PlayerView.addTerminatingMessage("Ink compiler had an unexpected error ☹", "error");
             PlayerView.addLongMessage(error, "error");
         }
+    },
+    compilerBusyChanged: (busy) => {
+        ToolbarView.setBusySpinnerVisible(busy);
     }
 });
 

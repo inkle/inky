@@ -751,17 +751,7 @@ img.issue-icon.warning {
   background: #bf5e5e;
 }
 
-/* Toolbar buttons */
-
-#restart {
-  right: 5px;
-  top: 5px;
-}
-
-#stepback {
-  right: 110px;
-  top: 5px;
-}
+/* Toolbar buttons and spinner */
 
 .button {
   font-family: Verdana, Geneva, sans-serif;
@@ -780,6 +770,17 @@ img.issue-icon.warning {
   background: #EEE;
 }
 
+.busySpinner {
+  position: absolute;
+  right: 75px;
+  width: 20px;
+  height: 20px;
+  top: 3px;
+  background-image: url(img/busy.gif);
+  background-repeat: no-repeat;
+  background-size: cover;
+  
+}
 
 #goto-anything {
   position: absolute;

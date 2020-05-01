@@ -158,9 +158,14 @@ function setTitle(title) {
     remote.getCurrentWindow().setTitle(title);
 }
 
+function setBusySpinnerVisible(vis) {
+    $(".busySpinner").css("display", vis ? "block" : "none");
+}
+
 exports.ToolbarView = {
     setEvents: (e) => { events = e; },
     updateIssueSummary: updateIssueSummary,
     clearIssueSummary: () => { updateIssueSummary([]); },
-    setTitle: setTitle
+    setTitle: setTitle,
+    setBusySpinnerVisible: setBusySpinnerVisible
 }

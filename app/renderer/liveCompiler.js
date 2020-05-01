@@ -25,6 +25,8 @@ var expressionEvaluationObj = null;
 var project = null;
 var events = {};
 
+var compilerBusy = false;
+
 function setProject(p) {
     project = p;
 
@@ -67,6 +69,14 @@ function sessionIsCurrent(id) {
     return id == currentPlaySessionId || id == currentExportSessionId;
 }
 
+function updateCompilerIsBusy(isBusy) {
+    if( isBusy != compilerBusy ) {
+        compilerBusy = isBusy;
+        console.log("Busy = "+compilerBusy+": " + new Error().stack);
+        events.compilerBusyChanged(compilerBusy);
+    }
+}
+
 function reloadInklecateSession() {
 
     lastEditorChange = null;
@@ -88,6 +98,8 @@ function reloadInklecateSession() {
 
     console.log("This window sending session "+instr.sessionId);
     ipc.send("compile", instr);
+
+    updateCompilerIsBusy(true);
 }
 
 function exportJson(inkJsCompatible, callback) {
@@ -99,6 +111,8 @@ function exportJson(inkJsCompatible, callback) {
     currentExportSessionId = instr.sessionId;
 
     ipc.send("compile", instr);
+
+    updateCompilerIsBusy(true);
 }
 
 function getStats(callback) {
@@ -110,6 +124,8 @@ function getStats(callback) {
     currentStatsSessionId = instr.sessionId;
 
     ipc.send("compile", instr);
+
+    updateCompilerIsBusy(true);
 }
 
 function completeExport(error, path) {
@@ -119,10 +135,14 @@ function completeExport(error, path) {
         callback(error.message);
     else
         callback(null, path);
+
+    updateCompilerIsBusy(false);
 }
 
 function stopInklecateSession(idToStop) {
     ipc.send("play-stop-ink", idToStop);
+
+    updateCompilerIsBusy(false);
 }
 
 function choose(choice) {
@@ -198,12 +218,18 @@ ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
     if( fromSessionId != currentPlaySessionId ) return;
 
+    // May have just finished compiling, have text
+    updateCompilerIsBusy(false);
+
     events.textAdded(result);
 });
 
 ipc.on("play-generated-errors", (event, errors, fromSessionId) => {
 
     if( !sessionIsCurrent(fromSessionId) ) return;
+
+    // Finished compiling for sure
+    updateCompilerIsBusy(false);
 
     issues = errors;
     events.errorsAdded(errors);
@@ -213,6 +239,9 @@ ipc.on("play-generated-tags", (event, tags, fromSessionId) => {
 
     if( fromSessionId != currentPlaySessionId ) return;
 
+    // May have finished compiling
+    updateCompilerIsBusy(false);
+
     events.tagsAdded(tags);
 });
 
@@ -221,6 +250,9 @@ ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
     if( fromSessionId != currentPlaySessionId ) return;
 
     choice.sourceSessionId = fromSessionId;
+
+    // May have finished compiling
+    updateCompilerIsBusy(false);
 
     // If there's one choice, that means there are two turns/chunks
     var turnCount = choiceSequence.length+1;
@@ -232,6 +264,9 @@ ipc.on("play-requires-input", (event, fromSessionId) => {
 
     if( fromSessionId != currentPlaySessionId )
         return;
+
+    // May have finished compiling
+    updateCompilerIsBusy(false);
 
     var justCompletedReplay = false;
     if( replaying && currentTurnIdx >= choiceSequence.length ) {
@@ -256,6 +291,8 @@ ipc.on("inklecate-complete", (event, fromSessionId, exportJsonPath) => {
     if( fromSessionId == currentPlaySessionId ) {
         events.storyCompleted();
 
+        updateCompilerIsBusy(false);
+
         if( replaying ) {
             replaying = false;
             events.replayComplete(currentPlaySessionId);
@@ -279,6 +316,8 @@ ipc.on("play-exit-due-to-error", (event, exitCode, fromSessionId) => {
         }
 
         events.exitDueToError();
+
+        updateCompilerIsBusy(false);
     }
 });
 
@@ -295,11 +334,16 @@ ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
         }
 
         events.unexpectedError(error);
+
+        updateCompilerIsBusy(false);
     }
 });
 
 ipc.on("play-story-stopped", (event, fromSessionId) => {
-
+    // Commented out since we get a play-story-stopped immediately after pressing the
+    // reset button, which causes the busy-spinner to hide even though it's just started
+    // recompiling the ink.
+    // updateCompilerIsBusy(false);
 });
 
 ipc.on("return-location-from-source", (event, fromSessionId, locationInfo) => {
@@ -333,6 +377,8 @@ ipc.on("return-stats", (event, statsObj, fromSessionId) => {
     var callback = statsCompleteCallback;
     statsCompleteCallback = null;
     callback(statsObj);
+
+    updateCompilerIsBusy(false);
 
     currentStatsSessionId = null
 });

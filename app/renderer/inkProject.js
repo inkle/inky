@@ -139,6 +139,7 @@ InkProject.prototype.refreshIncludes = function() {
 
     NavView.setFiles(this.mainInk, this.files);
     EditorView.setFiles(this.files);
+    LiveCompiler.setEdited();
 }
 
 InkProject.prototype.refreshUnsavedChanges = function() {
