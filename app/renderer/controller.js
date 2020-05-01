@@ -185,6 +185,9 @@ ipc.on("project-stats", (event, visible) => {
         messageLines.push("Choices: "+statsObj["choices"]);
         messageLines.push("Gathers: "+statsObj["gathers"]);
         messageLines.push("Diverts: "+statsObj["diverts"]);
+        messageLines.push("");
+
+        messageLines.push("Notes: Words should be accurate. Knots include functions. Gathers and diverts may include some implicitly added ones by the compiler, for example in weave. Diverts include END and DONE.");
 
         alert(messageLines.join("\n"));
     });
