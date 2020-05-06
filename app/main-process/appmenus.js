@@ -140,12 +140,12 @@ function setupMenus(callbacks) {
                 },
                 {
                     label: "Zoom (Increase) ",
-                    accelerator: 'CmdOrCtrl+K',
+                    accelerator: 'CmdOrCtrl+=',
                     click: callbacks.zoomIn
                 },
                 {
                     label: "Zoom (Decrease) ",
-                    accelerator: 'CmdOrCtrl+L',
+                    accelerator: 'CmdOrCtrl+-',
                     click: callbacks.zoomOut
                 }
             ]
