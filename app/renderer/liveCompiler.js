@@ -11,6 +11,7 @@ var currentStatsSessionId = null;
 var exportCompleteCallback = null;
 
 var lastEditorChange = null;
+var reloadPending = false;
 
 var choiceSequence = [];
 var currentTurnIdx = -1;
@@ -34,6 +35,8 @@ function setProject(p) {
     // otherwise when the name changes, the temp folder could go out of sync
     var namespaceCode = randomstring.generate(7);
     namespace = project.mainInk.filename().replace(/\./g, "_") + "_" + namespaceCode;
+
+    reloadPending = true;
 }
 
 function resetErrors() {
@@ -72,14 +75,20 @@ function sessionIsCurrent(id) {
 function updateCompilerIsBusy(isBusy) {
     if( isBusy != compilerBusy ) {
         compilerBusy = isBusy;
-        console.log("Busy = "+compilerBusy+": " + new Error().stack);
         events.compilerBusyChanged(compilerBusy);
     }
 }
 
 function reloadInklecateSession() {
 
+    if( project == null || !project.ready ) {
+        reloadPending = true;
+        updateCompilerIsBusy(true);
+        return;
+    }
+
     lastEditorChange = null;
+    reloadPending = false;
 
     if( currentPlaySessionId  )
         stopInklecateSession(currentPlaySessionId);
@@ -190,8 +199,7 @@ setTimeout(reloadInklecateSession, 1000);
 // compile loop - detect changes every 0.25 and make sure
 // user has paused before actually compiling
 setInterval(() => {
-    if( lastEditorChange != null && Date.now() - lastEditorChange > 500 ) {
-        lastEditorChange = null;
+    if( lastEditorChange !== null && Date.now() - lastEditorChange > 500 || reloadPending ) {
         reloadInklecateSession();
     }
 }, 250);

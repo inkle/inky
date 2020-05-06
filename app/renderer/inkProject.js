@@ -33,6 +33,9 @@ function InkProject(mainInkFilePath) {
     EditorView.setFiles(this.files);
     this.showInkFile(this.mainInk);
 
+    // Wait for all project files to be found before starting first compilation
+    this.ready = false;
+
     this.startFileWatching();
 }
 
@@ -157,8 +160,10 @@ InkProject.prototype.refreshUnsavedChanges = function() {
 }
 
 InkProject.prototype.startFileWatching = function() {
-    if( !this.mainInk.projectDir )
+    if( !this.mainInk.projectDir ) {
+        this.ready = true;
         return;
+    }
 
     if( this.fileWatcher )
         this.fileWatcher.close();
@@ -217,6 +222,8 @@ InkProject.prototype.startFileWatching = function() {
             }
         }
     });
+
+    this.fileWatcher.on("ready", () => this.ready = true);
 }
 
 InkProject.prototype.showInkFile = function(inkFile) {
@@ -290,6 +297,11 @@ function copyFile(source, destination, transform) {
 
 // exportType is "json", "web", or "js"
 InkProject.prototype.export = function(exportType) {
+
+    if( !this.ready ) {
+        alert("Project not quite fully loaded! Please try exporting again in a couple of seconds...");
+        return;
+    }
 
     // Always start by building the JSON
     var inkJsCompatible = exportType == "js" || exportType == "web";

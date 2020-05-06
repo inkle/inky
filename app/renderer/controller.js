@@ -82,8 +82,13 @@ NavHistory.setEvents({
 
 LiveCompiler.setEvents({
     resetting: (sessionId) => {
-        EditorView.clearErrors();
-        ToolbarView.clearIssueSummary();
+        // Don't reset errors: ToolbarView.clearIssueSummary() was causing
+        // it to appear as "no issues", which was often incorrect! Instead,
+        // leave the errors around (which could even be useful if you're working
+        // through a bunch of errors that need to be fixed) while recompiling.
+        // Only when recompile is complete refresh what is known to be the truth.
+        //EditorView.clearErrors();
+        //ToolbarView.clearIssueSummary();
         PlayerView.prepareForNewPlaythrough(sessionId);
     },
     selectIssue: gotoIssue,
