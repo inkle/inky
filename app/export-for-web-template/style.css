@@ -7,16 +7,12 @@ body {
     overflow: hidden;
 }
 
-body.dark {
-    background: black;
-    color: white;
-}
-
 body.switched {
     transition: color 0.6s, background-color 0.6s;
 }
 
-h1, h2 {
+h1,
+h2 {
     text-align: center;
     font-family: "Quattrocento", Georgia, 'Times New Roman', Times, serif;
     margin: 0;
@@ -36,16 +32,20 @@ h2 {
     color: #BBB;
 }
 
-.dark h2 {
-    color: #666;
-}
-
 .header {
     padding-top: 3em;
     padding-bottom: 3em;
 }
 
-h3.written-in-ink {
+/*
+  Built-in class:
+    # author: Name
+*/
+.byline {
+    font-style: italic;
+}
+
+.written-in-ink {
     z-index: 3;
     font-size: 9pt;
     font-family: sans-serif;
@@ -63,12 +63,9 @@ h3.written-in-ink {
     top: 0;
 }
 
-.dark h3.written-in-ink {
-    background: black;
-}
-
-
-/* Seems necessary to make iframes work on itch.io on mobile iOS :-( */
+/* 
+  Enables <iframe> support work on itch.io when using mobile iOS
+*/
 .outerContainer {
     position: absolute;
     display: block;
@@ -103,10 +100,6 @@ h3.written-in-ink {
     background: white;
 }
 
-.dark .container {
-    background: black;
-}
-
 .switched .container {
     transition: background-color 0.6s;
 }
@@ -126,28 +119,14 @@ a {
     text-decoration: none;
 }
 
-.dark a {
-    color: #cc8f1a;
-    transition: color 0.6s;
-}
-
-
 a:hover {
     color: black;
     transition: color 0.1s;
 }
 
-.dark a:hover {
-    color: white;
-}
-
 strong {
     color: black;
     font-weight: bold;
-}
-
-.dark strong {
-    color: white;
 }
 
 img {
@@ -164,28 +143,37 @@ img {
     display: none;
 }
 
-.container > * {
+.container>* {
     opacity: 1.0;
     transition: opacity 1.0s;
 }
 
-p.choice {
+/*
+  Class applied to all choices
+  (Will always appear inside <p> element by default.)
+*/
+.choice {
     text-align: center;
     line-height: 1.7em;
 }
 
-/* first choice */
-:not(.choice) + .choice {
+/* 
+  Class applied to first choice
+*/
+:not(.choice)+.choice {
     padding-top: 1em;
 }
 
-
-p.choice a {
+/*
+  Class applied to choice links
+*/
+.choice a {
     font-size: 15pt;
 }
 
-/* Built in class if you want to write:
-     The End # CLASS: end
+/* 
+  Built-in class:
+    The End # CLASS: end
 */
 .end {
     text-align: center;
@@ -194,11 +182,6 @@ p.choice a {
     padding-top: 20px;
     padding-bottom: 20px;
 }
-
-.dark .end {
-    color: white;
-}
-
 
 #controls {
     z-index: 4;
@@ -213,28 +196,67 @@ p.choice a {
     transition: color 0.6s, background 0.6s;
 }
 
-.dark #controls {
-    background: black;
-}
-
 #controls [disabled] {
-color: #ccc;
+    color: #ccc;
 }
 
-.dark #controls [disabled] {
-color: #444;
-}
-
-#controls > *:not(:last-child):after {
+#controls>*:not(:last-child):after {
     content: " | ";
 }
 
 @media screen and (max-width: 980px) {
-	#controls {
+    #controls {
         z-index: 2;
         padding-top: 24px;
         top: 0;
         left: 0;
         right: 0;
-	}
+    }
+}
+
+/* 
+  Dark Theme (Added in Inky 0.10.0)
+    # theme: dark
+*/
+
+body.dark {
+    background: black;
+    color: white;
+}
+
+.dark h2 {
+    color: #666;
+}
+
+.dark .container {
+    background: black;
+}
+
+.dark .written-in-ink {
+    background: black;
+}
+
+.dark a {
+    color: #cc8f1a;
+    transition: color 0.6s;
+}
+
+.dark a:hover {
+    color: white;
+}
+
+.dark strong {
+    color: white;
+}
+
+.dark #controls [disabled] {
+    color: #444;
+}
+
+.dark .end {
+    color: white;
+}
+
+.dark #controls {
+    background: black;
 }
