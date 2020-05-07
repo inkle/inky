@@ -222,6 +222,15 @@ ipc.on("next-issue", () => {
 // IPC Events from inklecate.js
 // --------------------------------------------------------
 
+ipc.on("compile-complete", (event, fromSessionId) => {
+    if( fromSessionId != currentPlaySessionId ) return;
+
+    updateCompilerIsBusy(false);
+
+    events.compileComplete(fromSessionId);
+});
+
+
 ipc.on("play-generated-text", (event, result, fromSessionId) => {
 
     if( fromSessionId != currentPlaySessionId ) return;

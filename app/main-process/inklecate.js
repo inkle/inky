@@ -62,6 +62,12 @@ function compile(compileInstruction, requester) {
 
     var inklecateOptions = ["-ck"];
 
+    // JSON output
+    // (inkJs compatible build is pre-JSON integration. Remove this when it's up to date!)
+    var useJsonComm = !compileInstruction.inkJsCompatible;
+    if( useJsonComm )
+        inklecateOptions[0] += "j";
+
     if( compileInstruction.play )
         inklecateOptions[0] += "p";
 
@@ -138,6 +144,9 @@ function compile(compileInstruction, requester) {
         }
     }
 
+    var issueRegex = /^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?line (\d+): (.+)/;
+    var debugSourceRegex = /^DebugSource: (line (\d+) of (.*)|Unknown source)/;
+
     playProcess.stdout.on('data', (text) => {
 
         // Strip Byte order mark
@@ -149,8 +158,116 @@ function compile(compileInstruction, requester) {
         for(var i=0; i<lines.length; ++i) {
             var line = lines[i].trim();
 
+            // Ignore blank lines
+            if( line.length == 0 )
+                continue;
+            
+            if( useJsonComm ) {
+                try {
+                    var jsonResponse = JSON.parse(line);
+                } catch(err) {
+                    console.error("Failed to parse JSON response from inklecate: "+line);
+                    continue;
+                }
+
+                if( requester.isDestroyed() ) {
+                    break;
+                }
+
+                // Issues
+                if( jsonResponse.issues !== undefined ) {
+                    for(let issue of jsonResponse.issues) {
+                        let issueMatches = issue.match(issueRegex);
+                        let msg = issueMatches[5];
+                        if( session.evaluatingExpression ) {
+                            requester.send('play-evaluated-expression-error', msg, sessionId);
+                        } else {
+                            inkErrors.push({
+                                type: issueMatches[1],
+                                filename: issueMatches[3],
+                                lineNumber: parseInt(issueMatches[4]),
+                                message: msg
+                            });
+                        }
+                    }
+
+                    requester.send('play-generated-errors', inkErrors, sessionId);
+                    inkErrors = [];
+                }
+                
+                // Compile success?
+                else if( jsonResponse["compile-success"] !== undefined ) {
+                    // Whether true or false, it's done
+                    requester.send('compile-complete', sessionId);
+                }
+                
+                // Tags
+                else if( jsonResponse.tags !== undefined ) {
+                    requester.send('play-generated-tags', jsonResponse.tags, sessionId);
+                }
+
+                // Choices
+                else if ( jsonResponse.choices !== undefined ) {
+                    for(let i=0; i<jsonResponse.choices.length; i++) {
+                        requester.send("play-generated-choice", {
+                            number: (i+1),
+                            text: jsonResponse.choices[i]
+                        }, sessionId);
+                    }
+                }
+
+                // Input prompt
+                else if( jsonResponse.needInput ) {
+                    if( session.evaluatingExpression )
+                        session.evaluatingExpression = false;
+                    // else if( session.justRequestedDebugSource )
+                    //     session.justRequestedDebugSource = false;
+                    else
+                        requester.send('play-requires-input', sessionId);
+                }
+                
+                // DebugSource and expression result
+                else if( jsonResponse.cmdOutput !== undefined ) {
+
+                    let debugSourceMatches = jsonResponse.cmdOutput.match(debugSourceRegex);
+                    if( debugSourceMatches ) {
+                        // session.justRequestedDebugSource = true;
+                        requester.send('return-location-from-source', sessionId, {
+                            lineNumber: parseInt(debugSourceMatches[2]),
+                            filename: debugSourceMatches[3]
+                        });
+                    } else if( session.evaluatingExpression ) {
+                        requester.send('play-evaluated-expression', jsonResponse.cmdOutput, sessionId);
+                    }
+                }
+                
+                // Story text
+                else if( jsonResponse.text !== undefined ) {
+                    requester.send('play-generated-text', jsonResponse.text, sessionId);
+                }
+                
+                // End of story, but keep process running for debug source lookups
+                else if( jsonResponse.end ) {
+                    onEndOfStory();
+                }
+                
+                // Stats
+                else if( jsonResponse.stats ) {
+                    requester.send('return-stats', jsonResponse.stats, sessionId);
+                }
+
+                continue;
+            }
+
+            // -------------
+            // EVERYTHING BELOW IS THE OLD WAY OF INTERACTING WITH INKLECATE,
+            // PRE JSON COMMUNICATION. WE SHOULD REMOVE THIS WHEN THE
+            // INKJS-COMPATIBLE VERSION OF INKLECATE IS A JSON-COMMUNICATION
+            // CAPABLE VERSION
+            // -------------
+
             var choiceMatches = line.match(/^(\d+):\s*(.*)/);
-            var errorMatches = line.match(/^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?line (\d+): (.+)/);
+            var errorMatches = line.match(issueRegex);
             var tagMatches = line.match(/^(# tags:) (.+)/);
             var promptMatches = line.match(/^\?>/);
             var debugSourceMatches = line.match(/^DebugSource: (line (\d+) of (.*)|Unknown source)/);
