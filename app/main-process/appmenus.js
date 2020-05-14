@@ -23,6 +23,19 @@ function setupMenus(callbacks) {
             }
         });
     }
+    
+    let sizes = [];
+    const defaultSize = '12';
+    for (const size of ['8', '9', '10', '11', '12', '14', '16', '18', '20', '22', '24', '26', '28', '36', '48', '72']) {
+        sizes.push({
+            label: size.substring(0, 2),
+            type: 'radio',
+            checked: size === defaultSize,
+            click: () => {
+                callbacks.zoom(size);
+            }
+        });
+    }
 
     const template = [
         {
@@ -137,6 +150,10 @@ function setupMenus(callbacks) {
                 {
                     label: 'Theme',
                     submenu: themes
+                },
+                {
+                    label: "Font Size",
+                    submenu: sizes
                 },
                 {
                     label: "Zoom (Increase) ",
