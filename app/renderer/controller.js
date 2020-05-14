@@ -311,25 +311,30 @@ ipc.on("zoom", (event, amount) => {
     let playerEl = document.getElementById("player");
 
     let currentSize = editorEl.style.fontSize;
-
-    if(currentSize == "") {
-
-      if(amount > 0) {
-        currentSize = "14";
-      } else {
-        currentSize = "10";
-      }
-
+    
+    if(amount > 2) {
+        editorEl.style.fontSize = amount + "px";
+        playerEl.style.fontSize = amount + "px";
     } else {
 
-      currentSize = currentSize.substring(0, currentSize.length - 2);
-      currentSize = parseInt(currentSize);
-      currentSize += amount;
+        if(currentSize == "") {
 
+            if(amount > 0) {
+                currentSize = "14";
+            } else {
+                currentSize = "10";
+            }
+
+        } else {
+
+            currentSize = currentSize.substring(0, currentSize.length - 2);
+            currentSize = parseInt(currentSize);
+            currentSize += amount;
+        }
+        
+        editorEl.style.fontSize = currentSize + "px";
+        playerEl.style.fontSize = currentSize + "px";
     }
-
-    editorEl.style.fontSize = currentSize + "px";
-    playerEl.style.fontSize = currentSize + "px";
 
 });
 
