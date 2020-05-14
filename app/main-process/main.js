@@ -115,6 +115,12 @@ app.on('ready', function () {
             win.zoom(-2);
           }
         },
+        zoom: (size) => {
+          var win = ProjectWindow.focused();
+          if (win != null) {
+            win.zoom(size);
+          }
+        },
         insertSnippet: (focussedWindow, snippet) => {
             if( focussedWindow )
                 focussedWindow.webContents.send('insertSnippet', snippet);
