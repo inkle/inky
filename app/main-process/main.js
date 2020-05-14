@@ -115,10 +115,10 @@ app.on('ready', function () {
             win.zoom(-2);
           }
         },
-        zoom: (size) => {
+        zoom: (zoom_percent) => {
           var win = ProjectWindow.focused();
           if (win != null) {
-            win.zoom(size);
+            win.zoom(zoom_percent);
           }
         },
         insertSnippet: (focussedWindow, snippet) => {
