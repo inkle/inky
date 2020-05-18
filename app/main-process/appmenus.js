@@ -23,6 +23,19 @@ function setupMenus(callbacks) {
             }
         });
     }
+    
+    let zoom_percents = [];
+    const defaultZoom = '100%';
+    for (const zoom_percent of ['50%', '75%', '100%', '125%', '150%', '175%', '200%', '250%', '300%']) {
+        zoom_percents.push({
+            label: zoom_percent.substring(0, 4),
+            type: 'radio',
+            checked: zoom_percent === defaultZoom,
+            click: () => {
+                callbacks.zoom(zoom_percent.replace('%', ''));
+            }
+        });
+    }
 
     const template = [
         {
@@ -137,6 +150,10 @@ function setupMenus(callbacks) {
                 {
                     label: 'Theme',
                     submenu: themes
+                },
+                {
+                    label: "Zoom %",
+                    submenu: zoom_percents
                 },
                 {
                     label: "Zoom (Increase) ",
