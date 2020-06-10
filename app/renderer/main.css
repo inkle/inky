@@ -518,7 +518,7 @@ img.issue-icon.warning {
 }
 
 #editor .ace-warning {
-  background: #ffedbf;
+  background: #f2ad2b;
   position:absolute;
 }
 
@@ -727,7 +727,7 @@ img.issue-icon.warning {
 }
 
 #player td.expressionInput:focus {
-  outline: none; 
+  outline: none;
 }
 
 #player .evaluationResult {
@@ -779,7 +779,7 @@ img.issue-icon.warning {
   background-image: url(img/busy.gif);
   background-repeat: no-repeat;
   background-size: cover;
-  
+
 }
 
 #goto-anything {

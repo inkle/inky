@@ -1,7 +1,7 @@
 .window.dark #main,
 .window.dark #editor,
 .window.dark #toolbar {
-    background-color: #333;
+    background-color: #282828;
 }
 
 .window.dark #main .sidebar,
@@ -26,10 +26,6 @@
 
 .window.dark #main .sidebar .nav-group-item.active .filename {
     color: #CCC;
-}
-
-.window.dark .busySpinner {
-    background-image: url(img/busy-dark.gif);
 }
 
 .window.dark #toolbar .button:hover .icon {
@@ -74,7 +70,8 @@
 .window.dark #editor,
 .window.dark #player,
 .window.dark .ace_editor .ace_cursor {
-    color: #f0f0f0;
+    /*color: #f0f0f0; */
+    color: #faf1c6;
 }
 
 .window.dark .ace_editor .ace_indent-guide {
@@ -102,81 +99,36 @@
     background: darkred;
 }
 
-.window.dark #editor .ace-warning {
-    background-color: #7d6015;
-}
-
 .window.dark #editor .ace_todo,
 .window.dark #editor .ace-todo {
-    background: darkcyan;
+    background:#f2ad2b;
+    color: #784a0f;
 }
 
 .window.dark .ace_editor span.ace_flow.ace_declaration,
 .window.dark .ace_editor span.ace_divert,
-.window.dark .ace_editor span.ace_choice.ace_bullets,
 .window.dark .ace_editor span.ace_choice.ace_label,
-.window.dark .ace_editor span.ace_choice.ace_weaveBracket,
-.window.dark .ace_editor span.ace_gather.ace_bullets,
 .window.dark .ace_editor span.ace_gather.ace_label,
 .window.dark .ace_editor span.ace_glue,
 .window.dark .ace_editor span.ace_include,
 .window.dark .ace_editor span.ace_external {
-  color: cyan;
+    color:#6d9e8e;
+}
+
+.window.dark .ace_editor span.ace_choice.ace_bullets,
+.window.dark .ace_editor span.ace_choice.ace_weaveBracket,
+.window.dark .ace_editor span.ace_gather.ace_bullets {
+    color: #ec3c2f;
 }
 
 .window.dark .ace_editor span.ace_var-decl,
-.window.dark .ace_editor span.ace_list-decl,
+.window.dark .ace_editor span.ace_list-decl {
+    color: #ec3c2f;
+}
 .window.dark .ace_editor span.ace_logic:not(.ace_innerContent) {
-  color: lightgreen;
+    color:#8eb865;
 }
 
 .window.dark #main.hideTags .ace_editor span.ace_tag {
-    color: #333;
-}
-
-/* scrollbars */
-.window.dark *::-webkit-scrollbar {
-	width: auto;
-}
-
-.window.dark *::-webkit-scrollbar-track,
-.window.dark *::-webkit-scrollbar-track-piece,
-.window.dark *::-webkit-scrollbar-corner,
-.window.dark *::-webkit-resizer {
-	background-color: #222;
-}
-
-.window.dark *::-webkit-scrollbar-thumb {
-	background-color: #777;
-	transition: background-color 0.6s;
-	box-shadow: inset 0px 0px 10px 0px #00000061;
-}
-
-.window.dark *::-webkit-scrollbar-thumb:hover {
-	background-color: #999;
-	transition: background-color 0.6s;
-}
-
-/* Issues Pop-up */
-#toolbar .issue-popup {
-    background-color: #222;
-    border-color: #444;
-}
-
-#toolbar .issue-popup img.nubbin {
-    filter: brightness(12%);
-}
-
-#toolbar .issue-popup .row:hover {
-background: #444;
-}
-
-#toolbar .issue-popup .row {
-    border-bottom-color: #333;
-}
-
-#toolbar .issue-popup .line-no {
-    background: #222;
-    color: #ccc;
-    border-right-color: #333;
+    color: #282828;
 }
