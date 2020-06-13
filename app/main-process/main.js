@@ -99,6 +99,10 @@ app.on('ready', function () {
         showAbout: () => {
             AboutWindow.showAboutWindow(theme);
         },
+        keyboardShortcuts: () => {
+            var win = ProjectWindow.focused();
+            if (win) win.keyboardShortcuts();
+        },
         stats: () => {
             var win = ProjectWindow.focused();
             if (win) win.stats();
