@@ -534,6 +534,7 @@ const keywords = [
     "LIST_MIN",
     "LIST_RANGE",
     "LIST_VALUE",
+    "LIST_RANDOM",
     "TODO",
     "TURNS_SINCE",
     "VAR",
