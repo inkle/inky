@@ -60,8 +60,7 @@ Text content from the game will appear 'as is' when the engine runs. However, it
 
 **ink** provides a simple system for tagging lines of content, with hashtags. 
 
-	=== content 
-		A line of normal game-text. # colour it blue
+	A line of normal game-text. # colour it blue
 
 These don't show up in the main text flow, but can be read off by the game and used as you see fit. See [RunningYourInk](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md#marking-up-your-ink-content-with-tags) for more information.
 
@@ -264,7 +263,7 @@ You can't use too much glue: multiple glues next to each other have no additiona
 
 Combining knots, options and diverts gives us the basic structure of a choose-your-own game.
 
-	== paragraph_1 === 
+	=== paragraph_1 === 
 	You stand by the wall of Analand, sword in hand.
 	* [Open the gate] -> paragraph_2 
 	* [Smash down the gate] -> paragraph_3
@@ -541,7 +540,15 @@ You can use several logical tests on an option; if you do, *all* the tests must 
 	+ 	{ visit_paris } { not bored_of_paris } 
 		[Return to Paris] -> visit_paris 
 
+#### Logical operators: AND and OR 
 
+The above "multiple conditions" are really just conditions with an the usual programming AND operator. Ink supports `and` (also written as `&&`) and `or` (also written as `||`) in the usual way, as well as brackets. 
+
+	*	{ not (visit_paris or visit_rome) && (visit_london || visit_new_york) } [ Wait. Go where? I'm confused. ] -> visit_someplace
+
+For non-programmers `X and Y` means both X and Y must be true. `X or Y` means either or both. We don't have a `xor`. 
+
+You can also use the standard `!` for `not`, though it'll sometimes confuse the compiler which thinks `{!text}` is a once-only list. We recommend using `not` because negated boolean tests are never that exciting. 
 
 #### Advanced: knot/stitch labels are actually read counts
 
@@ -554,6 +561,7 @@ is actually testing an *integer* and not a true/false flag. A knot or stitch use
 If it's non-zero, it'll return true in a test like the one above, but you can also be more specific as well:
 
 	* {seen_clue > 3} [Flat-out arrest Mr Jefferson]
+
 
 #### Advanced: more logic
 
@@ -721,13 +729,13 @@ or:
 
 	"I missed him. Was he particularly evil?"
 
-## 7) Game Queries
+## 7) Game Queries and Functions
 
 **ink** provides a few useful 'game level' queries about game state, for use in conditional logic. They're not quite parts of the language, but they're always available, and they can't be edited by the author. In a sense, they're the "standard library functions" of the language.
 
 The convention is to name these in capital letters.
 
-### CHOICE_COUNT
+### CHOICE_COUNT()
 
 `CHOICE_COUNT` returns the number of options created so far in the current chunk. So for instance.
 
@@ -737,7 +745,11 @@ The convention is to name these in capital letters.
 
 produces two options, B and C. This can be useful for controlling how many options a player gets on a turn. 
 
-### TURNS_SINCE
+### TURNS()
+
+This returns the number of game turns since the game began. 
+
+### TURNS_SINCE(-> knot)
 
 `TURNS_SINCE` returns the number of moves (formally, player inputs) since a particular knot/stitch was last visited.
 
@@ -749,6 +761,28 @@ A value of 0 means "was seen as part of the current chunk". A value of -1 means 
 Note that the parameter passed to `TURNS_SINCE` is a "divert target", not simply the knot address itself (because the knot address is a number - the read count - not a location in the story...)
 
 TODO: (requirement of passing `-c` to the compiler)
+
+#### Sneak preview: using TURNS_SINCE in a function
+
+The `TURNS_SINCE(->x) == 0` test is so useful it's often worth wrapping it up as an ink function.
+
+	=== function came_from(-> x) 
+		~ return TURNS_SINCE(x) == 0
+	
+The section on functions outlines the syntax here a bit more clearly but the above allows you to say things like:
+
+	* {came_from(->  nice_welcome)} 'I'm happy to be here!' 
+	* {came_from(->  nasty_welcome)} 'Let's keep this quick.' 
+
+... and have the game react to content the player saw *just now*.
+
+### SEED_RANDOM()
+
+For testing purposes, it's often useful to fix the random number generator so ink will produce the same outcomes every time you play. You can do this by "seeding" the random number system. 
+
+	~ SEED_RANDOM(235) 
+	
+The number you pass to the seed function is arbitrary, but providing different seeds will result in different sequences of outcomes. 
 
 #### Advanced: more queries
 
@@ -1259,9 +1293,26 @@ and the following will test conditions:
 	
 ### Mathematics
 	
-**ink** supports the four basic mathematical operations (`+`, `-`, `*` and `/`), as well as `%` (or `mod`), which returns the remainder after integer division. 
+**ink** supports the four basic mathematical operations (`+`, `-`, `*` and `/`), as well as `%` (or `mod`), which returns the remainder after integer division. There's also POW for to-the-power-of: 
+
+	{POW(3, 2)} is 9. 
+	{POW(16, 0.5)} is 4. 
+
 
 If more complex operations are required, one can write functions (using recursion if necessary), or call out to external, game-code functions (for anything more advanced). 
+
+
+#### RANDOM(min, max) 
+
+Ink can generate random integers if required using the RANDOM function. RANDOM is authored to be like a dice (yes, pendants, we said *a dice*), so the min and max values are both inclusive. 
+
+	~ temp dice_roll = RANDOM(1, 6) 
+	
+	~ temp lazy_grading_for_test_paper = RANDOM(30, 75)  
+	
+	~ temp number_of_heads_the_serpent_has = RANDOM(3, 8)
+
+The random number generator can be seeded for testing purposes, see the section of Game Queries and Functions section above. 
 
 #### Advanced: numerical types are implicit
 
@@ -1272,6 +1323,19 @@ Results of operations - in particular, for division - are typed based on the typ
 	~ z = 1.2 / 0.5
 	
 assigns `x` to be 0, `y` to be 2 and `z` to be 2.4.
+
+#### Advanced: INT(), FLOOR() and FLOAT() 
+
+In cases where you don't want implicit types, or you want to round off a variable, you can cast it directly. 
+
+	{INT(3.2)} is 3. 
+	{FLOOR(4.8)} is 4.
+	{INT(-4.8)} is -4. 
+	{FLOOR(-4.8)} is -5. 
+	
+	{FLOAT(4)} is, um, still 4. 
+
+
 
 ### String queries
 
@@ -1402,8 +1466,7 @@ There's one other class of multiline block, which expands on the alternatives sy
 		- 	Ace of Hearts.
 		- 	King of Spades.
 		- 	2 of Diamonds.
-			'You lose!' crowed the croupier.
-			-> leave_casino
+			'You lose this time!' crowed the croupier.
 	}
 	
 	// Cycle: show each in turn, and then cycle
@@ -1418,6 +1481,28 @@ There's one other class of multiline block, which expands on the alternatives sy
 		- Would my luck hold?
 		- Could I win the hand?
 	}
+
+#### Advanced: modified shuffles 
+
+The shuffle block above is really a "shuffled cycle"; in that it'll shuffle the content, play through it, then reshuffle and go again. 
+
+There are two other versions of shuffle: 
+
+`shuffle once` which will shuffle the content, play through it, and then do nothing.
+
+	{ shuffle once: 
+	-	The sun was hot. 
+	- 	It was a hot day. 
+	}
+
+`shuffle stopping` will shuffle all the content (except the last entry), and once its been played, it'll stick on the last entry. 
+
+	{ shuffle stopping:
+	- 	A silver BMW roars past.
+	-	A bright yellow Mustang takes the turn. 
+	- 	There are like, cars, here. 
+	}
+	
 
 ## 4) Temporary Variables
 
@@ -1748,7 +1833,7 @@ And sometimes the numbers are useful in other ways:
 	VAR suitcase_location = HALLWAY
 	
 	=== report_progress ===
-	{  secret_agent_location = suitcase_location:
+	{  secret_agent_location == suitcase_location:
 		The secret agent grabs the suitcase!
 		~ suitcase_location = HELD_BY_AGENT  
 		
@@ -1790,7 +1875,7 @@ But this flat structure makes certain things difficult: for example, imagine a g
 	=== outside_honolulu ===
 	We arrived at the large island of Honolulu.
 	- (postscript) 
-		{crossing_the_date_line(-> done)} 
+		-> crossing_the_date_line(-> done)
 	- (done)
 		-> END 
 
@@ -1799,7 +1884,7 @@ But this flat structure makes certain things difficult: for example, imagine a g
 	=== outside_pitcairn_island ===
 	The boat sailed along the water towards the tiny island.
 	- (postscript) 
-		{crossing_the_date_line(-> done)} 
+		-> crossing_the_date_line(-> done)
 	- (done)
 		-> END 
 	
@@ -1940,7 +2025,7 @@ But for games with lots of independent moving parts, threads quickly become esse
 		}
 	
 	== hallway ==	
-		<- characters_present
+		<- characters_present(HALLWAY)
 		*	[Drawers]	-> examine_drawers
 		* 	[Wardrobe] -> examine_wardrobe
 		*  [Go to Office] 	-> go_office
@@ -1951,12 +2036,13 @@ But for games with lots of independent moving parts, threads quickly become esse
 	// Here's the thread, which mixes in dialogue for characters you share the room with at the moment.
 	
 	== characters_present(room)
-		{ generals_location == player_location:
+		{ generals_location == room:
 			<- general_conversation
 		}
 		{ doctors_location == room:
 			<- doctor_conversation
 		}
+		-> DONE
 		
 	== general_conversation 
 		*	[Ask the General about the bloodied knife]
@@ -1983,11 +2069,21 @@ If we didn't, the end of content might be a story-bug or a hanging story thread,
 
 ### Using `-> DONE`
 
-So cases where we want to mark the end of a thread, we use `-> DONE`: meaning "the flow intentionally ends here".
+In cases where we want to mark the end of a thread, we use `-> DONE`: meaning "the flow intentionally ends here". If we don't, we might end up with a warning message - we can still play the game, but it's a reminder that we have unfinished business. 
+
+The example at the start of this section will generate a warning; it can be fixed as follows:
+
+    == thread_example ==
+    I had a headache; threading is hard to get your head around.
+    <- conversation
+    <- walking
+    -> DONE 
+
+The extra DONE tells ink that the flow here has ended and it should rely on the threads for the next part of the story. 
 
 Note that we don't need a `-> DONE` if the flow ends with options that fail their conditions. The engine treats this as a valid, intentional, end of flow state.
 
-**You do not need a `-> DONE` in a thread after an option has been chosen**. Once an option is chosen, a thread is no longer a thread - it is simply the normal story flow once more.
+**You do not need a `-> DONE` after an option has been chosen**. Once an option is chosen, a thread is no longer a thread - it is simply the normal story flow once more.
 
 Using `-> END` in this case will not end the thread, but the whole story flow. (And this is the real reason for having two different ways to end flow.)
 
@@ -2329,6 +2425,7 @@ We have a few basic ways of getting information about what's in a list:
 	{LIST_COUNT(DoctorsInSurgery)} 	//  "2"
 	{LIST_MIN(DoctorsInSurgery)} 		//  "Adams"
 	{LIST_MAX(DoctorsInSurgery)} 		//  "Cartwright"
+	{LIST_RANDOM(DoctorsInSurgery)} 	//  "Adams" or "Cartwright"
 
 #### Testing for emptiness
 
