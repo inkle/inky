@@ -1,1 +1,1 @@
-Untagged version with stats feature 0.9.0
+0.9.0 + Untagged version after dotnet ink merge (ink repo e564a2)
