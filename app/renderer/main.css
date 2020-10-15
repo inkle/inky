@@ -329,7 +329,7 @@ img.issue-icon.warning {
   bottom: 0;
   left: 0;
   right: 0;
-  overflow: scroll;
+  overflow: auto;
   padding-bottom: 40px; /* leave space for include adding UI */
 }
 
@@ -683,7 +683,8 @@ img.issue-icon.warning {
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: auto;
 }
 
 #player .expressionWatch td {
@@ -879,4 +880,18 @@ img.issue-icon.warning {
 
 .ignore-events {
   pointer-events: none;
+}
+
+.window ::-webkit-scrollbar {
+  width: .75rem;
+  background: transparent;
+  border-left: 1px solid #F0F0F0;
+}
+
+.window ::-webkit-scrollbar-thumb {
+  background: #F0F0F0;
+}
+
+.sidebar .nav-wrapper::-webkit-scrollbar-thumb {
+  background: #DDDDDD;
 }
