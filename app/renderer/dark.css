@@ -132,3 +132,17 @@
 .window.dark #main.hideTags .ace_editor span.ace_tag {
     color: #282828;
 }
+
+.window.dark ::-webkit-scrollbar {
+    width: .75rem;
+    background: #282828;
+    border-left: 1px solid #323232;
+  }
+  
+.window.dark ::-webkit-scrollbar-thumb {
+    background: #323232;
+}
+
+.window.dark .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
+    background: #323232;
+}
