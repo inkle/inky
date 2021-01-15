@@ -271,6 +271,8 @@ InkProject.prototype.save = function() {
     this.mainInk.save(success => {
         singleFileSaveComplete(this.mainInk, success);
 
+        ipc.send("main-file-saved", this.mainInk.absolutePath());
+
         // May not be a success if cancelled, in which case we stop early
         if( success ) {
 

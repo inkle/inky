@@ -23,6 +23,13 @@ function setupMenus(callbacks) {
             }
         });
     }
+
+    function computeRecent(newRecentFiles) {
+        return newRecentFiles.map((path) => ({
+            label: path,
+            click: () => ProjectWindow.open(path)
+        }));
+    }
     
     let zoom_percents = [];
     const defaultZoom = '100%';
@@ -55,9 +62,14 @@ function setupMenus(callbacks) {
                     type: 'separator'
                 },
                 {
-                    label: 'Open',
+                    label: 'Open...',
                     accelerator: 'CmdOrCtrl+O',
                     click: callbacks.open
+                },
+                {
+                    label: 'Open recent',
+                    submenu: computeRecent(ProjectWindow.getRecentFiles()),
+                    id: "recent"
                 },
                 {
                     type: 'separator'
@@ -366,6 +378,15 @@ function setupMenus(callbacks) {
 
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
+
+    ProjectWindow.setRecentFilesChanged(function(newRecentFiles) {
+        _.find(
+            _.find(template, menu => menu.label == "File").submenu,
+            submenu => submenu.id == "recent"
+        ).submenu = computeRecent(newRecentFiles);
+        const menu = Menu.buildFromTemplate(template);
+        Menu.setApplicationMenu(menu);
+    });
 }
 
 exports.setupMenus = setupMenus;

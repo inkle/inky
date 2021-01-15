@@ -3,6 +3,7 @@ const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
+const fs = require("fs");
 const Inklecate = require("./inklecate.js").Inklecate;
 const Menu = electron.Menu;
 
@@ -16,6 +17,10 @@ const electronWindowOptions = {
 };
 
 var windows = [];
+
+const recentFilesPath = path.join(electron.app.getPath("userData"), "recent-files.json");
+
+let onRecentFilesChanged = null;
 
 function ProjectWindow(filePath) {
     const getThemeFromMenu = () => Menu.getApplicationMenu().items.find(
@@ -127,6 +132,37 @@ ProjectWindow.withWebContents = function(webContents) {
     return null;
 }
 
+ProjectWindow.setRecentFilesChanged = function(f) {
+    onRecentFilesChanged = f;
+}
+
+ProjectWindow.getRecentFiles = function() {
+    if(!fs.existsSync(recentFilesPath)) {
+        return [];
+    }
+    const json = fs.readFileSync(recentFilesPath, "utf-8");
+    try {
+        return JSON.parse(json);
+    } catch(e) {
+        console.error("Error in recent files JSON parsing:", e);
+        return [];
+    }
+}
+
+function addRecentFile(filePath) {
+    const resolvedFilePath = path.resolve(filePath);
+    const recentFiles = ProjectWindow.getRecentFiles();
+    const newRecentFiles = recentFiles.indexOf(resolvedFilePath) >= 0 ?
+        recentFiles :
+        [resolvedFilePath].concat(recentFiles).slice(0, 5);
+    fs.writeFileSync(recentFilesPath, JSON.stringify(newRecentFiles), {
+        encoding: "utf-8"
+    });
+    if(onRecentFilesChanged) {
+        onRecentFilesChanged(newRecentFiles);
+    }
+}
+
 ProjectWindow.open = function(filePath) {
     if( !filePath ) {
         var multiSelectPaths = dialog.showOpenDialog({
@@ -144,9 +180,15 @@ ProjectWindow.open = function(filePath) {
     // TODO: Could check whether the filepath is relative to any of our
     // existing open projects, and switch to that window?
 
-    if( filePath)
+    if( filePath) {
+        addRecentFile(filePath);
         return new ProjectWindow(filePath);
+    }
 }
+
+ipc.on("main-file-saved", (_, filePath) => {
+    addRecentFile(filePath);
+});
 
 ipc.on("project-final-close", (event) => {
     var win = ProjectWindow.withWebContents(event.sender);
