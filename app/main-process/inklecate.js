@@ -144,7 +144,7 @@ function compile(compileInstruction, requester) {
         }
     }
 
-    var issueRegex = /^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?line (\d+): (.+)/;
+    var issueRegex = /^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?line (\d+): (.*)/;
     var debugSourceRegex = /^DebugSource: (line (\d+) of (.*)|Unknown source)/;
 
     playProcess.stdout.on('data', (text) => {
