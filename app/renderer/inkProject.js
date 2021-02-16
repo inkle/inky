@@ -514,7 +514,7 @@ InkProject.prototype.closeImmediate = function() {
 }
 
 InkProject.prototype.inkFileWithRelativePath = function(relativePath) {
-    return _.find(this.files, f => f.relativePath() == relativePath);
+    return _.find(this.files, f => f.relativePath().replace('\\', '/') == relativePath);
 }
 
 InkProject.prototype.inkFileWithId = function(id) {
