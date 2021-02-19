@@ -67,7 +67,7 @@ function setupMenus(callbacks) {
                     click: callbacks.open
                 },
                 {
-                    label: 'Open recent',
+                    label: 'Open Recent',
                     submenu: computeRecent(ProjectWindow.getRecentFiles()),
                     id: "recent"
                 },
