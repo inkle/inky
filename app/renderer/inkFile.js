@@ -176,7 +176,10 @@ InkFile.prototype.save = function(afterSaveCallback) {
     else {
         this.justSaved = true;
         var fileContent = this.aceDocument.getValue();
-        if( !fileContent || fileContent.length < 1 ) throw "Empty file content in aceDocument!";
+        if( !fileContent || fileContent.length < 1 ) {
+            dialog.showErrorBox("Refusing to save empty file", "\""+this.relPath+"\" is empty: please add some content.");
+            throw "Empty file content in aceDocument!";
+        }
         
         // Ensure that the enclosing folder exists beforehand
         var fileAbsPath = this.absolutePath();

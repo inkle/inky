@@ -288,8 +288,11 @@ function copyFile(source, destination, transform) {
     fs.readFile(source, "utf8", (err, fileContent) => {
         if( !err && fileContent ) {
             if( transform ) fileContent = transform(fileContent);
-            if( fileContent.length < 1 ) throw "Trying to write (copy) empty file!";
-            
+            if( fileContent.length < 1 ) {
+                dialog.showErrorBox("Refusing to copy empty file", "\""+source+"\" is empty: please add some content.");
+                throw "Trying to write (copy) empty file!";
+            }
+
             fs.writeFile(destination, fileContent, "utf8", err => {
                 if( err ) alert(`Failed to save file '${destination}'`);
             });
