@@ -199,6 +199,28 @@ ipc.on("project-stats", (event, visible) => {
     });
 });
 
+ipc.on("keyboard-shortcuts", (event, visible) => {
+    let messageLines = [];
+    messageLines.push("Useful Keyboard Shortcuts");
+    messageLines.push("");
+    messageLines.push("Find and Replace: Ctrl+H or Cmd+H");
+    messageLines.push("");
+    messageLines.push("Find: Ctrl+F or Cmd+F");
+    messageLines.push("");
+    messageLines.push("Go to Anything: Ctrl+P or Cmd+P");
+    messageLines.push("");
+    messageLines.push("Toggle Comment: Ctrl+/ or Cmd+/");
+    messageLines.push("");
+    messageLines.push("Add Multicursor Above: Ctrl+Alt+Up or Ctrl+Option+Up");
+    messageLines.push("");
+    messageLines.push("Add Multicursor Below: Ctrl+Alt+Down or Ctrl+Option+Down");
+    messageLines.push("");
+    messageLines.push("Temporarily Fold/Unfold Selection: Alt+L or Ctrl+Option+Down");
+    messageLines.push("");
+    alert(messageLines.join("\n"));
+});
+
+
 EditorView.setEvents({
     "change": () => {
         LiveCompiler.setEdited();
