@@ -146,6 +146,14 @@ function setupMenus(callbacks) {
                     accelerator: 'CmdOrCtrl+A',
                     role: 'selectall'
                 },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Useful Keyboard Shortcuts',
+                    enabled: callbacks.isFocusedWindow,
+                    click: callbacks.keyboardShortcuts
+                }
             ]
         },
         {
