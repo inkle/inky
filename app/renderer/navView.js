@@ -121,8 +121,11 @@ function setFiles(mainInk, allFiles) {
         });
 
     $navWrapper.empty();
+    
+    var extraClass = "";
+    if( mainInk.hasUnsavedChanges ) extraClass = "unsaved";
+    if( mainInk.isLoading ) extraClass += " loading";
 
-    var extraClass = mainInk.hasUnsavedChanges || mainInk.brandNewEmpty ? "unsaved" : "";
     var $main = `<nav class="nav-group main-ink">
                     <h5 class="nav-group-title">Main ink file</h5>
                     <a class="nav-group-item ${extraClass}" data-file-id="${mainInk.id}">
@@ -137,7 +140,11 @@ function setFiles(mainInk, allFiles) {
 
         group.files.forEach((file) => {
             var name = file.isSpare ? file.relativePath() : file.filename();
-            var extraClass = file.hasUnsavedChanges || file.brandNewEmpty ? "unsaved" : "";
+
+            var extraClass = "";
+            if( file.hasUnsavedChanges ) extraClass = "unsaved";
+            if( file.isLoading ) extraClass += " loading";
+
             items = items + `<span class="nav-group-item ${extraClass}" data-file-id="${file.id}">
                                 <span class="icon icon-doc-text"></span>
                                 <span class="filename">${name}</span>

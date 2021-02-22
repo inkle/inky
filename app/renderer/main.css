@@ -345,6 +345,10 @@ img.issue-icon.warning {
   font-weight: bold;
 }
 
+.sidebar .nav-group-item.loading .filename {
+  opacity: 0.5;
+}
+
 .sidebar .nav-group.unused .nav-group-title {
   font-weight: bold;
 }

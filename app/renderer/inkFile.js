@@ -19,12 +19,14 @@ var fileIdCounter = 0;
 // -----------------------------------------------------------------
 
 // anyPath can be relative or absolute
-function InkFile(anyPath, mainInkFile, events) {
+function InkFile(anyPath, mainInkFile, isBrandNew, events) {
     
     this.id = fileIdCounter++;
 
     // Default filename if creating a new file, and passed null to constructor
     anyPath = anyPath || "Untitled.ink";
+
+    this.mainInkFile = mainInkFile;
 
     // Obtain relative path by looking at main ink file
     if( path.isAbsolute(anyPath) ) {
@@ -44,13 +46,18 @@ function InkFile(anyPath, mainInkFile, events) {
 
     this.events = events;
 
-    this.mainInkFile = mainInkFile;
-
     // Create new Inky files with a comment already embedded placeholder comment.
     // This is a temporary solution to prevent the "INCLUDE x" blank file destructive deletion
     // issue, where saving automatically created blank files prevented properly saving and
     // removed Included files without warning the user.
-    var initialContent = mainInkFile == null ? "Once upon a time..." : "// Replace this comment with Ink and start writing!";
+    var initialContent = "";
+    if( mainInkFile == null ) {
+        initialContent = "Once upon a time...\n\n"
+            + " * There were two choices.\n"
+            + " * There were four lines of content.\n\n"
+            + "- They lived happily ever after.\n"
+            + "    -> END\n"
+    }
     this.aceDocument = new Document(initialContent);
     this.aceSession = null;
 
@@ -61,15 +68,6 @@ function InkFile(anyPath, mainInkFile, events) {
     // we're ready for it.
     // TODO: Verify this is true - can we simplify?
     this.justLoadedContent = false;
-
-    // New empty file only just created by user. Used to detect
-    // when unsaved, unedited files can be safely removed by the project.
-    // We can't know at time of creation whether it's going to be new and empty,
-    // since it might be due to the user typing "INCLUDE x". x may be a brand
-    // new file, or it could be an existing file - we just have to try and load it.
-    // We initially set this to false so that the project doesn't immediately
-    // remove it from the project before the include link has been set up.
-    this.brandNewEmpty = false;
 
     // Flag to detect files that have data that hasn't been saved 
     // out into the compiler's temporary directory that needs to stay
@@ -87,15 +85,25 @@ function InkFile(anyPath, mainInkFile, events) {
             this.events.includesChanged();
         }
     });
+    
+    // Assume it's new by default. We then attempt to load below
+    // to check for sure
+    this.hasUnsavedChanges = isBrandNew;
+    this.isLoading = !isBrandNew;
 
-    this.tryLoadFromDisk(success => {
-        this.brandNewEmpty = !success;
+    // If it has an absolute path, we expect it to exist on disk
+    this.tryLoadFromDisk(err => {
+        if( err ) {
+            this.hasUnsavedChanges = true;
+            this.events.loadError(err);
+        } else {
+            this.hasUnsavedChanges = false;
+            this.isLoading = false;
+        }
     });
-
-    this.hasUnsavedChanges = false;
+    
     this.aceDocument.on("change", () => {
         this.hasUnsavedChanges = true;
-        this.brandNewEmpty = false;        
         this.compilerVersionDirty = true;
         this.justSaved = false;
         
@@ -175,8 +183,7 @@ InkFile.prototype.save = function(afterSaveCallback) {
     // Quick save to existing path
     else {
         this.justSaved = true;
-        var fileContent = this.aceDocument.getValue();
-        if( !fileContent || fileContent.length < 1 ) throw "Empty file content in aceDocument!";
+        var fileContent = this.aceDocument.getValue() || "";
         
         // Ensure that the enclosing folder exists beforehand
         var fileAbsPath = this.absolutePath();
@@ -184,7 +191,6 @@ InkFile.prototype.save = function(afterSaveCallback) {
         mkdirp.sync(fileDirectory);
 
         fs.writeFile(fileAbsPath, fileContent, "utf8", (err) => {
-            this.brandNewEmpty = false;
             if( err ) 
                 afterSaveCallback(false);
             else {
@@ -211,24 +217,24 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
     }
 
     // Simplify code below by using a fallback
-    loadCallback = loadCallback || (() => {});
+    loadCallback = loadCallback || (err => {});
 
     var absPath = this.absolutePath();
     if( !absPath ) {
-        loadCallback(false);
+        loadCallback("File doesn't yet have a project directory");
         return;
     }
 
     fs.stat(absPath, (err, stats) => {
         if( err || !stats.isFile() ) { 
-            loadCallback(false);
+            loadCallback(err.message || "ink file not found");
             return;
         }
 
         fs.readFile(absPath, 'utf8', (err, data) => {
             if( err ) {
                 console.error("Failed to load include at: "+absPath);
-                loadCallback(false);
+                loadCallback(err.message);
                 return;
             }
 
@@ -238,7 +244,7 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
 
             // Success - fire this callback before other callbacks 
             // like document change get fired
-            loadCallback(true);
+            loadCallback(null);
 
             // Temporarily set justLoadedContent to true so that
             // we don't get a double fileChanged callback before

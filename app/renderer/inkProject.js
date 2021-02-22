@@ -28,7 +28,7 @@ function InkProject(mainInkFilePath) {
     this.unsavedFiles = [];
 
     this.mainInk = null;
-    this.mainInk = this.createInkFile(mainInkFilePath || null);
+    this.mainInk = this.createInkFile(mainInkFilePath || null, isBrandNew = mainInkFilePath === undefined);
 
     EditorView.setFiles(this.files);
     this.showInkFile(this.mainInk);
@@ -39,16 +39,18 @@ function InkProject(mainInkFilePath) {
     this.startFileWatching();
 }
 
-InkProject.prototype.createInkFile = function(anyPath) {
-    var inkFile = new InkFile(anyPath || null, this.mainInk, {
+InkProject.prototype.createInkFile = function(anyPath, isBrandNew, loadErrorCallback) {
+    var inkFile = new InkFile(anyPath || null, this.mainInk, isBrandNew, {
         fileChanged: () => { 
             if( inkFile.hasUnsavedChanges && !this.unsavedFiles.contains(inkFile) ) {
                 this.unsavedFiles.push(inkFile);
                 this.refreshUnsavedChanges();
             }
 
-            // When a file is changed, its state may change to have unsaved changes,
-            // which should be reflected in the sidebar (unsaved files are bold)
+            // When a file is changed its state may change to have unsaved changes,
+            // which should be reflected in the sidebar (unsaved files are bold).
+            // Newly added INCLUDE lines get the callback includesChanged, below.
+            
             this.refreshIncludes();
         },
 
@@ -57,7 +59,14 @@ InkProject.prototype.createInkFile = function(anyPath) {
             this.refreshIncludes();
             if( inkFile.includes.length > 0  )
                 NavView.initialShow();
+        },
+
+        loadError: err => {
+            if( loadErrorCallback )
+                loadErrorCallback(err);
         }
+
+
     });
 
     this.files.push(inkFile);
@@ -80,7 +89,7 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
         return null;
     }
 
-    var newIncludeFile = this.createInkFile(newIncludePath || null);
+    var newIncludeFile = this.createInkFile(newIncludePath || null, isBrandNew = true);
 
     if( addToMainInk )
         this.mainInk.addIncludeLine(newIncludeFile.relativePath());
@@ -90,13 +99,11 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
     return newIncludeFile;
 }
 
-// - Mark old includes as spare if they're no longer included
 // - Load any newly discovered includes
 // - Refresh nav hierarchy in sidebar
 InkProject.prototype.refreshIncludes = function() {
 
-    var allIncludes = [];
-    var existingRelFilePaths = _.map(_.without(this.files, this.mainInk), (f) => f.relativePath());
+    var existingRelFilePaths = _.map(_.without(this.files, this.mainInk), f => f.relativePath());
 
     var relPathsFromINCLUDEs = [];
     var addIncludePathsFromFile = (inkFile) => {
@@ -127,18 +134,26 @@ InkProject.prototype.refreshIncludes = function() {
     // Files that are in this.files that aren't actually mentioned anywhere
     var spareRelFilePaths = _.difference(existingRelFilePaths,  relPathsFromINCLUDEs);
 
-    // Mark files that are spare, and remove those that aren't needed at all
-    var filesToRemove = [];
+    // Mark files that are spare, so they go in a special category at the bottom
     this.files.forEach(f => {
         f.isSpare = spareRelFilePaths.indexOf(f.relativePath()) != -1;
-
-        // Remove brand new files that aren't included anywhere - otherwise they're spare
-        if( f.isSpare && f.brandNewEmpty )
-            filesToRemove.push(f);
     });
-    this.files = _.difference(this.files, filesToRemove);
 
-    includeRelPathsToLoad.forEach(newIncludeRelPath => this.createInkFile(newIncludeRelPath));
+    // Load up newly mentioned include files, if they exist
+    includeRelPathsToLoad.forEach(newIncludeRelPath => {
+        let absPath = path.join(this.mainInk.projectDir, newIncludeRelPath);
+        fs.stat(absPath, (err, stats) => {
+            // If it exists, and double check that it hasn't already been created during the async fs.stat
+            if( stats.isFile() &&  !_.some(this.files, f => f.relativePath() == newIncludeRelPath) ) {
+                let newFile = this.createInkFile(newIncludeRelPath, isBrandNew = false, err => {
+                    alert("Failed to load ink file: "+err);
+                    this.files.remove(newFile);
+                    this.refreshIncludes();
+                });
+            }
+        });
+        
+    });
 
     NavView.setFiles(this.mainInk, this.files);
     EditorView.setFiles(this.files);
@@ -183,7 +198,12 @@ InkProject.prototype.startFileWatching = function() {
         var existingFile = _.find(this.files, f => f.relativePath() == relPath);
         if( !existingFile ) {
             console.log("Watch found new file - creating it: "+relPath);
-            this.createInkFile(newlyFoundAbsFilePath);
+
+            let newFile = this.createInkFile(newlyFoundAbsFilePath, isBrandNew = false, err => {
+                alert("Failed to load ink file: "+err);
+                this.files.remove(newFile);
+                this.refreshIncludes();
+            });
 
             // TODO: Find a way to refresh includes without spamming it
             this.refreshIncludes();
@@ -204,8 +224,8 @@ InkProject.prototype.startFileWatching = function() {
                 if( this.activeInkFile == inkFile )
                     EditorView.saveCursorPos();
 
-                inkFile.tryLoadFromDisk(success => {
-                    if( success && this.activeInkFile == inkFile )
+                inkFile.tryLoadFromDisk(err => {
+                    if( !err && this.activeInkFile == inkFile )
                         setImmediate(() => EditorView.restoreCursorPos());
                 });
             }
