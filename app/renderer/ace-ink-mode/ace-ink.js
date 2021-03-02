@@ -227,6 +227,7 @@ var inkHighlightRules = function() {
                 defaultToken: "gather.innerContent"
             }]
         }],
+
         "#globalVAR": [{
             regex: /^(\s*)(VAR|CONST)\b/, // (\s*)(\w+)(\s*)
             token: [
@@ -254,43 +255,35 @@ var inkHighlightRules = function() {
                 defaultToken: "var-decl"
             }]
         }],
+
         "#listDef": [{
-            regex: /(\s*)(LIST)/,
+            regex: /^(\s*)(LIST)\b/,
             token: [
-                "list-decl",          // whitespace
-                "list-decl.keyword"   // LIST
+                "list-decl", // whitespace
+                "list-decl.keyword"
             ],
-            push: [ {
-                    regex: /(\w+)(\s*=\s*)/,
-                    token: [
-                        "list-decl.name", // list_name
-                        "list-decl"       // whitespace & equals sign
-                    ],
-                    next: "#listItem"
-                }, {
-                    regex: /$/,
-                    next: "pop"
-                }, {
-                    defaultToken: "list-decl"
-                }
-            ]
+            
+            push: [{
+                regex: /(\s*)(\w+)(\s*)/,
+                token: [
+                    "list-decl",      // whitespace
+                    "list-decl.name", // var_name
+                    "list-decl"       // whitespace
+                ]
+            }, 
+
+            // The rest of the assignment line
+            { 
+                regex: /$/,
+                token: "list-decl",
+                next: "pop"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "list-decl"
+            }]
         }],
 
-        "#listItemsSeparator": [{
-            regex: /(\s*,\s*)/,
-            token: ["list-decl"],
-            next: "#listItem"
-        }, {
-            regex: /$/,
-            token: [""],
-            next: "start"
-        }],
-
-        "#listItem": [{
-            regex: /([\w\(\)=\d\s]+)/,
-            token: ["list-decl.item"],
-            next: "#listItemsSeparator"
-        }],
         "#INCLUDE": [{
             regex: /(\s*)(INCLUDE\b)/,
             token: [
