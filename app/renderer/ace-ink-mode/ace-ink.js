@@ -69,7 +69,7 @@ var inkHighlightRules = function() {
                 push: [{ 
                     token: "choice.weaveBracket", 
                     regex: /\s*\]\s*/,              // ] weave end 
-                    next: "pop" 
+                    next: "start"
                 }, {
                     include: "#inlineContent" 
                 }, {
