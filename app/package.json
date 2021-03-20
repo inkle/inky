@@ -29,6 +29,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "electron": "^4.2.0",
+    "jsdom": "^16.5.1",
     "markdown-html": "^0.0.8",
     "mocha": "^4.0.1",
     "spectron": "^3.8.0"

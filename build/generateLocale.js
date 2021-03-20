@@ -2,6 +2,7 @@
     const fs = require('fs');
     const path = require('path');
     const readline = require('readline');
+    const { JSDOM } = require('../app/node_modules/jsdom');
 
     // JSON utils
     const PrettyJSON = (str) => JSON.stringify(str, null, 2); 
@@ -22,6 +23,22 @@
         WriteJSONTo(json, filePath);
     };
 
+    // Extraction utils
+    const ExtractFromJS = filePath => {
+        const fileContent = fs.readFileSync(filePath);
+        const matches = Array.from(RegExp.prototype[Symbol.matchAll].call(re, fileContent));
+        return matches.reduce((acc, match) => ({...acc, [match[2]]: ""}), {});
+    };
+    const ExtractFromHTML = filePath => {
+        const mustBeExtracted = ['textContent', 'title', 'placeholder'];
+        const fileContent = fs.readFileSync(filePath);
+        const dom = new JSDOM(fileContent);
+        const matches = Array.from(dom.window._document.querySelectorAll('.i18n')).map(
+            elem => mustBeExtracted.map(key => elem[key] ? elem[key] : undefined).filter(x => x != undefined && x.trim().length)
+        ).flat(1);
+        return matches.reduce((acc, match) => ({...acc, [match]: ""}), {});
+    };
+
     // Extract all msgids from a directory
     const re = new RegExp(/i18n\._\((['"])(.+?)\1\)/, 'gm');
     const Extract = dirPath => {
@@ -35,9 +52,9 @@
             if (fs.lstatSync(filePath).isDirectory()) {
                 msgs = Object.assign({}, msgs, Extract(filePath));
             } else if (path.extname(file) === ".js") {
-                const fileContent = fs.readFileSync(filePath);
-                const matches = Array.from(RegExp.prototype[Symbol.matchAll].call(re, fileContent));
-                matches.forEach(match => msgs[match[2]] = "");
+                msgs = Object.assign({}, msgs, ExtractFromJS(filePath));
+            } else if (path.extname(file) === ".html") {
+                msgs = Object.assign({}, msgs, ExtractFromHTML(filePath));
             }
         });
 

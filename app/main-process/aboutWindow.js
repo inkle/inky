@@ -1,7 +1,6 @@
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
-const ipc = electron.ipcMain;
 const fs = require("fs");
 const inkjsPackage = require('inkjs/package.json');
 const i18n = require('./i18n/i18n.js');
@@ -12,7 +11,10 @@ const electronWindowOptions = {
     height: 270,
     resizable: false,
     show: false,
-    autoHideMenuBar: true
+    autoHideMenuBar: true,
+    webPreferences: {
+        preload: path.join(__dirname, '..', 'renderer', 'preload.js')
+    }
 };
 
 const versionFilePath = "ink/version.txt";
@@ -36,8 +38,6 @@ function AboutWindow(theme) {
 
     var w = new BrowserWindow(electronWindowOptions);
     w.loadURL("file://" + __dirname + "/../renderer/about/about.html");
-
-    // w.webContents.openDevTools();
 
     w.webContents.on("did-finish-load", () => {
         w.webContents.send("set-about-data", {
