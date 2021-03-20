@@ -98,6 +98,11 @@ Tested on a fresh **Ubuntu 16.04 LTS** VM installation (_equivalent processes sh
 
 `./RUN.command`
 
+### Translation
+
+Translation files are located under `app/main-process/i18n/`.  
+If a particular locale file is missing (or if it's missing some keys), you can generate it with the following command: `cd app && npm run generate-locale -- <locale> ./main-process/i18n/`.
+
 ## License
 
 **Inky** and **ink** are released under the MIT license. Although we don't require attribution, we'd love to know if you decide to use **ink** a project! Let us know on [Twitter](http://www.twitter.com/inkleStudios) or [by email](mailto:info@inklestudios.com).
