@@ -96,13 +96,18 @@
 }
 
 .window.dark #editor .ace-error {
-    background: darkred;
+    background: #580000
 }
 
 .window.dark #editor .ace_todo,
 .window.dark #editor .ace-todo {
-    background:#f2ad2b;
-    color: #784a0f;
+    background: #a97410;
+    color: #000000;
+}
+
+.window.dark #editor .ace_warning,
+.window.dark #editor .ace-warning {
+    background: #0f3553;
 }
 
 .window.dark .ace_editor span.ace_flow.ace_declaration,
