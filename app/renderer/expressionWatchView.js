@@ -7,13 +7,15 @@ const EditSession = ace.require('ace/edit_session').EditSession;
 const Range = ace.require("ace/range").Range;
 const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
+const i18n = require("./i18n.js");
+
 var expressionViews = [];
 var events = {};
 
 function ExpressionWatchView() {
     this.$expression = $(`
         <tr>
-            <td class="expressionLabel">Every turn:</td>
+            <td class="expressionLabel">${i18n._("Every turn:")}</td>
             <td class="expressionInput">
                 <div class="expressionEditor"></div>
                 <div class="removeButton"><span class="icon icon-cancel-circled"></span></div>

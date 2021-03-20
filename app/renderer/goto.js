@@ -9,6 +9,8 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const InkProject = require("./inkProject.js").InkProject;
 const EditorView = require("./editorView.js").EditorView;
 
+const i18n = require("./i18n.js");
+
 var $goto = null;
 var $gotoContainer = null;
 var $input = null;
@@ -271,12 +273,11 @@ function addResult(result, searchStr)
     }
 
     else if( type == "gotoLine" ) {
-        $result = $(`<li class='gotoLine'><p>➡︎ Go to line ${result.line+1}</p><p class='meta'>${result.lineContent}</p></li>`);
+        $result = $(`<li class='gotoLine'><p>➡︎ ${i18n._("Go to line")} ${result.line+1}</p><p class='meta'>${result.lineContent}</p></li>`);
     }
 
     else if( type == "runtimePath" ) {
-        $result = $(`<li class='runtimePath'><p>🔎 ${result.lineContent}</p><p class='meta'>${result.file.filename()} - line ${result.line+1} (looked up internal runtime path ${result.runtimePath})</p></li>`);
-        //$result = $(`<li class='runtimePath'><p>🔎 <strong>${result.file.relativePath()}, line ${result.line+1} (looked up internal path ${result.runtimePath})</p><p class='meta'>${result.lineContent}</p></li>`);
+        $result = $(`<li class='runtimePath'><p>🔎 ${result.lineContent}</p><p class='meta'>${result.file.filename()} - ${i18n._("line")} ${result.line+1} (${i18n._("looked up internal runtime path")} ${result.runtimePath})</p></li>`);
     }
 
     else if( type == "symbol" ) {
@@ -291,13 +292,13 @@ function addResult(result, searchStr)
 
         var filePath = result.inkFile.relativePath();
         var lineNo = result.row+1;
-        $result = $(`<li class='symbol'><p>✎ ${ancestorStr}${wrappedResult}</p><p class='meta'>${filePath} - line ${lineNo}</p></li>`);
+        $result = $(`<li class='symbol'><p>✎ ${ancestorStr}${wrappedResult}</p><p class='meta'>${filePath} - ${i18n._("line")} ${lineNo}</p></li>`);
     }
 
     else if( type == "content" ) {
         var filePath = result.file.relativePath();
         var lineNo = result.row+1;
-        $result = $(`<li class='content'><p>${wrappedResult}</p><p class='meta'>${filePath} - line ${lineNo}</p></li>`);
+        $result = $(`<li class='content'><p>${wrappedResult}</p><p class='meta'>${filePath} - ${i18n._("line")} ${lineNo}</p></li>`);
     }
 
     $result.data("result", result);

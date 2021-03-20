@@ -1,6 +1,7 @@
 const electron = require("electron");
 const remote = electron.remote;
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+const i18n = require("./i18n.js");
 
 // Overriden by external setButtonActions call
 var events = {
@@ -74,7 +75,7 @@ function updateIssueSummary(issues, issueClickCallback) {
 
     if( errorCount == 0 && warningCount == 0 && todoCount == 0 ) {
         $summary.addClass("hidden");
-        $message.text("No issues.");
+        $message.text(i18n._("No issues."));
         $message.removeClass("hidden");
         $issues.addClass("hidden");
     } else {
