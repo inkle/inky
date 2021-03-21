@@ -8183,7 +8183,6 @@ function Folding() {
     this.toggleFoldBlock = function(editor)
     {
         var foldWidgets = this.foldWidgets;
-        console.log(foldWidgets);
         if (!foldWidgets)
             return; // mode doesn't support folding
 
@@ -11056,7 +11055,7 @@ exports.commands = [{
     readOnly: true
 }, {
     name: "gotoline",
-    bindKey: bindKey("Ctrl-L", "Command-L"),
+    bindKey: bindKey("Ctrl-G", "Command-G"),
     exec: function(editor) {
         var line = parseInt(prompt("Enter line number:"), 10);
         if (!isNaN(line)) {
@@ -11111,7 +11110,7 @@ exports.commands = [{
     name: "toggleFoldBlock",
     bindKey: bindKey("Control-L", "Command-L"),
     exec: function(editor) {     
-    	editor.session.foldBlock(editor);
+    	editor.session.toggleFoldBlock(editor);
     },
     scrollIntoView: "center",
     readOnly: true
