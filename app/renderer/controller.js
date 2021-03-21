@@ -309,11 +309,15 @@ ipc.on("set-tags-visible", (event, visible) => {
 
 
 function updateTheme(event, newTheme) {
-	if (newTheme && newTheme.toLowerCase() === 'dark') {
-		$(".window").addClass("dark");
-	} else {
-		$(".window").removeClass("dark");
-	}
+    let themes = ["dark", "contrast", "focus"];
+    themes = themes.filter(e => e !== newTheme);
+    if (newTheme && newTheme.toLowerCase() !== 'main')
+    {
+        $(".window").addClass(newTheme);
+    }
+    for (const theme of themes) {
+        $(".window").removeClass(theme);
+    }
 	LiveCompiler.setEdited();
 }
 
