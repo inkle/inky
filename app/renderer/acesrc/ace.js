@@ -11108,7 +11108,7 @@ exports.commands = [{
     readOnly: true
 }, {
     name: "toggleFoldBlock",
-    bindKey: bindKey("Control-L", "Command-L"),
+    bindKey: bindKey("Ctrl-L", "Command-L"),
     exec: function(editor) {     
     	editor.session.toggleFoldBlock(editor);
     },
