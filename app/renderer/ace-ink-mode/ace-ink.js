@@ -526,7 +526,7 @@ oop.inherits(inkFoldingRules, BaseFoldMode);
 
     // Use a regular expression to say which line starts a fold.   
 
-    this.foldingStartMarker =  /^(\s*)(=)(?<knot>==)?(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/; 
+    this.foldingStartMarker =  /^(\s*)(=)(?<knot>={1,})?(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/; 
 
     // Get the range of text that will be included in the fold. 
 
@@ -550,7 +550,7 @@ oop.inherits(inkFoldingRules, BaseFoldMode);
 
         // Collect all text into the fold until you get to a knot
 
-        var endLineRegex = /^(\s*)(===)(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/
+        var endLineRegex = /^(\s*)(={2,})(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/
         return this.getRangeFromStartToRegex(session, foldStyle, row, line, endLineRegex)
     }
 
@@ -558,7 +558,7 @@ oop.inherits(inkFoldingRules, BaseFoldMode);
 
         // Collect all text into the fold until you get to a knot or a stitch
 
-        var endLineRegex = /^(\s*)(=)(==)?(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/
+        var endLineRegex = /^(\s*)(={1,})?(\s*)((?:function)?)(\s*)(\w+)(\s*)(\([\w,\s->]*\))?(\s*)((?:={1,})?)/
         return this.getRangeFromStartToRegex(session, foldStyle, row, line, endLineRegex)
     }
 

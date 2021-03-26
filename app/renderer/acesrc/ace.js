@@ -8179,6 +8179,43 @@ function Folding() {
             return range;
         }
     };
+    
+    this.toggleFoldBlock = function(editor)
+    {
+        var foldWidgets = this.foldWidgets;
+        if (!foldWidgets)
+            return; // mode doesn't support folding
+
+    	var startRow = editor.getSelectionRange().start.row;     
+        if (!startRow && !foldWidgets[startRow])
+        	return;
+        	
+        for (var row = startRow; row >= 0; row--)
+        {
+            if (foldWidgets[row] == null)
+                foldWidgets[row] = this.getFoldWidget(row);
+            if (foldWidgets[row] != "start")
+                continue;
+                        
+            var oldFold = this.getFoldAt(row, this.getLine(row).length, 1);
+            if (oldFold)
+            { 
+                this.expandFold(oldFold);
+            }
+            else
+            {
+                var range = this.getFoldWidgetRange(row);
+                row = range.end.row;
+                try {
+                    var fold = this.addFold("...", range);
+                    if (fold)
+                        fold.collapseChildren = depth;
+                } catch(e) {}    
+            }
+
+            break;
+        }
+    }
 
     this.foldAll = function(startRow, endRow, depth) {
         if (depth == undefined)
@@ -11018,7 +11055,7 @@ exports.commands = [{
     readOnly: true
 }, {
     name: "gotoline",
-    bindKey: bindKey("Ctrl-L", "Command-L"),
+    bindKey: bindKey("Ctrl-G", "Command-G"),
     exec: function(editor) {
         var line = parseInt(prompt("Enter line number:"), 10);
         if (!isNaN(line)) {
@@ -11070,7 +11107,15 @@ exports.commands = [{
     scrollIntoView: "center",
     readOnly: true
 }, {
-    name: "unfoldall",
+    name: "toggleFoldBlock",
+    bindKey: bindKey("Control-L", "Command-L"),
+    exec: function(editor) {     
+    	editor.session.toggleFoldBlock(editor);
+    },
+    scrollIntoView: "center",
+    readOnly: true
+}, {    
+	name: "unfoldall",
     bindKey: bindKey("Alt-Shift-0", "Command-Option-Shift-0"),
     exec: function(editor) { editor.session.unfold(); },
     scrollIntoView: "center",
