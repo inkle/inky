@@ -10,7 +10,7 @@ const inkSnippets = require("./inkSnippets.js").snippets;
 function setupMenus(callbacks) {
     let themes = [];
     const defaultTheme = 'light';
-    for (const theme of ['light', 'dark']) {
+    for (const theme of ['light', 'dark', 'contrast', 'focus']) {
         themes.push({
             label: theme.substring(0, 1).toUpperCase() + theme.substring(1),
             type: 'radio',
