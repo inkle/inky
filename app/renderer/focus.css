@@ -1,0 +1,153 @@
+.window.focus #main,
+.window.focus #editor,
+.window.focus #toolbar {
+    background-color: #282828;
+}
+
+.window.focus #main .sidebar,
+.window.focus #main .sidebar .footer {
+    background-color: #282828;
+}
+
+.window.focus h1.title {
+    color: white;
+}
+
+
+.window.focus #main .sidebar .filename,
+.window.focus #main .sidebar .footer .add-include-button,
+.window.focus #main .sidebar .footer .new-include-form h5 {
+    color: #888;
+}
+
+.window.focus #main .sidebar .nav-group-item.active {
+    background: #666;
+}
+
+.window.focus #main .sidebar .nav-group-item.active .filename {
+    color: #CCC;
+}
+
+.window.focus #toolbar .button:hover .icon {
+    color: #CCC;
+}
+
+/* e.g. filename input */
+.window.focus #main .sidebar .footer input {
+    background: #333;
+    border: 1px solid #888;
+    color: #888;
+}
+
+.window.focus #main .sidebar .footer .checkbox {
+    color: #888;
+}
+
+
+
+.window.focus #toolbar {
+    border-bottom: 1px solid #888;
+}
+
+.window.focus #toolbar div.issuesSummary .issueCount {
+    color: #888;
+}
+
+.window.focus #main .sidebar .footer {
+    border-top: 1px solid #555;
+}
+
+
+.window.focus .ace_editor .ace_marker-layer .ace_selection {
+    background-color: #444;
+}
+
+.window.focus .ace_editor .ace_marker-layer .ace_selected-word {
+    background-color: #999;
+    border-color: #dedede;
+}
+
+.window.focus #editor,
+.window.focus #player,
+.window.focus .ace_editor .ace_cursor {
+    /*color: #f0f0f0; */
+    color: #faf1c6;
+}
+
+.window.focus .ace_editor .ace_indent-guide {
+    opacity: .1;
+}
+
+.window.focus .ace_editor .ace_marker-layer .ace_active-line {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.window.focus #player hr {
+    border-top-color: #444;
+}
+
+.window.focus #player p.choice a:hover {
+    color: #999;
+}
+
+.window.focus #editor .ace_gutter-layer,
+.window.focus .split {
+    background: #444;
+}
+
+.window.focus #editor .ace-error {
+    background: #580000
+}
+
+.window.focus #editor .ace_todo,
+.window.focus #editor .ace-todo {
+    background: #5f6238;
+    color:  #444;
+}
+
+.window.focus #editor .ace_warning,
+.window.focus #editor .ace-warning {
+    background: #0f3553;
+}
+
+.window.focus .ace_editor span.ace_flow.ace_declaration,
+.window.focus .ace_editor span.ace_divert,
+.window.focus .ace_editor span.ace_choice.ace_label,
+.window.focus .ace_editor span.ace_gather.ace_label,
+.window.focus .ace_editor span.ace_glue,
+.window.focus .ace_editor span.ace_include,
+.window.focus .ace_editor span.ace_external {
+    color: #434f53;
+}
+
+.window.focus .ace_editor span.ace_choice.ace_bullets,
+.window.focus .ace_editor span.ace_choice.ace_weaveBracket,
+.window.focus .ace_editor span.ace_gather.ace_bullets {
+    color:  #535353;
+}
+
+.window.focus .ace_editor span.ace_var-decl,
+.window.focus .ace_editor span.ace_list-decl {
+    color: #535353;
+}
+.window.focus .ace_editor span.ace_logic:not(.ace_innerContent) {
+    color: #535353;
+}
+
+.window.focus #main.hideTags .ace_editor span.ace_tag {
+    color: #535353;
+}
+
+.window.focus ::-webkit-scrollbar {
+    width: .75rem;
+    background: #282828;
+    border-left: 1px solid #323232;
+  }
+  
+.window.focus ::-webkit-scrollbar-thumb {
+    background: #323232;
+}
+
+.window.focus .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
+    background: #323232;
+}

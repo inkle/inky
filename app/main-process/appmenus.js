@@ -11,7 +11,7 @@ const i18n = require('./i18n/i18n.js');
 function setupMenus(callbacks) {
     let themes = [];
     const defaultTheme = 'light';
-    for (const theme of ['light', 'dark']) {
+    for (const theme of ['light', 'dark', 'contrast', 'focus']) {
         themes.push({
             label: theme.substring(0, 1).toUpperCase() + theme.substring(1),
             type: 'radio',

@@ -1,0 +1,153 @@
+.window.contrast #main,
+.window.contrast #editor,
+.window.contrast #toolbar {
+    background-color: #282828;
+}
+
+.window.contrast #main .sidebar,
+.window.contrast #main .sidebar .footer {
+    background-color: #282828;
+}
+
+.window.contrast h1.title {
+    color: white;
+}
+
+
+.window.contrast #main .sidebar .filename,
+.window.contrast #main .sidebar .footer .add-include-button,
+.window.contrast #main .sidebar .footer .new-include-form h5 {
+    color: #888;
+}
+
+.window.contrast #main .sidebar .nav-group-item.active {
+    background: #666;
+}
+
+.window.contrast #main .sidebar .nav-group-item.active .filename {
+    color: #CCC;
+}
+
+.window.contrast #toolbar .button:hover .icon {
+    color: #CCC;
+}
+
+/* e.g. filename input */
+.window.contrast #main .sidebar .footer input {
+    background: #333;
+    border: 1px solid #888;
+    color: #888;
+}
+
+.window.contrast #main .sidebar .footer .checkbox {
+    color: #888;
+}
+
+
+
+.window.contrast #toolbar {
+    border-bottom: 1px solid #888;
+}
+
+.window.contrast #toolbar div.issuesSummary .issueCount {
+    color: #888;
+}
+
+.window.contrast #main .sidebar .footer {
+    border-top: 1px solid #555;
+}
+
+
+.window.contrast .ace_editor .ace_marker-layer .ace_selection {
+    background-color: #444;
+}
+
+.window.contrast .ace_editor .ace_marker-layer .ace_selected-word {
+    background-color: #999;
+    border-color: #dedede;
+}
+
+.window.contrast #editor,
+.window.contrast #player,
+.window.contrast .ace_editor .ace_cursor {
+    /*color: #f0f0f0; */
+    color: #faf2e7;
+}
+
+.window.contrast .ace_editor .ace_indent-guide {
+    opacity: .1;
+}
+
+.window.contrast .ace_editor .ace_marker-layer .ace_active-line {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.window.contrast #player hr {
+    border-top-color: #444;
+}
+
+.window.contrast #player p.choice a:hover {
+    color: #999;
+}
+
+.window.contrast #editor .ace_gutter-layer,
+.window.contrast .split {
+    background: #444;
+}
+
+.window.contrast #editor .ace-error {
+    background: #81265b;
+}
+
+.window.contrast #editor .ace_todo,
+.window.contrast #editor .ace-todo {
+    background: #a97410;
+    color: #000000;
+}
+
+.window.contrast #editor .ace_warning,
+.window.contrast #editor .ace-warning {
+    background: #0f3553;
+}
+
+.window.contrast .ace_editor span.ace_flow.ace_declaration,
+.window.contrast .ace_editor span.ace_divert,
+.window.contrast .ace_editor span.ace_choice.ace_label,
+.window.contrast .ace_editor span.ace_gather.ace_label,
+.window.contrast .ace_editor span.ace_glue,
+.window.contrast .ace_editor span.ace_include,
+.window.contrast .ace_editor span.ace_external {
+    color:#3eebff;
+}
+
+.window.contrast .ace_editor span.ace_choice.ace_bullets,
+.window.contrast .ace_editor span.ace_choice.ace_weaveBracket,
+.window.contrast .ace_editor span.ace_gather.ace_bullets {
+    color: #00b6a5;
+}
+
+.window.contrast .ace_editor span.ace_var-decl,
+.window.contrast .ace_editor span.ace_list-decl {
+    color: #00b6a5;
+}
+.window.contrast .ace_editor span.ace_logic:not(.ace_innerContent) {
+    color: #00b6a5;
+}
+
+.window.contrast #main.hideTags .ace_editor span.ace_tag {
+    color: #282828;
+}
+
+.window.contrast ::-webkit-scrollbar {
+    width: .75rem;
+    background: #282828;
+    border-left: 1px solid #323232;
+}
+
+.window.contrast ::-webkit-scrollbar-thumb {
+    background: #323232;
+}
+
+.window.contrast .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
+    background: #323232;
+}
