@@ -1,4 +1,5 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+const i18n = require('./i18n.js');
 
 var events = {};
 var lastFadeTime = 0;
@@ -230,7 +231,7 @@ function addHorizontalDivider()
 
 function addLineError(error, callback)
 {
-    var $aError = $("<a href='#'>Line "+error.lineNumber+": "+error.message+"</a>");
+    var $aError = $(`<a href='#'>${i18n._("Line")} ${error.lineNumber}: ${error.message}</a>`);
     $aError.on("click", callback);
 
     var $paragraph = $("<p class='error'></p>");

@@ -25,6 +25,7 @@ const LiveCompiler = require("./liveCompiler.js").LiveCompiler;
 const InkProject = require("./inkProject.js").InkProject;
 const NavHistory = require("./navHistory.js").NavHistory;
 const GotoAnything = require("./goto.js").GotoAnything;
+const i18n = require("./i18n.js");
 
 InkProject.setEvents({
     "newProject": (project) => {
@@ -153,8 +154,8 @@ LiveCompiler.setEvents({
     },
     unexpectedError: (error) => {
         if( error.indexOf("Unhandled Exception") != -1 ) {
-            PlayerView.addTerminatingMessage("Sorry, the ink compiler crashed ☹", "error");
-            PlayerView.addTerminatingMessage("Here is some diagnostic information:", "error");
+            PlayerView.addTerminatingMessage(i18n._("Sorry, the ink compiler crashed ☹"), "error");
+            PlayerView.addTerminatingMessage(i18n._("Here is some diagnostic information:"), "error");
 
             // Make it a bit less verbose and concentrate on the useful stuff
             // [0x000ea] in /Users/blah/blah/blah/blah/ink/ParsedHierarchy/FlowBase.cs:377
@@ -164,7 +165,7 @@ LiveCompiler.setEvents({
 
             PlayerView.addLongMessage(error, "diagnostic");
         } else {
-            PlayerView.addTerminatingMessage("Ink compiler had an unexpected error ☹", "error");
+            PlayerView.addTerminatingMessage(i18n._("Ink compiler had an unexpected error ☹"), "error");
             PlayerView.addLongMessage(error, "error");
         }
     },
@@ -177,23 +178,23 @@ ipc.on("project-stats", (event, visible) => {
     LiveCompiler.getStats((statsObj) => {
         
         let messageLines = [];
-        messageLines.push("Project statistics:");
+        messageLines.push(i18n._("Project statistics:"));
         messageLines.push("");
         
-        messageLines.push("Words: "+statsObj["words"]);
+        messageLines.push(`${i18n._("Words")}: ${statsObj["words"]}`);
         messageLines.push("");
 
-        messageLines.push("Knots: "+statsObj["knots"]);
-        messageLines.push("Stitches: "+statsObj["stitches"]);
-        messageLines.push("Functions: "+statsObj["functions"]);
+        messageLines.push(`${i18n._("Knots")}: ${statsObj["knots"]}`);
+        messageLines.push(`${i18n._("Stitches")}: ${statsObj["stitches"]}`);
+        messageLines.push(`${i18n._("Functions")}: ${statsObj["functions"]}`);
         messageLines.push("");
 
-        messageLines.push("Choices: "+statsObj["choices"]);
-        messageLines.push("Gathers: "+statsObj["gathers"]);
-        messageLines.push("Diverts: "+statsObj["diverts"]);
+        messageLines.push(`${i18n._("Choices")}: ${statsObj["choices"]}`);
+        messageLines.push(`${i18n._("Gathers")}: ${statsObj["gathers"]}`);
+        messageLines.push(`${i18n._("Diverts")}: ${statsObj["diverts"]}`);
         messageLines.push("");
 
-        messageLines.push("Notes: Words should be accurate. Knots include functions. Gathers and diverts may include some implicitly added ones by the compiler, for example in weave. Diverts include END and DONE.");
+        messageLines.push(i18n._("Notes: Words should be accurate. Knots include functions. Gathers and diverts may include some implicitly added ones by the compiler, for example in weave. Diverts include END and DONE."));
 
         alert(messageLines.join("\n"));
     });
@@ -201,21 +202,21 @@ ipc.on("project-stats", (event, visible) => {
 
 ipc.on("keyboard-shortcuts", (event, visible) => {
     let messageLines = [];
-    messageLines.push("Useful Keyboard Shortcuts");
+    messageLines.push(i18n._("Useful Keyboard Shortcuts"));
     messageLines.push("");
-    messageLines.push("Find and Replace: Ctrl+H or Cmd+H");
+    messageLines.push(`${i18n._("Find and Replace")}: Ctrl+H ${i18n._("or")} Cmd+H`);
     messageLines.push("");
-    messageLines.push("Find: Ctrl+F or Cmd+F");
+    messageLines.push(`${i18n._("Find")}: Ctrl+F ${i18n._("or")} Cmd+F`);
     messageLines.push("");
-    messageLines.push("Go to Anything: Ctrl+P or Cmd+P");
+    messageLines.push(`${i18n._("Go to Anything")}: Ctrl+P ${i18n._("or")} Cmd+P`);
     messageLines.push("");
-    messageLines.push("Toggle Comment: Ctrl+/ or Cmd+/");
+    messageLines.push(`${i18n._("Toggle Comment")}: Ctrl+/ ${i18n._("or")} Cmd+/`);
     messageLines.push("");
-    messageLines.push("Add Multicursor Above: Ctrl+Alt+Up or Ctrl+Option+Up");
+    messageLines.push(`${i18n._("Add Multicursor Above")}: Ctrl+Alt+Up ${i18n._("or")} Ctrl+Option+Up`);
     messageLines.push("");
-    messageLines.push("Add Multicursor Below: Ctrl+Alt+Down or Ctrl+Option+Down");
+    messageLines.push(`${i18n._("Add Multicursor Below")}: Ctrl+Alt+Down ${i18n._("or")} Ctrl+Option+Down`);
     messageLines.push("");
-    messageLines.push("Temporarily Fold/Unfold Selection: Alt+L or Ctrl+Option+Down");
+    messageLines.push(`${i18n._("Temporarily Fold/Unfold Selection")}: Alt+L ${i18n._("or")} Ctrl+Option+Down`);
     messageLines.push("");
     alert(messageLines.join("\n"));
 });

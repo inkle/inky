@@ -1,6 +1,7 @@
 const ipc = require("electron").ipcRenderer;
 const _ = require("lodash");
-var randomstring = require("randomstring");
+const randomstring = require("randomstring");
+const i18n = require('./i18n.js');
 
 var namespace = null;
 var sessionIdx = 0;
@@ -325,7 +326,7 @@ ipc.on("play-exit-due-to-error", (event, exitCode, fromSessionId) => {
     if( !sessionIsCurrent(fromSessionId) ) return;
 
     if( fromSessionId == currentExportSessionId ) {
-        completeExport({message: "Ink has errors - please fix them before exporting."});
+        completeExport({message: i18n._("Ink has errors - please fix them before exporting.")});
     } else {
         if( replaying ) {
             replaying = false;
@@ -343,7 +344,7 @@ ipc.on("play-story-unexpected-error", (event, error, fromSessionId) => {
     if( !sessionIsCurrent(fromSessionId) ) return;
 
     if( fromSessionId == currentExportSessionId ) {
-        completeExport({message: "Unexpected error"});
+        completeExport({message: i18n._("Unexpected error")});
     } else {
         if( replaying ) {
             replaying = false;

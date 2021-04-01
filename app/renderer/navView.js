@@ -1,6 +1,7 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const path = require("path");
 const _ = require("lodash");
+const i18n = require("./i18n.js");
 
 const slideAnimDuration = 200;
 var sidebarWidth = 200;
@@ -116,7 +117,7 @@ function setFiles(mainInk, allFiles) {
 
     if( unusedFiles.length > 0 )
         groupsArray.push({
-            name: "Unused files",
+            name: i18n._("Unused files"),
             files: unusedFiles
         });
 

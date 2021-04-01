@@ -6,6 +6,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const chokidar = require('chokidar');
 const mkdirp = require('mkdirp');
+const i18n = require('./i18n.js');
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -85,7 +86,7 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
     // Make sure it doesn't already exist
     var alreadyExists = _.some(this.files, (f) => f.relativePath() == newIncludePath);
     if( alreadyExists ) {
-        alert("Could not create new include file at "+newIncludePath+" because it already exists!");
+        alert(`${i18n._("Could not create new include file at")} ${newIncludePath} ${i18n._("because it already exists!")}`);
         return null;
     }
 
@@ -146,7 +147,7 @@ InkProject.prototype.refreshIncludes = function() {
             // If it exists, and double check that it hasn't already been created during the async fs.stat
             if( stats.isFile() &&  !_.some(this.files, f => f.relativePath() == newIncludeRelPath) ) {
                 let newFile = this.createInkFile(newIncludeRelPath, isBrandNew = false, err => {
-                    alert("Failed to load ink file: "+err);
+                    alert(`${i18n._("Failed to load ink file:")} ${err}`);
                     this.files.remove(newFile);
                     this.refreshIncludes();
                 });
@@ -200,7 +201,7 @@ InkProject.prototype.startFileWatching = function() {
             console.log("Watch found new file - creating it: "+relPath);
 
             let newFile = this.createInkFile(newlyFoundAbsFilePath, isBrandNew = false, err => {
-                alert("Failed to load ink file: "+err);
+                alert(`${i18n._("Failed to load ink file:")} ${err}`);
                 this.files.remove(newFile);
                 this.refreshIncludes();
             });
@@ -321,7 +322,7 @@ function copyFile(source, destination, transform) {
 InkProject.prototype.export = function(exportType) {
 
     if( !this.ready ) {
-        alert("Project not quite fully loaded! Please try exporting again in a couple of seconds...");
+        alert(i18n._("Project not quite fully loaded! Please try exporting again in a couple of seconds..."));
         return;
     }
 
@@ -329,7 +330,7 @@ InkProject.prototype.export = function(exportType) {
     var inkJsCompatible = exportType == "js" || exportType == "web";
     LiveCompiler.exportJson(inkJsCompatible, (err, compiledJsonTempPath) => {
         if( err ) {
-            alert("Could not export: "+err);
+            alert(`${i18n._("Could not export:")} ${err}`);
             return;
         }
 
@@ -362,11 +363,11 @@ InkProject.prototype.export = function(exportType) {
 
         if( exportType == "json" ) {
             saveOptions.filters = [
-                { name: "JSON files", extensions: ["json"] }
+                { name: i18n._("JSON files"), extensions: ["json"] }
             ]
         } else if( exportType == "js" ) {
             saveOptions.filters = [
-                { name: "JavaScript files", extensions: ["js"] }
+                { name: i18n._("JavaScript files"), extensions: ["js"] }
             ]
         }
 
@@ -381,12 +382,12 @@ InkProject.prototype.export = function(exportType) {
                         // File already exists, or there's another error
                         // (error when code == ENOENT means file doens't exist, which is fine)
                         if( !err || err.code != "ENOENT" ) {
-                            if( err ) alert("Sorry, could not save to "+targetSavePath);
+                            if( err ) alert(`${i18n._("Sorry, could not save to")} ${targetSavePath}`);
 
                             if( stats.isFile() ) fs.unlinkSync(targetSavePath);
 
                             if( stats.isDirectory() ) {
-                                alert("Could not save because directory exists with the given name");
+                                alert(i18n._("Could not save because directory exists with the given name"));
                                 return
                             }
                         }
@@ -495,12 +496,12 @@ InkProject.prototype.tryClose = function() {
     if( this.hasUnsavedChanges ) {
         dialog.showMessageBox(remote.getCurrentWindow(), {
             type: "warning",
-            message: "Would you like to save changes before exiting?",
-            detail: "Your changes will be lost if you don't save.",
+            message: i18n._("Would you like to save changes before exiting?"),
+            detail: i18n._("Your changes will be lost if you don't save."),
             buttons: [
-                "Save",
-                "Don't save",
-                "Cancel"
+                i18n._("Save"),
+                i18n._("Don't save"),
+                i18n._("Cancel")
             ],
             defaultId: 0
         }, (response) => {

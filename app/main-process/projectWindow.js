@@ -6,6 +6,7 @@ const path = require("path");
 const fs = require("fs");
 const Inklecate = require("./inklecate.js").Inklecate;
 const Menu = electron.Menu;
+const i18n = require("./i18n/i18n.js");
 
 const electronWindowOptions = {
   width: 1300,
@@ -13,7 +14,9 @@ const electronWindowOptions = {
   minWidth: 350,
   minHeight: 250,
   titleBarStyle: 'hidden',
-  title: "Inky"
+  webPreferences: {
+      preload: path.join(__dirname, '..', 'renderer', 'preload.js')
+  }
 };
 
 var windows = [];
@@ -31,6 +34,7 @@ function ProjectWindow(filePath) {
         e => e.checked
     ).label.toLowerCase();
 
+    electronWindowOptions.title = i18n._("Inky");
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/../renderer/index.html");
     this.browserWindow.setSheetOffset(49);
@@ -170,10 +174,10 @@ function addRecentFile(filePath) {
 ProjectWindow.open = function(filePath) {
     if( !filePath ) {
         var multiSelectPaths = dialog.showOpenDialog({
-            title: "Open main ink file",
+            title: i18n._("Open main ink file"),
             properties: ['openFile'],
             filters: [
-                { name: 'Ink files', extensions: ['ink'] }
+                { name: i18n._('Ink files'), extensions: ['ink'] }
             ]
         });
 
