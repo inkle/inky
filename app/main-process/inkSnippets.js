@@ -166,20 +166,20 @@ exports.snippets = [
             },
             {
                 name: "Flow: thread_in_tunnel",
-                ink:  loadLongerSnippet("thread-in_tunnel.ink") 
+                ink:  loadLongerSnippet("thread_in_tunnel.ink") 
             },
             {separator: true},
             {
                 name: "List: pop",
-                ink:  loadLongerSnippet("list-pop.ink") 
+                ink:  loadLongerSnippet("list_pop.ink") 
             },
             {
                 name: "List: pop_random",
-                ink:  loadLongerSnippet("list-pop-random.ink") 
+                ink:  loadLongerSnippet("list_pop_random.ink") 
             },
             {
                 name: "List: string_to_list",
-                ink:  loadLongerSnippet("string-to-list.ink") 
+                ink:  loadLongerSnippet("string_to_list.ink") 
             },
             {separator: true},
             {
@@ -188,7 +188,7 @@ exports.snippets = [
             },
             {
                 name: "Printing: print_number",
-                ink:  loadLongerSnippet("print-number.ink") 
+                ink:  loadLongerSnippet("print_number.ink") 
             },
             {
                 name: "Printing: list_with_commas",
@@ -201,7 +201,7 @@ exports.snippets = [
         snippets: [
             {
                 name: "Swing Variables",
-                ink:  loadLongerSnippet("swing-variables.ink") 
+                ink:  loadLongerSnippet("swing_variables.ink") 
             }
         ]
     },
