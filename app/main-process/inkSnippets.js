@@ -183,6 +183,10 @@ exports.snippets = [
             },
             {separator: true},
             {
+                name: "Printing: UPPERCASE",
+                ink:  loadLongerSnippet("uppercase.ink") 
+            },
+            {
                 name: "Printing: print_number",
                 ink:  loadLongerSnippet("print-number.ink") 
             },
