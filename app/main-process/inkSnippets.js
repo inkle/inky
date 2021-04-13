@@ -141,6 +141,69 @@ exports.snippets = [
 
     {separator: true},
 
+    //-------------------
+    // USEFUL FUNCTIONS
+    //-------------------
+
+    {
+        categoryName: "Useful functions",
+        snippets: [
+            {
+                name: "Flow: came_from",
+                ink:  loadLongerSnippet("came_from.ink") 
+            },
+            {
+                name: "Flow: seen_very_recently",
+                ink:  loadLongerSnippet("seen_very_recently.ink") 
+            },
+            {
+                name: "Flow: seen_more_recently_than",
+                ink:  loadLongerSnippet("seen_more_recently_than.ink") 
+            },
+            {
+                name: "Flow: seen_this_scene",
+                ink:  loadLongerSnippet("seen_this_scene.ink") 
+            },
+            {
+                name: "Flow: thread_in_tunnel",
+                ink:  loadLongerSnippet("thread-in_tunnel.ink") 
+            },
+            {separator: true},
+            {
+                name: "List: pop",
+                ink:  loadLongerSnippet("list-pop.ink") 
+            },
+            {
+                name: "List: pop_random",
+                ink:  loadLongerSnippet("list-pop-random.ink") 
+            },
+            {
+                name: "List: string_to_list",
+                ink:  loadLongerSnippet("string-to-list.ink") 
+            },
+            {separator: true},
+            {
+                name: "Printing: print_number",
+                ink:  loadLongerSnippet("print-number.ink") 
+            },
+            {
+                name: "Printing: list_with_commas",
+                ink:  loadLongerSnippet("list_with_commas.ink") 
+            }
+        ]
+    },
+    {
+        categoryName: "Useful systems",
+        snippets: [
+            {
+                name: "Swing Variables",
+                ink:  loadLongerSnippet("swing-variables.ink") 
+            }
+        ]
+    },
+
+    {separator: true},
+
     {
         categoryName: "Full stories",
         snippets: [
