@@ -38,7 +38,7 @@
     "chokidar": "^3.3.1",
     "fuzzaldrin-plus": "^0.5",
     "inkjs": "^1.10.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "mkdirp": "^0.5.1",
     "randomstring": "^1.1.5"
   }
