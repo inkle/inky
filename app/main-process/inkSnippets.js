@@ -149,6 +149,11 @@ exports.snippets = [
         categoryName: "Useful functions",
         snippets: [
             {
+                name: "Logic: maybe",
+                ink:  loadLongerSnippet("maybe.ink") 
+            },
+            {separator: true},
+            {
                 name: "Flow: came_from",
                 ink:  loadLongerSnippet("came_from.ink") 
             },
@@ -176,6 +181,14 @@ exports.snippets = [
             {
                 name: "List: pop_random",
                 ink:  loadLongerSnippet("list_pop_random.ink") 
+            },
+            {
+                name: "List: list_random_subset",
+                ink:  loadLongerSnippet("list_random_subset.ink") 
+            },
+            {
+                name: "List: list_random_subset_of_size",
+                ink:  loadLongerSnippet("list_random_subset_of_size.ink") 
             },
             {
                 name: "List: string_to_list",

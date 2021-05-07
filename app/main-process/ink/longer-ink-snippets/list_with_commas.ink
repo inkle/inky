@@ -3,7 +3,7 @@
 
 	Dependenices: 
 
-		This function relies on the pop function. 
+		This function relies on the "pop" function. 
 
 	Usage: 
 
