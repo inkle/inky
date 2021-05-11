@@ -60,13 +60,7 @@ function compile(compileInstruction, requester) {
 
     var mainInkPath = path.join(uniqueDirPath, compileInstruction.mainName);
 
-    var inklecateOptions = ["-ck"];
-
-    // JSON output
-    // (inkJs compatible build is pre-JSON integration. Remove this when it's up to date!)
-    var useJsonComm = !compileInstruction.inkJsCompatible;
-    if( useJsonComm )
-        inklecateOptions[0] += "j";
+    var inklecateOptions = ["-ckj"];
 
     if( compileInstruction.play )
         inklecateOptions[0] += "p";
@@ -171,7 +165,7 @@ function compile(compileInstruction, requester) {
             if( line.length == 0 )
                 continue;
             
-            if( useJsonComm ) {
+            
                 try {
                     var jsonResponse = JSON.parse(line);
                 } catch(err) {
@@ -266,76 +260,6 @@ function compile(compileInstruction, requester) {
                 }
 
                 continue;
-            }
-
-            // -------------
-            // EVERYTHING BELOW IS THE OLD WAY OF INTERACTING WITH INKLECATE,
-            // PRE JSON COMMUNICATION. WE SHOULD REMOVE THIS WHEN THE
-            // INKJS-COMPATIBLE VERSION OF INKLECATE IS A JSON-COMMUNICATION
-            // CAPABLE VERSION
-            // -------------
-
-            var choiceMatches = line.match(/^(\d+):\s*(.*)/);
-            var errorMatches = line.match(issueRegex);
-            var tagMatches = line.match(/^(# tags:) (.+)/);
-            var promptMatches = line.match(/^\?>/);
-            var debugSourceMatches = line.match(/^DebugSource: (line (\d+) of (.*)|Unknown source)/);
-            var endOfStoryMatches = line.match(/^--- End of story ---/);
-
-            if( errorMatches ) {
-                var errorMessage = errorMatches[5];
-                if( session.evaluatingExpression ) {
-                    requester.send('play-evaluated-expression-error', errorMessage, sessionId);
-                } else {
-                    inkErrors.push({
-                        type: errorMatches[1],
-                        filename: errorMatches[3],
-                        lineNumber: parseInt(errorMatches[4]),
-                        message: errorMessage
-                    });
-                }
-            } else if( tagMatches ) {
-                var tagsStr = tagMatches[2];
-                var tags = tagsStr.split(", ");
-                requester.send('play-generated-tags', tags, sessionId);
-            } else if( choiceMatches ) {
-                requester.send("play-generated-choice", {
-                    number: parseInt(choiceMatches[1]),
-                    text: choiceMatches[2]
-                }, sessionId);
-            } else if( promptMatches ) {
-                sendAnyErrors();
-                if( session.evaluatingExpression )
-                    session.evaluatingExpression = false;
-                else if( session.justRequestedDebugSource )
-                    session.justRequestedDebugSource = false;
-                else
-                    requester.send('play-requires-input', sessionId);
-            } else if( debugSourceMatches ) {
-                session.justRequestedDebugSource = true;
-                requester.send('return-location-from-source', sessionId, {
-                    lineNumber: parseInt(debugSourceMatches[2]),
-                    filename: debugSourceMatches[3]
-                });
-            } else if( endOfStoryMatches ) {
-                onEndOfStory();
-            } else if( line.length > 0 ) {
-
-                // If this is the first line of actual generated content,
-                // then we're ready to send any warnings or todos generated
-                // during compilation.
-                sendAnyErrors();
-
-                if (!requester.isDestroyed()) {
-                  if (session.evaluatingExpression ) {
-                      requester.send('play-evaluated-expression', line, sessionId);
-                  } else if( compileInstruction.stats ) {
-                    requester.send('return-stats', JSON.parse(text), sessionId);
-                  } else {
-                    requester.send('play-generated-text', line, sessionId);
-                  }
-                }
-            }
 
         }
 
