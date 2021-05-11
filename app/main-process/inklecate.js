@@ -166,100 +166,100 @@ function compile(compileInstruction, requester) {
                 continue;
             
             
-                try {
-                    var jsonResponse = JSON.parse(line);
-                } catch(err) {
-                    console.error("Failed to parse JSON response from inklecate: "+line);
-                    continue;
-                }
-
-                if( requester.isDestroyed() ) {
-                    break;
-                }
-
-                // Issues
-                if( jsonResponse.issues !== undefined ) {
-                    for(let issue of jsonResponse.issues) {
-                        let issueMatches = issue.match(issueRegex);
-                        let msg = issueMatches[5];
-                        if( session.evaluatingExpression ) {
-                            requester.send('play-evaluated-expression-error', msg, sessionId);
-                        } else {
-                            inkErrors.push({
-                                type: issueMatches[1],
-                                filename: issueMatches[3],
-                                lineNumber: parseInt(issueMatches[4]),
-                                message: msg
-                            });
-                        }
-                    }
-
-                    requester.send('play-generated-errors', inkErrors, sessionId);
-                    inkErrors = [];
-                }
-                
-                // Compile success?
-                else if( jsonResponse["compile-success"] !== undefined ) {
-                    // Whether true or false, it's done
-                    requester.send('compile-complete', sessionId);
-                }
-                
-                // Tags
-                else if( jsonResponse.tags !== undefined ) {
-                    requester.send('play-generated-tags', jsonResponse.tags, sessionId);
-                }
-
-                // Choices
-                else if ( jsonResponse.choices !== undefined ) {
-                    for(let i=0; i<jsonResponse.choices.length; i++) {
-                        requester.send("play-generated-choice", {
-                            number: (i+1),
-                            text: jsonResponse.choices[i]
-                        }, sessionId);
-                    }
-                }
-
-                // Input prompt
-                else if( jsonResponse.needInput ) {
-                    if( session.evaluatingExpression )
-                        session.evaluatingExpression = false;
-                    // else if( session.justRequestedDebugSource )
-                    //     session.justRequestedDebugSource = false;
-                    else
-                        requester.send('play-requires-input', sessionId);
-                }
-                
-                // DebugSource and expression result
-                else if( jsonResponse.cmdOutput !== undefined ) {
-
-                    let debugSourceMatches = jsonResponse.cmdOutput.match(debugSourceRegex);
-                    if( debugSourceMatches ) {
-                        // session.justRequestedDebugSource = true;
-                        requester.send('return-location-from-source', sessionId, {
-                            lineNumber: parseInt(debugSourceMatches[2]),
-                            filename: debugSourceMatches[3]
-                        });
-                    } else if( session.evaluatingExpression ) {
-                        requester.send('play-evaluated-expression', jsonResponse.cmdOutput, sessionId);
-                    }
-                }
-                
-                // Story text
-                else if( jsonResponse.text !== undefined ) {
-                    requester.send('play-generated-text', jsonResponse.text, sessionId);
-                }
-                
-                // End of story, but keep process running for debug source lookups
-                else if( jsonResponse.end ) {
-                    onEndOfStory();
-                }
-                
-                // Stats
-                else if( jsonResponse.stats ) {
-                    requester.send('return-stats', jsonResponse.stats, sessionId);
-                }
-
+            try {
+                var jsonResponse = JSON.parse(line);
+            } catch(err) {
+                console.error("Failed to parse JSON response from inklecate: "+line);
                 continue;
+            }
+
+            if( requester.isDestroyed() ) {
+                break;
+            }
+
+            // Issues
+            if( jsonResponse.issues !== undefined ) {
+                for(let issue of jsonResponse.issues) {
+                    let issueMatches = issue.match(issueRegex);
+                    let msg = issueMatches[5];
+                    if( session.evaluatingExpression ) {
+                        requester.send('play-evaluated-expression-error', msg, sessionId);
+                    } else {
+                        inkErrors.push({
+                            type: issueMatches[1],
+                            filename: issueMatches[3],
+                            lineNumber: parseInt(issueMatches[4]),
+                            message: msg
+                        });
+                    }
+                }
+
+                requester.send('play-generated-errors', inkErrors, sessionId);
+                inkErrors = [];
+            }
+            
+            // Compile success?
+            else if( jsonResponse["compile-success"] !== undefined ) {
+                // Whether true or false, it's done
+                requester.send('compile-complete', sessionId);
+            }
+            
+            // Tags
+            else if( jsonResponse.tags !== undefined ) {
+                requester.send('play-generated-tags', jsonResponse.tags, sessionId);
+            }
+
+            // Choices
+            else if ( jsonResponse.choices !== undefined ) {
+                for(let i=0; i<jsonResponse.choices.length; i++) {
+                    requester.send("play-generated-choice", {
+                        number: (i+1),
+                        text: jsonResponse.choices[i]
+                    }, sessionId);
+                }
+            }
+
+            // Input prompt
+            else if( jsonResponse.needInput ) {
+                if( session.evaluatingExpression )
+                    session.evaluatingExpression = false;
+                // else if( session.justRequestedDebugSource )
+                //     session.justRequestedDebugSource = false;
+                else
+                    requester.send('play-requires-input', sessionId);
+            }
+            
+            // DebugSource and expression result
+            else if( jsonResponse.cmdOutput !== undefined ) {
+
+                let debugSourceMatches = jsonResponse.cmdOutput.match(debugSourceRegex);
+                if( debugSourceMatches ) {
+                    // session.justRequestedDebugSource = true;
+                    requester.send('return-location-from-source', sessionId, {
+                        lineNumber: parseInt(debugSourceMatches[2]),
+                        filename: debugSourceMatches[3]
+                    });
+                } else if( session.evaluatingExpression ) {
+                    requester.send('play-evaluated-expression', jsonResponse.cmdOutput, sessionId);
+                }
+            }
+            
+            // Story text
+            else if( jsonResponse.text !== undefined ) {
+                requester.send('play-generated-text', jsonResponse.text, sessionId);
+            }
+            
+            // End of story, but keep process running for debug source lookups
+            else if( jsonResponse.end ) {
+                onEndOfStory();
+            }
+            
+            // Stats
+            else if( jsonResponse.stats ) {
+                requester.send('return-stats', jsonResponse.stats, sessionId);
+            }
+
+            continue;
 
         }
 
