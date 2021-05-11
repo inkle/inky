@@ -147,13 +147,22 @@ function compile(compileInstruction, requester) {
     var issueRegex = /^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?line (\d+): (.*)/;
     var debugSourceRegex = /^DebugSource: (line (\d+) of (.*)|Unknown source)/;
 
+    var stdoutTextBuffer = "";
     playProcess.stdout.on('data', (text) => {
 
         // Strip Byte order mark
         text = text.replace(/^\uFEFF/, '');
         if( text.length == 0 ) return;
 
-        var lines = text.split('\n');
+        stdoutTextBuffer += text;
+        // end of transmission should always be a \n or }
+        // if not, wait for more data.
+        if(!["\n", "}"].includes(stdoutTextBuffer.substr(-1))){
+            return;
+        }
+
+        var lines = stdoutTextBuffer.split('\n');
+        stdoutTextBuffer = ""; //we have enough : clear the buffer.
 
         for(var i=0; i<lines.length; ++i) {
             var line = lines[i].trim();
