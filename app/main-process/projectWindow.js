@@ -25,6 +25,10 @@ const recentFilesPath = path.join(electron.app.getPath("userData"), "recent-file
 
 let onRecentFilesChanged = null;
 
+const veiwSettingsPath = path.join(electron.app.getPath("userData"), "view-settings.json");
+
+let onViewSettingsChanged = null;
+
 function ProjectWindow(filePath) {
     const getThemeFromMenu = () => Menu.getApplicationMenu().items.find(
         e => e.label.toLowerCase() === 'view'
@@ -193,6 +197,35 @@ ProjectWindow.open = function(filePath) {
         return new ProjectWindow(filePath);
     }
 }
+
+ProjectWindow.setViewSettingsChanged = function(f) {
+    onViewSettingsChanged = f;
+}
+
+ProjectWindow.getViewSettings = function() {
+    if(!fs.existsSync(veiwSettingsPath)) {
+        return { theme:'light', zoom:'100' };
+    }
+    const json = fs.readFileSync(veiwSettingsPath, "utf-8");
+    try {
+        return JSON.parse(json);
+    } catch(e) {
+        console.error('Error in view settings JSON parsing:', e);
+        return { theme:'light', zoom:'100' };
+    }
+}
+
+ProjectWindow.addOrChangeViewSetting = function(name, data){
+    const viewSettings = ProjectWindow.getViewSettings();
+    viewSettings[name] = data;
+    fs.writeFileSync(veiwSettingsPath, JSON.stringify(viewSettings), {
+        encoding: "utf-8"
+    });
+    if(onViewSettingsChanged) {
+        onViewSettingsChanged(viewSettings);
+    }
+}
+
 
 ipc.on("main-file-saved", (_, filePath) => {
     addRecentFile(filePath);
