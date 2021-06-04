@@ -10,7 +10,8 @@ const i18n = require('./i18n/i18n.js');
 
 function setupMenus(callbacks) {
     let themes = [];
-    const defaultTheme = 'light';
+    //Grab the default theme from storage
+    const defaultTheme = ProjectWindow.getViewSettings().theme;
     for (const theme of ['light', 'dark', 'contrast', 'focus']) {
         themes.push({
             label: theme.substring(0, 1).toUpperCase() + theme.substring(1),
@@ -33,7 +34,8 @@ function setupMenus(callbacks) {
     }
     
     let zoom_percents = [];
-    const defaultZoom = '100%';
+    //Grab the default zoom from storage
+    const defaultZoom = ProjectWindow.getViewSettings().zoom + '%';
     for (const zoom_percent of ['50%', '75%', '100%', '125%', '150%', '175%', '200%', '250%', '300%']) {
         zoom_percents.push({
             label: zoom_percent.substring(0, 4),

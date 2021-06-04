@@ -29,7 +29,8 @@ app.on('will-finish-launching', function () {
 });
 
 let isQuitting = false;
-let theme = "light";
+let theme = ProjectWindow.getViewSettings().theme;
+let zoom = ProjectWindow.getViewSettings().zoom;
 
 app.on('before-quit', function () {
     // We need this to differentiate between pressing quit (which should quit) or closing all windows
@@ -111,18 +112,26 @@ app.on('ready', function () {
           var win = ProjectWindow.focused();
           if (win != null) {
             win.zoom(2);
+            //Convert change from font size to zoom percentage
+            zoom = (parseInt(zoom) + Math.floor(2*100/12)).toString();
+            ProjectWindow.addOrChangeViewSetting('zoom', zoom);
           }
         },
         zoomOut: () => {
           var win = ProjectWindow.focused();
           if (win != null) {
             win.zoom(-2);
+            //Convert change from font size to zoom percentage
+            zoom = (parseInt(zoom) - Math.floor(2*100/12)).toString();
+            ProjectWindow.addOrChangeViewSetting('zoom', zoom);
           }
         },
         zoom: (zoom_percent) => {
           var win = ProjectWindow.focused();
           if (win != null) {
             win.zoom(zoom_percent);
+            zoom = zoom_percent.toString();
+            ProjectWindow.addOrChangeViewSetting('zoom', zoom)
           }
         },
         insertSnippet: (focussedWindow, snippet) => {
@@ -133,6 +142,7 @@ app.on('ready', function () {
           theme = newTheme;
           AboutWindow.changeTheme(newTheme);
           DocumentationWindow.changeTheme(newTheme);
+          ProjectWindow.addOrChangeViewSetting('theme', newTheme)
         }
     });
 
@@ -142,15 +152,29 @@ app.on('ready', function () {
             var arg = process.argv[i].toLowerCase();
             if (arg.endsWith(".ink")) {
                 var fileToOpen = process.argv[1];
-                ProjectWindow.open(fileToOpen);
+                var w = ProjectWindow.open(fileToOpen);
                 openedSpecificFile = true;
+                //Setup last stored zoom
+                if(w) {
+                    w.browserWindow.webContents.once('dom-ready', () => {
+                        ProjectWindow.focused().zoom(zoom);
+                    });
+                }
                 break;
             }
         }
     }
     if (!openedSpecificFile) {
         var w = ProjectWindow.createEmpty();
+        //Setup last stored zoom
+        w.browserWindow.webContents.once('dom-ready', () => {
+            ProjectWindow.focused().zoom(zoom);
+        });
     }
+
+    //Setup last stored theme
+    AboutWindow.changeTheme(theme);
+    DocumentationWindow.changeTheme(theme);
 
     // Debug
     //w.openDevTools();
