@@ -52,7 +52,7 @@ var inkHighlightRules = function() {
             ]
         }],
         "#choice": [{
-            regex: /(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
+            regex: /^(\s*)((?:[\*\+]\s?)+)(\s*)(?:(\(\s*)(\w+)(\s*\)))?/,
             token: [
                 "choice",                           // whitespace
                 "choice.bullets",                   // * or +
@@ -80,7 +80,13 @@ var inkHighlightRules = function() {
                     defaultToken: "choice.weaveInsideBrackets" 
                 }]
             }, {
+                include: "#choice"
+            }, {
+                include: "#gather"
+            }, {
                 include: "#mixedContent"
+            }, {
+                include: "#comments"
             }, {
                 defaultToken: "choice"
             }]
@@ -212,6 +218,8 @@ var inkHighlightRules = function() {
                 next: "pop"
             }, {
                 include: "#escapes"
+            }, {
+                include: "#gather"
             }, {
                 include: "#comments"
             }, {
