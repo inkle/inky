@@ -237,6 +237,10 @@ exports.snippets = [
         categoryName: "Full stories",
         snippets: [
             {
+                name: "Pontoon Game (from Overboard!)",
+                ink: loadLongerSnippet("pontoon_example.ink")
+            },
+            {
                 name: "The Intercept",
                 ink: loadLongerSnippet("theintercept.ink")
             }
