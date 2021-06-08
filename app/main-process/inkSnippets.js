@@ -142,6 +142,39 @@ exports.snippets = [
     {separator: true},
 
     //-------------------
+    // LIST FUNCTIONS
+    //-------------------
+    {
+        categoryName: "List-handling",
+        snippets: [
+            {
+                name: "List: pop",
+                ink:  loadLongerSnippet("list_pop.ink") 
+            },
+            {
+                name: "List: pop_random",
+                ink:  loadLongerSnippet("list_pop_random.ink") 
+            },
+            {
+                name: "List: list_item_is_member_of",
+                ink:  loadLongerSnippet("list_item_is_member_of.ink") 
+            },
+            {
+                name: "List: list_random_subset",
+                ink:  loadLongerSnippet("list_random_subset.ink") 
+            },
+            {
+                name: "List: list_random_subset_of_size",
+                ink:  loadLongerSnippet("list_random_subset_of_size.ink") 
+            },
+            {
+                name: "List: string_to_list",
+                ink:  loadLongerSnippet("string_to_list.ink") 
+            }
+        ]
+    },
+
+    //-------------------
     // USEFUL FUNCTIONS
     //-------------------
 
@@ -172,27 +205,6 @@ exports.snippets = [
             {
                 name: "Flow: thread_in_tunnel",
                 ink:  loadLongerSnippet("thread_in_tunnel.ink") 
-            },
-            {separator: true},
-            {
-                name: "List: pop",
-                ink:  loadLongerSnippet("list_pop.ink") 
-            },
-            {
-                name: "List: pop_random",
-                ink:  loadLongerSnippet("list_pop_random.ink") 
-            },
-            {
-                name: "List: list_random_subset",
-                ink:  loadLongerSnippet("list_random_subset.ink") 
-            },
-            {
-                name: "List: list_random_subset_of_size",
-                ink:  loadLongerSnippet("list_random_subset_of_size.ink") 
-            },
-            {
-                name: "List: string_to_list",
-                ink:  loadLongerSnippet("string_to_list.ink") 
             },
             {separator: true},
             {
