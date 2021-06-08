@@ -11,17 +11,17 @@
 {
     - x >= 1000000:
         ~ temp k = x mod 1000000
-        {print_num((x - k) / 1000000)} million{ k > 0:{k < 100: and|{x mod 100 != 0:<>,}} {print_num(k)}}
+        {print_number((x - k) / 1000000)} million{ k > 0:{k < 100: and|{x mod 100 != 0:<>,}} {print_number(k)}}
     - x >= 1000:
         ~ temp y = x mod 1000
-        {print_num((x - y) / 1000)} thousand{ y > 0:{y < 100: and|{x mod 100 != 0:<>,}} {print_num(y)}}
+        {print_number((x - y) / 1000)} thousand{ y > 0:{y < 100: and|{x mod 100 != 0:<>,}} {print_number(y)}}
     - x >= 100:
         ~ temp z = x mod 100
-        {print_num((x - z) / 100)} hundred {z > 0:and {print_num(z)}}
+        {print_number((x - z) / 100)} hundred {z > 0:and {print_number(z)}}
     - x == 0:
         zero
     - x < 0: 
-        minus {print_num(-1 * x)}
+        minus {print_number(-1 * x)}
     - else:
         { x >= 20:
             { x / 10:
