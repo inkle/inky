@@ -139,6 +139,27 @@ exports.snippets = [
         ]
     },
 
+    //-------------------
+    // COMMENTS
+    //-------------------
+    {
+        categoryName: "Comments",
+        snippets: [
+            {
+                name: "Single-line comment",
+                ink: "// This line is a comment.\n"
+            }, 
+            {
+                name: "Block comment",
+                ink: "/* ---------------------------------\n"+
+                     "\n" +
+                     "   This whole section is a comment \n"+
+                     "\n" +
+                     " ----------------------------------*/\n"
+            }
+        ]
+    },
+
     {separator: true},
 
     //-------------------
