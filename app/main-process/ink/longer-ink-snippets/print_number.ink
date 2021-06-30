@@ -1,13 +1,16 @@
 /*
-    Converts an integer between -1,000,000,000 and 1,000,000,000 into its printed equivalent.
+    Converts a number between -1,000,000,000 and 1,000,000,000 into its printed (integer) equivalent.
 
     Usage: 
 
     There are {print_number(RANDOM(100000,10000000))} stars in the sky.
 
+    Pi is roughly {print_number(3.1417)}.
+
 */
 
 === function print_number(x) 
+~ x = INT(x) // cast to an int, since this function can only handle ints!
 {
     - x >= 1000000:
         ~ temp k = x mod 1000000

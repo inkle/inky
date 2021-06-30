@@ -1,4 +1,15 @@
 
+/*
+
+    This is a simplified version of the pontoon game from Overboard! 
+
+    A deck of cards is properly simulated and dealt. The player can then bet on additional cards, before the AI characters (Carstairs, an English gentleman and card shark) will play.
+
+    In the real game (www.inklestudios.com/overboard) conversation options are added between hands, and there a few other more nefarious strategies for tilting the game in your favour!
+
+*/
+
+
 -> play_game -> END 
 
 /* ---------------------------------------------
