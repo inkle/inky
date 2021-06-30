@@ -10,6 +10,10 @@ const inkyPathsByPlatform = {
   "win32": "../Inky-win32-x64/Inky.exe"
 };
 
+const app = new Application({
+  path: inkyPathsByPlatform[process.platform]
+})
+
 chai.should();
 chai.use(chaiAsPromised);
 
@@ -17,66 +21,76 @@ describe('application launch tests', function () {
   this.timeout(10000)
 
   beforeEach(function () {
-    this.app = new Application({
-      path: inkyPathsByPlatform[process.platform]
-    })
-    return this.app.start().then(function (app) {
-        chaiAsPromised.transferPromiseness = app.transferPromiseness;
-        return app;
-    });
+    chaiAsPromised.transferPromiseness = app.transferPromiseness;
+    return app.start();
   })
 
   afterEach(function () {
-    if (this.app && this.app.isRunning()) {
-      return this.app.stop()
+    if (app && app.isRunning()) {
+      app.mainProcess.exit(0);
     }
   })
 
   it('shows an initial window', function () {
-    return this.app.client.getWindowCount().then(function (count) {
-      assert.equal(count, 1)
-    })
+    return app.client
+      .getWindowCount()
+      .should.eventually.equal(1);
   })
 
   it('reads the title', function () {
     const title = "Untitled.ink";
-    return this.app.client.getText('.title')
+
+    return app.client
+      .getHTML('.title', false)
       .should.eventually.equal(title);
   })
 
   it('opens the menu', function () {
-    return this.app.client.click('.icon-menu')
-      .element('.sidebar')
-      .should.eventually.exist
+    const cssPropValue = "block";
+
+    return app.client
+      .click('.icon-menu')
+      .getCssProperty('.sidebar','display').then(function (property){
+        return property.value;
+    }).should.eventually.equal(cssPropValue);
   })
+
 })
 
 describe('compiles hello world game', function () {
   this.timeout(10000)
 
   beforeEach(function () {
-    this.app = new Application({
-      path: inkyPathsByPlatform[process.platform]
-    })
-    return this.app.start().then(function (app) {
-        chaiAsPromised.transferPromiseness = app.transferPromiseness;
-        return app;
+    chaiAsPromised.transferPromiseness = app.transferPromiseness;
+    return app.start().then(function () {
+
+      // A bug with setValue() means it doesn't properly clear the element
+      // hence the element is cleared by simulating pressing the delete key
+
+      for (let i = 0; i < 125; i++) { 
+        app.client.setValue('.ace_text-input', "\ue017").pause(50); 
+      };
+
+      return app.client.setValue('.ace_text-input', "\ue017");
     });
   })
 
   afterEach(function () {
-    if (this.app && this.app.isRunning()) {
-      return this.app.stop()
+    if (app && app.isRunning()) {
+      app.mainProcess.exit(0);
     }
   })
 
   it('writes and reads hello world', function () {
     const input = "Hello World!";
-    return this.app.client
+
+    return app.client
       .setValue('.ace_text-input', input)
       .pause(2000)
-      .getText('.storyText')
-      .should.eventually.equal(input)
+      .getText('.storyText:nth-of-type(1)').then(function(value){
+        return value.join('');
+      })
+      .should.eventually.equal(input);
   })
 
   it('writes and selects a choice', function () {
@@ -84,7 +98,7 @@ describe('compiles hello world game', function () {
     const resultChoice = "Hello back";
     const resultAnswer = "Nice to hear from you!";
 
-    return this.app.client
+    return app.client
       .setValue('.ace_text-input', input)
       .pause(2000)
       .click('.choice')
@@ -99,19 +113,19 @@ describe('compiles hello world game', function () {
     const input = "Hello World! \n * [Hello back] \n Nice to hear from you! \n -> END";
     const resultAnswer = "Nice to hear from you!";
 
-    return this.app.client
+    return app.client
       .setValue('.ace_text-input', input)
       .pause(2000)
       .click('.choice')
       .pause(2000)
-      .getText('.storyText:nth-of-type(2)')
-      .should.eventually.equal(resultAnswer)
+      .getText('.storyText:nth-of-type(3)')
+      .should.eventually.equal(resultAnswer);
   })
 
   it('shows TODOs', function() {
     const input = "-\n * Rock\n * Paper\n * Scissors\nTODO: Make this more interesting"
 
-    return this.app.client
+    return app.client
       .setValue('.ace_text-input', input)
       .pause(2000)
       .getText('.issuesMessage')
