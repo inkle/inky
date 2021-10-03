@@ -25,19 +25,36 @@ catch(e) {
 }
 
 var tempInkPath;
-const tmpDir = os.tmpdir();
-fs.mkdtemp(`${tmpDir}${path.sep}inky_compile_`, (err, folder) => {
-    if (err) {
-        throw new Error(err);
-    }
 
-    tempInkPath = folder;
-})
+function setUp() {
+    const tmpDir = os.tmpdir();
+    fs.mkdtemp(`${tmpDir}${path.sep}inky_compile_`, (err, folder) => {
+        if (err) {
+            throw new Error(err);
+        }
+
+        tempInkPath = folder;
+    })
+}
+
+function tearDown() {
+    if (tempInkPath) {
+        try {
+            // only available from node version 14.14
+            fs.rmSync(tempInkPath, {recursive: true, force: true});
+        } catch (err) {
+            console.error(`Failed to delete temporary directory ${tempInkPath}: ${err}`);
+        }
+    }
+}
 
 var sessions = {};
 
 
 function compile(compileInstruction, requester) {
+    if (!tempInkPath) {
+        throw new Error("Temporary directory not initialized");
+    }
 
     var sessionId = compileInstruction.sessionId;
 
@@ -358,5 +375,7 @@ ipc.on("get-runtime-path-in-source", (event, runtimePath, sessionId) => {
 
 
 exports.Inklecate = {
-    killSessions: killSessions
+    setUp,
+    tearDown,
+    killSessions
 }
