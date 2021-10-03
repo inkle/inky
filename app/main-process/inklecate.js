@@ -1,6 +1,7 @@
 const child_process = require('child_process');
 const spawn = child_process.spawn;
 const fs = require('fs');
+const os = require('os');
 const path = require("path");
 const electron = require('electron');
 const ipc = electron.ipcMain;
@@ -24,11 +25,14 @@ catch(e) {
 }
 
 var tempInkPath;
-if (process.platform == "darwin" || process.platform == "linux") {
-    tempInkPath = process.env.TMPDIR ? path.join(process.env.TMPDIR, "inky_compile") : "/tmp/inky_compile";
-} else {
-    tempInkPath = path.join(process.env.temp, "inky_compile")
-}
+const tmpDir = os.tmpdir();
+fs.mkdtemp(`${tmpDir}${path.sep}inky_compile_`, (err, folder) => {
+    if (err) {
+        throw new Error(err);
+    }
+
+    tempInkPath = folder;
+})
 
 var sessions = {};
 
