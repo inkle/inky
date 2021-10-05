@@ -6,6 +6,7 @@ const path = require("path");
 const electron = require('electron');
 const ipc = electron.ipcMain;
 const mkdirp = require('mkdirp');
+const del = require('del');
 
 // inklecate is packaged outside of the main asar bundle since it's executable
 const inklecateNames = {
@@ -40,8 +41,7 @@ function setUp() {
 function tearDown() {
     if (tempInkPath) {
         try {
-            // only available from node version 14.14
-            fs.rmSync(tempInkPath, {recursive: true, force: true});
+            del.sync(tempInkPath, {force: true});
         } catch (err) {
             console.error(`Failed to delete temporary directory ${tempInkPath}: ${err}`);
         }
