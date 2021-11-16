@@ -135,6 +135,13 @@ img {
     max-width: 100%;
 }
 
+.tag-input {
+    background: white;
+    color: #888;
+    border: 1px solid #888;
+    font-size: 13pt;
+}
+
 .container .hide {
     opacity: 0.0;
 }
@@ -260,3 +267,12 @@ body.dark {
 .dark #controls {
     background: black;
 }
+
+.dark .tag-input {
+    background: black;
+}
+
+
+
+
+

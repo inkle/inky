@@ -129,6 +129,7 @@
                 else if( tag == "CLEAR" || tag == "RESTART" ) {
                     removeAll("p");
                     removeAll("img");
+                    removeAll(".tag-input");
 
                     // Comment out this line if you want to leave the header visible when clearing
                     setVisible(".header", false);
@@ -138,6 +139,60 @@
                         return;
                     }
                 }
+
+                //INPUT: shows a simple text input field
+                else if( splitTag && splitTag.property == "INPUT" ) {
+                    let list = splitTag.val.split(" ").map(n => n.trim()).filter(n => n);
+                    let var_name = list[0];
+                    let capsMode, trimMode, focusMode, unlimitedMode, liveMode, disabledMode;
+                    for (let i = 1; i < list.length; i++) {
+                        let item = list[i]
+                        if (item === "UPPERCASE") {
+                            capsMode = "UPPERCASE";
+                        } else if (item === "LOWERCASE") {
+                            capsMode = "LOWERCASE";
+                        } else if ( item === "CAPITALIZE" || item === "CAPITALISE" ) {
+                            capsMode = "CAPITALIZE"
+                        } else if (item === "TRIM") {
+                            trimMode = true;
+                        } else if (item === "FOCUS") {
+                            focusMode = true;
+                        } else if (item === "UNLIMITED") {
+                            unlimitedMode = true
+                        } else if (item === "LIVE") {
+                            liveMode = true
+                        } else if (item === "DISABLED") {
+                            disabledMode = true
+                        }
+                    }
+                    let inputElement = document.createElement('input');
+                    inputElement.classList.add("tag-input");
+                    inputElement.value = story.variablesState[var_name];
+                    if (!unlimitedMode) inputElement.maxLength = 24;
+                    if (disabledMode) inputElement.disabled = true;
+                    storyContainer.appendChild(inputElement);
+                    if (focusMode) inputElement.focus();
+                    showAfter(delay, inputElement);
+                    delay += 200.0;
+                    inputElement.addEventListener("input", () => {
+                        let val = inputElement.value;
+                        if (trimMode) val = val.trim();
+                        if (capsMode === "UPPERCASE") {
+                            val = val.toUpperCase();
+                        } else if (capsMode === "LOWERCASE") {
+                            val = val.toLowerCase();
+                        } else if (capsMode === "CAPITALIZE") {
+                            val = val.substr(0, 1).toUpperCase() +
+                                val.substr(1).toLowerCase();
+                        }
+                        if (liveMode) inputElement.value = val
+                        /* prevent HTML injection: */
+                        val = val.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        story.variablesState[var_name] = val;
+                    })
+                }
+
+
             }
 
             // Create paragraph element (initially hidden)
@@ -176,6 +231,9 @@
 
                 // Remove all existing choices
                 removeAll(".choice");
+
+                //Remove all input fields:
+                removeAll(".tag-input");
 
                 // Tell the story where to go next
                 story.ChooseChoiceIndex(choice.index);
@@ -337,6 +395,8 @@
         if (rewindEl) rewindEl.addEventListener("click", function(event) {
             removeAll("p");
             removeAll("img");
+            removeAll(".tag-input");
+
             setVisible(".header", false);
             restart();
         });
@@ -363,6 +423,9 @@
 
             removeAll("p");
             removeAll("img");
+            removeAll(".tag-input");
+
+
             try {
                 let savedState = window.localStorage.getItem('save-state');
                 if (savedState) story.state.LoadJson(savedState);
