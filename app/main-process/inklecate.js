@@ -138,7 +138,7 @@ function compile(compileInstruction, requester) {
         }
     }
 
-    var issueRegex = /^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?line (\d+): (.*)/;
+    var issueRegex = /^(ERROR|WARNING|RUNTIME ERROR|RUNTIME WARNING|TODO): ('([^']+)' )?(line (\d+):)?(.*)/;
     var debugSourceRegex = /^DebugSource: (line (\d+) of (.*)|Unknown source)/;
 
     var stdoutTextBuffer = "";
@@ -181,14 +181,23 @@ function compile(compileInstruction, requester) {
             if( jsonResponse.issues !== undefined ) {
                 for(let issue of jsonResponse.issues) {
                     let issueMatches = issue.match(issueRegex);
-                    let msg = issueMatches[5];
+                    if(issueMatches === null){ //falback if regexp fails
+                        inkErrors.push({
+                            type: "RUNTIME ERROR",
+                            filename: "",
+                            lineNumber: 0,
+                            message: issue
+                        });
+                        continue;
+                    }
+                    let msg = issueMatches[6].trim();
                     if( session.evaluatingExpression ) {
                         requester.send('play-evaluated-expression-error', msg, sessionId);
                     } else {
                         inkErrors.push({
                             type: issueMatches[1],
                             filename: issueMatches[3],
-                            lineNumber: parseInt(issueMatches[4]),
+                            lineNumber: parseInt(issueMatches[5] || 0),
                             message: msg
                         });
                     }
