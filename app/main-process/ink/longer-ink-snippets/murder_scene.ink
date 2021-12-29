@@ -68,14 +68,12 @@ VAR knowledgeState = ()
       ~ temp chain = LIST_ALL(x)
       ~ temp statesGained = LIST_RANGE(chain, LIST_MIN(chain), x)
       ~ knowledgeState += statesGained
-      ~ reach (statesToSet)     // set any other states left
-      ~ return true         // and we set this state, so true
+      ~ reach (statesToSet)     // set any other states left to set
+      ~ return true            // and we set this state, so true
  
     - else:
       ~ return false || reach(statesToSet) 
-    }
-
-
+    }   
 
 //
 // Set up the game
@@ -96,6 +94,7 @@ LIST BedKnowledge = neatly_made, crumpled_duvet, hastily_remade, body_on_bed, mu
 LIST KnifeKnowledge = prints_on_knife, joe_seen_prints_on_knife,joe_wants_better_prints, joe_got_better_prints
 
 LIST WindowKnowledge = steam_on_glass, fingerprints_on_glass, fingerprints_on_glass_match_knife
+
 
 //
 // Content
@@ -126,7 +125,7 @@ LIST WindowKnowledge = steam_on_glass, fingerprints_on_glass, fingerprints_on_gl
                 ~ BedState = bloodstain_visible
                 ~ reach (body_on_bed)
                 Either the body had been moved here before being dragged to the floor - or this is was where the murder had taken place.
-        * *     {!(BedState ? made_up)} [ Remake the bed ]
+        * *     {BedState !? made_up} [ Remake the bed ]
                 Carefully, I pulled the bedsheets back into place, trying to make it seem undisturbed.
                 ~ BedState = made_up
         * *     [Test the bed]
@@ -264,7 +263,6 @@ LIST WindowKnowledge = steam_on_glass, fingerprints_on_glass, fingerprints_on_gl
         ~ reach (fingerprints_on_glass_match_knife)
         -> backto
 
-
 = see_prints_on_glass
     ~ reach (fingerprints_on_glass)
     {But I could see a few fingerprints, as though someone hadpressed their palm against it.|The fingerprints were quite clear and well-formed.} They faded as I watched.
@@ -272,10 +270,10 @@ LIST WindowKnowledge = steam_on_glass, fingerprints_on_glass, fingerprints_on_gl
     ->->
 
 = seen_light
-    *   {!(bedroomLightState ? on)} [ Turn on lamp ]
+    *   {bedroomLightState !? on} [ Turn on lamp ]
         -> operate_lamp ->
 
-    *   { !(bedroomLightState ? on_bed)  && BedState ? bloodstain_visible }
+    *   { bedroomLightState !? on_bed  && BedState ? bloodstain_visible }
         [ Move the light to the bed ]
         ~ move_to_supporter(bedroomLightState, on_bed)
 
@@ -283,11 +281,11 @@ LIST WindowKnowledge = steam_on_glass, fingerprints_on_glass, fingerprints_on_gl
         There was no doubt about it. This was where the blow had been struck.
         ~ reach (murdered_in_bed)
 
-    *   { !(bedroomLightState ? on_desk) } {TURNS_SINCE(-> floorit) >= 2 }
+    *   { bedroomLightState !? on_desk } {TURNS_SINCE(-> floorit) >= 2 }
         [ Move the light back to the desk ]
         ~ move_to_supporter(bedroomLightState, on_desk)
         I moved the light back to the desk, setting it down where it had originally been.
-    *   (floorit) { !(bedroomLightState ? on_floor) && darkunder }
+    *   (floorit) { bedroomLightState !? on_floor && darkunder }
         [Move the light to the floor ]
         ~ move_to_supporter(bedroomLightState, on_floor)
         I picked the light up and set it down on the floor.
@@ -350,4 +348,5 @@ LIST WindowKnowledge = steam_on_glass, fingerprints_on_glass, fingerprints_on_gl
         <> 'Not much to go on.'
     }
     -> END
+
 
