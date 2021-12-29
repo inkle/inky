@@ -15,7 +15,7 @@ const mkdirp = require('../app/node_modules/mkdirp');
 //    It can happen that multiple '-' are directly following each other. In this case the last three entrys
 //    replaced these with one '-'.
 
-var characters = ['#x', '?x-', '>x', '<x', ')x-', '(x-', ':x', ' x-', '.x', '/x-', "'x-", '`x-', '--x-', '--x-', '--x-', '--x-', '--x-', '--x-'];
+var characters = ['#x', '?x-', '>x', '<x', ')x-', '(x-', ':x', ' x-', '.x', '/x-', "'x-", '`x-', '--x-', '--x-', '--x-', '--x-', '--x-', '--x-', '"x'];
 
 function initializeNavigation() {
     fs.readFile('../app/resources/Documentation/documentationWindowPrefab.html', 'utf8', function (firstErr, html) {
@@ -52,7 +52,7 @@ function initializeNavigation() {
 
                 var headlineType;
                 headlineType = 'h' + numberOfOccurrences(line, '#', false);
-                output = output + ' ' + '<li><a id="#' + id + '"onclick="openPath(this.id)" class="nav-' + headlineType + '">' + headline + '</a></li>\n';
+                output = output + ' ' + '<li><a id="#' + id + ' "onclick="openPath(this.id)" class="nav-' + headlineType + '">' + headline + '</a></li>\n';
 
             }
             output = output + originalFile[1];
