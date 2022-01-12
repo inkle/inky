@@ -248,6 +248,7 @@ function setupMenus(callbacks) {
                 },
                 {
                         label: i18n._('Word count and more'),
+                        accelerator: 'CmdOrCtrl+Shift+C',
                         enabled: callbacks.isFocusedWindow,
                         click: callbacks.stats
                 }
