@@ -310,6 +310,7 @@ function setupMenus(callbacks) {
             submenu: [
                 {
                     label: i18n._('Show Documentation'),
+                    accelerator: 'F1',
                     click: callbacks.showDocs
                 },
             ]
