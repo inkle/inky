@@ -82,7 +82,7 @@ function setupMenus(callbacks) {
 
     const template = [
         {
-            label: i18n._('File'),
+            label: i18n._('&File'),
             submenu: [
                 {
                     label: i18n._('New Project'),
@@ -147,7 +147,7 @@ function setupMenus(callbacks) {
             ]
         },
         {
-            label: i18n._('Edit'),
+            label: i18n._('&Edit'),
             submenu: [
                 {
                     label: i18n._('Undo'),
@@ -193,7 +193,7 @@ function setupMenus(callbacks) {
             ]
         },
         {
-            label: i18n._("View"),
+            label: i18n._("&View"),
             submenu: [
                 {
                     label: i18n._('Toggle Full Screen'),
@@ -224,7 +224,7 @@ function setupMenus(callbacks) {
             ]
         },
         {
-            label: i18n._('Story'),
+            label: i18n._('&Story'),
             submenu: [
                 {
                     label: i18n._('Go to anything...'),
@@ -254,12 +254,12 @@ function setupMenus(callbacks) {
             ]
         },
         {
-            label: i18n._('Ink'),
+            label: i18n._('&Ink'),
             submenu: inkSubMenu
         },
         
         {
-            label: i18n._('Window'),
+            label: i18n._('&Window'),
             role: 'window',
             submenu: [
                 {
@@ -304,7 +304,7 @@ function setupMenus(callbacks) {
             ]
         },
         {
-            label: i18n._('Help'),
+            label: i18n._('&Help'),
             role: 'help',
             submenu: [
                 {
