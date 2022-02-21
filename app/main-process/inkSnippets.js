@@ -207,6 +207,33 @@ exports.snippets = [
                 ink:  loadLongerSnippet("maybe.ink") 
             },
             {separator: true},
+
+            {
+                name: "Mathematics: abs",
+                ink: "/* ---------------------------------\n"+
+                     "\n" +
+                     "   This whole section is a comment \n"+
+                     "\n" +
+                     " ----------------------------------*/\n"
+            },
+            {
+                name: "Mathematics: divisor",
+                ink: "=== function divisor(x, n)\n" +
+                      "~ return (x - x mod n) / n"
+            },
+            {
+                name: "Mathematics: abs",
+                ink: "=== function abs(x)\n" +
+                      "{ x < 0:\n" + 
+                      "      ~ return -1 * x\n" +
+                      "  - else: \n" +
+                      "      ~ return x\n" + 
+                      "}"
+            },
+            {separator: true},
+            
+
+
             {
                 name: "Flow: came_from",
                 ink:  loadLongerSnippet("came_from.ink") 
@@ -261,6 +288,10 @@ exports.snippets = [
                 name: "Crime Scene (from Writing with Ink)",
                 ink: loadLongerSnippet("murder_scene.ink")
             },
+            {
+                name: "Swindlestones (from Sorcery!)",
+                ink: loadLongerSnippet("swindlestones.ink")
+            },  
             {
                 name: "Pontoon Game (from Overboard!)",
                 ink: loadLongerSnippet("pontoon_example.ink")
