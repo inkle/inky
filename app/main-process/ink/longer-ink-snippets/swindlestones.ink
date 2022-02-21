@@ -593,12 +593,6 @@ VAR whatDiceDoWeThinkYouHave = ()
             -> makebet 
             
         
-        ~ newBet += pop(bets)
-        ~ newBet += pop(bets)
-        ~ newBet += pop(bets)
-        
-        ~ newBet = LIST_RANDOM(newBet)
-        
         
     
     -   // ensure we only have a single bet
