@@ -204,6 +204,9 @@ ProjectWindow.setViewSettingsChanged = function(f) {
 
 ProjectWindow.getViewSettings = function() {
     if(!fs.existsSync(veiwSettingsPath)) {
+        fs.writeFileSync(veiwSettingsPath, JSON.stringify({ theme:'light', zoom:'100' }), {
+            encoding: "utf-8"
+        });
         return { theme:'light', zoom:'100' };
     }
     const json = fs.readFileSync(veiwSettingsPath, "utf-8");
@@ -211,6 +214,9 @@ ProjectWindow.getViewSettings = function() {
         return JSON.parse(json);
     } catch(e) {
         console.error('Error in view settings JSON parsing:', e);
+        fs.writeFileSync(veiwSettingsPath, JSON.stringify({ theme:'light', zoom:'100' }), {
+            encoding: "utf-8"
+        });
         return { theme:'light', zoom:'100' };
     }
 }
