@@ -148,7 +148,7 @@ LiveCompiler.setEvents({
         PlayerView.showSessionView(sessionId);
     },
     storyCompleted: () => {
-        PlayerView.addTerminatingMessage("End of story", "end");
+        PlayerView.addTerminatingMessage(i18n._("End of story"), "end");
     },
     exitDueToError: () => {
         // No need to do anything - errors themselves being displayed are enough
