@@ -58,6 +58,7 @@ InkProject.setEvents({
 $(document).ready(() => {
     if( InkProject.currentProject == null ) {
         InkProject.startNew();
+        i18n.switch("zh_CN")
 
         // Debug
         if( loadTestInk ) {

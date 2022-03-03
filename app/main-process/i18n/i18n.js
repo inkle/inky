@@ -8,6 +8,7 @@ class i18n {
         this.msgs = {}
 
         electron.app.on('ready', () => {
+            console.debug(electron.app.getLocale());
             this.switch(electron.app.getLocale());
         });
 

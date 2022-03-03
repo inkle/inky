@@ -8,6 +8,7 @@ const AboutWindow = require("./aboutWindow.js").AboutWindow;
 const appmenus = require('./appmenus.js');
 const forceQuitDetect = require('./forceQuitDetect');
 const Inklecate = require("./inklecate.js").Inklecate;
+const i18n = require('./i18n/i18n.js');
 
 function inkJSNeedsUpdating() {
     return false;
@@ -178,6 +179,9 @@ app.on('ready', function () {
 
     // Debug
     //w.openDevTools();
+
+    i18n.switch("zh_CN")
+
 });
 
 function finalQuit() {
