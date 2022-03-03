@@ -40,7 +40,7 @@
   "Basic Choice": "单次选项",
   "Sticky choice": "永久选项",
   "Choice without printing": "选择后不输出文字",
-  "Choice with mixed output": "选择后部分文字不输出",
+  "Choice with mixed output": "选择后不输出部分文字",
   "Variables": "变量",
   "Global variable": "全局变量",
   "Temporary variable": "临时变量",
