@@ -33,7 +33,6 @@
   "Ink": "快速语法",
   "Basic structure": "基本结构",
   "Knot (main section)": "节点 (主要结构)",
-  "=== knotName ===\nThis is the content of the knot.\n-> END\n": "=== 章节名 ===\n这是一段故事的正文。\n-> END\n",
   "Stitch (sub-section)": "章节 (子结构)",
   "Divert": "跳转",
   "Ending indicator": "结束当前章节",
