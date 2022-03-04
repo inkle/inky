@@ -1,10 +1,12 @@
 const child_process = require('child_process');
 const spawn = child_process.spawn;
 const fs = require('fs');
+const os = require('os');
 const path = require("path");
 const electron = require('electron');
 const ipc = electron.ipcMain;
 const mkdirp = require('mkdirp');
+const del = require('del');
 
 // inklecate is packaged outside of the main asar bundle since it's executable
 const inklecateNames = {
@@ -24,16 +26,35 @@ catch(e) {
 }
 
 var tempInkPath;
-if (process.platform == "darwin" || process.platform == "linux") {
-    tempInkPath = process.env.TMPDIR ? path.join(process.env.TMPDIR, "inky_compile") : "/tmp/inky_compile";
-} else {
-    tempInkPath = path.join(process.env.temp, "inky_compile")
+
+function setUp() {
+    const tmpDir = os.tmpdir();
+    fs.mkdtemp(`${tmpDir}${path.sep}inky_compile_`, (err, folder) => {
+        if (err) {
+            throw new Error(err);
+        }
+
+        tempInkPath = folder;
+    })
+}
+
+function tearDown() {
+    if (tempInkPath) {
+        try {
+            del.sync(tempInkPath, {force: true});
+        } catch (err) {
+            console.error(`Failed to delete temporary directory ${tempInkPath}: ${err}`);
+        }
+    }
 }
 
 var sessions = {};
 
 
 function compile(compileInstruction, requester) {
+    if (!tempInkPath) {
+        throw new Error("Temporary directory not initialized");
+    }
 
     var sessionId = compileInstruction.sessionId;
 
@@ -363,5 +384,7 @@ ipc.on("get-runtime-path-in-source", (event, runtimePath, sessionId) => {
 
 
 exports.Inklecate = {
-    killSessions: killSessions
+    setUp,
+    tearDown,
+    killSessions
 }
