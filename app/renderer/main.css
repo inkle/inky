@@ -319,12 +319,12 @@ img.issue-icon.warning {
   top: 0;
   bottom: 0;
   z-index: 1;
-  overflow: hidden;
+  overflow: scroll;
   -webkit-user-select: none;
 }
 
 .sidebar .nav-wrapper {
-  position: absolute;
+  position: relative;
   top: 0;
   bottom: 0;
   left: 0;
@@ -354,7 +354,7 @@ img.issue-icon.warning {
 }
 
 .sidebar .footer {
-  position: absolute;
+  position: relative;
   left: 0;
   right: 0;
   bottom: 0;

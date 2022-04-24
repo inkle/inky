@@ -5,8 +5,8 @@ const path = require("path");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 // Debug
-const loadTestInk = false;
-// remote.getCurrentWindow().webContents.openDevTools();
+const loadTestInk = true;
+//remote.getCurrentWindow().webContents.openDevTools();
 
 // Helpers in global objects and namespace
 
@@ -285,6 +285,9 @@ NavView.setEvents({
             return true;
         }
         return false;
+    },
+    jumpToRow: (row) => {
+        EditorView.gotoLine(row+1);
     }
 });
 

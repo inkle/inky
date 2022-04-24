@@ -2,12 +2,15 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const path = require("path");
 const _ = require("lodash");
 const i18n = require("./i18n.js");
+const InkFile = require("./inkFile.js").InkFile;
+const { range, toInteger } = require('lodash');
 
 const slideAnimDuration = 200;
 var sidebarWidth = 200;
 
 var $sidebar = null;
-var $navWrapper = null;
+var $fileNavWrapper = null;
+var $knotStichNavWrapper = null;
 var $twoPane = null;
 var $footer = null;
 var $newIncludeForm = null;
@@ -17,24 +20,34 @@ var hasBeenShown = false;
 var events = {};
 
 $(document).ready(() => {
+    //Assign each variable to the allocated class/id.
     $sidebar = $(".sidebar");
-    $navWrapper = $sidebar.find(".nav-wrapper");
+    $fileNavWrapper = $sidebar.find("#file-nav-wrapper");
+    $knotStichNavWrapper = $sidebar.find("#knot-stitch-wrapper")
     $twoPane = $(".twopane");
     $sidebarSplit = $("#main").children(".split");
     $sidebarSplit.hide();
     $sidebarSplit.css("left", 0);
     $footer = $sidebar.find(".footer");
 
-    // Clicking on files
-    $navWrapper.on("click", ".nav-group-item", function(event) {
+    // Clicking on navigation item
+    $fileNavWrapper.on("click", ".nav-group-item", function(event) {
+        //Any clicked navigation item should become highlighted
         event.preventDefault();
-
         var $targetNavGroupItem = $(event.currentTarget);
         highlight$NavGroupItem($targetNavGroupItem);
-
-        var fileIdStr = $targetNavGroupItem.attr("data-file-id");
-        var fileId = parseInt(fileIdStr);
-        events.clickFileId(fileId);
+            var fileIdStr = $targetNavGroupItem.attr("data-file-id");
+            var fileId = parseInt(fileIdStr);
+            events.clickFileId(fileId);
+    });
+    $knotStichNavWrapper.on("click", ".nav-group-item", function(event) {
+        //Any clicked navigation item should become highlighted
+        event.preventDefault();
+        var $targetNavGroupItem = $(event.currentTarget);
+        highlight$NavGroupItem($targetNavGroupItem);
+            var row = $targetNavGroupItem.attr("row");
+            console.log(row)
+            events.jumpToRow(parseInt(row))
     });
 
     // Add new include interactions
@@ -98,7 +111,30 @@ $(document).ready(() => {
 });
 
 function setMainInkFilename(name) {
-    $navWrapper.find(".nav-group.main-ink .nav-group-item .filename").text(name);
+    $fileNavWrapper.find(".nav-group.main-ink .nav-group-item .filename").text(name);
+}
+
+function setKnots(mainInk){
+    var ranges = mainInk.symbols.rangeIndex;
+    if (!ranges) return;
+    $knotStichNavWrapper.empty();
+    var extraClass = ""
+    
+    var $main = `<nav class="nav-group">
+            <h5 class="nav-group-title i18n">Knots</h5>
+        </nav>`;
+    $knotStichNavWrapper.append($main);
+    ranges.forEach(range => {
+        var symbol = range.symbol;
+        var extraClass = "knot"
+        var item = 
+        `<span class="nav-group-item ${extraClass}" row = "${symbol.row}">
+        <span class="icon icon-lifebuoy"></span>
+                <span class="filename">${symbol.name}</span>
+            </span>`;
+        $knotStichNavWrapper.find(".nav-group").append(item);
+    })
+
 }
 
 function setFiles(mainInk, allFiles) {
@@ -121,7 +157,7 @@ function setFiles(mainInk, allFiles) {
             files: unusedFiles
         });
 
-    $navWrapper.empty();
+    $fileNavWrapper.empty();
     
     var extraClass = "";
     if( mainInk.hasUnsavedChanges ) extraClass = "unsaved";
@@ -134,7 +170,7 @@ function setFiles(mainInk, allFiles) {
                         <span class="filename">${mainInk.filename()}</span>
                     </a>
                 </nav>`;
-    $navWrapper.append($main)
+    $fileNavWrapper.append($main)
 
     groupsArray.forEach(group => {
         var items = "";
@@ -157,12 +193,12 @@ function setFiles(mainInk, allFiles) {
             extraClass = "unused";
 
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
-        $navWrapper.append($group);
+        $fileNavWrapper.append($group);
     });
 }
 
 function highlight$NavGroupItem($navGroupItem) {
-    $navWrapper.find(".nav-group-item").not($navGroupItem).removeClass("active");
+    $fileNavWrapper.find(".nav-group-item").not($navGroupItem).removeClass("active");
     $navGroupItem.addClass("active");
 }
 
@@ -173,7 +209,7 @@ function highlightRelativePath(relativePath) {
 
     var filename = path.basename(relativePath);
 
-    var $group = $navWrapper.find(".nav-group").filter((i, el) => $(el).find(".nav-group-title").text() == dirName);
+    var $group = $fileNavWrapper.find(".nav-group").filter((i, el) => $(el).find(".nav-group-title").text() == dirName);
     if( dirName == "" ) $group = $group.add(".nav-group.main-ink");
 
     var $file = $group.find(".nav-group-item .filename").filter((i, el) => $(el).text() == filename);
@@ -243,6 +279,7 @@ function setIncludeFormVisible(visible) {
 exports.NavView = {
     setMainInkFilename: setMainInkFilename,
     setFiles: setFiles,
+    setKnots: setKnots,
     highlightRelativePath: highlightRelativePath,
     setEvents: e => events = e,
     hide: hide,
