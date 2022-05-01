@@ -157,6 +157,15 @@ function setKnots(mainInk){
     });
 }
 
+function updateCurrentKnot(mainInk, cursorpos){
+    var symbol = mainInk.symbols.symbolAtPos(cursorpos);
+    var currentKnot = $(`[row=${symbol.row}]`)
+    if (currentKnot.hasClass("active"))
+        return;
+    $(".nav-group, .active").removeClass("active");
+    currentKnot.addClass("active");
+}
+
 function setFiles(mainInk, allFiles) {
     var unusedFiles = _.filter(allFiles, f => f.isSpare);
     var normalIncludes = _.filter(allFiles, f => !f.isSpare && f != mainInk);
@@ -300,6 +309,7 @@ exports.NavView = {
     setMainInkFilename: setMainInkFilename,
     setFiles: setFiles,
     setKnots: setKnots,
+    updateCurrentKnot: updateCurrentKnot,
     highlightRelativePath: highlightRelativePath,
     setEvents: e => events = e,
     hide: hide,

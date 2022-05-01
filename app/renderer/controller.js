@@ -240,6 +240,11 @@ EditorView.setEvents({
         NavHistory.addStep();
     },
     "navigate": () => NavHistory.addStep()
+    "changedLine": (pos) =>{
+        if (InkProject.currentProject && InkProject.currentProject.activeInkFile){
+            NavView.updateCurrentKnot(InkProject.currentProject.activeInkFile, pos);
+    }
+}
 });
 
 PlayerView.setEvents({
