@@ -129,6 +129,7 @@ function setKnots(mainInk){
     
     var $main = `<nav class="nav-group"></nav>`;
     $knotStichNavWrapper.append($main);
+    //For every knots (Ranges is knot and functions)
     ranges.forEach(range => {
         var symbol = range.symbol;
         var extraClass = "knot"
@@ -136,7 +137,9 @@ function setKnots(mainInk){
         <span class="icon icon-water"></span>
                 <span class="filename">${symbol.name}</span>
             </span>`;
+        //If the knot has any symbols inside of it.
         if (symbol.innerSymbols){
+            //For every stitch inside the knot
             Object.keys(symbol.innerSymbols).forEach((innerSymbolName) => {
                 var innerSymbol = symbol.innerSymbols[innerSymbolName]
                 if (innerSymbol.flowType.name == "Stitch"){
