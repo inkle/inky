@@ -238,6 +238,41 @@ function symbolWithinIndex(rangeIndex, pos, includeFlows=true, includeVars=true)
     return null;
 }
 
+//Similar to above function, but this returns an array of the possible symbols that
+//a cursor could belong to. This makes it possible to select
+//a chosen symbol to interact with, for example finding what knot
+//a line belongs to. 
+function symbolsWithinIndex(rangeIndex, pos) {
+    if( !rangeIndex )
+        return null;
+    var symbols = {};
+    var start = 0;
+    var end = rangeIndex.length-1;
+    //While there is a range to explore
+    while (rangeIndex && start <= end) {
+        //Fine next element, if there is one.
+        var nextRangeElement = null;
+        if( start < end ) {
+            nextRangeElement = rangeIndex[start+1];
+        }
+        //If there is no next element, or if the next element goes too far, then
+        //current element is the looked for item. 
+        if( (!nextRangeElement || pos.row < nextRangeElement.rowStart )) {
+            var symbol = rangeIndex[start].symbol;
+            //We don't want extras, so only add a symbol if it fits!
+            if (pos.row >= symbol.row){
+                symbols[symbol.flowType.name] = symbol;
+            }
+            rangeIndex = symbol.rangeIndex;
+            start = 0;
+            end = (rangeIndex)? rangeIndex.length - 1 : 0; 
+        }
+        else{
+            start += 1;
+        }
+    }
+    return symbols;
+}
 InkFileSymbols.prototype.getSymbols = function() {
     if( this.dirty ) this.parse();
     return this.symbols;
