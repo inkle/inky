@@ -198,36 +198,44 @@ InkFileSymbols.prototype.parse = function() {
     this.dirty = false;
 }
 
+InkFileSymbols.prototype.flowAtPos =function(pos){
+    if (this.dirty) this.parse();
+    return symbolsWithinIndex(this.rangeIndex, pos);
+}
+ 
 InkFileSymbols.prototype.symbolAtPos = function(pos) {
 
     if( this.dirty ) this.parse();
+    return symbolWithinIndex(this.rangeIndex, pos);
+}
 
-    // Range index is an index of all the symbols by row number,
-    // nested into a hierarchy. 
-    function symbolWithinIndex(rangeIndex) {
+// Range index is an index of all the symbols by row number,
+// nested into a hierarchy. 
+function symbolWithinIndex(rangeIndex, pos, includeFlows=true, includeVars=true) {
+    if( !rangeIndex )
+        return null;
 
-        if( !rangeIndex )
-            return null;
-
-        // Loop through range until we find the symbol,
-        // then dig in to see if we can find a more accurate sub-symbol
-        for(var i=0; i<rangeIndex.length; i++) {
-
-            var nextRangeElement = null;
-            if( i < rangeIndex.length-1 )
-                nextRangeElement = rangeIndex[i+1];
-
-            if( !nextRangeElement || pos.row < nextRangeElement.rowStart ) {
-                var symbol = rangeIndex[i].symbol;
-                return symbolWithinIndex(symbol.rangeIndex) || symbol;
+    // Loop through range until we find the symbol,
+    // then dig in to see if we can find a more accurate sub-symbol
+    for(var i=0; i<rangeIndex.length; i++) {
+        var nextRangeElement = null;
+        var isValidSymbol = false;
+        if( i < rangeIndex.length-1 ) {
+            nextRangeElement = rangeIndex[i+1];
+            isValidSymbol = ((nextRangeElement.symbol.flowType && includeFlows) || (nextRangeElement.symbol.varType && includeVars))
+        }
+        if( (!nextRangeElement || pos.row < nextRangeElement.rowStart )) {
+            var symbol = rangeIndex[i].symbol;
+            console.log(includeFlows);
+            isValidSymbol = ((symbol.flowType && includeFlows) || (symbol.varType && includeVars))
+            if (isValidSymbol){
+                return symbolWithinIndex(symbol.rangeIndex, pos) || symbol;
             }
         }
-
-        // Only if it's an empty range, so impossible?
-        return null;
     }
 
-    return symbolWithinIndex(this.rangeIndex);
+    // Only if it's an empty range, so impossible?
+    return null;
 }
 
 InkFileSymbols.prototype.getSymbols = function() {
