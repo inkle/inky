@@ -113,14 +113,21 @@ function setMainInkFilename(name) {
 }
 
 function setKnots(mainInk){
+//Parse the symbols before setting the knots
+//TODO: Improved implementation of symbols/when they parse
+//may make this unneeded. This may improve performance, 
+//as currently it parses whenever the user types
+//anything! 
+    mainInk.symbols.parse();
     var ranges = mainInk.symbols.rangeIndex;
-    if (!ranges) return;
+    console.log(mainInk.symbols.rangeIndex);
+    if (!ranges) {
+        console.log("RARGH"); return;
+    }
     $knotStichNavWrapper.empty();
     var extraClass = ""
     
-    var $main = `<nav class="nav-group">
-            <h5 class="nav-group-title i18n">Knots</h5>
-        </nav>`;
+    var $main = `<nav class="nav-group"></nav>`;
     $knotStichNavWrapper.append($main);
     ranges.forEach(range => {
         var symbol = range.symbol;
@@ -145,13 +152,12 @@ function setKnots(mainInk){
     }
 
     extraClass = "";
-    var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${symbol.name}</h5> ${items} </nav>`);
+    var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
     $knotStichNavWrapper.append($group);
     });
 }
 
 function setFiles(mainInk, allFiles) {
-
     var unusedFiles = _.filter(allFiles, f => f.isSpare);
     var normalIncludes = _.filter(allFiles, f => !f.isSpare && f != mainInk);
     var groupedIncludes = _.groupBy(normalIncludes, f => { 
@@ -200,10 +206,6 @@ function setFiles(mainInk, allFiles) {
             <span class="icon icon-doc-text"></span>
             <span class="filename">${name}</span>
             </span>`;
-            if (file.isActive){
-                setKnots(file)
-                nonMainFileActive = true;
-            }
         });
 
         extraClass = "";
@@ -213,9 +215,6 @@ function setFiles(mainInk, allFiles) {
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
         $fileNavWrapper.append($group);
     });
-    if (!nonMainFileActive){
-        setKnots(mainInk);
-    }
 }
 
 function highlight$NavGroupItem($navGroupItem) {

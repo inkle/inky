@@ -110,6 +110,7 @@ function InkFile(anyPath, mainInkFile, isBrandNew, events) {
         if( !this.justLoadedContent ) 
             this.events.fileChanged();
     });
+
 }
 
 InkFile.prototype.isMain = function() {

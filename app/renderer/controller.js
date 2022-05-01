@@ -58,12 +58,12 @@ InkProject.setEvents({
 $(document).ready(() => {
     if( InkProject.currentProject == null ) {
         InkProject.startNew();
-
         // Debug
         if( loadTestInk ) {
             var testInk = require("fs").readFileSync(path.join(__dirname, "test.ink"), "utf8");
             InkProject.currentProject.mainInk.setValue(testInk);
         }
+        NavView.setKnots(InkProject.currentProject.mainInk);
     }
 });
 
@@ -225,7 +225,7 @@ ipc.on("keyboard-shortcuts", (event, visible) => {
 EditorView.setEvents({
     "change": () => {
         LiveCompiler.setEdited();
-//        NavView.setKnots(InkProject.currentProject.activeInkFile);
+        NavView.setKnots(InkProject.currentProject.activeInkFile);
     },
     "jumpToSymbol": (symbolName, contextPos) => {
         var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
@@ -290,7 +290,6 @@ NavView.setEvents({
     },
     jumpToRow: (row) => {
         EditorView.gotoLine(row+1);
-        console.log(InkProject.currentProject.mainInk.symbols);
     }
 });
 
