@@ -225,6 +225,7 @@ ipc.on("keyboard-shortcuts", (event, visible) => {
 EditorView.setEvents({
     "change": () => {
         LiveCompiler.setEdited();
+//        NavView.setKnots(InkProject.currentProject.activeInkFile);
     },
     "jumpToSymbol": (symbolName, contextPos) => {
         var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
@@ -275,6 +276,7 @@ NavView.setEvents({
     clickFileId: (fileId) => {
         var inkFile = InkProject.currentProject.inkFileWithId(fileId);
         InkProject.currentProject.showInkFile(inkFile);
+        NavView.setKnots(inkFile);
         NavHistory.addStep();
     },
     addInclude: (filename, addToMainInk) => {
@@ -288,6 +290,7 @@ NavView.setEvents({
     },
     jumpToRow: (row) => {
         EditorView.gotoLine(row+1);
+        console.log(InkProject.currentProject.mainInk.symbols);
     }
 });
 

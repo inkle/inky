@@ -73,7 +73,6 @@ InkFileSymbols.prototype.parse = function() {
     if( it.getCurrentToken() === undefined ) it.stepForward();
     
     for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
-
         // Token is some kind of name?
         if( tok.type.indexOf(".name") != -1 ) {
 
@@ -103,10 +102,9 @@ InkFileSymbols.prototype.parse = function() {
                     symbol.parent = parent;
 
                 if( !parent.innerSymbols ) {
-                    parent.innerSymbols = [];
+                    parent.innerSymbols = {};
                     parent.rangeIndex = [];
                 }
-
                 parent.innerSymbols[symbolName] = symbol;
                 parent.rangeIndex.push({
                     rowStart: symbol.row,

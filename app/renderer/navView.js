@@ -44,10 +44,8 @@ $(document).ready(() => {
         //Any clicked navigation item should become highlighted
         event.preventDefault();
         var $targetNavGroupItem = $(event.currentTarget);
-        highlight$NavGroupItem($targetNavGroupItem);
-            var row = $targetNavGroupItem.attr("row");
-            console.log(row)
-            events.jumpToRow(parseInt(row))
+        var row = $targetNavGroupItem.attr("row");
+        events.jumpToRow(parseInt(row))
     });
 
     // Add new include interactions
@@ -127,14 +125,29 @@ function setKnots(mainInk){
     ranges.forEach(range => {
         var symbol = range.symbol;
         var extraClass = "knot"
-        var item = 
-        `<span class="nav-group-item ${extraClass}" row = "${symbol.row}">
-        <span class="icon icon-lifebuoy"></span>
+        var items = `<span class="nav-group-item ${extraClass}" row = "${symbol.row}">
+        <span class="icon icon-water"></span>
                 <span class="filename">${symbol.name}</span>
             </span>`;
-        $knotStichNavWrapper.find(".nav-group").append(item);
-    })
+        if (symbol.innerSymbols){
+            Object.keys(symbol.innerSymbols).forEach((innerSymbolName) => {
+                var innerSymbol = symbol.innerSymbols[innerSymbolName]
+                if (innerSymbol.flowType.name == "Stitch"){
+                    var extraClass = "stitch";
+                items += 
+                    `<span class="nav-group-item ${extraClass}" row = "${innerSymbol.row}">
+                    <span class="icon icon-droplet"></span>
+                            <span class="filename">${innerSymbol.name}</span>
+                        </span>`;
+        }
+        });
 
+    }
+
+    extraClass = "";
+    var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${symbol.name}</h5> ${items} </nav>`);
+    $knotStichNavWrapper.append($group);
+    });
 }
 
 function setFiles(mainInk, allFiles) {
@@ -170,22 +183,27 @@ function setFiles(mainInk, allFiles) {
                         <span class="filename">${mainInk.filename()}</span>
                     </a>
                 </nav>`;
-    $fileNavWrapper.append($main)
-
+    $fileNavWrapper.append($main);
+//  console.log(mainInk);
+    var nonMainFileActive = false;
     groupsArray.forEach(group => {
         var items = "";
 
         group.files.forEach((file) => {
             var name = file.isSpare ? file.relativePath() : file.filename();
-
+            
             var extraClass = "";
             if( file.hasUnsavedChanges ) extraClass = "unsaved";
             if( file.isLoading ) extraClass += " loading";
-
+            
             items = items + `<span class="nav-group-item ${extraClass}" data-file-id="${file.id}">
-                                <span class="icon icon-doc-text"></span>
-                                <span class="filename">${name}</span>
-                            </span>`;
+            <span class="icon icon-doc-text"></span>
+            <span class="filename">${name}</span>
+            </span>`;
+            if (file.isActive){
+                setKnots(file)
+                nonMainFileActive = true;
+            }
         });
 
         extraClass = "";
@@ -195,6 +213,9 @@ function setFiles(mainInk, allFiles) {
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
         $fileNavWrapper.append($group);
     });
+    if (!nonMainFileActive){
+        setKnots(mainInk);
+    }
 }
 
 function highlight$NavGroupItem($navGroupItem) {

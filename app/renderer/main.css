@@ -345,6 +345,10 @@ img.issue-icon.warning {
   font-weight: bold;
 }
 
+.sidebar .nav-group-item.stitch {
+  margin-left: 10px;
+}
+
 .sidebar .nav-group-item.loading .filename {
   opacity: 0.5;
 }
