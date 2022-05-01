@@ -160,13 +160,24 @@ function setKnots(mainInk){
     });
 }
 
-function updateCurrentKnot(mainInk, cursorpos){
-    var symbol = mainInk.symbols.symbolAtPos(cursorpos);
-    var currentKnot = $(`[row=${symbol.row}]`)
-    if (currentKnot.hasClass("active"))
+function updateCurrentKnot(mainInk, cursorPos){
+    var symbols = mainInk.symbols.flowAtPos(cursorPos);
+    console.log(symbols);
+    if (!symbols) return;
+    if ("Knot" in symbols){
+        var currentKnot = $(`[row=${symbols["Knot"].row}]`);
+    }
+    if ("Stitch" in symbols){
+        var currentStitch = $(`[row=${symbols["Stitch"].row}]`);
+    }
+    if ((currentKnot && currentKnot.hasClass("active"))&&(currentStitch && currentStitch.hasClass("active")))
         return;
     $(".nav-group, .active").removeClass("active");
-    currentKnot.addClass("active");
+    if (currentStitch)
+        currentStitch.addClass("active");
+    if (currentKnot)
+        currentKnot.addClass("active");
+
 }
 
 function setFiles(mainInk, allFiles) {
