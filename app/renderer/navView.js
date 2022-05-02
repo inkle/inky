@@ -170,7 +170,7 @@ function updateCurrentKnot(mainInk, cursorPos){
     }
     if ((currentKnot && currentKnot.hasClass("active"))&&(currentStitch && currentStitch.hasClass("active")))
         return;
-    $(".nav-group, .active").removeClass("active");
+    $(".nav-group-item.active").removeClass("active");
     if (currentStitch)
         currentStitch.addClass("active");
     if (currentKnot)
