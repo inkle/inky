@@ -65,11 +65,11 @@ function contentReady() {
     var $scrollContainer = $("#player .scrollContainer");
     $scrollContainer.stop();
 
-    // Need to save these ones because we are reseting height, so these are lost
+    // Need to save these ones because we are resetting height, so these are lost
     var savedScrollTop = $scrollContainer.scrollTop();
     var prevHeight = $textBuffer.height();
 
-    // Need to reset first, otherwise ($textBuffer[0].scrollHeight) is always not less than $textBuffer.height() and it only expands (bad when story has huge list of choises)
+    // Need to reset first, otherwise ($textBuffer[0].scrollHeight) is always not less than $textBuffer.height() and it only expands (bad when story has huge list of choices)
     $textBuffer.height(0);
     var newHeight = $textBuffer[0].scrollHeight;
 
