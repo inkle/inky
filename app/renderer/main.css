@@ -331,6 +331,7 @@ img.issue-icon.warning {
   right: 0;
   overflow: auto;
   padding-bottom: 40px; /* leave space for include adding UI */
+  height: 50%;
 }
 
 .sidebar.hidden {
@@ -362,7 +363,7 @@ img.issue-icon.warning {
 }
 
 .sidebar .footer {
-  position: relative;
+  position: absolute;
   left: 0;
   right: 0;
   bottom: 0;

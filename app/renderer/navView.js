@@ -50,12 +50,12 @@ $(document).ready(() => {
 
     // Add new include interactions
     $newIncludeForm = $footer.find(".new-include-form");
-    $footer.find(".add-include-button").on("click", function(event) {
+    $fileNavWrapper.on("click", ".add-include-button", function(event) {
+        console.log("Test");
         setIncludeFormVisible(true);
         event.preventDefault();
-        
     });
-    $footer.find("#cancel-add-include").on("click", function(event) {
+    $fileNavWrapper.on("click", "#cancel-add-include", function(event) {
         setIncludeFormVisible(false);
         event.preventDefault();
     })
@@ -76,14 +76,14 @@ $(document).ready(() => {
         }
     }
 
-    $newIncludeForm.find("input").on("keypress", function(event) {
+    $fileNavWrapper.on("keypress", "input", function(event) {
         const returnKey = 13;
         if( event.which == returnKey ) {
             confirmAddInclude();
             event.preventDefault();
         }
     });
-    $newIncludeForm.find("#add-include").on("click", function(event) {
+    $fileNavWrapper.on("click", "#add-include", function(event) {
         event.preventDefault();
         confirmAddInclude();
     })
@@ -120,9 +120,8 @@ function setKnots(mainInk){
 //anything! 
     mainInk.symbols.parse();
     var ranges = mainInk.symbols.rangeIndex;
-    console.log(mainInk.symbols.rangeIndex);
     if (!ranges) {
-        console.log("RARGH"); return;
+        return;
     }
     $knotStichNavWrapper.empty();
     var extraClass = ""
@@ -162,7 +161,6 @@ function setKnots(mainInk){
 
 function updateCurrentKnot(mainInk, cursorPos){
     var symbols = mainInk.symbols.flowAtPos(cursorPos);
-    console.log(symbols);
     if (!symbols) return;
     if ("Knot" in symbols){
         var currentKnot = $(`[row=${symbols["Knot"].row}]`);
@@ -213,7 +211,6 @@ function setFiles(mainInk, allFiles) {
                     </a>
                 </nav>`;
     $fileNavWrapper.append($main);
-//  console.log(mainInk);
     var nonMainFileActive = false;
     groupsArray.forEach(group => {
         var items = "";
@@ -238,6 +235,7 @@ function setFiles(mainInk, allFiles) {
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
         $fileNavWrapper.append($group);
     });
+    $fileNavWrapper.append($footer);
 }
 
 function highlight$NavGroupItem($navGroupItem) {
