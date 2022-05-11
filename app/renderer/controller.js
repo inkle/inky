@@ -239,7 +239,7 @@ EditorView.setEvents({
         InkProject.currentProject.showInkFile(includePath);
         NavHistory.addStep();
     },
-    "navigate": () => NavHistory.addStep()
+    "navigate": () => NavHistory.addStep(),
     "changedLine": (pos) =>{
         if (InkProject.currentProject && InkProject.currentProject.activeInkFile){
             NavView.updateCurrentKnot(InkProject.currentProject.activeInkFile, pos);
