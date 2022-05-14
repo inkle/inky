@@ -15,6 +15,8 @@ var $twoPane = null;
 var $footer = null;
 var $newIncludeForm = null;
 
+var $currentNavWrapper = null
+
 var visible = false;
 var hasBeenShown = false;
 var events = {};
@@ -88,7 +90,7 @@ $(document).ready(() => {
         confirmAddInclude();
     })
 
-    // Unfortuanately you can't capture escape from the input itself
+    // Unfortunately you can't capture escape from the input itself
     $(document).keyup(function(e) {
         const escape = 27;
         if (e.keyCode == escape) {
@@ -317,6 +319,18 @@ function setIncludeFormVisible(visible) {
     }
 }
 
+function toggle(id){
+    if (visible && $currentNavWrapper && "#"+$currentNavWrapper.attr('id')==id){
+        hide(); 
+    }
+    else if (!visible){
+        show();
+    }
+    $(".nav-wrapper").addClass("hidden");
+    $currentNavWrapper = $(id);
+    $currentNavWrapper.removeClass("hidden");
+}
+
 exports.NavView = {
     setMainInkFilename: setMainInkFilename,
     setFiles: setFiles,
@@ -326,7 +340,9 @@ exports.NavView = {
     setEvents: e => events = e,
     hide: hide,
     show: show,
-    initialShow: () => { if( !hasBeenShown ) show(); },
-    toggle: () => { if( visible ) hide(); else show(); },
+    initialShow: () => { if( !hasBeenShown ) 
+        toggle("#file-nav-wrapper");
+    },
+    toggle: toggle,
     showAddIncludeForm: () => setIncludeFormVisible(true)
 }

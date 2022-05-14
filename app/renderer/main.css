@@ -319,19 +319,18 @@ img.issue-icon.warning {
   top: 0;
   bottom: 0;
   z-index: 1;
-  overflow: scroll;
+  overflow: hidden;
   -webkit-user-select: none;
 }
 
 .sidebar .nav-wrapper {
-  position: relative;
+  position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
   overflow: auto;
   padding-bottom: 40px; /* leave space for include adding UI */
-  height: 50%;
 }
 
 .sidebar.hidden {
