@@ -24,12 +24,17 @@
 
       <div id="toolbar" class="draggable">
 
+
+        
         <div class="buttons left">
 
           <div class="button nav-toggle" title="Toggle file browser">
             <span class="icon icon-menu"></span>
           </div>
 
+          <div class="button knot-toggle" title="Toggle knot browser">
+            <span class="icon icon-tag"></span>
+          </div>
           <div class="button nav-back" title="Navigate back">
             <span class="icon icon-left-dir"></span>
           </div>
@@ -74,9 +79,10 @@
 
         <div id="main">
            <div class="sidebar hidden">
-            <div class="nav-wrapper" id="knot-stitch-wrapper">
+
+            <div class="nav-wrapper hidden" id="knot-stitch-wrapper">
             </div>
-            <div class="nav-wrapper" id="file-nav-wrapper">
+            <div class="nav-wrapper hidden" id="file-nav-wrapper">
               <div class="footer">
                 <a class="add-include-button" onclick="console.log('test')">
                   <span class="icon icon-plus"></span>
