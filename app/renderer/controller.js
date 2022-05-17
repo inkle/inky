@@ -47,6 +47,7 @@ InkProject.setEvents({
         var filename = inkFile.filename();
         ToolbarView.setTitle(filename);
         NavView.highlightRelativePath(inkFile.relativePath());
+        NavView.setKnots(inkFile);
         var fileIssues = LiveCompiler.getIssuesForFilename(inkFile.relativePath());
         setImmediate(() => EditorView.setErrors(fileIssues));
         NavHistory.addStep();
