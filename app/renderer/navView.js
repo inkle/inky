@@ -128,7 +128,7 @@ function setKnots(mainInk){
     $knotStichNavWrapper.empty();
     var extraClass = ""
     
-    var $main = `<nav class="nav-group"><h5 class="nav-group-title">File contents</h5></nav>`;
+    var $main = `<nav class="nav-group"><h5 class="nav-group-title">` + mainInk.relPath + ` contents</h5></nav>`;
     $knotStichNavWrapper.append($main);
     //For every knots (Ranges is knot and functions)
     ranges.forEach(range => {
