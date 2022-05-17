@@ -52,12 +52,12 @@ $(document).ready(() => {
 
     // Add new include interactions
     $newIncludeForm = $footer.find(".new-include-form");
-    $fileNavWrapper.on("click", ".add-include-button", function(event) {
+    $sidebar.on("click", ".add-include-button", function(event) {
         console.log("Test");
         setIncludeFormVisible(true);
         event.preventDefault();
     });
-    $fileNavWrapper.on("click", "#cancel-add-include", function(event) {
+    $sidebar.on("click", "#cancel-add-include", function(event) {
         setIncludeFormVisible(false);
         event.preventDefault();
     })
@@ -128,7 +128,7 @@ function setKnots(mainInk){
     $knotStichNavWrapper.empty();
     var extraClass = ""
     
-    var $main = `<nav class="nav-group"></nav>`;
+    var $main = `<nav class="nav-group"><h5 class="nav-group-title">File contents</h5></nav>`;
     $knotStichNavWrapper.append($main);
     //For every knots (Ranges is knot and functions)
     ranges.forEach(range => {
@@ -145,19 +145,19 @@ function setKnots(mainInk){
                 var innerSymbol = symbol.innerSymbols[innerSymbolName]
                 if (innerSymbol.flowType.name == "Stitch"){
                     var extraClass = "stitch";
-                items += 
+                    items += 
                     `<span class="nav-group-item ${extraClass}" row = "${innerSymbol.row}">
                     <span class="icon icon-droplet"></span>
                             <span class="filename">${innerSymbol.name}</span>
                         </span>`;
+                }
+            });
+
         }
-        });
 
-    }
-
-    extraClass = "";
-    var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
-    $knotStichNavWrapper.append($group);
+        extraClass = "";
+        var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
+        $knotStichNavWrapper.append($group);
     });
 }
 
@@ -237,7 +237,7 @@ function setFiles(mainInk, allFiles) {
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
         $fileNavWrapper.append($group);
     });
-    $fileNavWrapper.append($footer);
+    
 }
 
 function highlight$NavGroupItem($navGroupItem) {
@@ -329,6 +329,10 @@ function toggle(id){
     $(".nav-wrapper").addClass("hidden");
     $currentNavWrapper = $(id);
     $currentNavWrapper.removeClass("hidden");
+    if ($currentNavWrapper.hasClass("hasFooter")) 
+        $footer.removeClass("hidden");
+    else 
+        $footer.addClass("hidden");
 }
 
 exports.NavView = {
