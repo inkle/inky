@@ -78,14 +78,14 @@ $(document).ready(() => {
         }
     }
 
-    $fileNavWrapper.on("keypress", "input", function(event) {
+    $sidebar.on("keypress", "input", function(event) {
         const returnKey = 13;
         if( event.which == returnKey ) {
             confirmAddInclude();
             event.preventDefault();
         }
     });
-    $fileNavWrapper.on("click", "#add-include", function(event) {
+    $sidebar.on("click", "#add-include", function(event) {
         event.preventDefault();
         confirmAddInclude();
     })
