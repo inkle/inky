@@ -133,8 +133,9 @@ function setKnots(mainInk){
     ranges.forEach(range => {
         var symbol = range.symbol;
         var extraClass = "knot"
+        var icon = symbol.isfunc ? "icon-window" : "icon-water"
         var items = `<span class="nav-group-item ${extraClass}" row = "${symbol.row}">
-        <span class="icon icon-water"></span>
+        <span class="icon ${icon}"></span>
                 <span class="filename">${symbol.name}</span>
             </span>`;
         //If the knot has any symbols inside of it.
@@ -165,6 +166,9 @@ function updateCurrentKnot(mainInk, cursorPos){
     if (!symbols) return;
     if ("Knot" in symbols){
         var currentKnot = $(`[row=${symbols["Knot"].row}]`);
+        if (symbols["Knot"].isfunc){
+            currentKnot.addClass("function")
+        }
     }
     if ("Stitch" in symbols){
         var currentStitch = $(`[row=${symbols["Stitch"].row}]`);

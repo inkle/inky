@@ -72,7 +72,14 @@ InkFileSymbols.prototype.parse = function() {
     // initially, and sometimes it doesn't?
     if( it.getCurrentToken() === undefined ) it.stepForward();
     
+    var isfunc = false
+
     for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
+        
+        //Flag, if triggered, the next "name" is a function. 
+        if (tok.type.endsWith("function"))
+        isfunc = true
+        
         // Token is some kind of name?
         if( tok.type.indexOf(".name") != -1 ) {
 
@@ -91,6 +98,7 @@ InkFileSymbols.prototype.parse = function() {
 
                 var symbol = {
                     name: symbolName,
+                    isfunc : isfunc,
                     flowType: flowType,
                     row: it.getCurrentTokenRow(),
                     column: it.getCurrentTokenColumn(),
@@ -110,9 +118,9 @@ InkFileSymbols.prototype.parse = function() {
                     rowStart: symbol.row,
                     symbol: symbol
                 });
-
                 symbolStack.push(symbol);
                 divertTargets.add(symbolName);
+                isfunc = false
             }
             else if( varType ) {
                 variables.add(symbolName);
