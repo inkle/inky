@@ -179,5 +179,8 @@ exports.EditorView = {
             editor.moveCursorToPosition(savedCursorPos); 
             editor.scrollToRow(savedScrollRow);
         } 
+    },
+    getCurrentCursorPos: ()=>{
+        return editor.getCursorPosition();
     }
 };

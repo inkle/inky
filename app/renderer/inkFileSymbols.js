@@ -226,7 +226,6 @@ function symbolWithinIndex(rangeIndex, pos, includeFlows=true, includeVars=true)
         }
         if( (!nextRangeElement || pos.row < nextRangeElement.rowStart )) {
             var symbol = rangeIndex[i].symbol;
-            console.log(includeFlows);
             isValidSymbol = ((symbol.flowType && includeFlows) || (symbol.varType && includeVars))
             if (isValidSymbol){
                 return symbolWithinIndex(symbol.rangeIndex, pos) || symbol;

@@ -53,7 +53,6 @@ $(document).ready(() => {
     // Add new include interactions
     $newIncludeForm = $footer.find(".new-include-form");
     $sidebar.on("click", ".add-include-button", function(event) {
-        console.log("Test");
         setIncludeFormVisible(true);
         event.preventDefault();
     });
@@ -171,7 +170,7 @@ function updateCurrentKnot(mainInk, cursorPos){
         var currentStitch = $(`[row=${symbols["Stitch"].row}]`);
     }
     if ((currentKnot && currentKnot.hasClass("active"))&&(currentStitch && currentStitch.hasClass("active")))
-        return;
+    return;
     $(".nav-group-item.active").removeClass("active");
     if (currentStitch)
         currentStitch.addClass("active");
