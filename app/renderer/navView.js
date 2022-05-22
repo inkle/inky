@@ -172,10 +172,15 @@ function updateCurrentKnot(mainInk, cursorPos){
     if ((currentKnot && currentKnot.hasClass("active"))&&(currentStitch && currentStitch.hasClass("active")))
     return;
     $(".nav-group-item.active").removeClass("active");
-    if (currentStitch)
-        currentStitch.addClass("active");
-    if (currentKnot)
+    if (currentKnot && currentKnot.length !== 0){
         currentKnot.addClass("active");
+        currentKnot[0].scrollIntoView();
+
+    }
+    if (currentStitch && currentStitch.length !== 0){
+        currentStitch.addClass("active");
+        currentStitch[0].scrollIntoView();
+    }
 
 }
 
