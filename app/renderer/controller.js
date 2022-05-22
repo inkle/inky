@@ -47,8 +47,10 @@ InkProject.setEvents({
         var filename = inkFile.filename();
         ToolbarView.setTitle(filename);
         NavView.highlightRelativePath(inkFile.relativePath());
+        NavView.setKnots(inkFile);
         var fileIssues = LiveCompiler.getIssuesForFilename(inkFile.relativePath());
         setImmediate(() => EditorView.setErrors(fileIssues));
+        NavView.updateCurrentKnot(inkFile, EditorView.getCurrentCursorPos());
         NavHistory.addStep();
     }
 });
@@ -281,7 +283,6 @@ NavView.setEvents({
     clickFileId: (fileId) => {
         var inkFile = InkProject.currentProject.inkFileWithId(fileId);
         InkProject.currentProject.showInkFile(inkFile);
-        NavView.setKnots(inkFile);
         NavHistory.addStep();
     },
     addInclude: (filename, addToMainInk) => {

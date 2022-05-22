@@ -52,12 +52,11 @@ $(document).ready(() => {
 
     // Add new include interactions
     $newIncludeForm = $footer.find(".new-include-form");
-    $fileNavWrapper.on("click", ".add-include-button", function(event) {
-        console.log("Test");
+    $sidebar.on("click", ".add-include-button", function(event) {
         setIncludeFormVisible(true);
         event.preventDefault();
     });
-    $fileNavWrapper.on("click", "#cancel-add-include", function(event) {
+    $sidebar.on("click", "#cancel-add-include", function(event) {
         setIncludeFormVisible(false);
         event.preventDefault();
     })
@@ -78,14 +77,14 @@ $(document).ready(() => {
         }
     }
 
-    $fileNavWrapper.on("keypress", "input", function(event) {
+    $sidebar.on("keypress", "input", function(event) {
         const returnKey = 13;
         if( event.which == returnKey ) {
             confirmAddInclude();
             event.preventDefault();
         }
     });
-    $fileNavWrapper.on("click", "#add-include", function(event) {
+    $sidebar.on("click", "#add-include", function(event) {
         event.preventDefault();
         confirmAddInclude();
     })
@@ -128,7 +127,7 @@ function setKnots(mainInk){
     $knotStichNavWrapper.empty();
     var extraClass = ""
     
-    var $main = `<nav class="nav-group"></nav>`;
+    var $main = `<nav class="nav-group"><h5 class="nav-group-title">` + mainInk.relPath + `</h5></nav>`;
     $knotStichNavWrapper.append($main);
     //For every knots (Ranges is knot and functions)
     ranges.forEach(range => {
@@ -145,19 +144,19 @@ function setKnots(mainInk){
                 var innerSymbol = symbol.innerSymbols[innerSymbolName]
                 if (innerSymbol.flowType.name == "Stitch"){
                     var extraClass = "stitch";
-                items += 
+                    items += 
                     `<span class="nav-group-item ${extraClass}" row = "${innerSymbol.row}">
                     <span class="icon icon-droplet"></span>
                             <span class="filename">${innerSymbol.name}</span>
                         </span>`;
+                }
+            });
+
         }
-        });
 
-    }
-
-    extraClass = "";
-    var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
-    $knotStichNavWrapper.append($group);
+        extraClass = "";
+        var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
+        $knotStichNavWrapper.append($group);
     });
 }
 
@@ -171,12 +170,17 @@ function updateCurrentKnot(mainInk, cursorPos){
         var currentStitch = $(`[row=${symbols["Stitch"].row}]`);
     }
     if ((currentKnot && currentKnot.hasClass("active"))&&(currentStitch && currentStitch.hasClass("active")))
-        return;
+    return;
     $(".nav-group-item.active").removeClass("active");
-    if (currentStitch)
-        currentStitch.addClass("active");
-    if (currentKnot)
+    if (currentKnot && currentKnot.length !== 0){
         currentKnot.addClass("active");
+        currentKnot[0].scrollIntoView();
+
+    }
+    if (currentStitch && currentStitch.length !== 0){
+        currentStitch.addClass("active");
+        currentStitch[0].scrollIntoView();
+    }
 
 }
 
@@ -237,7 +241,7 @@ function setFiles(mainInk, allFiles) {
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
         $fileNavWrapper.append($group);
     });
-    $fileNavWrapper.append($footer);
+    
 }
 
 function highlight$NavGroupItem($navGroupItem) {
@@ -329,6 +333,10 @@ function toggle(id){
     $(".nav-wrapper").addClass("hidden");
     $currentNavWrapper = $(id);
     $currentNavWrapper.removeClass("hidden");
+    if ($currentNavWrapper.hasClass("hasFooter")) 
+        $footer.removeClass("hidden");
+    else 
+        $footer.addClass("hidden");
 }
 
 exports.NavView = {
