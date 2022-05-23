@@ -127,12 +127,18 @@ function setKnots(mainInk){
     $knotStichNavWrapper.empty();
     var extraClass = ""
     
-    var $main = `<nav class="nav-group"><h5 class="nav-group-title">` + mainInk.relPath + `</h5></nav>`;
-    $knotStichNavWrapper.append($main);
+    var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>`);
+    var $functions = $(`<nav class="nav-group"><h5 class="nav-group-title">Functions</h5></nav>`);
+
+    var foundContent = false; 
+    var foundFunctions = false;
+
+    // $knotStichNavWrapper.append($main);
     //For every knots (Ranges is knot and functions)
     ranges.forEach(range => {
         var symbol = range.symbol;
         var extraClass = "knot"
+        if (symbol.isfunc) foundFunctions = true; else foundContent = true;
         var icon = symbol.isfunc ? "icon-window" : "icon-water"
         var items = `<span class="nav-group-item ${extraClass}" row = "${symbol.row}">
         <span class="icon ${icon}"></span>
@@ -157,8 +163,17 @@ function setKnots(mainInk){
 
         extraClass = "";
         var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
-        $knotStichNavWrapper.append($group);
+
+        if (symbol.isfunc)
+            $functions.append($group);
+        else 
+            $content.append($group);
     });
+
+    if (foundContent)
+        $knotStichNavWrapper.append($content);
+    if (foundFunctions)
+        $knotStichNavWrapper.append($functions);
 }
 
 function updateCurrentKnot(mainInk, cursorPos){
