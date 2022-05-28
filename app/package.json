@@ -26,20 +26,20 @@
   },
   "homepage": "http://www.inklestudios.com/ink",
   "devDependencies": {
-    "chai": "^4.1.2",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "electron": "^4.2.0",
-    "jsdom": "^16.5.1",
+    "electron": "^19.0.1",
+    "jsdom": "^19.0.0",
     "markdown-html": "^0.0.8",
-    "mocha": "^4.0.1",
-    "spectron": "^3.8.0"
+    "mocha": "^10.0.0",
+    "spectron": "^19.0.0"
   },
   "dependencies": {
-    "chokidar": "^3.3.1",
-    "fuzzaldrin-plus": "^0.5",
-    "inkjs": "^2.0.0",
-    "lodash": "^4.17.15",
-    "mkdirp": "^0.5.1",
-    "randomstring": "^1.1.5"
+    "chokidar": "^3.5.3",
+    "fuzzaldrin-plus": "^0.6",
+    "inkjs": "^2.1.0",
+    "lodash": "^4.17.21",
+    "mkdirp": "^1.0.4",
+    "randomstring": "^1.2.2"
   }
 }
