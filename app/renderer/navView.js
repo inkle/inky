@@ -126,9 +126,12 @@ function setKnots(mainInk){
     }
     $knotStichNavWrapper.empty();
     var extraClass = ""
+
+    var externalsList = getExternals(mainInk);
     
     var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>`);
     var $functions = $(`<nav class="nav-group"><h5 class="nav-group-title">Functions</h5></nav>`);
+    var $externals = $(`<nav class="nav-group"><h5 class="nav-group-title">Externals</h5></nav>`);
 
     var foundContent = false; 
     var foundFunctions = false;
@@ -164,8 +167,12 @@ function setKnots(mainInk){
         extraClass = "";
         var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
 
-        if (symbol.isfunc)
-            $functions.append($group);
+        if (symbol.isfunc) {
+            if (externalsList.has(symbol.name)) 
+                $externals.append($group);
+            else
+                $functions.append($group);
+        }
         else 
             $content.append($group);
     });
@@ -174,6 +181,8 @@ function setKnots(mainInk){
         $knotStichNavWrapper.append($content);
     if (foundFunctions)
         $knotStichNavWrapper.append($functions);
+    if (externalsList.size > 0) 
+        $knotStichNavWrapper.append($externals);
 }
 
 function updateCurrentKnot(mainInk, cursorPos){
@@ -372,4 +381,10 @@ exports.NavView = {
     },
     toggle: toggle,
     showAddIncludeForm: () => setIncludeFormVisible(true)
+}
+
+
+// Helper function that gets all the external function names from a list of InkFiles
+function getExternals(file) {
+    return file.symbols.getCachedExternals();
 }
