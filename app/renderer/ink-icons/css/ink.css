@@ -18,11 +18,16 @@
     font-variant: normal;
     text-transform: none;
     font-size: 16px;
-  
+    transition: transform .25s ease-in-out;
     /* Better Font Rendering =========== */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  .active .icon.ink-icon{
+        transform: rotate(45deg);
+  }
+
   #toolbar .button .icon.ink-icon{
   font-size: 12pt;
   }
