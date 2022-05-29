@@ -139,7 +139,7 @@ function setKnots(mainInk){
         var symbol = range.symbol;
         var extraClass = "knot"
         if (symbol.isfunc) foundFunctions = true; else foundContent = true;
-        var icon = symbol.isfunc ? "icon-window" : "icon-water"
+        var icon = symbol.isfunc ? "ink-icon icon-function-a" : "ink-icon icon-knot-rotated"
         var items = `<span class="nav-group-item ${extraClass}" row = "${symbol.row}">
         <span class="icon ${icon}"></span>
                 <span class="filename">${symbol.name}</span>
@@ -153,7 +153,7 @@ function setKnots(mainInk){
                     var extraClass = "stitch";
                     items += 
                     `<span class="nav-group-item ${extraClass}" row = "${innerSymbol.row}">
-                    <span class="icon icon-droplet"></span>
+                    <span class="icon ink-icon icon-stitch-rotated"></span>
                             <span class="filename">${innerSymbol.name}</span>
                         </span>`;
                 }
