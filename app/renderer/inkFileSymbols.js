@@ -11,6 +11,7 @@ function InkFileSymbols(inkFile, events) {
 
     this.divertTargets = new Set();
     this.variables = new Set();
+    this.externals = new Set();
     this.vocabWords = new Set();
 
     this.inkFile.aceDocument.on("change", () => {
@@ -45,6 +46,7 @@ InkFileSymbols.prototype.parse = function() {
     const varTypes = [
         { name: "Variable", code: "var-decl"  },
         { name: "List",     code: "list-decl" },
+        { name: "External", code: "external"},
     ];
     const topLevelInkFlow = { level: 0 };
 
@@ -63,6 +65,7 @@ InkFileSymbols.prototype.parse = function() {
 
     var divertTargets = new Set();
     var variables = new Set();
+    var externals = new Set();
     var vocabWords = new Set();
 
     var it = new TokenIterator(session, 0, 0);
@@ -75,7 +78,6 @@ InkFileSymbols.prototype.parse = function() {
     var isfunc = false
 
     for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
-        
         //Flag, if triggered, the next "name" is a function. 
         if (tok.type.endsWith("function"))
         isfunc = true
@@ -123,7 +125,12 @@ InkFileSymbols.prototype.parse = function() {
                 isfunc = false
             }
             else if( varType ) {
-                variables.add(symbolName);
+                switch (tok.type){
+                    case "external.declaration.name":
+                        externals.add(symbolName)
+                    default:
+                        variables.add(symbolName);
+                }
             }
             // Not a knot/stitch/gather/choice nor a variable. Do nothing.
         }
@@ -185,8 +192,8 @@ InkFileSymbols.prototype.parse = function() {
 
     this.divertTargets = divertTargets;
     this.variables = variables;
+    this.externals = externals;
     this.vocabWords = vocabWords;
-
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];
     this.includes = includes;
@@ -301,6 +308,10 @@ InkFileSymbols.prototype.getCachedDivertTargets = function() {
 
 InkFileSymbols.prototype.getCachedVariables = function() {
     return this.variables;
+}
+
+InkFileSymbols.prototype.getCachedExternals = function() {
+    return this.externals;
 }
 
 InkFileSymbols.prototype.getCachedVocabWords = function() {
