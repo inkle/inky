@@ -36,31 +36,46 @@
   }
 
 
-  .icon-function-a:before {
-    content: "\e906";
-  }
-  .icon-function-b:before {
-    content: "\e907";
-  }
-  .icon-function-c:before {
-    content: "\e908";
-  }
-  .icon-category-rotated:before {
+  .icon-category-flat:before {
     content: "\e900";
   }
-  .icon-category-straight:before {
+  .icon-category:before {
     content: "\e901";
   }
-  .icon-knot-rotated:before {
+  .icon-function-flat-scaled:before {
     content: "\e902";
   }
-  .icon-knot-straight:before {
+  .icon-function-flat:before {
     content: "\e903";
   }
-  .icon-stitch-rotated:before {
+  .icon-function-scaled:before {
     content: "\e904";
   }
-  .icon-stitch-straight:before {
+  .icon-function:before {
     content: "\e905";
+  }
+  .icon-knot-flat-scaled:before {
+    content: "\e906";
+  }
+  .icon-knot-flat:before {
+    content: "\e907";
+  }
+  .icon-knot-scaled:before {
+    content: "\e908";
+  }
+  .icon-knot:before {
+    content: "\e909";
+  }
+  .icon-stitch-flat-scaled:before {
+    content: "\e90a";
+  }
+  .icon-stitch-flat:before {
+    content: "\e90b";
+  }
+  .icon-stitch-scaled:before {
+    content: "\e90c";
+  }
+  .icon-stitch:before {
+    content: "\e90d";
   }
   
