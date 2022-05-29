@@ -334,7 +334,6 @@ var inkHighlightRules = function() {
                 token: [
                     "external", // whitespace
                     "external.declaration.name", //function name
-                    "external", // whitespace
                     "external.declaration.parameters" //function parameters
 
                 ]
