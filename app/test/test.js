@@ -5,7 +5,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
 const inkyPathsByPlatform = {
-  "darwin": "../Inky-darwin-x64/Inky.app/Contents/MacOS/Inky",
+  "darwin": "../Inky-darwin-universal/Inky.app/Contents/MacOS/Inky",
   "linux": "../Inky-linux-x64/Inky",
   "win32": "../Inky-win32-x64/Inky.exe"
 };
