@@ -1,13 +1,7 @@
-const {remote} = require('electron')
-const {Menu, MenuItem} = remote
+const {ipcRenderer} = require("electron")
 
-const menu = new Menu()
-menu.append(new MenuItem({ role: 'cut' }))
-menu.append(new MenuItem({ role: 'copy' }))
-menu.append(new MenuItem({ role: 'paste' }))
-menu.append(new MenuItem({ role: 'selectall' }))
-
+// renderer
 window.addEventListener('contextmenu', (e) => {
     e.preventDefault()
-    menu.popup(remote.getCurrentWindow())
-}, false);
+    ipcRenderer.send('show-context-menu')
+  })

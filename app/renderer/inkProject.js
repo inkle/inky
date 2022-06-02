@@ -1,5 +1,3 @@
-const remote = require('electron').remote;
-const dialog = remote.dialog;
 const ipc = require("electron").ipcRenderer;
 const path = require("path");
 const fs = require("fs");
@@ -190,7 +188,7 @@ InkProject.prototype.refreshUnsavedChanges = function() {
 
     // Overall, are there *any* unsaved changes, and has the state changed?
     // Change the dot in the Mac close window button
-    remote.getCurrentWindow().setDocumentEdited(this.hasUnsavedChanges);
+    ipc.send("change-mac-dot", this.hasUnsavedChanges);
 }
 
 InkProject.prototype.startFileWatching = function() {
@@ -408,47 +406,48 @@ InkProject.prototype.export = function(exportType) {
                 { name: i18n._("JavaScript files"), extensions: ["js"] }
             ]
         }
-
-        dialog.showSaveDialog(remote.getCurrentWindow(), saveOptions, (targetSavePath) => {
+        ipc.invoke('showSaveDialog', saveOptions).then((result) => {
+            let targetSavePath = result.filePath;
             if( targetSavePath ) { 
                 this.defaultExportPath = targetSavePath;
-
+    
                 // JSON export - simply move compiled json into place
                 if( exportType == "json" || exportType == "js" ) {
                     fs.stat(targetSavePath, (err, stats) => {
-
+    
                         // File already exists, or there's another error
                         // (error when code == ENOENT means file doens't exist, which is fine)
                         if( !err || err.code != "ENOENT" ) {
                             if( err ) alert(`${i18n._("Sorry, could not save to")} ${targetSavePath}`);
-
+    
                             if( stats.isFile() ) fs.unlinkSync(targetSavePath);
-
+    
                             if( stats.isDirectory() ) {
                                 alert(i18n._("Could not save because directory exists with the given name"));
                                 return
                             }
                         }
-
+    
                         // JS file: 
                         if( exportType == "js" ) {
                             this.convertJSONToJS(compiledJsonTempPath, targetSavePath);
                         } 
-
-                        // JSON: Just copy into place
+    
+                        // JSON: Just copy into p
                         else {
                             copyFile(compiledJsonTempPath, targetSavePath);
                         }
-
+    
                     });
                 }
-
+    
                 // Web export
                 else {
                     this.buildForWeb(compiledJsonTempPath, targetSavePath);
                 }
             }
         });
+
     });
 }
 
@@ -532,41 +531,33 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
 
 InkProject.prototype.tryClose = function() {
     if( this.hasUnsavedChanges ) {
-        dialog.showMessageBox(remote.getCurrentWindow(), {
-            type: "warning",
-            message: i18n._("Would you like to save changes before exiting?"),
-            detail: i18n._("Your changes will be lost if you don't save."),
-            buttons: [
-                i18n._("Save"),
-                i18n._("Don't save"),
-                i18n._("Cancel")
-            ],
-            defaultId: 0
-        }, (response) => {
-            // Save
+        ipc.invoke("try-close").then((responseObject) => {
+            var response = responseObject.response;
             if( response == 0 ) {
                 this.save(false, () => {
                     this.closeImmediate();
                 });
             }
-
+            
             // Don't save
             else if( response == 1 ) {
                 this.closeImmediate();
             }
-
+            
             // Cancel
             else { 
                 ipc.send("project-cancelled-close");
             }
-        });
-    } 
-
+            })
+    }
     // Nothing to save, just exit
     else {
         this.closeImmediate();
     }
 }
+
+// Response from the close menu
+
 
 InkProject.prototype.closeImmediate = function() {
     ipc.send("project-final-close");

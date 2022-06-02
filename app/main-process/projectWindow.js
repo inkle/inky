@@ -13,9 +13,11 @@ const electronWindowOptions = {
   height: 730,
   minWidth: 350,
   minHeight: 250,
-  titleBarStyle: 'hidden',
+  titleBarStyle: 'default',
   webPreferences: {
-      preload: path.join(__dirname, '..', 'renderer', 'preload.js')
+      preload: path.join(__dirname, '..', 'renderer', 'preload.js'),
+      nodeIntegration: true,
+    contextIsolation: false
   }
 };
 
@@ -283,21 +285,20 @@ function addRecentFile(filePath) {
 
 ProjectWindow.open = function(filePath) {
     if( !filePath ) {
-        var multiSelectPaths = dialog.showOpenDialog({
+        var multiSelectPaths = dialog.showOpenDialogSync({
             title: i18n._("Open main ink file"),
             properties: ['openFile'],
             filters: [
                 { name: i18n._('Ink files'), extensions: ['ink'] }
             ]
         });
-
         if( multiSelectPaths && multiSelectPaths.length > 0 )
             filePath = multiSelectPaths[0];
     }
 
     // TODO: Could check whether the filepath is relative to any of our
     // existing open projects, and switch to that window?
-
+    console.log("Testing!")
     if( filePath) {
         addRecentFile(filePath);
         return new ProjectWindow(filePath);

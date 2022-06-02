@@ -1,5 +1,4 @@
-const electron = require("electron");
-const remote = electron.remote;
+const {ipcRenderer} = require("electron");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const i18n = require("./i18n.js");
 
@@ -161,7 +160,7 @@ function setTitle(title) {
     $("h1.title").text(title);
 
     // Not visible on macOS
-    remote.getCurrentWindow().setTitle(title);
+    //ipcRenderer.setTitle(title);
 }
 
 function setBusySpinnerVisible(vis) {

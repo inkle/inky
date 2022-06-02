@@ -2,8 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const assert = require("assert");
 
-const remote = require('electron').remote;
-const dialog = remote.dialog;
+const {ipcRenderer} = require("electron")
 const mkdirp = require('mkdirp');
 
 const InkFileSymbols = require("./inkFileSymbols.js").InkFileSymbols;
@@ -161,10 +160,12 @@ InkFile.prototype.save = function(afterSaveCallback) {
 
     // Need to show save path dialog?
     if( !this.absolutePath() ) {
-        dialog.showSaveDialog(remote.getCurrentWindow(), { filters: [
+        ipcRenderer.invoke("showSaveDialog", { filters: [
             { name: 'Ink files', extensions: ['ink'] },
             { name: 'Text files', extensions: ['txt'] }
-        ]}, (savedPath) => {
+        ]}).then((result) => {
+            console.log(result);
+            let savedPath = result.filePath;
             if( savedPath ) {
 
                 // If we're showing a save dialog, assume we're in the main ink file
