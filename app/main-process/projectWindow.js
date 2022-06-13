@@ -50,6 +50,7 @@ function ProjectWindow(filePath) {
             this.browserWindow.setRepresentedFilename(filePath);
             this.browserWindow.webContents.send('set-project-main-ink-filepath', filePath);
         });
+        this.refreshProjectSettings(filePath);
     }
 
     windows.push(this);
@@ -117,6 +118,46 @@ ProjectWindow.prototype.openDevTools = function() {
 ProjectWindow.prototype.zoom = function(amount) {
     this.browserWindow.webContents.send('zoom', amount);
 }
+
+// Try to load up an optional <ink_root_file_name>.settings.json file
+ProjectWindow.prototype.refreshProjectSettings = function(rootInkFilePath) {
+    
+    const resolvedRootPath = path.resolve(rootInkFilePath);
+    let basePath = rootInkFilePath;
+    if( path.extname(resolvedRootPath) == ".ink" ) {
+        basePath = rootInkFilePath.substring(0, resolvedRootPath.length-4)
+    }
+    const settingsPath = basePath + ".settings.json";
+    fs.stat(settingsPath, (err, stats) => {
+        if( err || !stats.isFile() ) { 
+            return;
+        }
+
+        fs.readFile(settingsPath, "utf8", (err, fileContent) => {
+
+            if( err ) {
+                dialog.showErrorBox("Project Settings Error", "Failed to load project settings file at: "+settingsPath);
+                return;
+            }
+            if( !fileContent ) {
+                dialog.showErrorBox("Project Settings Error", "Project settings file appeared to be empty: "+settingsPath);
+                return;
+            }
+
+            let settings = {};
+            try {
+                settings = JSON.parse(fileContent);
+            } catch(error) {
+                dialog.showErrorBox("Project Settings Error", "Project settings file appeared to be invalid JSON: "+settingsPath+": "+error);
+                return;
+            }
+
+            console.log(settings.menu);
+        });
+
+    });
+}
+
 
 ProjectWindow.all = () => windows;
 
@@ -227,8 +268,11 @@ ProjectWindow.addOrChangeViewSetting = function(name, data){
 }
 
 
-ipc.on("main-file-saved", (_, filePath) => {
+ipc.on("main-file-saved", (event, filePath) => {
     addRecentFile(filePath);
+
+    var win = ProjectWindow.withWebContents(event.sender);
+    win.refreshProjectSettings(filePath);
 });
 
 ipc.on("project-final-close", (event) => {
