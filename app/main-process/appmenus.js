@@ -1,4 +1,5 @@
-const electron = require('electron')
+const electron = require('electron');
+const { template } = require('lodash');
 const app = electron.app
 const ipc = electron.ipcMain;
 const dialog = electron.dialog;
@@ -8,7 +9,16 @@ const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const inkSnippets = require("./inkSnippets.js").snippets;
 const i18n = require('./i18n/i18n.js');
 
-function setupMenus(callbacks) {
+let menuTemplate = null;
+let recentFilesMenu = null;
+let callbacks = {
+};
+
+
+
+function setupMenus(newCallbacks) {
+    callbacks = newCallbacks;
+
     let themes = [];
     //Grab the default theme from storage
     const defaultTheme = ProjectWindow.getViewSettings().theme;
@@ -26,13 +36,6 @@ function setupMenus(callbacks) {
         });
     }
 
-    function computeRecent(newRecentFiles) {
-        return newRecentFiles.map((path) => ({
-            label: path,
-            click: () => ProjectWindow.open(path)
-        }));
-    }
-    
     let zoom_percents = [];
     //Grab the default zoom from storage
     const defaultZoom = ProjectWindow.getViewSettings().zoom + '%';
@@ -48,12 +51,12 @@ function setupMenus(callbacks) {
     }
 
     // Generate menus for ink snippets
-    const inkSubMenu = [];
+    let inkMenu = [];
     for(var category of inkSnippets) {
 
         // Category separator?
         if( category.separator ) {
-            inkSubMenu.push({
+            inkMenu.push({
                 type: 'separator'
             });
             continue;
@@ -74,13 +77,19 @@ function setupMenus(callbacks) {
             
         });
         
-        inkSubMenu.push({
+        inkMenu.push({
             label: i18n._(category.categoryName),
             submenu: items
         });
-    }
 
-    const template = [
+        // Custom snippets are added later during a callback after settings has been loaded  
+    }
+    
+    // Remember how many built in menu items we have so we can
+    // remove any custom ones when refreshing them.
+    inkMenuOriginalCount = inkMenu.length;
+
+    menuTemplate = [
         {
             label: i18n._('File'),
             submenu: [
@@ -104,7 +113,6 @@ function setupMenus(callbacks) {
                 },
                 {
                     label: i18n._('Open Recent'),
-                    submenu: computeRecent(ProjectWindow.getRecentFiles()),
                     id: "recent"
                 },
                 {
@@ -255,7 +263,8 @@ function setupMenus(callbacks) {
         },
         {
             label: i18n._('Ink'),
-            submenu: inkSubMenu
+            submenu: inkMenu,
+            id: "ink"
         },
         
         {
@@ -319,7 +328,7 @@ function setupMenus(callbacks) {
     const aboutWindowLabel = i18n._('About ') + name;
     // Mac specific menus
     if (process.platform === 'darwin') {
-        template.unshift({
+        menuTemplate.unshift({
             label: name,
             submenu: [
                 {
@@ -363,7 +372,7 @@ function setupMenus(callbacks) {
             ]
         });
 
-        var windowMenu = _.find(template, menu => menu.role == "window");
+        var windowMenu = _.find(menuTemplate, menu => menu.role == "window");
         windowMenu.submenu.push(
             {
                 type: 'separator'
@@ -377,7 +386,7 @@ function setupMenus(callbacks) {
     else
     {
         // Windows specific menu items
-        template.find(x => x.role === 'help').submenu.push(
+        menuTemplate.find(x => x.role === 'help').submenu.push(
             {
                 label: aboutWindowLabel,
                 click: callbacks.showAbout
@@ -385,17 +394,69 @@ function setupMenus(callbacks) {
         );
     }
 
-    const menu = Menu.buildFromTemplate(template);
-    Menu.setApplicationMenu(menu);
+    recentFilesMenu = _.find(
+        _.find(menuTemplate, menu => menu.label == i18n._("File")).submenu,
+        submenu => submenu.id == "recent"
+    );
+    
+    // This will also do the final refresh of the full Menu
+    refreshRecentFilesMenu(ProjectWindow.getRecentFiles());
+}
 
-    ProjectWindow.setRecentFilesChanged(function(newRecentFiles) {
-        _.find(
-            _.find(template, menu => menu.label == i18n._("File")).submenu,
-            submenu => submenu.id == "recent"
-        ).submenu = computeRecent(newRecentFiles);
-        const menu = Menu.buildFromTemplate(template);
-        Menu.setApplicationMenu(menu);
-    });
+function refreshRecentFilesMenu(recentFiles)
+{
+    // Re-create just the submenu of the Recent menu 
+    recentFilesMenu.submenu = recentFiles.map((path) => ({
+        label: path,
+        click: () => ProjectWindow.open(path)
+    }));
+
+    // Rebuild entire Menu for the app
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
+}
+
+function setCustomSnippetMenus(customInkSnippets)
+{
+    // Need to find it every time since Menu.buildFromTemplate mutates the template (since it sorts items etc)
+    let inkMenu = menuTemplate.find((submenu) => submenu.id == "ink");
+
+    // Remove old custom menus
+    if( inkMenu.submenu.length > inkMenuOriginalCount ) {
+        inkMenu.submenu.splice(inkMenuOriginalCount, inkMenu.submenu.length-inkMenuOriginalCount);
+    }
+
+    // Create new custom menus
+    for(let baseMenuName in customInkSnippets) {
+        let snippetsInCategory = customInkSnippets[baseMenuName];
+        if( !Array.isArray(snippetsInCategory) ) {
+            continue;
+        }
+
+        var categoryItems = snippetsInCategory.map(snippet => {
+            if( snippet.separator ) {
+                return {
+                    type: 'separator'
+                };
+            } else {
+                return {
+                    label: snippet.name,
+                    click: (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, snippet.ink)
+                }
+            }
+        });
+
+        inkMenu.submenu.push({
+            label: baseMenuName,
+            submenu: categoryItems
+        });
+    }
+
+    // Rebuild entire Menu for the app
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
 }
 
 exports.setupMenus = setupMenus;
+exports.refreshRecentFilesMenu = refreshRecentFilesMenu;
+exports.setCustomSnippetMenus = setCustomSnippetMenus;

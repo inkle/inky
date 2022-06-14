@@ -5,7 +5,7 @@ const dialog = electron.dialog;
 const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const DocumentationWindow = require("./documentationWindow.js").DocumentationWindow;
 const AboutWindow = require("./aboutWindow.js").AboutWindow;
-const appmenus = require('./appmenus.js');
+const AppMenus = require('./appmenus.js');
 const forceQuitDetect = require('./forceQuitDetect');
 const Inklecate = require("./inklecate.js").Inklecate;
 
@@ -53,7 +53,7 @@ app.on('ready', function () {
         }
     });
 
-    appmenus.setupMenus({
+    AppMenus.setupMenus({
         new: () => {
             ProjectWindow.createEmpty();
         },
@@ -143,6 +143,19 @@ app.on('ready', function () {
           AboutWindow.changeTheme(newTheme);
           DocumentationWindow.changeTheme(newTheme);
           ProjectWindow.addOrChangeViewSetting('theme', newTheme)
+        }
+    });
+
+    ProjectWindow.setEvents({
+        onRecentFilesChanged: (recentFiles) => {
+            AppMenus.refreshRecentFilesMenu(recentFiles);
+        },
+        onProjectSettingsChanged: (settings) => {
+            settings = settings || {};
+            AppMenus.setCustomSnippetMenus(settings.customInkSnippets || {});
+        },
+        onViewSettingsChanged: (viewSettings) => {
+            // Joe: 13/06/22: I refactored this but the callback was never hooked up in the first place?
         }
     });
 
