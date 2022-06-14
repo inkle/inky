@@ -134,6 +134,12 @@
     color: #00b6a5;
 }
 
+/* Custom instructions, e.g. >>> */
+.window.contrast .ace_editor span.ace_customInstruction {
+    color: red;
+}
+
+
 .window.contrast #main.hideTags .ace_editor span.ace_tag {
     color: #282828;
 }

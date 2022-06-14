@@ -7,6 +7,7 @@ const _ = require("lodash");
 const chokidar = require('chokidar');
 const mkdirp = require('mkdirp');
 const i18n = require('./i18n.js');
+const { InkMode } = require('./ace-ink-mode/ace-ink.js');
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -28,6 +29,10 @@ function InkProject(mainInkFilePath) {
     this.hasUnsavedChanges = false;
     this.unsavedFiles = [];
 
+    // Default ink mode for syntax highlighting. This may be replace if
+    // the user has a project settings file that customises the instructionPrefix
+    this.inkMode = new InkMode("");
+
     this.mainInk = null;
     this.mainInk = this.createInkFile(mainInkFilePath || null, isBrandNew = mainInkFilePath === undefined);
 
@@ -41,7 +46,7 @@ function InkProject(mainInkFilePath) {
 }
 
 InkProject.prototype.createInkFile = function(anyPath, isBrandNew, loadErrorCallback) {
-    var inkFile = new InkFile(anyPath || null, this.mainInk, isBrandNew, {
+    var inkFile = new InkFile(anyPath || null, this.mainInk, isBrandNew, this.inkMode, {
         fileChanged: () => { 
             if( inkFile.hasUnsavedChanges && !this.unsavedFiles.contains(inkFile) ) {
                 this.unsavedFiles.push(inkFile);
@@ -638,6 +643,22 @@ InkProject.prototype.findSymbol = function(name, posContext) {
 }
 
 
+InkProject.prototype.refreshProjectSettings = function(newProjectSettings) {
+    if( this.instructionPrefix != newProjectSettings.instructionPrefix ) {
+        this.instructionPrefix = newProjectSettings.instructionPrefix;
+        
+        // Refresh the InkMode, which affects syntax highlighting.
+        // This allows users to customise the "instructionPrefix", which
+        // is the game-specific convension to use something like ">>> CAMERA: Wide angle"
+        this.inkMode = new InkMode(this.instructionPrefix);
+
+        for(let inkFile of this.files) {
+            inkFile.setInkMode(this.inkMode);
+        }
+    }
+}
+
+
 InkProject.setEvents = function(e) {
     InkProject.events = e;
 }
@@ -693,6 +714,12 @@ ipc.on("project-export-js-only", (event) => {
 ipc.on("project-tryClose", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.tryClose();
+    }
+});
+
+ipc.on("project-settings-changed", (event, settings) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.refreshProjectSettings(settings);
     }
 });
 

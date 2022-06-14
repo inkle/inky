@@ -30,6 +30,11 @@
     color: #AAA;
 }
 
+/* Custom instructions, e.g. >>> */
+.ace_editor span.ace_customInstruction {
+    color: red;
+}
+
 #main.hideTags .ace_editor span.ace_tag {
     color: white;
 }

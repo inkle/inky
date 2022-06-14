@@ -328,7 +328,7 @@ var inkHighlightRules = function() {
                 "external.keyword"
             ],
 
-            // The rest of the external line unline a newline
+            // The rest of the external line until a newline
             push: [{
                 regex: /(\s*)([^\r\n]+)/,
                 token: [
@@ -510,7 +510,13 @@ var inkHighlightRules = function() {
             include: "#logicLine"
         }, {
             include: "#mixedContent"
-        }]
+        }, {
+            include: "#customInstruction"
+        }],
+
+        // This will be added when overriden in project settings
+        // "#customInstruction": [{
+        // }],
     }
     
     this.normalizeRules();
@@ -635,8 +641,39 @@ const keywords = [
     "VAR",
 ];
 
-var InkMode = function() {
-    this.HighlightRules = inkHighlightRules;
+var InkMode = function(instructionPrefix) {
+
+    // With instruction prefix
+    if( instructionPrefix ) {
+        var extendedRules = function() {
+            this.$rules = new inkHighlightRules().getRules();
+            
+            var regex = new RegExp("(\\s*)(" + instructionPrefix + ")(.*)");
+
+            this.$rules["#customInstruction"] = [{
+                regex: regex,
+                token: [
+                    "customInstruction",              // whitespace
+                    "customInstruction.punctuation",  // prefix
+                    "customInstruction"               // user content
+                ]
+            }];
+
+            this.normalizeRules();
+        }
+
+        extendedRules.metaData = inkHighlightRules.metaData
+        oop.inherits(extendedRules, TextHighlightRules);
+
+        this.HighlightRules = extendedRules;
+    }
+
+    // Standard rules, no instruction prefix
+    else {
+        this.HighlightRules = inkHighlightRules;
+    }
+
+    
     this.foldingRules = new inkFoldingRules();
 };
 oop.inherits(InkMode, TextMode);

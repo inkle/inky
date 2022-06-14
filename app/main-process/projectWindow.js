@@ -55,10 +55,10 @@ function ProjectWindow(filePath) {
         this.browserWindow.webContents.on('dom-ready', () => {
             this.browserWindow.setRepresentedFilename(filePath);
             this.browserWindow.webContents.send('set-project-main-ink-filepath', filePath);
-        });
 
-        // Try to load settings 
-        this.refreshProjectSettings(filePath);
+            // Try to load settings 
+            this.refreshProjectSettings(filePath);
+        });
     }
     
     // New project, new settings
@@ -159,6 +159,8 @@ ProjectWindow.prototype.refreshProjectSettings = function(rootInkFilePath) {
         if( events.onProjectSettingsChanged ) {
             events.onProjectSettingsChanged(settings);
         }
+
+        self.browserWindow.send("project-settings-changed", self.settings);
 
         if( err ) {
             dialog.showErrorBox("Project Settings Error", "Failed to load project settings file at: "+settingsPath);
