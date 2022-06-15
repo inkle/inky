@@ -286,6 +286,12 @@ NavView.setEvents({
         NavHistory.addStep();
     },
     addInclude: (filename, addToMainInk) => {
+
+        // Force filename to have .ink on the end if it hasn't been done manually by user
+        // (Is there ever a scenario where this isn't wanted?)
+        // Note that if they write my_file.txt then it will turn into my_file.txt.ink
+        if( path.extname(filename) != ".ink" ) filename += ".ink";
+
         var newInkFile = InkProject.currentProject.addNewInclude(filename, addToMainInk);
         if( newInkFile ) {
             InkProject.currentProject.showInkFile(newInkFile);
