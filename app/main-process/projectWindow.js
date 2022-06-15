@@ -49,6 +49,7 @@ function ProjectWindow(filePath) {
     this.browserWindow.setSheetOffset(49);
 
     this.safeToClose = false;
+    this.mainInkAbsPath = filePath;
 
     // Existing project at specific path
     if( filePath ) {
@@ -235,6 +236,17 @@ ProjectWindow.withWebContents = function(webContents) {
 }
 
 
+ProjectWindow.withMainkInkPath = function(absPath) {
+    if( !absPath ) return null;
+
+    for(var i=0; i<windows.length; i++) {
+        if( windows[i].mainInkAbsPath == absPath )
+            return windows[i];
+    }
+    return null;
+}
+
+
 ProjectWindow.getRecentFiles = function() {
     if(!fs.existsSync(recentFilesPath)) {
         return [];
@@ -310,11 +322,13 @@ ProjectWindow.addOrChangeViewSetting = function(name, data){
     }
 }
 
-ipc.on("main-file-saved", (event, filePath) => {
-    addRecentFile(filePath);
+
+ipc.on("main-file-saved", (event, absFilePath) => {
+    addRecentFile(absFilePath);
 
     var win = ProjectWindow.withWebContents(event.sender);
-    win.refreshProjectSettings(filePath);
+    win.mainInkAbsPath = absFilePath;
+    win.refreshProjectSettings(absFilePath);
 });
 
 ipc.on("project-final-close", (event) => {

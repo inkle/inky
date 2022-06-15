@@ -36,7 +36,15 @@ app.on("open-file", function (event, path) {
     
     // Drag and drop onto app while it's already open
     else {
-        ProjectWindow.open(path);
+
+        // See if this root file is already open in an existing window
+        let existingWin = ProjectWindow.withMainkInkPath(path);
+        if( existingWin ) {
+            existingWin.browserWindow.focus();
+            existingWin.browserWindow.webContents.send('open-main-ink');
+        } else {
+            ProjectWindow.open(path);       
+        }
     }
     
     event.preventDefault();

@@ -702,6 +702,12 @@ ipc.on("set-project-main-ink-filepath", (event, filePath) => {
     InkProject.loadProject(filePath);
 });
 
+ipc.on("open-main-ink", (event) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.showInkFile(InkProject.currentProject.mainInk);
+    }
+});
+
 ipc.on("project-new-include", () => {
     if( InkProject.currentProject ) {
         NavView.show();
