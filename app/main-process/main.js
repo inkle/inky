@@ -82,6 +82,11 @@ app.on('ready', function () {
         open: () => {
             ProjectWindow.open();
         },
+        clearRecent: () => {
+            ProjectWindow.clearRecentFiles();
+            AppMenus.setRecentFiles([]);
+            AppMenus.refresh();
+        },
         save: () => {
             var win = ProjectWindow.focused();
             if (win) win.save();

@@ -260,6 +260,12 @@ ProjectWindow.getRecentFiles = function() {
     }
 }
 
+ProjectWindow.clearRecentFiles = function() {
+    if(fs.existsSync(recentFilesPath)) {
+        fs.unlinkSync(recentFilesPath);
+    }
+}
+
 function addRecentFile(filePath) {
     const resolvedFilePath = path.resolve(filePath);
     const recentFiles = ProjectWindow.getRecentFiles();

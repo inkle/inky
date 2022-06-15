@@ -141,6 +141,26 @@ function refresh() {
         createSnippetMenuItems(customInkSnippets, inkMenu);
     }
 
+    let recentFilesSubmenu = recentFiles.map((path) => ({
+        label: path,
+        click: () => ProjectWindow.open(path)
+    }));
+    let hasRecentFiles = recentFiles.length > 0;
+    if( !hasRecentFiles ) {
+        recentFilesSubmenu.push({
+            label: i18n._('None'),
+            enabled: false
+        });
+    }
+    if( hasRecentFiles ) {
+        recentFilesSubmenu.push({"type": "separator"});
+        recentFilesSubmenu.push({
+            label: i18n._('Clear'),
+            enabled: hasRecentFiles,
+            click: callbacks.clearRecent
+        });
+    }
+
     // Finally, put everything together into the full menu template
     let menuTemplate = [
         {
@@ -167,10 +187,7 @@ function refresh() {
                 {
                     label: i18n._('Open Recent'),
                     id: "recent",
-                    submenu: recentFiles.map((path) => ({
-                        label: path,
-                        click: () => ProjectWindow.open(path)
-                    }))
+                    submenu: recentFilesSubmenu
                 },
                 {
                     type: 'separator'
