@@ -9,6 +9,7 @@ const AboutWindow = require("./aboutWindow.js").AboutWindow;
 const AppMenus = require('./appmenus.js');
 const forceQuitDetect = require('./forceQuitDetect');
 const Inklecate = require("./inklecate.js").Inklecate;
+const fs = require("fs");
 
 function inkJSNeedsUpdating() {
     return false;
@@ -21,17 +22,9 @@ function inkJSNeedsUpdating() {
     // return true;
 }
 
-let openedSpecificFileAtLaunch = false;
 let pendingPathToOpen = null;
 let hasFinishedLaunch = false;
-
-app.on('will-finish-launching', function () {
-    hasFinishedLaunch = true;
-    if( pendingPathToOpen ) {
-        ProjectWindow.open(pendingPathToOpen);
-        pendingPathToOpen = null;
-    }
-});
+let isQuitting = false;
 
 app.on("open-file", function (event, path) {
 
@@ -39,7 +32,6 @@ app.on("open-file", function (event, path) {
     // "open-file" seems to come before "will-finish-launching"
     if( !hasFinishedLaunch ) {
         pendingPathToOpen = path;
-        openedSpecificFileAtLaunch = true;
     }
     
     // Drag and drop onto app while it's already open
@@ -49,8 +41,6 @@ app.on("open-file", function (event, path) {
     
     event.preventDefault();
 });
-
-let isQuitting = false;
 
 app.on('before-quit', function () {
     // We need this to differentiate between pressing quit (which should quit) or closing all windows
@@ -190,18 +180,25 @@ app.on('ready', function () {
         }
     });
 
-    if (process.platform == "win32" && process.argv.length > 1 && !openedSpecificFileAtLaunch) {
+    // Windows passed file to open on command line?
+    if (process.platform == "win32" && process.argv.length > 1 && !pendingPathToOpen) {
         for (let i = 1; i < process.argv.length; i++) {
             var arg = process.argv[i].toLowerCase();
             if (arg.endsWith(".ink")) {
-                var fileToOpen = process.argv[1];
-                openedSpecificFileAtLaunch = true;
-                ProjectWindow.open(fileToOpen);
+                pendingPathToOpen = process.argv[1];
                 break;
             }
         }
     }
-    if (!openedSpecificFileAtLaunch) {
+
+    // Opened Inky with specific file (e.g. drag and drop or windows command line)
+    if( pendingPathToOpen ) {
+        ProjectWindow.open(pendingPathToOpen);
+        pendingPathToOpen = null;
+    }
+    
+    // Otherwise, show new empty window
+    else {
         ProjectWindow.createEmpty();
     }
 
@@ -209,6 +206,8 @@ app.on('ready', function () {
     let theme = ProjectWindow.getViewSettings().theme;
     AboutWindow.changeTheme(theme);
     DocumentationWindow.changeTheme(theme);
+
+    hasFinishedLaunch = true;
 
     // Debug
     //w.openDevTools();
