@@ -198,7 +198,25 @@ InkProject.prototype.startFileWatching = function() {
         return fileAbsPath.split(".").pop() == "ink";
     };
 
+    const tryUpdateSettingsFile = fileAbsPath => {
+        const mainInkPath = this.mainInk.absolutePath();
+        let basePath = mainInkPath;
+        if( path.extname(basePath) == ".ink" ) {
+            basePath = basePath.substring(0, basePath.length-4);
+        }
+        
+        let expectedSettingsPath = basePath + ".settings.json";
+        if( expectedSettingsPath != fileAbsPath ) {
+            return false; // not a settings file
+        }
+
+        ipc.send("project-settings-needs-reload", mainInkPath);
+
+        return true; // yes, it was a settings file
+    }
+
     this.fileWatcher.on("add", newlyFoundAbsFilePath => {
+        if( tryUpdateSettingsFile(newlyFoundAbsFilePath) ) return;
         if (!isInkFile(newlyFoundAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath);
@@ -220,6 +238,7 @@ InkProject.prototype.startFileWatching = function() {
     });
 
     this.fileWatcher.on("change", updatedAbsFilePath => {
+        if( tryUpdateSettingsFile(updatedAbsFilePath) ) return;
         if (!isInkFile(updatedAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, updatedAbsFilePath);
@@ -239,6 +258,7 @@ InkProject.prototype.startFileWatching = function() {
         }
     });
     this.fileWatcher.on("unlink", removedAbsFilePath => {
+        if( tryUpdateSettingsFile(removedAbsFilePath) ) return;
         if (!isInkFile(removedAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, removedAbsFilePath);

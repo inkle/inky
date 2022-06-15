@@ -320,4 +320,9 @@ ipc.on("project-final-close", (event) => {
     win.finalClose();
 });
 
+ipc.on("project-settings-needs-reload", (event, rootInkFilePath) => {
+    var win = ProjectWindow.withWebContents(event.sender);
+    win.refreshProjectSettings(rootInkFilePath);
+});
+
 exports.ProjectWindow = ProjectWindow;
