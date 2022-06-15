@@ -152,7 +152,7 @@ app.on('ready', function () {
         },
         onProjectSettingsChanged: (settings) => {
             settings = settings || {};
-            AppMenus.setCustomSnippetMenus(settings.customInkSnippets || {});
+            AppMenus.setCustomSnippetMenus(settings.customInkSnippets || []);
         },
         onViewSettingsChanged: (viewSettings) => {
             // Joe: 13/06/22: I refactored this but the callback was never hooked up in the first place?

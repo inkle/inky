@@ -163,7 +163,7 @@ ProjectWindow.prototype.refreshProjectSettings = function(rootInkFilePath) {
         self.browserWindow.send("project-settings-changed", self.settings);
 
         if( err ) {
-            dialog.showErrorBox("Project Settings Error", "Failed to load project settings file at: "+settingsPath);
+            dialog.showErrorBox("Project Settings Error", err);
         }
     }
 
@@ -176,11 +176,11 @@ ProjectWindow.prototype.refreshProjectSettings = function(rootInkFilePath) {
         fs.readFile(settingsPath, "utf8", (err, fileContent) => {
 
             if( err ) {
-                completeSettings({}, "Project Settings Error", "Failed to load project settings file at: "+settingsPath);
+                completeSettings({}, "File read error - failed to load project settings file at: "+settingsPath);
                 return;
             }
             if( !fileContent ) {
-                completeSettings({}, "Project Settings Error", "Project settings file appeared to be empty: "+settingsPath);
+                completeSettings({}, "Project settings file appeared to be empty: "+settingsPath);
                 return;
             }
 
@@ -188,7 +188,7 @@ ProjectWindow.prototype.refreshProjectSettings = function(rootInkFilePath) {
             try {
                 settings = JSON.parse(fileContent);
             } catch(error) {
-                completeSettings({}, "Project Settings Error", "Project settings file appeared to be invalid JSON: "+settingsPath+": "+error);
+                completeSettings({}, "Project settings file appeared to be invalid JSON: "+settingsPath+": "+error);
                 return;
             }
 

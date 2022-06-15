@@ -426,30 +426,51 @@ function setCustomSnippetMenus(customInkSnippets)
         inkMenu.submenu.splice(inkMenuOriginalCount, inkMenu.submenu.length-inkMenuOriginalCount);
     }
 
-    // Create new custom menus
-    for(let baseMenuName in customInkSnippets) {
-        let snippetsInCategory = customInkSnippets[baseMenuName];
-        if( !Array.isArray(snippetsInCategory) ) {
-            continue;
+            
+    // Recursively convert our settings format into the Electron template menu format.
+    // Very similar, but we rename things a bit and turn "ink" into a callback.
+    if( Array.isArray(customInkSnippets) && customInkSnippets.length > 0 ) {
+
+        // Add separator between built-in and custom snippets
+        inkMenu.submenu.push({type: "separator"});
+
+        function createSnippetMenuItems(menuItemsArray, parentMenuItem) {
+
+            if( !Array.isArray(menuItemsArray) ) return;
+
+            // Create new custom menus
+            for(let menuItem of menuItemsArray) {
+
+                let templateMenuItem = {};
+                let valid = false;
+
+                if( menuItem.separator ) {
+                    templateMenuItem.type = "separator";
+                    valid = true;
+                }
+
+                else if( menuItem.name ) {
+                    templateMenuItem.label = menuItem.name;
+
+                    if( menuItem.ink ) {
+                        templateMenuItem.click = (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, menuItem.ink)
+                        valid = true;
+                    }
+
+                    else if( menuItem.submenu && Array.isArray(menuItem.submenu) ) {
+                        valid = true;
+                        templateMenuItem.submenu = [];
+                        createSnippetMenuItems(menuItem.submenu, templateMenuItem);
+                    }
+                }
+                
+                if( valid )
+                    parentMenuItem.submenu.push(templateMenuItem);
+            }
+
         }
 
-        var categoryItems = snippetsInCategory.map(snippet => {
-            if( snippet.separator ) {
-                return {
-                    type: 'separator'
-                };
-            } else {
-                return {
-                    label: snippet.name,
-                    click: (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, snippet.ink)
-                }
-            }
-        });
-
-        inkMenu.submenu.push({
-            label: baseMenuName,
-            submenu: categoryItems
-        });
+        createSnippetMenuItems(customInkSnippets, inkMenu);
     }
 
     // Rebuild entire Menu for the app
