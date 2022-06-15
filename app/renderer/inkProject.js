@@ -8,6 +8,7 @@ const chokidar = require('chokidar');
 const mkdirp = require('mkdirp');
 const i18n = require('./i18n.js');
 const { InkMode } = require('./ace-ink-mode/ace-ink.js');
+const { PlayerView } = require('./playerView.js');
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -646,6 +647,8 @@ InkProject.prototype.findSymbol = function(name, posContext) {
 InkProject.prototype.refreshProjectSettings = function(newProjectSettings) {
     if( this.instructionPrefix != newProjectSettings.instructionPrefix ) {
         this.instructionPrefix = newProjectSettings.instructionPrefix;
+
+        PlayerView.setInstructionPrefix(this.instructionPrefix);
         
         // Refresh the InkMode, which affects syntax highlighting.
         // This allows users to customise the "instructionPrefix", which

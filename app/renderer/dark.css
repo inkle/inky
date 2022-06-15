@@ -90,6 +90,11 @@
     color: #999;
 }
 
+
+.window.dark #player .innerText p.customInstruction {
+    border-top-color: rgb(179, 94, 94);
+}
+
 .window.dark #editor .ace_gutter-layer,
 .window.dark .split {
     background: #444;

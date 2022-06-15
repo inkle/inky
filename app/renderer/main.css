@@ -592,6 +592,11 @@ img.issue-icon.warning {
   padding: 0 40px 0 40px;
 }
 
+#player .innerText p.customInstruction {
+  color: rgb(179, 94, 94);
+  font-family: Monaco, 'Courier New', monospace;
+}
+
 #player.altKey .innerText p span:hover {
   text-decoration: underline;
   cursor: pointer;
