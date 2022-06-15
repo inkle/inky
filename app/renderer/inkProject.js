@@ -57,7 +57,6 @@ InkProject.prototype.createInkFile = function(anyPath, isBrandNew, loadErrorCall
             // When a file is changed its state may change to have unsaved changes,
             // which should be reflected in the sidebar (unsaved files are bold).
             // Newly added INCLUDE lines get the callback includesChanged, below.
-            
             this.refreshIncludes();
         },
 

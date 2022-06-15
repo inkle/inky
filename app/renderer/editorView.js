@@ -16,7 +16,8 @@ var savedScrollRow = null;
 var events = {
     change:         () => {},
     jumpToInclude:  () => {},
-    jumpToSymbol:   () => {}
+    jumpToSymbol:   () => {},
+    changedLine:    () => {}
 };
 
 editor.setShowPrintMargin(false);
@@ -27,6 +28,9 @@ editor.setOptions({
 editor.on("change", () => {
     events.change();
 });
+editor.on("changeSelection", ()=>{
+    events.changedLine(editor.getCursorPosition());
+})
 
 // Exclude language_tools.textCompleter but add the Ink completer
 editor.completers = editor.completers.filter(
@@ -175,5 +179,8 @@ exports.EditorView = {
             editor.moveCursorToPosition(savedCursorPos); 
             editor.scrollToRow(savedScrollRow);
         } 
+    },
+    getCurrentCursorPos: ()=>{
+        return editor.getCursorPosition();
     }
 };

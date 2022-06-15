@@ -330,10 +330,12 @@ var inkHighlightRules = function() {
 
             // The rest of the external line until a newline
             push: [{
-                regex: /(\s*)([^\r\n]+)/,
+                regex: /(\s*)(\w+)(\([\w,\s->]*\))?/,
                 token: [
                     "external", // whitespace
-                    "external.declaration"
+                    "external.declaration.name", //function name
+                    "external.declaration.parameters" //function parameters
+
                 ]
             }, 
             { 

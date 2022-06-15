@@ -11,6 +11,7 @@ function InkFileSymbols(inkFile, events) {
 
     this.divertTargets = new Set();
     this.variables = new Set();
+    this.externals = new Set();
     this.vocabWords = new Set();
 
     this.inkFile.aceDocument.on("change", () => {
@@ -45,6 +46,7 @@ InkFileSymbols.prototype.parse = function() {
     const varTypes = [
         { name: "Variable", code: "var-decl"  },
         { name: "List",     code: "list-decl" },
+        { name: "External", code: "external"},
     ];
     const topLevelInkFlow = { level: 0 };
 
@@ -63,6 +65,7 @@ InkFileSymbols.prototype.parse = function() {
 
     var divertTargets = new Set();
     var variables = new Set();
+    var externals = new Set();
     var vocabWords = new Set();
 
     var it = new TokenIterator(session, 0, 0);
@@ -72,8 +75,13 @@ InkFileSymbols.prototype.parse = function() {
     // initially, and sometimes it doesn't?
     if( it.getCurrentToken() === undefined ) it.stepForward();
     
-    for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
+    var isfunc = false
 
+    for(var tok = it.getCurrentToken(); tok; tok = it.stepForward()) {
+        //Flag, if triggered, the next "name" is a function. 
+        if (tok.type.endsWith("function"))
+        isfunc = true
+        
         // Token is some kind of name?
         if( tok.type.indexOf(".name") != -1 ) {
 
@@ -92,6 +100,7 @@ InkFileSymbols.prototype.parse = function() {
 
                 var symbol = {
                     name: symbolName,
+                    isfunc : isfunc,
                     flowType: flowType,
                     row: it.getCurrentTokenRow(),
                     column: it.getCurrentTokenColumn(),
@@ -103,21 +112,25 @@ InkFileSymbols.prototype.parse = function() {
                     symbol.parent = parent;
 
                 if( !parent.innerSymbols ) {
-                    parent.innerSymbols = [];
+                    parent.innerSymbols = {};
                     parent.rangeIndex = [];
                 }
-
                 parent.innerSymbols[symbolName] = symbol;
                 parent.rangeIndex.push({
                     rowStart: symbol.row,
                     symbol: symbol
                 });
-
                 symbolStack.push(symbol);
                 divertTargets.add(symbolName);
+                isfunc = false
             }
             else if( varType ) {
-                variables.add(symbolName);
+                switch (tok.type){
+                    case "external.declaration.name":
+                        externals.add(symbolName)
+                    default:
+                        variables.add(symbolName);
+                }
             }
             // Not a knot/stitch/gather/choice nor a variable. Do nothing.
         }
@@ -179,8 +192,8 @@ InkFileSymbols.prototype.parse = function() {
 
     this.divertTargets = divertTargets;
     this.variables = variables;
+    this.externals = externals;
     this.vocabWords = vocabWords;
-
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];
     this.includes = includes;
@@ -200,38 +213,80 @@ InkFileSymbols.prototype.parse = function() {
     this.dirty = false;
 }
 
+InkFileSymbols.prototype.flowAtPos =function(pos){
+    if (this.dirty) this.parse();
+    return symbolsWithinIndex(this.rangeIndex, pos);
+}
+ 
 InkFileSymbols.prototype.symbolAtPos = function(pos) {
 
     if( this.dirty ) this.parse();
-
-    // Range index is an index of all the symbols by row number,
-    // nested into a hierarchy. 
-    function symbolWithinIndex(rangeIndex) {
-
-        if( !rangeIndex )
-            return null;
-
-        // Loop through range until we find the symbol,
-        // then dig in to see if we can find a more accurate sub-symbol
-        for(var i=0; i<rangeIndex.length; i++) {
-
-            var nextRangeElement = null;
-            if( i < rangeIndex.length-1 )
-                nextRangeElement = rangeIndex[i+1];
-
-            if( !nextRangeElement || pos.row < nextRangeElement.rowStart ) {
-                var symbol = rangeIndex[i].symbol;
-                return symbolWithinIndex(symbol.rangeIndex) || symbol;
-            }
-        }
-
-        // Only if it's an empty range, so impossible?
-        return null;
-    }
-
-    return symbolWithinIndex(this.rangeIndex);
+    return symbolWithinIndex(this.rangeIndex, pos);
 }
 
+// Range index is an index of all the symbols by row number,
+// nested into a hierarchy. 
+function symbolWithinIndex(rangeIndex, pos, includeFlows=true, includeVars=true) {
+    if( !rangeIndex )
+        return null;
+
+    // Loop through range until we find the symbol,
+    // then dig in to see if we can find a more accurate sub-symbol
+    for(var i=0; i<rangeIndex.length; i++) {
+        var nextRangeElement = null;
+        var isValidSymbol = false;
+        if( i < rangeIndex.length-1 ) {
+            nextRangeElement = rangeIndex[i+1];
+            isValidSymbol = ((nextRangeElement.symbol.flowType && includeFlows) || (nextRangeElement.symbol.varType && includeVars))
+        }
+        if( (!nextRangeElement || pos.row < nextRangeElement.rowStart )) {
+            var symbol = rangeIndex[i].symbol;
+            isValidSymbol = ((symbol.flowType && includeFlows) || (symbol.varType && includeVars))
+            if (isValidSymbol){
+                return symbolWithinIndex(symbol.rangeIndex, pos) || symbol;
+            }
+        }
+    }
+
+    // Only if it's an empty range, so impossible?
+    return null;
+}
+
+//Similar to above function, but this returns an array of the possible symbols that
+//a cursor could belong to. This makes it possible to select
+//a chosen symbol to interact with, for example finding what knot
+//a line belongs to. 
+function symbolsWithinIndex(rangeIndex, pos) {
+    if( !rangeIndex )
+        return null;
+    var symbols = {};
+    var start = 0;
+    var end = rangeIndex.length-1;
+    //While there is a range to explore
+    while (rangeIndex && start <= end) {
+        //Fine next element, if there is one.
+        var nextRangeElement = null;
+        if( start < end ) {
+            nextRangeElement = rangeIndex[start+1];
+        }
+        //If there is no next element, or if the next element goes too far, then
+        //current element is the looked for item. 
+        if( (!nextRangeElement || pos.row < nextRangeElement.rowStart )) {
+            var symbol = rangeIndex[start].symbol;
+            //We don't want extras, so only add a symbol if it fits!
+            if (pos.row >= symbol.row){
+                symbols[symbol.flowType.name] = symbol;
+            }
+            rangeIndex = symbol.rangeIndex;
+            start = 0;
+            end = (rangeIndex)? rangeIndex.length - 1 : 0; 
+        }
+        else{
+            start += 1;
+        }
+    }
+    return symbols;
+}
 InkFileSymbols.prototype.getSymbols = function() {
     if( this.dirty ) this.parse();
     return this.symbols;
@@ -253,6 +308,10 @@ InkFileSymbols.prototype.getCachedDivertTargets = function() {
 
 InkFileSymbols.prototype.getCachedVariables = function() {
     return this.variables;
+}
+
+InkFileSymbols.prototype.getCachedExternals = function() {
+    return this.externals;
 }
 
 InkFileSymbols.prototype.getCachedVocabWords = function() {

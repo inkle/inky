@@ -5,8 +5,8 @@ const path = require("path");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 // Debug
-const loadTestInk = false;
-// remote.getCurrentWindow().webContents.openDevTools();
+const loadTestInk = true;
+//remote.getCurrentWindow().webContents.openDevTools();
 
 // Helpers in global objects and namespace
 
@@ -47,8 +47,10 @@ InkProject.setEvents({
         var filename = inkFile.filename();
         ToolbarView.setTitle(filename);
         NavView.highlightRelativePath(inkFile.relativePath());
+        NavView.setKnots(inkFile);
         var fileIssues = LiveCompiler.getIssuesForFilename(inkFile.relativePath());
         setImmediate(() => EditorView.setErrors(fileIssues));
+        NavView.updateCurrentKnot(inkFile, EditorView.getCurrentCursorPos());
         NavHistory.addStep();
     }
 });
@@ -58,12 +60,12 @@ InkProject.setEvents({
 $(document).ready(() => {
     if( InkProject.currentProject == null ) {
         InkProject.startNew();
-
         // Debug
         if( loadTestInk ) {
             var testInk = require("fs").readFileSync(path.join(__dirname, "test.ink"), "utf8");
             InkProject.currentProject.mainInk.setValue(testInk);
         }
+        NavView.setKnots(InkProject.currentProject.mainInk);
     }
 });
 
@@ -225,6 +227,7 @@ ipc.on("keyboard-shortcuts", (event, visible) => {
 EditorView.setEvents({
     "change": () => {
         LiveCompiler.setEdited();
+        NavView.setKnots(InkProject.currentProject.activeInkFile);
     },
     "jumpToSymbol": (symbolName, contextPos) => {
         var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
@@ -238,7 +241,12 @@ EditorView.setEvents({
         InkProject.currentProject.showInkFile(includePath);
         NavHistory.addStep();
     },
-    "navigate": () => NavHistory.addStep()
+    "navigate": () => NavHistory.addStep(),
+    "changedLine": (pos) =>{
+        if (InkProject.currentProject && InkProject.currentProject.activeInkFile){
+            NavView.updateCurrentKnot(InkProject.currentProject.activeInkFile, pos);
+    }
+}
 });
 
 PlayerView.setEvents({
@@ -260,7 +268,7 @@ ExpressionWatchView.setEvents({
 });
 
 ToolbarView.setEvents({
-    toggleSidebar: () => { NavView.toggle(); },
+    toggleSidebar: (id) => { NavView.toggle(id); },
     navigateBack: () => NavHistory.back(),
     navigateForward: () => NavHistory.forward(),
     selectIssue: gotoIssue,
@@ -285,6 +293,9 @@ NavView.setEvents({
             return true;
         }
         return false;
+    },
+    jumpToRow: (row) => {
+        EditorView.gotoLine(row+1);
     }
 });
 

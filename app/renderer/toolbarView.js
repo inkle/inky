@@ -109,7 +109,12 @@ function updateIssuesPopupPosition() {
 $(document).ready(function() {
 
     $("#toolbar .nav-toggle.button").on("click", function(event) {
-        events.toggleSidebar();
+        events.toggleSidebar("#file-nav-wrapper");
+        event.preventDefault();
+    });
+
+    $("#toolbar .knot-toggle.button").on("click", function(event) {
+        events.toggleSidebar("#knot-stitch-wrapper");
         event.preventDefault();
     });
 

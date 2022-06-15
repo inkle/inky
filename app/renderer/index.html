@@ -12,6 +12,8 @@
   <body>
 
     <link rel="stylesheet" href="photon/css/photon.css">
+    <link rel="stylesheet" href="ink-icons/css/ink.css">
+
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="inkTheme.css">
     <link rel="stylesheet" href="dark.css">
@@ -24,12 +26,17 @@
 
       <div id="toolbar" class="draggable">
 
+
+        
         <div class="buttons left">
 
           <div class="button nav-toggle" title="Toggle file browser">
             <span class="icon icon-menu"></span>
           </div>
 
+          <div class="button knot-toggle" title="Toggle knot browser">
+            <span class="icon ink-icon icon-category"></span>
+          </div>
           <div class="button nav-back" title="Navigate back">
             <span class="icon icon-left-dir"></span>
           </div>
@@ -75,23 +82,17 @@
         <div id="main">
            <div class="sidebar hidden">
 
-            <div class="nav-wrapper">
-              <nav class="nav-group main-ink">
-                <h5 class="nav-group-title i18n">Main ink file</h5>
-                <a class="nav-group-item active">
-                  <span class="icon icon-book"></span>
-                  <span class="filename"></span>
-                </a>
-              </nav>
+            <div class="nav-wrapper hidden" id="knot-stitch-wrapper">
             </div>
-
+            <div class="nav-wrapper hidden hasFooter" id="file-nav-wrapper">
+            </div>
             <div class="footer">
               <a class="add-include-button">
                 <span class="icon icon-plus"></span>
                 <span class="i18n">Add new include</span>
               </a>
               <div class="new-include-form">
-                <h5 class="i18n">Enter new ink file name:</h5>
+                <h5 class="i18n">Enter new ink filename:</h5>
                 <div class="inputWrapper">
                   <input type="text" class="form-control i18n" placeholder="Folder/inkFileName.ink">
                 </div>
@@ -104,7 +105,9 @@
                 </div>
               </div>
             </div>
-
+            
+            
+            
           </div><!-- sidebar -->
 
           <div class="split hidden"></div>

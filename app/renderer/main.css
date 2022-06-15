@@ -341,8 +341,16 @@ img.issue-icon.warning {
   cursor: default;
 }
 
+.sidebar .nav-group-item.active .filename{
+  font-weight: bold;
+}
+
 .sidebar .nav-group-item.unsaved .filename {
   font-weight: bold;
+}
+
+.sidebar .nav-group-item.stitch {
+  margin-left: 10px;
 }
 
 .sidebar .nav-group-item.loading .filename {

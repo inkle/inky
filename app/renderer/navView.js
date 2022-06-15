@@ -2,49 +2,61 @@ const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const path = require("path");
 const _ = require("lodash");
 const i18n = require("./i18n.js");
+const InkFile = require("./inkFile.js").InkFile;
+const { range, toInteger } = require('lodash');
 
 const slideAnimDuration = 200;
 var sidebarWidth = 200;
 
 var $sidebar = null;
-var $navWrapper = null;
+var $fileNavWrapper = null;
+var $knotStichNavWrapper = null;
 var $twoPane = null;
 var $footer = null;
 var $newIncludeForm = null;
+
+var $currentNavWrapper = null
 
 var visible = false;
 var hasBeenShown = false;
 var events = {};
 
 $(document).ready(() => {
+    //Assign each variable to the allocated class/id.
     $sidebar = $(".sidebar");
-    $navWrapper = $sidebar.find(".nav-wrapper");
+    $fileNavWrapper = $sidebar.find("#file-nav-wrapper");
+    $knotStichNavWrapper = $sidebar.find("#knot-stitch-wrapper")
     $twoPane = $(".twopane");
     $sidebarSplit = $("#main").children(".split");
     $sidebarSplit.hide();
     $sidebarSplit.css("left", 0);
     $footer = $sidebar.find(".footer");
 
-    // Clicking on files
-    $navWrapper.on("click", ".nav-group-item", function(event) {
+    // Clicking on navigation item
+    $fileNavWrapper.on("click", ".nav-group-item", function(event) {
+        //Any clicked navigation item should become highlighted
         event.preventDefault();
-
         var $targetNavGroupItem = $(event.currentTarget);
         highlight$NavGroupItem($targetNavGroupItem);
-
-        var fileIdStr = $targetNavGroupItem.attr("data-file-id");
-        var fileId = parseInt(fileIdStr);
-        events.clickFileId(fileId);
+            var fileIdStr = $targetNavGroupItem.attr("data-file-id");
+            var fileId = parseInt(fileIdStr);
+            events.clickFileId(fileId);
+    });
+    $knotStichNavWrapper.on("click", ".nav-group-item", function(event) {
+        //Any clicked navigation item should become highlighted
+        event.preventDefault();
+        var $targetNavGroupItem = $(event.currentTarget);
+        var row = $targetNavGroupItem.attr("row");
+        events.jumpToRow(parseInt(row))
     });
 
     // Add new include interactions
     $newIncludeForm = $footer.find(".new-include-form");
-    $footer.find(".add-include-button").on("click", function(event) {
+    $sidebar.on("click", ".add-include-button", function(event) {
         setIncludeFormVisible(true);
         event.preventDefault();
-        
     });
-    $footer.find("#cancel-add-include").on("click", function(event) {
+    $sidebar.on("click", "#cancel-add-include", function(event) {
         setIncludeFormVisible(false);
         event.preventDefault();
     })
@@ -65,19 +77,19 @@ $(document).ready(() => {
         }
     }
 
-    $newIncludeForm.find("input").on("keypress", function(event) {
+    $sidebar.on("keypress", "input", function(event) {
         const returnKey = 13;
         if( event.which == returnKey ) {
             confirmAddInclude();
             event.preventDefault();
         }
     });
-    $newIncludeForm.find("#add-include").on("click", function(event) {
+    $sidebar.on("click", "#add-include", function(event) {
         event.preventDefault();
         confirmAddInclude();
     })
 
-    // Unfortuanately you can't capture escape from the input itself
+    // Unfortunately you can't capture escape from the input itself
     $(document).keyup(function(e) {
         const escape = 27;
         if (e.keyCode == escape) {
@@ -98,11 +110,100 @@ $(document).ready(() => {
 });
 
 function setMainInkFilename(name) {
-    $navWrapper.find(".nav-group.main-ink .nav-group-item .filename").text(name);
+    $fileNavWrapper.find(".nav-group.main-ink .nav-group-item .filename").text(name);
+}
+
+function setKnots(mainInk){
+//Parse the symbols before setting the knots
+//TODO: Improved implementation of symbols/when they parse
+//may make this unneeded. This may improve performance, 
+//as currently it parses whenever the user types
+//anything! 
+    mainInk.symbols.parse();
+    var ranges = mainInk.symbols.rangeIndex;
+    if (!ranges) {
+        return;
+    }
+    $knotStichNavWrapper.empty();
+    var extraClass = ""
+    
+    var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>`);
+    var $functions = $(`<nav class="nav-group"><h5 class="nav-group-title">Functions</h5></nav>`);
+
+    var foundContent = false; 
+    var foundFunctions = false;
+
+    // $knotStichNavWrapper.append($main);
+    //For every knots (Ranges is knot and functions)
+    ranges.forEach(range => {
+        var symbol = range.symbol;
+        var extraClass = "knot"
+        if (symbol.isfunc) foundFunctions = true; else foundContent = true;
+        var icon = symbol.isfunc ? "ink-icon icon-function-scaled" : "ink-icon icon-knot-scaled"
+        var items = `<span class="nav-group-item ${extraClass}" row = "${symbol.row}">
+        <span class="icon ${icon}"></span>
+                <span class="filename">${symbol.name}</span>
+            </span>`;
+        //If the knot has any symbols inside of it.
+        if (symbol.innerSymbols){
+            //For every stitch inside the knot
+            Object.keys(symbol.innerSymbols).forEach((innerSymbolName) => {
+                var innerSymbol = symbol.innerSymbols[innerSymbolName]
+                if (innerSymbol.flowType.name == "Stitch"){
+                    var extraClass = "stitch";
+                    items += 
+                    `<span class="nav-group-item ${extraClass}" row = "${innerSymbol.row}">
+                    <span class="icon ink-icon icon-stitch-scaled"></span>
+                            <span class="filename">${innerSymbol.name}</span>
+                        </span>`;
+                }
+            });
+
+        }
+
+        extraClass = "";
+        var $group = $(`<nav class="nav-group ${extraClass}"> ${items} </nav>`);
+
+        if (symbol.isfunc)
+            $functions.append($group);
+        else 
+            $content.append($group);
+    });
+
+    if (foundContent)
+        $knotStichNavWrapper.append($content);
+    if (foundFunctions)
+        $knotStichNavWrapper.append($functions);
+}
+
+function updateCurrentKnot(mainInk, cursorPos){
+    var symbols = mainInk.symbols.flowAtPos(cursorPos);
+    if (!symbols) return;
+    if ("Knot" in symbols){
+        var currentKnot = $(`[row=${symbols["Knot"].row}]`);
+        if (symbols["Knot"].isfunc){
+            currentKnot.addClass("function")
+        }
+    }
+    if ("Stitch" in symbols){
+        var currentStitch = $(`[row=${symbols["Stitch"].row}]`);
+    }
+    if ((currentKnot && currentKnot.hasClass("active"))&&(currentStitch && currentStitch.hasClass("active")))
+    return;
+    $(".nav-group-item.active").removeClass("active");
+    if (currentKnot && currentKnot.length !== 0){
+        currentKnot.addClass("active");
+        currentKnot[0].scrollIntoView();
+
+    }
+    if (currentStitch && currentStitch.length !== 0){
+        currentStitch.addClass("active");
+        currentStitch[0].scrollIntoView();
+    }
+
 }
 
 function setFiles(mainInk, allFiles) {
-
     var unusedFiles = _.filter(allFiles, f => f.isSpare);
     var normalIncludes = _.filter(allFiles, f => !f.isSpare && f != mainInk);
     var groupedIncludes = _.groupBy(normalIncludes, f => { 
@@ -121,7 +222,7 @@ function setFiles(mainInk, allFiles) {
             files: unusedFiles
         });
 
-    $navWrapper.empty();
+    $fileNavWrapper.empty();
     
     var extraClass = "";
     if( mainInk.hasUnsavedChanges ) extraClass = "unsaved";
@@ -134,22 +235,22 @@ function setFiles(mainInk, allFiles) {
                         <span class="filename">${mainInk.filename()}</span>
                     </a>
                 </nav>`;
-    $navWrapper.append($main)
-
+    $fileNavWrapper.append($main);
+    var nonMainFileActive = false;
     groupsArray.forEach(group => {
         var items = "";
 
         group.files.forEach((file) => {
             var name = file.isSpare ? file.relativePath() : file.filename();
-
+            
             var extraClass = "";
             if( file.hasUnsavedChanges ) extraClass = "unsaved";
             if( file.isLoading ) extraClass += " loading";
-
+            
             items = items + `<span class="nav-group-item ${extraClass}" data-file-id="${file.id}">
-                                <span class="icon icon-doc-text"></span>
-                                <span class="filename">${name}</span>
-                            </span>`;
+            <span class="icon icon-doc-text"></span>
+            <span class="filename">${name}</span>
+            </span>`;
         });
 
         extraClass = "";
@@ -157,12 +258,13 @@ function setFiles(mainInk, allFiles) {
             extraClass = "unused";
 
         var $group = $(`<nav class="nav-group ${extraClass}"><h5 class="nav-group-title">${group.name}</h5> ${items} </nav>`);
-        $navWrapper.append($group);
+        $fileNavWrapper.append($group);
     });
+    
 }
 
 function highlight$NavGroupItem($navGroupItem) {
-    $navWrapper.find(".nav-group-item").not($navGroupItem).removeClass("active");
+    $fileNavWrapper.find(".nav-group-item").not($navGroupItem).removeClass("active");
     $navGroupItem.addClass("active");
 }
 
@@ -173,7 +275,7 @@ function highlightRelativePath(relativePath) {
 
     var filename = path.basename(relativePath);
 
-    var $group = $navWrapper.find(".nav-group").filter((i, el) => $(el).find(".nav-group-title").text() == dirName);
+    var $group = $fileNavWrapper.find(".nav-group").filter((i, el) => $(el).find(".nav-group-title").text() == dirName);
     if( dirName == "" ) $group = $group.add(".nav-group.main-ink");
 
     var $file = $group.find(".nav-group-item .filename").filter((i, el) => $(el).text() == filename);
@@ -240,14 +342,34 @@ function setIncludeFormVisible(visible) {
     }
 }
 
+function toggle(id){
+    if (visible && $currentNavWrapper && "#"+$currentNavWrapper.attr('id')==id){
+        hide(); 
+    }
+    else if (!visible){
+        show();
+    }
+    $(".nav-wrapper").addClass("hidden");
+    $currentNavWrapper = $(id);
+    $currentNavWrapper.removeClass("hidden");
+    if ($currentNavWrapper.hasClass("hasFooter")) 
+        $footer.removeClass("hidden");
+    else 
+        $footer.addClass("hidden");
+}
+
 exports.NavView = {
     setMainInkFilename: setMainInkFilename,
     setFiles: setFiles,
+    setKnots: setKnots,
+    updateCurrentKnot: updateCurrentKnot,
     highlightRelativePath: highlightRelativePath,
     setEvents: e => events = e,
     hide: hide,
     show: show,
-    initialShow: () => { if( !hasBeenShown ) show(); },
-    toggle: () => { if( visible ) hide(); else show(); },
+    initialShow: () => { if( !hasBeenShown ) 
+        toggle("#file-nav-wrapper");
+    },
+    toggle: toggle,
     showAddIncludeForm: () => setIncludeFormVisible(true)
 }
