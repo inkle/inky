@@ -54,7 +54,7 @@ function refresh() {
 
     // Create menus for ink snippets (built in snippets)
     let inkMenu = {
-        label: i18n._('Ink'),
+        label: i18n._('&Ink'),
         submenu: [],
         id: "ink"
     };
@@ -164,7 +164,7 @@ function refresh() {
     // Finally, put everything together into the full menu template
     let menuTemplate = [
         {
-            label: i18n._('File'),
+            label: i18n._('&File'),
             submenu: [
                 {
                     label: i18n._('New Project'),
@@ -229,7 +229,7 @@ function refresh() {
             ]
         },
         {
-            label: i18n._('Edit'),
+            label: i18n._('&Edit'),
             submenu: [
                 {
                     label: i18n._('Undo'),
@@ -275,7 +275,7 @@ function refresh() {
             ]
         },
         {
-            label: i18n._("View"),
+            label: i18n._("&View"),
             submenu: [
                 {
                     label: i18n._('Toggle Full Screen'),
@@ -306,7 +306,7 @@ function refresh() {
             ]
         },
         {
-            label: i18n._('Story'),
+            label: i18n._('&Story'),
             submenu: [
                 {
                     label: i18n._('Go to anything...'),
@@ -339,7 +339,7 @@ function refresh() {
         inkMenu,
         
         {
-            label: i18n._('Window'),
+            label: i18n._('&Window'),
             role: 'window',
             submenu: [
                 {
@@ -384,7 +384,7 @@ function refresh() {
             ]
         },
         {
-            label: i18n._('Help'),
+            label: i18n._('&Help'),
             role: 'help',
             submenu: [
                 {
