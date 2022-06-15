@@ -7,7 +7,7 @@ cd "`dirname "$0"`"
 #
 
 # Clean
-rm -rf Inky-darwin-x64/
+rm -rf Inky-darwin-universal/
 rm -rf Inky-win32-x64/
 rm -rf Inky-win32-ia32/
 rm -rf Inky-linux-x64/
