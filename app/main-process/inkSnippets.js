@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const i18n = require("./i18n/i18n.js");
 
 // Find longer snippets folder
 const snippetsDirRelease = path.join(__dirname, "../../app.asar.unpacked/main-process", "ink/longer-ink-snippets");
@@ -36,27 +37,27 @@ exports.snippets = [
     // Basic structure
     //-------------------
     {
-        categoryName: "Basic structure",
+        categoryName: i18n._('Basic structure'),
         snippets: [
             {
-                name: "Knot (main section)",
+                name: i18n._('Knot (main section)'),
                 ink: "=== knotName ===\n"
                     +"This is the content of the knot.\n"
                     +"-> END\n"
             },
             {
-                name: "Stitch (sub-section)",
+                name: i18n._('Stitch (sub-section)'),
                 ink: "= stitchName\n"
                     +"This is the content of the stitch that should be embedded within a knot.\n"
                     +"-> END\n"
             },
             {separator: true},
             {
-                name: "Divert",
+                name: i18n._('Divert'),
                 ink: "-> targetKnotName"
             },
             {
-                name: "Ending indicator",
+                name: i18n._('Ending indicator'),
                 ink: "-> END\n"
             }
         ]
@@ -66,22 +67,22 @@ exports.snippets = [
     // CHOICES
     //-------------------
     {
-        categoryName: "Choices",
+        categoryName: i18n._('Choices'),
         snippets: [
             {
-                name: "Basic Choice",
+                name: i18n._('Basic Choice'),
                 ink:  "* This is a choice that can only be chosen once\n"
             },
             {
-                name: "Sticky choice",
+                name: i18n._('Sticky choice'),
                 ink: "+ This is a sticky choice - the player can choose it more than once\n"
             },
             {
-                name: "Choice without printing",
+                name: i18n._('Choice without printing'),
                 ink: "* [A choice where the content isn't printed after choosing]\n"
             },
             {
-                name: "Choice with mixed output",
+                name: i18n._('Choice with mixed output'),
                 ink: "* Try [it] this example!\n"
             },
         ]
@@ -91,18 +92,18 @@ exports.snippets = [
     // VARIABLES
     //-------------------
     {
-        categoryName: "Variables",
+        categoryName: i18n._('Variables'),
         snippets: [
             {
-                "name": "Global variable",
+                "name": i18n._('Global variable'),
                 "ink": "VAR myNumber = 5\n"
             },
             {
-                "name": "Temporary variable",
+                "name": i18n._('Temporary variable'),
                 "ink": "temp myTemporaryValue = 5\n"
             },
             {
-                "name": "Modify variable",
+                "name": i18n._('Modify variable'),
                 "ink": "~ myNumber = myNumber + 1\n"
             },
 
@@ -113,10 +114,10 @@ exports.snippets = [
     // INLINE LOGIC
     //-------------------
     {
-        categoryName: "Inline logic",
+        categoryName: i18n._('Inline logic'),
         snippets: [
             {
-                name: "Condition",
+                name:  i18n._('Condition'),
                 ink: "{yourVariable: This is written if yourVariable is true|Otherwise this is written}"
             }
         ]
@@ -126,10 +127,10 @@ exports.snippets = [
     // MULTI-LINE LOGIC
     //-------------------
     {
-        categoryName: "Multi-line logic",
+        categoryName: i18n._('Multi-line logic'),
         snippets: [
             {
-                name: "Condition",
+                name: i18n._('Condition'),
                 ink: "{yourVariable:\n"+
                      "    This is written if yourVariable is true.\n"+
                      "  - else:\n"+
@@ -143,14 +144,14 @@ exports.snippets = [
     // COMMENTS
     //-------------------
     {
-        categoryName: "Comments",
+        categoryName: i18n._('Comments'),
         snippets: [
             {
-                name: "Single-line comment",
+                name: i18n._('Single-line comment'),
                 ink: "// This line is a comment.\n"
             }, 
             {
-                name: "Block comment",
+                name: i18n._('Block comment'),
                 ink: "/* ---------------------------------\n"+
                      "\n" +
                      "   This whole section is a comment \n"+
@@ -166,30 +167,30 @@ exports.snippets = [
     // LIST FUNCTIONS
     //-------------------
     {
-        categoryName: "List-handling",
+        categoryName: i18n._('List-handling'),
         snippets: [
             {
-                name: "List: pop",
+                name: i18n._('List: pop'),
                 ink:  loadLongerSnippet("list_pop.ink") 
             },
             {
-                name: "List: pop_random",
+                name: i18n._('List: pop_random'),
                 ink:  loadLongerSnippet("list_pop_random.ink") 
             },
             {
-                name: "List: list_item_is_member_of",
+                name: i18n._('List: list_item_is_member_of'),
                 ink:  loadLongerSnippet("list_item_is_member_of.ink") 
             },
             {
-                name: "List: list_random_subset",
+                name: i18n._('List: list_random_subset'),
                 ink:  loadLongerSnippet("list_random_subset.ink") 
             },
             {
-                name: "List: list_random_subset_of_size",
+                name: i18n._('List: list_random_subset_of_size'),
                 ink:  loadLongerSnippet("list_random_subset_of_size.ink") 
             },
             {
-                name: "List: string_to_list",
+                name: i18n._('List: string_to_list'),
                 ink:  loadLongerSnippet("string_to_list.ink") 
             }
         ]
@@ -200,16 +201,16 @@ exports.snippets = [
     //-------------------
 
     {
-        categoryName: "Useful functions",
+        categoryName: i18n._('Useful functions'),
         snippets: [
             {
-                name: "Logic: maybe",
+                name: i18n._('Logic: maybe'),
                 ink:  loadLongerSnippet("maybe.ink") 
             },
             {separator: true},
 
             {
-                name: "Mathematics: abs",
+                name: i18n._('Mathematics: abs'),
                 ink: "/* ---------------------------------\n"+
                      "\n" +
                      "   This whole section is a comment \n"+
@@ -217,12 +218,12 @@ exports.snippets = [
                      " ----------------------------------*/\n"
             },
             {
-                name: "Mathematics: divisor",
+                name: i18n._('Mathematics: divisor'),
                 ink: "=== function divisor(x, n)\n" +
                       "~ return (x - x mod n) / n"
             },
             {
-                name: "Mathematics: abs",
+                name: i18n._('Mathematics: abs'),
                 ink: "=== function abs(x)\n" +
                       "{ x < 0:\n" + 
                       "      ~ return -1 * x\n" +
@@ -231,49 +232,46 @@ exports.snippets = [
                       "}"
             },
             {separator: true},
-            
-
-
             {
-                name: "Flow: came_from",
+                name: i18n._('Flow: came_from'),
                 ink:  loadLongerSnippet("came_from.ink") 
             },
             {
-                name: "Flow: seen_very_recently",
+                name: i18n._('Flow: seen_very_recently'),
                 ink:  loadLongerSnippet("seen_very_recently.ink") 
             },
             {
-                name: "Flow: seen_more_recently_than",
+                name: i18n._('Flow: seen_more_recently_than'),
                 ink:  loadLongerSnippet("seen_more_recently_than.ink") 
             },
             {
-                name: "Flow: seen_this_scene",
+                name: i18n._('Flow: seen_this_scene'),
                 ink:  loadLongerSnippet("seen_this_scene.ink") 
             },
             {
-                name: "Flow: thread_in_tunnel",
+                name: i18n._('Flow: thread_in_tunnel'),
                 ink:  loadLongerSnippet("thread_in_tunnel.ink") 
             },
             {separator: true},
             {
-                name: "Printing: UPPERCASE",
+                name: i18n._('Printing: UPPERCASE'),
                 ink:  loadLongerSnippet("uppercase.ink") 
             },
             {
-                name: "Printing: print_number",
+                name: i18n._('Printing: print_number'),
                 ink:  loadLongerSnippet("print_number.ink") 
             },
             {
-                name: "Printing: list_with_commas",
+                name: i18n._('Printing: list_with_commas'),
                 ink:  loadLongerSnippet("list_with_commas.ink") 
             }
         ]
     },
     {
-        categoryName: "Useful systems",
+        categoryName: i18n._('Useful systems'),
         snippets: [
             {
-                name: "Swing Variables",
+                name: i18n._('Swing Variables'),
                 ink:  loadLongerSnippet("swing_variables.ink") 
             }
         ]
@@ -282,22 +280,22 @@ exports.snippets = [
     {separator: true},
 
     {
-        categoryName: "Full stories",
+        categoryName: i18n._('Full stories'),
         snippets: [
             {
-                name: "Crime Scene (from Writing with Ink)",
+                name: i18n._('Crime Scene (from Writing with Ink)'),
                 ink: loadLongerSnippet("murder_scene.ink")
             },
             {
-                name: "Swindlestones (from Sorcery!)",
+                name: i18n._('Swindlestones (from Sorcery!)'),
                 ink: loadLongerSnippet("swindlestones.ink")
             },  
             {
-                name: "Pontoon Game (from Overboard!)",
+                name: i18n._('Pontoon Game (from Overboard!)'),
                 ink: loadLongerSnippet("pontoon_example.ink")
             },
             {
-                name: "The Intercept",
+                name: i18n._('The Intercept'),
                 ink: loadLongerSnippet("theintercept.ink")
             }
         ]
