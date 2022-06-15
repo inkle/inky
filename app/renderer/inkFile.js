@@ -254,6 +254,7 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
             this.justLoadedContent = true;
 
             this.aceDocument.setValue(data);
+            this.aceSession.setUndoManager(new ace.UndoManager());
             this.hasUnsavedChanges = false;
             this.events.fileChanged();
 
