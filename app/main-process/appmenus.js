@@ -9,54 +9,60 @@ const ProjectWindow = require("./projectWindow.js").ProjectWindow;
 const inkSnippets = require("./inkSnippets.js").snippets;
 const i18n = require('./i18n/i18n.js');
 
-let menuTemplate = null;
-let recentFilesMenu = null;
+let recentFiles = [];
+let customInkSnippets = [];
+let theme = null;
+let zoom = null;
+
+
 let callbacks = {
 };
 
-
-
-function setupMenus(newCallbacks) {
-    callbacks = newCallbacks;
-
+function refresh() {
+    
     let themes = [];
-    //Grab the default theme from storage
-    const defaultTheme = ProjectWindow.getViewSettings().theme;
-    for (const theme of ['light', 'dark', 'contrast', 'focus']) {
+
+    // Create the themes menu, with the correct current theme ticked
+    for (const t of ['light', 'dark', 'contrast', 'focus']) {
         themes.push({
-            label: theme.substring(0, 1).toUpperCase() + theme.substring(1),
+            label: t.substring(0, 1).toUpperCase() + t.substring(1),
             type: 'radio',
-            checked: theme === defaultTheme,
+            checked: t === theme,
             click: () => {
+                theme = t;
                 ProjectWindow.all().forEach(window => {
-                    window.browserWindow.webContents.send('change-theme', theme);
-                    callbacks.changeTheme(theme);
+                    window.browserWindow.webContents.send('change-theme', t);
+                    callbacks.changeTheme(t);
                 });
             }
         });
     }
 
+    // Create the zoom menu, with the correct current zoom ticked
     let zoom_percents = [];
-    //Grab the default zoom from storage
-    const defaultZoom = ProjectWindow.getViewSettings().zoom + '%';
     for (const zoom_percent of ['50%', '75%', '100%', '125%', '150%', '175%', '200%', '250%', '300%']) {
         zoom_percents.push({
             label: zoom_percent.substring(0, 4),
             type: 'radio',
-            checked: zoom_percent === defaultZoom,
+            checked: zoom_percent === (zoom + "%"),
             click: () => {
-                callbacks.zoom(zoom_percent.replace('%', ''));
+                zoom = zoom_percent.replace('%', '');
+                callbacks.zoom(zoom);
             }
         });
     }
 
-    // Generate menus for ink snippets
-    let inkMenu = [];
+    // Create menus for ink snippets (built in snippets)
+    let inkMenu = {
+        label: i18n._('Ink'),
+        submenu: [],
+        id: "ink"
+    };
     for(var category of inkSnippets) {
 
         // Category separator?
         if( category.separator ) {
-            inkMenu.push({
+            inkMenu.submenu.push({
                 type: 'separator'
             });
             continue;
@@ -77,7 +83,7 @@ function setupMenus(newCallbacks) {
             
         });
         
-        inkMenu.push({
+        inkMenu.submenu.push({
             label: i18n._(category.categoryName),
             submenu: items
         });
@@ -87,9 +93,56 @@ function setupMenus(newCallbacks) {
     
     // Remember how many built in menu items we have so we can
     // remove any custom ones when refreshing them.
-    inkMenuOriginalCount = inkMenu.length;
+    inkMenuOriginalCount = inkMenu.submenu.length;
 
-    menuTemplate = [
+    // Recursively convert our settings format into the Electron template menu format.
+    // Very similar, but we rename things a bit and turn "ink" into a callback.
+    if( Array.isArray(customInkSnippets) && customInkSnippets.length > 0 ) {
+
+        // Add separator between built-in and custom snippets
+        inkMenu.submenu.push({type: "separator"});
+
+        function createSnippetMenuItems(menuItemsArray, parentMenuItem) {
+
+            if( !Array.isArray(menuItemsArray) ) return;
+
+            // Create new custom menus
+            for(let menuItem of menuItemsArray) {
+
+                let templateMenuItem = {};
+                let valid = false;
+
+                if( menuItem.separator ) {
+                    templateMenuItem.type = "separator";
+                    valid = true;
+                }
+
+                else if( menuItem.name ) {
+                    templateMenuItem.label = menuItem.name;
+
+                    if( menuItem.ink ) {
+                        templateMenuItem.click = (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, menuItem.ink)
+                        valid = true;
+                    }
+
+                    else if( menuItem.submenu && Array.isArray(menuItem.submenu) ) {
+                        valid = true;
+                        templateMenuItem.submenu = [];
+                        createSnippetMenuItems(menuItem.submenu, templateMenuItem);
+                    }
+                }
+                
+                if( valid )
+                    parentMenuItem.submenu.push(templateMenuItem);
+            }
+
+        }
+
+        createSnippetMenuItems(customInkSnippets, inkMenu);
+    }
+
+    // Finally, put everything together into the full menu template
+    let menuTemplate = [
         {
             label: i18n._('File'),
             submenu: [
@@ -113,7 +166,11 @@ function setupMenus(newCallbacks) {
                 },
                 {
                     label: i18n._('Open Recent'),
-                    id: "recent"
+                    id: "recent",
+                    submenu: recentFiles.map((path) => ({
+                        label: path,
+                        click: () => ProjectWindow.open(path)
+                    }))
                 },
                 {
                     type: 'separator'
@@ -261,11 +318,8 @@ function setupMenus(newCallbacks) {
                 }
             ]
         },
-        {
-            label: i18n._('Ink'),
-            submenu: inkMenu,
-            id: "ink"
-        },
+        
+        inkMenu,
         
         {
             label: i18n._('Window'),
@@ -324,6 +378,7 @@ function setupMenus(newCallbacks) {
         },
     ];
 
+    // Customise menus for the specific platform
     const name = app.getName();
     const aboutWindowLabel = i18n._('About ') + name;
     // Mac specific menus
@@ -393,91 +448,16 @@ function setupMenus(newCallbacks) {
             }
         );
     }
-
-    recentFilesMenu = _.find(
-        _.find(menuTemplate, menu => menu.label == i18n._("File")).submenu,
-        submenu => submenu.id == "recent"
-    );
     
-    // This will also do the final refresh of the full Menu
-    refreshRecentFilesMenu(ProjectWindow.getRecentFiles());
-}
 
-function refreshRecentFilesMenu(recentFiles)
-{
-    // Re-create just the submenu of the Recent menu 
-    recentFilesMenu.submenu = recentFiles.map((path) => ({
-        label: path,
-        click: () => ProjectWindow.open(path)
-    }));
-
-    // Rebuild entire Menu for the app
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
 }
 
-function setCustomSnippetMenus(customInkSnippets)
-{
-    // Need to find it every time since Menu.buildFromTemplate mutates the template (since it sorts items etc)
-    let inkMenu = menuTemplate.find((submenu) => submenu.id == "ink");
 
-    // Remove old custom menus
-    if( inkMenu.submenu.length > inkMenuOriginalCount ) {
-        inkMenu.submenu.splice(inkMenuOriginalCount, inkMenu.submenu.length-inkMenuOriginalCount);
-    }
-
-            
-    // Recursively convert our settings format into the Electron template menu format.
-    // Very similar, but we rename things a bit and turn "ink" into a callback.
-    if( Array.isArray(customInkSnippets) && customInkSnippets.length > 0 ) {
-
-        // Add separator between built-in and custom snippets
-        inkMenu.submenu.push({type: "separator"});
-
-        function createSnippetMenuItems(menuItemsArray, parentMenuItem) {
-
-            if( !Array.isArray(menuItemsArray) ) return;
-
-            // Create new custom menus
-            for(let menuItem of menuItemsArray) {
-
-                let templateMenuItem = {};
-                let valid = false;
-
-                if( menuItem.separator ) {
-                    templateMenuItem.type = "separator";
-                    valid = true;
-                }
-
-                else if( menuItem.name ) {
-                    templateMenuItem.label = menuItem.name;
-
-                    if( menuItem.ink ) {
-                        templateMenuItem.click = (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, menuItem.ink)
-                        valid = true;
-                    }
-
-                    else if( menuItem.submenu && Array.isArray(menuItem.submenu) ) {
-                        valid = true;
-                        templateMenuItem.submenu = [];
-                        createSnippetMenuItems(menuItem.submenu, templateMenuItem);
-                    }
-                }
-                
-                if( valid )
-                    parentMenuItem.submenu.push(templateMenuItem);
-            }
-
-        }
-
-        createSnippetMenuItems(customInkSnippets, inkMenu);
-    }
-
-    // Rebuild entire Menu for the app
-    const menu = Menu.buildFromTemplate(menuTemplate);
-    Menu.setApplicationMenu(menu);
-}
-
-exports.setupMenus = setupMenus;
-exports.refreshRecentFilesMenu = refreshRecentFilesMenu;
-exports.setCustomSnippetMenus = setCustomSnippetMenus;
+exports.setCallbacks = c => callbacks = c;
+exports.setRecentFiles = files => recentFiles = files;
+exports.setTheme = t => theme = t;
+exports.setZoom = z => zoom = z;
+exports.setCustomSnippetMenus = snippets => customInkSnippets = snippets;
+exports.refresh = refresh;

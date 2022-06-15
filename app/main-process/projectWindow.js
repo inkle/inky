@@ -23,7 +23,7 @@ var windows = [];
 
 const recentFilesPath = path.join(electron.app.getPath("userData"), "recent-files.json");
 
-const veiwSettingsPath = path.join(electron.app.getPath("userData"), "view-settings.json");
+const viewSettingsPath = path.join(electron.app.getPath("userData"), "view-settings.json");
 
 
 // Overriden by main.js
@@ -83,8 +83,10 @@ function ProjectWindow(filePath) {
             windows.splice(idx, 1);
     });
 
+    // Set up theme/zoom from settings
     this.browserWindow.webContents.on('dom-ready', () => {
         this.browserWindow.send("change-theme", getThemeFromMenu());
+        this.zoom(ProjectWindow.getViewSettings().zoom);
     });
 
     // Project settings may affect menus etc, so we refresh that
@@ -285,10 +287,10 @@ ProjectWindow.open = function(filePath) {
 }
 
 ProjectWindow.getViewSettings = function() {
-    if(!fs.existsSync(veiwSettingsPath)) {
+    if(!fs.existsSync(viewSettingsPath)) {
         return { theme:'light', zoom:'100' };
     }
-    const json = fs.readFileSync(veiwSettingsPath, "utf-8");
+    const json = fs.readFileSync(viewSettingsPath, "utf-8");
     try {
         return JSON.parse(json);
     } catch(e) {
@@ -300,7 +302,7 @@ ProjectWindow.getViewSettings = function() {
 ProjectWindow.addOrChangeViewSetting = function(name, data){
     const viewSettings = ProjectWindow.getViewSettings();
     viewSettings[name] = data;
-    fs.writeFileSync(veiwSettingsPath, JSON.stringify(viewSettings), {
+    fs.writeFileSync(viewSettingsPath, JSON.stringify(viewSettings), {
         encoding: "utf-8"
     });
     if(events.onViewSettingsChanged) {

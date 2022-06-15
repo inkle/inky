@@ -1,4 +1,5 @@
-const electron = require('electron')
+const electron = require('electron');
+const { fstat } = require('original-fs');
 const app = electron.app
 const ipc = electron.ipcMain;
 const dialog = electron.dialog;
@@ -20,17 +21,36 @@ function inkJSNeedsUpdating() {
     // return true;
 }
 
-app.on('will-finish-launching', function () {
-    app.on("open-file", function (event, path) {
-        ProjectWindow.open(path);
-        event.preventDefault();
-    });
+let openedSpecificFileAtLaunch = false;
+let pendingPathToOpen = null;
+let hasFinishedLaunch = false;
 
+app.on('will-finish-launching', function () {
+    hasFinishedLaunch = true;
+    if( pendingPathToOpen ) {
+        ProjectWindow.open(pendingPathToOpen);
+        pendingPathToOpen = null;
+    }
+});
+
+app.on("open-file", function (event, path) {
+
+    // e.g. Drag and drop onto app to open it.
+    // "open-file" seems to come before "will-finish-launching"
+    if( !hasFinishedLaunch ) {
+        pendingPathToOpen = path;
+        openedSpecificFileAtLaunch = true;
+    }
+    
+    // Drag and drop onto app while it's already open
+    else {
+        ProjectWindow.open(path);
+    }
+    
+    event.preventDefault();
 });
 
 let isQuitting = false;
-let theme = ProjectWindow.getViewSettings().theme;
-let zoom = ProjectWindow.getViewSettings().zoom;
 
 app.on('before-quit', function () {
     // We need this to differentiate between pressing quit (which should quit) or closing all windows
@@ -53,7 +73,7 @@ app.on('ready', function () {
         }
     });
 
-    AppMenus.setupMenus({
+    AppMenus.setCallbacks({
         new: () => {
             ProjectWindow.createEmpty();
         },
@@ -95,10 +115,10 @@ app.on('ready', function () {
             focusedWindow.webContents.send("add-watch-expression");
         },
         showDocs: () => {
-            DocumentationWindow.openDocumentation(theme);
+            DocumentationWindow.openDocumentation(ProjectWindow.getViewSettings().theme);
         },
         showAbout: () => {
-            AboutWindow.showAboutWindow(theme);
+            AboutWindow.showAboutWindow(ProjectWindow.getViewSettings().theme);
         },
         keyboardShortcuts: () => {
             var win = ProjectWindow.focused();
@@ -112,7 +132,8 @@ app.on('ready', function () {
           var win = ProjectWindow.focused();
           if (win != null) {
             win.zoom(2);
-            //Convert change from font size to zoom percentage
+            // Convert change from font size to zoom percentage
+            let zoom = ProjectWindow.getViewSettings().zoom;
             zoom = (parseInt(zoom) + Math.floor(2*100/12)).toString();
             ProjectWindow.addOrChangeViewSetting('zoom', zoom);
           }
@@ -121,7 +142,8 @@ app.on('ready', function () {
           var win = ProjectWindow.focused();
           if (win != null) {
             win.zoom(-2);
-            //Convert change from font size to zoom percentage
+            // Convert change from font size to zoom percentage
+            let zoom = ProjectWindow.getViewSettings().zoom
             zoom = (parseInt(zoom) - Math.floor(2*100/12)).toString();
             ProjectWindow.addOrChangeViewSetting('zoom', zoom);
           }
@@ -130,7 +152,7 @@ app.on('ready', function () {
           var win = ProjectWindow.focused();
           if (win != null) {
             win.zoom(zoom_percent);
-            zoom = zoom_percent.toString();
+            let zoom = zoom_percent.toString();
             ProjectWindow.addOrChangeViewSetting('zoom', zoom)
           }
         },
@@ -139,53 +161,52 @@ app.on('ready', function () {
                 focussedWindow.webContents.send('insertSnippet', snippet);
         },
         changeTheme: (newTheme) => {
-          theme = newTheme;
           AboutWindow.changeTheme(newTheme);
           DocumentationWindow.changeTheme(newTheme);
           ProjectWindow.addOrChangeViewSetting('theme', newTheme)
         }
     });
 
+    AppMenus.setRecentFiles(ProjectWindow.getRecentFiles());
+    AppMenus.setTheme(ProjectWindow.getViewSettings().theme);
+    AppMenus.setZoom(ProjectWindow.getViewSettings().zoom);
+
+    AppMenus.refresh();
+
     ProjectWindow.setEvents({
         onRecentFilesChanged: (recentFiles) => {
-            AppMenus.refreshRecentFilesMenu(recentFiles);
+            AppMenus.setRecentFiles(recentFiles);
+            AppMenus.refresh();
         },
         onProjectSettingsChanged: (settings) => {
             settings = settings || {};
             AppMenus.setCustomSnippetMenus(settings.customInkSnippets || []);
+            AppMenus.refresh();
         },
         onViewSettingsChanged: (viewSettings) => {
-            // Joe: 13/06/22: I refactored this but the callback was never hooked up in the first place?
+            AppMenus.setTheme(viewSettings.theme);
+            AppMenus.setZoom(viewSettings.zoom);
+            AppMenus.refresh();
         }
     });
 
-    let openedSpecificFile = false;
-    if (process.platform == "win32" && process.argv.length > 1) {
+    if (process.platform == "win32" && process.argv.length > 1 && !openedSpecificFileAtLaunch) {
         for (let i = 1; i < process.argv.length; i++) {
             var arg = process.argv[i].toLowerCase();
             if (arg.endsWith(".ink")) {
                 var fileToOpen = process.argv[1];
-                var w = ProjectWindow.open(fileToOpen);
-                openedSpecificFile = true;
-                //Setup last stored zoom
-                if(w) {
-                    w.browserWindow.webContents.once('dom-ready', () => {
-                        ProjectWindow.focused().zoom(zoom);
-                    });
-                }
+                openedSpecificFileAtLaunch = true;
+                ProjectWindow.open(fileToOpen);
                 break;
             }
         }
     }
-    if (!openedSpecificFile) {
-        var w = ProjectWindow.createEmpty();
-        //Setup last stored zoom
-        w.browserWindow.webContents.once('dom-ready', () => {
-            ProjectWindow.focused().zoom(zoom);
-        });
+    if (!openedSpecificFileAtLaunch) {
+        ProjectWindow.createEmpty();
     }
 
-    //Setup last stored theme
+    // Setup last stored theme
+    let theme = ProjectWindow.getViewSettings().theme;
     AboutWindow.changeTheme(theme);
     DocumentationWindow.changeTheme(theme);
 
