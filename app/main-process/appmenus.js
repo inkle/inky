@@ -330,6 +330,7 @@ function refresh() {
                 },
                 {
                         label: i18n._('Word count and more'),
+                        accelerator: 'CmdOrCtrl+Shift+C',
                         enabled: callbacks.isFocusedWindow,
                         click: callbacks.stats
                 }
@@ -389,6 +390,7 @@ function refresh() {
             submenu: [
                 {
                     label: i18n._('Show Documentation'),
+                    accelerator: 'F1',
                     click: callbacks.showDocs
                 },
             ]
