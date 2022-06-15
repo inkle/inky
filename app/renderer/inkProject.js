@@ -146,20 +146,22 @@ InkProject.prototype.refreshIncludes = function() {
     });
 
     // Load up newly mentioned include files, if they exist
-    includeRelPathsToLoad.forEach(newIncludeRelPath => {
-        let absPath = path.join(this.mainInk.projectDir, newIncludeRelPath);
-        fs.stat(absPath, (err, stats) => {
-            // If it exists, and double check that it hasn't already been created during the async fs.stat
-            if( stats.isFile() &&  !_.some(this.files, f => f.relativePath() == newIncludeRelPath) ) {
-                let newFile = this.createInkFile(newIncludeRelPath, isBrandNew = false, err => {
-                    alert(`${i18n._("Failed to load ink file:")} ${err}`);
-                    this.files.remove(newFile);
-                    this.refreshIncludes();
-                });
-            }
+    if( this.mainInk.projectDir ) {
+        includeRelPathsToLoad.forEach(newIncludeRelPath => {
+            let absPath = path.join(this.mainInk.projectDir, newIncludeRelPath);
+            fs.stat(absPath, (err, stats) => {
+                // If it exists, and double check that it hasn't already been created during the async fs.stat
+                if( stats.isFile() &&  !_.some(this.files, f => f.relativePath() == newIncludeRelPath) ) {
+                    let newFile = this.createInkFile(newIncludeRelPath, isBrandNew = false, err => {
+                        alert(`${i18n._("Failed to load ink file:")} ${err}`);
+                        this.files.remove(newFile);
+                        this.refreshIncludes();
+                    });
+                }
+            });
+            
         });
-        
-    });
+    }
 
     NavView.setFiles(this.mainInk, this.files);
     EditorView.setFiles(this.files);
