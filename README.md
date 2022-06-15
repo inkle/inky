@@ -31,6 +31,59 @@ To keep up to date with the latest news about ink [sign up for the mailing list]
 
 [Download the latest release](http://www.github.com/inkle/inky/releases/latest)
 
+## Project settings file
+
+**Warning: For the technically inclined - you need to understand what a JSON file is to do the following!**
+
+To customise Inky settings for your specific ink project, create a JSON file with the same name as your main ink file, except with a `.settings.json` extension. For example, if your main ink file is called `my_great_story.ink`, then name your JSON file `my_great_story.settings.json`.
+
+Here is an example settings file:
+
+    {
+        "customInkSnippets": [
+            {
+                "name": "Heaven's Vault",
+                "submenu": [
+                    {
+                        "name": "Camera",
+                        "ink": ">>> CAMERA: Wide shot"
+                    },
+                    {
+                        "separator": true
+                    },
+                    {
+                        "name": "Walk",
+                        "ink": ">>> WALK: TheInscription"
+                    },
+                    {
+                        "name": "More snippets",
+                        "submenu": [
+                            {
+                                "name": "A snippet in a submenu",
+                                "ink": "This snippet of ink came from a submenu."
+                            },
+                        ]
+                    }
+                ]
+            }
+        ],
+
+        "instructionPrefix": ">>>"
+    }
+
+* `customInkSnippets` - this array allows your to add your own project-specific ink snippets to the Ink menu. There are three types of item you can add to the array:
+    * **An ink snippet**: Requires `name` for the name of the menu item and `ink` for the snippet of ink it will insert into the editor.
+    * **A separator**: Use `{"separator": true}` to add a horizonal line separator into the menu at this point.
+    * **A sub-menu**: To nest more snippets into a sub-menu, use `name` for the sub-menu name, and then `submenu` with another array in the same format.
+
+
+* `instructionPrefix` - A common convention is to use a particular text format in ink to instruct the game to perform certain actions rather than presenting the text verbatim to players.
+
+    For example, at inkle we would write something like `>>> CAMERA: BigSwoop` in ink. The `>>>` isn't directly built into ink, and this entire text is simply passed through as plain text. But we have custom game code to interpret it and turn it into an action that takes place in-game. To help support this within Inky, you can define an *instructionPrefix*, if you have a particular consistent way of writing these actions. 
+    
+    When Inky sees this, it will highlight the line of text both in the editor and player views, so that you can clearly see that it's not part of the game text itself.
+
+
 ## Implementation details
 
 Inky is built using:
