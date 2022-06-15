@@ -4,6 +4,7 @@ const i18n = require('./i18n.js');
 var events = {};
 var lastFadeTime = 0;
 var $textBuffer = null;
+var instructionPrefix = null;
 
 document.addEventListener("keyup", function(){
     $("#player").removeClass("altKey");
@@ -112,6 +113,11 @@ function prepareForNewPlaythrough(sessionId) {
 function addTextSection(text)
 {
     var $paragraph = $("<p class='storyText'></p>");
+
+    // Game-specific instruction prefix, e.g. >>> START CAMERA: Wide shot
+    if( instructionPrefix && text.trim().startsWith(instructionPrefix) ) {
+        $paragraph.addClass("customInstruction");
+    }
 
     // Split individual words into span tags, so that they can be underlined
     // when the user holds down the alt key, and so that they can be individually
@@ -257,6 +263,23 @@ function previewStepBack()
     $lastDivider.remove();
 }
 
+function setInstructionPrefix(prefix) {
+    if( instructionPrefix == prefix ) return;
+
+    instructionPrefix = prefix;
+
+    // Refresh any existing content
+    let $storyChunks = $textBuffer.find("p.storyText");
+    for(let storyChunk of $storyChunks) {
+        let $storyChunk = $(storyChunk);
+        $storyChunk.removeClass("customInstruction");
+
+        if( storyChunk.textContent.trim().startsWith(instructionPrefix) ) {
+            $storyChunk.addClass("customInstruction");
+        }
+    }
+}
+
 exports.PlayerView = {
     setEvents: (e) => { events = e; },
     contentReady: contentReady,
@@ -270,5 +293,6 @@ exports.PlayerView = {
     addLineError: addLineError,
     addEvaluationResult: addEvaluationResult,
     showSessionView: showSessionView,
-    previewStepBack: previewStepBack
+    previewStepBack: previewStepBack,
+    setInstructionPrefix: setInstructionPrefix
 };  

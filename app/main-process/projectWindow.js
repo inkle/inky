@@ -23,11 +23,16 @@ var windows = [];
 
 const recentFilesPath = path.join(electron.app.getPath("userData"), "recent-files.json");
 
-let onRecentFilesChanged = null;
-
 const veiwSettingsPath = path.join(electron.app.getPath("userData"), "view-settings.json");
 
-let onViewSettingsChanged = null;
+
+// Overriden by main.js
+var events = {
+    onRecentFilesChanged:    (files) => {},
+    onProjectSettingsChanged: (settings) => {},
+    onViewSettingsChanged:   (settings) => {}
+};
+
 
 function ProjectWindow(filePath) {
     const getThemeFromMenu = () => Menu.getApplicationMenu().items.find(
@@ -45,11 +50,22 @@ function ProjectWindow(filePath) {
 
     this.safeToClose = false;
 
+    // Existing project at specific path
     if( filePath ) {
         this.browserWindow.webContents.on('dom-ready', () => {
             this.browserWindow.setRepresentedFilename(filePath);
             this.browserWindow.webContents.send('set-project-main-ink-filepath', filePath);
+
+            // Try to load settings 
+            this.refreshProjectSettings(filePath);
         });
+    }
+    
+    // New project, new settings
+    else {
+        this.settings = {};
+        if( events.onProjectSettingsChanged )
+            events.onProjectSettingsChanged({});
     }
 
     windows.push(this);
@@ -69,6 +85,13 @@ function ProjectWindow(filePath) {
 
     this.browserWindow.webContents.on('dom-ready', () => {
         this.browserWindow.send("change-theme", getThemeFromMenu());
+    });
+
+    // Project settings may affect menus etc, so we refresh that
+    // when changing focus between different windows
+    this.browserWindow.on("focus", () => {
+        if( events.onProjectSettingsChanged )
+            events.onProjectSettingsChanged(this.settings);
     });
 }
 
@@ -118,7 +141,72 @@ ProjectWindow.prototype.zoom = function(amount) {
     this.browserWindow.webContents.send('zoom', amount);
 }
 
+// Try to load up an optional <ink_root_file_name>.settings.json file
+ProjectWindow.prototype.refreshProjectSettings = function(rootInkFilePath) {
+    
+    let self = this;
+
+
+    const resolvedRootPath = path.resolve(rootInkFilePath);
+    let basePath = rootInkFilePath;
+    if( path.extname(resolvedRootPath) == ".ink" ) {
+        basePath = rootInkFilePath.substring(0, resolvedRootPath.length-4)
+    }
+    const settingsPath = basePath + ".settings.json";
+
+
+    function completeSettings(settings, err) {
+        if( events.onProjectSettingsChanged ) {
+            events.onProjectSettingsChanged(settings);
+        }
+
+        self.browserWindow.send("project-settings-changed", self.settings);
+
+        if( err ) {
+            dialog.showErrorBox("Project Settings Error", err);
+        }
+    }
+
+    fs.stat(settingsPath, (err, stats) => {
+        if( err || !stats.isFile() ) { 
+            events.onProjectSettingsChanged({});
+            return;
+        }
+
+        fs.readFile(settingsPath, "utf8", (err, fileContent) => {
+
+            if( err ) {
+                completeSettings({}, "File read error - failed to load project settings file at: "+settingsPath);
+                return;
+            }
+            if( !fileContent ) {
+                completeSettings({}, "Project settings file appeared to be empty: "+settingsPath);
+                return;
+            }
+
+            let settings = {};
+            try {
+                settings = JSON.parse(fileContent);
+            } catch(error) {
+                completeSettings({}, "Project settings file appeared to be invalid JSON: "+settingsPath+": "+error);
+                return;
+            }
+
+            self.settings = settings;
+
+            completeSettings(settings);
+        });
+
+    });
+}
+
+
 ProjectWindow.all = () => windows;
+
+ProjectWindow.setEvents = function(newEvents) {
+    events = newEvents
+}
+
 
 ProjectWindow.createEmpty = function() {
     return new ProjectWindow();
@@ -144,9 +232,6 @@ ProjectWindow.withWebContents = function(webContents) {
     return null;
 }
 
-ProjectWindow.setRecentFilesChanged = function(f) {
-    onRecentFilesChanged = f;
-}
 
 ProjectWindow.getRecentFiles = function() {
     if(!fs.existsSync(recentFilesPath)) {
@@ -170,8 +255,9 @@ function addRecentFile(filePath) {
     fs.writeFileSync(recentFilesPath, JSON.stringify(newRecentFiles), {
         encoding: "utf-8"
     });
-    if(onRecentFilesChanged) {
-        onRecentFilesChanged(newRecentFiles);
+
+    if( events.onRecentFilesChanged ) {
+        events.onRecentFilesChanged(newRecentFiles);
     }
 }
 
@@ -198,10 +284,6 @@ ProjectWindow.open = function(filePath) {
     }
 }
 
-ProjectWindow.setViewSettingsChanged = function(f) {
-    onViewSettingsChanged = f;
-}
-
 ProjectWindow.getViewSettings = function() {
     if(!fs.existsSync(veiwSettingsPath)) {
         return { theme:'light', zoom:'100' };
@@ -221,19 +303,26 @@ ProjectWindow.addOrChangeViewSetting = function(name, data){
     fs.writeFileSync(veiwSettingsPath, JSON.stringify(viewSettings), {
         encoding: "utf-8"
     });
-    if(onViewSettingsChanged) {
-        onViewSettingsChanged(viewSettings);
+    if(events.onViewSettingsChanged) {
+        events.onViewSettingsChanged(viewSettings);
     }
 }
 
-
-ipc.on("main-file-saved", (_, filePath) => {
+ipc.on("main-file-saved", (event, filePath) => {
     addRecentFile(filePath);
+
+    var win = ProjectWindow.withWebContents(event.sender);
+    win.refreshProjectSettings(filePath);
 });
 
 ipc.on("project-final-close", (event) => {
     var win = ProjectWindow.withWebContents(event.sender);
     win.finalClose();
+});
+
+ipc.on("project-settings-needs-reload", (event, rootInkFilePath) => {
+    var win = ProjectWindow.withWebContents(event.sender);
+    win.refreshProjectSettings(rootInkFilePath);
 });
 
 exports.ProjectWindow = ProjectWindow;

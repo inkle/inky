@@ -10,7 +10,6 @@ const InkFileSymbols = require("./inkFileSymbols.js").InkFileSymbols;
 
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
-const InkMode = require("./ace-ink-mode/ace-ink.js").InkMode;
 
 var fileIdCounter = 0;
 
@@ -19,9 +18,10 @@ var fileIdCounter = 0;
 // -----------------------------------------------------------------
 
 // anyPath can be relative or absolute
-function InkFile(anyPath, mainInkFile, isBrandNew, events) {
+function InkFile(anyPath, mainInkFile, isBrandNew, inkMode, events) {
     
     this.id = fileIdCounter++;
+    this.inkMode = inkMode;
 
     // Default filename if creating a new file, and passed null to constructor
     anyPath = anyPath || "Untitled.ink";
@@ -146,7 +146,7 @@ InkFile.prototype.setValue = function(text) {
 
 InkFile.prototype.getAceSession = function() {
     if( this.aceSession == null ) {
-        this.aceSession = new EditSession(this.aceDocument, new InkMode());
+        this.aceSession = new EditSession(this.aceDocument, this.inkMode);
         this.aceSession.setUseWrapMode(true);
         this.aceSession.setUndoManager(new ace.UndoManager());
     }
@@ -282,6 +282,17 @@ InkFile.prototype.addIncludeLine = function(relativePath) {
     } else {
         var lastIncludeRowContent = this.aceDocument.getLine(lastIncludeRow);
         this.aceDocument.insert({row: lastIncludeRow, column: lastIncludeRowContent.length}, "\n" + includeText);
+    }
+}
+
+InkFile.prototype.setInkMode = function(newInkMode)
+{
+    this.inkMode = newInkMode;
+
+    // Don't force greedy construction right now by calling getAceSession(), instead
+    // allowing it to be created whenever it's wanted elsewhere.
+    if( this.aceSession ) {
+        this.aceSession.setMode(this.inkMode);
     }
 }
 

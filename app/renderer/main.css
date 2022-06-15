@@ -368,7 +368,7 @@ img.issue-icon.warning {
 .sidebar .footer.showingForm {
   height: 120px;
   bottom: 0;
-  /*transition: height 3s;/*0.2s;*/*/
+  /*transition: height 3s;/*0.2s;*/
 }
 
 
@@ -590,6 +590,11 @@ img.issue-icon.warning {
 
 #player .innerText p {
   padding: 0 40px 0 40px;
+}
+
+#player .innerText p.customInstruction {
+  color: rgb(179, 94, 94);
+  font-family: Monaco, 'Courier New', monospace;
 }
 
 #player.altKey .innerText p span:hover {

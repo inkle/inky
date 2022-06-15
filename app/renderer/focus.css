@@ -138,6 +138,11 @@
     color: #535353;
 }
 
+/* Custom instructions, e.g. >>> */
+.window.focus .window.contrast .ace_editor span.ace_customInstruction {
+    color: #c36f6f;
+}
+
 .window.focus ::-webkit-scrollbar {
     width: .75rem;
     background: #282828;

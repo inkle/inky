@@ -7,6 +7,8 @@ const _ = require("lodash");
 const chokidar = require('chokidar');
 const mkdirp = require('mkdirp');
 const i18n = require('./i18n.js');
+const { InkMode } = require('./ace-ink-mode/ace-ink.js');
+const { PlayerView } = require('./playerView.js');
 
 const EditorView = require("./editorView.js").EditorView;
 const NavView = require("./navView.js").NavView;
@@ -28,6 +30,10 @@ function InkProject(mainInkFilePath) {
     this.hasUnsavedChanges = false;
     this.unsavedFiles = [];
 
+    // Default ink mode for syntax highlighting. This may be replace if
+    // the user has a project settings file that customises the instructionPrefix
+    this.inkMode = new InkMode("");
+
     this.mainInk = null;
     this.mainInk = this.createInkFile(mainInkFilePath || null, isBrandNew = mainInkFilePath === undefined);
 
@@ -41,7 +47,7 @@ function InkProject(mainInkFilePath) {
 }
 
 InkProject.prototype.createInkFile = function(anyPath, isBrandNew, loadErrorCallback) {
-    var inkFile = new InkFile(anyPath || null, this.mainInk, isBrandNew, {
+    var inkFile = new InkFile(anyPath || null, this.mainInk, isBrandNew, this.inkMode, {
         fileChanged: () => { 
             if( inkFile.hasUnsavedChanges && !this.unsavedFiles.contains(inkFile) ) {
                 this.unsavedFiles.push(inkFile);
@@ -192,7 +198,25 @@ InkProject.prototype.startFileWatching = function() {
         return fileAbsPath.split(".").pop() == "ink";
     };
 
+    const tryUpdateSettingsFile = fileAbsPath => {
+        const mainInkPath = this.mainInk.absolutePath();
+        let basePath = mainInkPath;
+        if( path.extname(basePath) == ".ink" ) {
+            basePath = basePath.substring(0, basePath.length-4);
+        }
+        
+        let expectedSettingsPath = basePath + ".settings.json";
+        if( expectedSettingsPath != fileAbsPath ) {
+            return false; // not a settings file
+        }
+
+        ipc.send("project-settings-needs-reload", mainInkPath);
+
+        return true; // yes, it was a settings file
+    }
+
     this.fileWatcher.on("add", newlyFoundAbsFilePath => {
+        if( tryUpdateSettingsFile(newlyFoundAbsFilePath) ) return;
         if (!isInkFile(newlyFoundAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath);
@@ -214,6 +238,7 @@ InkProject.prototype.startFileWatching = function() {
     });
 
     this.fileWatcher.on("change", updatedAbsFilePath => {
+        if( tryUpdateSettingsFile(updatedAbsFilePath) ) return;
         if (!isInkFile(updatedAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, updatedAbsFilePath);
@@ -233,6 +258,7 @@ InkProject.prototype.startFileWatching = function() {
         }
     });
     this.fileWatcher.on("unlink", removedAbsFilePath => {
+        if( tryUpdateSettingsFile(removedAbsFilePath) ) return;
         if (!isInkFile(removedAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, removedAbsFilePath);
@@ -638,6 +664,24 @@ InkProject.prototype.findSymbol = function(name, posContext) {
 }
 
 
+InkProject.prototype.refreshProjectSettings = function(newProjectSettings) {
+    if( this.instructionPrefix != newProjectSettings.instructionPrefix ) {
+        this.instructionPrefix = newProjectSettings.instructionPrefix;
+
+        PlayerView.setInstructionPrefix(this.instructionPrefix);
+        
+        // Refresh the InkMode, which affects syntax highlighting.
+        // This allows users to customise the "instructionPrefix", which
+        // is the game-specific convension to use something like ">>> CAMERA: Wide angle"
+        this.inkMode = new InkMode(this.instructionPrefix);
+
+        for(let inkFile of this.files) {
+            inkFile.setInkMode(this.inkMode);
+        }
+    }
+}
+
+
 InkProject.setEvents = function(e) {
     InkProject.events = e;
 }
@@ -693,6 +737,12 @@ ipc.on("project-export-js-only", (event) => {
 ipc.on("project-tryClose", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.tryClose();
+    }
+});
+
+ipc.on("project-settings-changed", (event, settings) => {
+    if( InkProject.currentProject ) {
+        InkProject.currentProject.refreshProjectSettings(settings);
     }
 });
 
