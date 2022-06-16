@@ -77,6 +77,8 @@ InkProject.prototype.createInkFile = function(anyPath, isBrandNew, loadErrorCall
 
     this.files.push(inkFile);
 
+    this.sortFileList();
+    
     return inkFile;
 }
 
@@ -108,9 +110,6 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
 // - Load any newly discovered includes
 // - Refresh nav hierarchy in sidebar
 InkProject.prototype.refreshIncludes = function() {
-
-    var mainInkFile = this.mainInk;
-    this.files.sort(function(a,b) { return mainInkFile.includes.indexOf(a.relPath) - mainInkFile.includes.indexOf(b.relPath) } );
 
     var existingRelFilePaths = _.map(_.without(this.files, this.mainInk), f => f.relativePath());
 
@@ -164,11 +163,20 @@ InkProject.prototype.refreshIncludes = function() {
             });
             
         });
+
+        this.sortFileList();
     }
 
     NavView.setFiles(this.mainInk, this.files);
     EditorView.setFiles(this.files);
     LiveCompiler.setEdited();
+}
+
+InkProject.prototype.sortFileList = function() {
+    var mainInkFile = this.mainInk;
+    this.files.sort(function(a,b) {
+        return mainInkFile.includes.indexOf(a.relPath) - mainInkFile.includes.indexOf(b.relPath) 
+    } );
 }
 
 InkProject.prototype.refreshUnsavedChanges = function() {
