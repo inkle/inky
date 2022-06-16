@@ -122,10 +122,18 @@ function setKnots(mainInk){
 //anything! 
     mainInk.symbols.parse();
     var ranges = mainInk.symbols.rangeIndex;
-    if (!ranges) {
+
+    $knotStichNavWrapper.empty();
+
+    if (ranges.length == 0) {
+        var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>` + 
+            '<nav class="nav-group"><span class="nav-group-item nav-tooltip">Knots, stitches and functions are indexed here</span></nav>');
+        
+        $knotStichNavWrapper.append($content);
+
         return;
     }
-    $knotStichNavWrapper.empty();
+    
     var extraClass = ""
 
     var externalsList = getExternals(mainInk);

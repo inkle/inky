@@ -362,6 +362,10 @@ img.issue-icon.warning {
   font-weight: bold;
 }
 
+.sidebar .nav-group-item.nav-tooltip {
+  white-space: normal;
+}
+
 .sidebar .footer {
   position: absolute;
   left: 0;
