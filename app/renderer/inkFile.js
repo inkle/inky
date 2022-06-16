@@ -85,7 +85,7 @@ function InkFile(anyPath, mainInkFile, isBrandNew, inkMode, events) {
             this.events.includesChanged();
         }
     });
-    
+
     // Assume it's new by default. We then attempt to load below
     // to check for sure
     this.hasUnsavedChanges = isBrandNew;
@@ -254,7 +254,7 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
             this.justLoadedContent = true;
 
             this.aceDocument.setValue(data);
-            this.aceSession.setUndoManager(new ace.UndoManager());
+            if( this.aceSession ) this.aceSession.setUndoManager(new ace.UndoManager());
             this.hasUnsavedChanges = false;
             this.events.fileChanged();
 
