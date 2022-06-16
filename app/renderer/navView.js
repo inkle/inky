@@ -202,7 +202,7 @@ function updateCurrentKnot(mainInk, cursorPos){
     if ("Stitch" in symbols){
         $currentStitch = $(`[row=${symbols["Stitch"].row}]`);
     }
-    
+
     if (($currentKnot && $currentKnot.hasClass("active"))&&($currentStitch && $currentStitch.hasClass("active")))
         return;
 
@@ -330,7 +330,6 @@ function showSidebar(columns) {
 
 function animateSidebar(columns) {
     
-    
     $sidebar.animate({
         width: (columns * sidebarWidth)-1 // border
     }, slideAnimDuration, () => {
@@ -345,20 +344,23 @@ function animateSidebar(columns) {
     }, slideAnimDuration);
 
     if (columns > 0) {
-        var navElements =  $(".nav-wrapper");
-        var widthStep = (100 / columns);
-        $footer.width(widthStep + "%");
-        navElements.width(widthStep + "%");
-        var pos = 0;
+        var $navElements =  $(".nav-wrapper");
+        var widthStepPercent = (100 / columns);
+
+        let widthCss = "calc("+widthStepPercent+"% - 1px)"; // leave space for a 1 px border
+        $footer.width(widthCss);
+        $navElements.width(widthCss);
+
+        var leftPosPercent = 0;
         var el;
-        for (var idx = 0 ; idx < navElements.length; idx++) {
-            el = $(navElements[idx]);
+        for (var idx = 0 ; idx < $navElements.length; idx++) {
+            el = $($navElements[idx]);
             if (!el.hasClass("hidden")) 
             {
                 el.animate({
-                    left: (pos + "%")
+                    left: (leftPosPercent + "%")
                 }, 0 );  
-                pos += widthStep;  
+                leftPosPercent += widthStepPercent;  
             }
         }
     }

@@ -331,6 +331,7 @@ img.issue-icon.warning {
   right: 0;
   overflow: auto;
   padding-bottom: 40px; /* leave space for include adding UI */
+  border-left: 1px solid #DDD;
 }
 
 .sidebar.hidden {
