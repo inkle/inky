@@ -388,8 +388,9 @@ function setIncludeFormVisible(visible) {
     }
 }
 
-function toggle(id){
+function toggle(id, buttonId){
 
+    var $button = $("#toolbar " + buttonId);
     var $thisPanel = $(id);
 
     var columns =  2 - $(".nav-wrapper.hidden").length;
@@ -403,12 +404,13 @@ function toggle(id){
         $thisPanel.removeClass("hidden");
         if ($thisPanel.hasClass("hasFooter")) 
             $footer.removeClass("hidden");
-        
+        $button.addClass("selected");
     } else {
         columns--;
         $thisPanel.addClass("hidden");
         if ($thisPanel.hasClass("hasFooter")) 
-            $footer.addClass("hidden");      
+            $footer.addClass("hidden"); 
+        $button.removeClass("selected");     
     }
 
    
