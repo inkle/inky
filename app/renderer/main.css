@@ -175,6 +175,9 @@ img.issue-icon.warning {
   color: gray;
 }
 #toolbar .button:hover .icon {
+  color: dimgray;
+}
+#toolbar .button.selected .icon {
   color: black;
 }
 

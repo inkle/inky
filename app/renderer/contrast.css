@@ -28,11 +28,15 @@
     color: #CCC;
 }
 
-.window.dark #main .sidebar .nav-group-item.nav-tooltip {
+.window.contrast #main .sidebar .nav-group-item.nav-tooltip {
     color: #7b7b7b;
 }
 
 .window.contrast #toolbar .button:hover .icon {
+    color: #999;
+}
+
+.window.contrast #toolbar .button.selected .icon {
     color: #CCC;
 }
 

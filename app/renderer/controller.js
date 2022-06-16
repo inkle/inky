@@ -268,7 +268,7 @@ ExpressionWatchView.setEvents({
 });
 
 ToolbarView.setEvents({
-    toggleSidebar: (id) => { NavView.toggle(id); },
+    toggleSidebar: (id, buttonId) => { NavView.toggle(id, buttonId); },
     navigateBack: () => NavHistory.back(),
     navigateForward: () => NavHistory.forward(),
     selectIssue: gotoIssue,
