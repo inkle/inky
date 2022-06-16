@@ -367,6 +367,12 @@ function toggle(id){
         $footer.addClass("hidden");
 }
 
+
+// Helper function that gets all the external function names from a list of InkFiles
+function getExternals(file) {
+    return file.symbols.getCachedExternals();
+}
+
 exports.NavView = {
     setMainInkFilename: setMainInkFilename,
     setFiles: setFiles,
@@ -383,8 +389,3 @@ exports.NavView = {
     showAddIncludeForm: () => setIncludeFormVisible(true)
 }
 
-
-// Helper function that gets all the external function names from a list of InkFiles
-function getExternals(file) {
-    return file.symbols.getCachedExternals();
-}
