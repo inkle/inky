@@ -36,7 +36,7 @@ var events = {
 
 function ProjectWindow(filePath) {
     const getThemeFromMenu = () => Menu.getApplicationMenu().items.find(
-        e => e.label.toLowerCase() === 'view'
+        e => e.label.toLowerCase() === '&view'
     ).submenu.items.find(
         e => e.label.toLowerCase() === 'theme'
     ).submenu.items.find(
