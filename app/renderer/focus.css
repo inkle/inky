@@ -139,8 +139,8 @@
 }
 
 /* Custom instructions, e.g. >>> */
-.window.focus .window.contrast .ace_editor span.ace_customInstruction {
-    color: #c36f6f;
+.window.focus .ace_editor span.ace_customInstruction {
+    color: #5f4c4c;
 }
 
 .window.focus ::-webkit-scrollbar {
