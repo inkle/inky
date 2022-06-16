@@ -109,6 +109,9 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
 // - Refresh nav hierarchy in sidebar
 InkProject.prototype.refreshIncludes = function() {
 
+    var mainInkFile = this.mainInk;
+    this.files.sort(function(a,b) { return mainInkFile.includes.indexOf(a.relPath) - mainInkFile.includes.indexOf(b.relPath) } );
+
     var existingRelFilePaths = _.map(_.without(this.files, this.mainInk), f => f.relativePath());
 
     var relPathsFromINCLUDEs = [];
