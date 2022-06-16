@@ -208,15 +208,6 @@ exports.snippets = [
                 ink:  loadLongerSnippet("maybe.ink") 
             },
             {separator: true},
-
-            {
-                name: i18n._('Mathematics: abs'),
-                ink: "/* ---------------------------------\n"+
-                     "\n" +
-                     "   This whole section is a comment \n"+
-                     "\n" +
-                     " ----------------------------------*/\n"
-            },
             {
                 name: i18n._('Mathematics: divisor'),
                 ink: "=== function divisor(x, n)\n" +
