@@ -299,50 +299,72 @@ function highlightRelativePath(relativePath) {
     highlight$NavGroupItem($navGroupItem);
 }
 
-function hide() {
+function hideSidebar() {
     if( !visible )
         return;
-
+    
     sidebarWidth = $sidebarSplit.position().left;
 
-    $sidebar.animate({
-        width: 0,
-    }, slideAnimDuration, () => {
-        $sidebar.hide();
-    });
-    $twoPane.animate({
-        left: 0
-    }, slideAnimDuration);
-    $sidebarSplit.animate({
-        left: 0
-    }, slideAnimDuration);
+    animateSidebar(0);
+
     visible = false;
 }
 
-function show() {
-    if( visible )
-        return;
+function showSidebar(columns) {
+    if (!columns) columns = 1;    
+    if( ! visible )
+    {
+    
+        hasBeenShown = true;
 
-    hasBeenShown = true;
+        // hidden class only exists in initial state
+        $sidebar.removeClass("hidden");
+        $sidebarSplit.removeClass("hidden");
 
-    // hidden class only exists in initial state
-    $sidebar.removeClass("hidden");
-    $sidebarSplit.removeClass("hidden");
-
-    $sidebar.show();
-    $sidebarSplit.show();
-
-    $sidebar.animate({
-        width: sidebarWidth-1 // border
-    }, slideAnimDuration);
-    $twoPane.animate({
-        left: sidebarWidth
-    }, slideAnimDuration);
-    $sidebarSplit.animate({
-        left: sidebarWidth
-    }, slideAnimDuration);
+        $sidebar.show();
+        $sidebarSplit.show();
+    }
+    animateSidebar(columns);
     visible = true;
 }
+
+function animateSidebar(columns) {
+    
+    
+    $sidebar.animate({
+        width: (columns * sidebarWidth)-1 // border
+    }, slideAnimDuration, () => {
+        if (columns == 0)
+            $sidebar.hide();    
+    });
+    $twoPane.animate({
+        left: (columns * sidebarWidth)
+    }, slideAnimDuration);
+    $sidebarSplit.animate({
+        left:  (columns * sidebarWidth)
+    }, slideAnimDuration);
+
+    if (columns > 0) {
+        var navElements =  $(".nav-wrapper");
+        var widthStep = (100 / columns);
+        $footer.width(widthStep + "%");
+        navElements.width(widthStep + "%");
+        var pos = 0;
+        var el;
+        for (var idx = 0 ; idx < navElements.length; idx++) {
+            el = $(navElements[idx]);
+            if (!el.hasClass("hidden")) 
+            {
+                el.animate({
+                    left: (pos + "%")
+                }, 0 );  
+                pos += widthStep;  
+            }
+        }
+    }
+
+}
+
 
 function setIncludeFormVisible(visible) {
     var $inputBox = $newIncludeForm.find("input[type='text']");
@@ -359,20 +381,37 @@ function setIncludeFormVisible(visible) {
 }
 
 function toggle(id){
-    if (visible && $currentNavWrapper && "#"+$currentNavWrapper.attr('id')==id){
-        hide(); 
+
+    var columns =  2 - $(".nav-wrapper.hidden").length;
+    if (columns > 0)
+        sidebarWidth =  $sidebarSplit.position().left / columns; 
+
+    var $thisPanel = $(id);
+
+    if ($thisPanel.hasClass("hidden")) {
+        columns++;
+        $thisPanel.removeClass("hidden");
+        if ($thisPanel.hasClass("hasFooter")) 
+            $footer.removeClass("hidden");
+        
+    } else {
+        columns--;
+        $thisPanel.addClass("hidden");
+        if ($thisPanel.hasClass("hasFooter")) 
+            $footer.addClass("hidden");      
     }
-    else if (!visible){
-        show();
+
+   
+    if (columns == 0) {
+        hideSidebar();
+    } else { 
+        showSidebar(columns);
+   
     }
-    $(".nav-wrapper").addClass("hidden");
-    $currentNavWrapper = $(id);
-    $currentNavWrapper.removeClass("hidden");
-    if ($currentNavWrapper.hasClass("hasFooter")) 
-        $footer.removeClass("hidden");
-    else 
-        $footer.addClass("hidden");
+
+ 
 }
+
 
 
 // Helper function that gets all the external function names from a list of InkFiles
@@ -387,8 +426,8 @@ exports.NavView = {
     updateCurrentKnot: updateCurrentKnot,
     highlightRelativePath: highlightRelativePath,
     setEvents: e => events = e,
-    hide: hide,
-    show: show,
+    hide: hideSidebar,
+    show: showSidebar,
     initialShow: () => { if( !hasBeenShown ) 
         toggle("#file-nav-wrapper");
     },
