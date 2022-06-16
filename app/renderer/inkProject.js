@@ -116,7 +116,7 @@ InkProject.prototype.refreshIncludes = function() {
 
     var relPathsFromINCLUDEs = [];
     var addIncludePathsFromFile = (inkFile) => {
-        if( !inkFile.includes )
+        if( inkFile.includes.length == 0 )
             return;
 
         inkFile.includes.forEach(incPath => {
@@ -154,7 +154,7 @@ InkProject.prototype.refreshIncludes = function() {
             let absPath = path.join(this.mainInk.projectDir, newIncludeRelPath);
             fs.stat(absPath, (err, stats) => {
                 // If it exists, and double check that it hasn't already been created during the async fs.stat
-                if( stats.isFile() &&  !_.some(this.files, f => f.relativePath() == newIncludeRelPath) ) {
+                if( !!stats && stats.isFile() &&  !_.some(this.files, f => f.relativePath() == newIncludeRelPath) ) {
                     let newFile = this.createInkFile(newIncludeRelPath, isBrandNew = false, err => {
                         alert(`${i18n._("Failed to load ink file:")} ${err}`);
                         this.files.remove(newFile);
