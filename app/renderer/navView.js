@@ -34,16 +34,17 @@ $(document).ready(() => {
 
     // Clicking on navigation item
     $fileNavWrapper.on("click", ".nav-group-item", function(event) {
-        //Any clicked navigation item should become highlighted
+        // Any clicked navigation item should become highlighted
         event.preventDefault();
         var $targetNavGroupItem = $(event.currentTarget);
         highlight$NavGroupItem($targetNavGroupItem);
-            var fileIdStr = $targetNavGroupItem.attr("data-file-id");
-            var fileId = parseInt(fileIdStr);
-            events.clickFileId(fileId);
+
+        var fileIdStr = $targetNavGroupItem.attr("data-file-id");
+        var fileId = parseInt(fileIdStr);
+        events.clickFileId(fileId);
     });
     $knotStichNavWrapper.on("click", ".nav-group-item", function(event) {
-        //Any clicked navigation item should become highlighted
+        // Any clicked navigation item should become highlighted
         event.preventDefault();
         var $targetNavGroupItem = $(event.currentTarget);
         var row = $targetNavGroupItem.attr("row");
@@ -188,28 +189,34 @@ function setKnots(mainInk){
 function updateCurrentKnot(mainInk, cursorPos){
     var symbols = mainInk.symbols.flowAtPos(cursorPos);
     if (!symbols) return;
+
+    let $currentKnot = null;
     if ("Knot" in symbols){
-        var currentKnot = $(`[row=${symbols["Knot"].row}]`);
+        $currentKnot = $(`[row=${symbols["Knot"].row}]`);
         if (symbols["Knot"].isfunc){
-            currentKnot.addClass("function")
+            $currentKnot.addClass("function")
         }
     }
+
+    let $currentStitch = null;
     if ("Stitch" in symbols){
-        var currentStitch = $(`[row=${symbols["Stitch"].row}]`);
+        $currentStitch = $(`[row=${symbols["Stitch"].row}]`);
     }
-    if ((currentKnot && currentKnot.hasClass("active"))&&(currentStitch && currentStitch.hasClass("active")))
-    return;
-    $(".nav-group-item.active").removeClass("active");
-    if (currentKnot && currentKnot.length !== 0){
-        currentKnot.addClass("active");
-        currentKnot[0].scrollIntoViewIfNeeded();
+    
+    if (($currentKnot && $currentKnot.hasClass("active"))&&($currentStitch && $currentStitch.hasClass("active")))
+        return;
+
+    $knotStichNavWrapper.find(".nav-group-item.active").removeClass("active");
+    if ($currentKnot && $currentKnot.length !== 0){
+        $currentKnot.addClass("active");
+        $currentKnot[0].scrollIntoViewIfNeeded();
+
 
     }
-    if (currentStitch && currentStitch.length !== 0){
-        currentStitch.addClass("active");
-        currentStitch[0].scrollIntoViewIfNeeded();
+    if ($currentStitch && $currentStitch.length !== 0){
+        $currentStitch.addClass("active");
+        $currentStitch[0].scrollIntoViewIfNeeded();
     }
-
 }
 
 function setFiles(mainInk, allFiles) {
