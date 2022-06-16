@@ -303,8 +303,6 @@ function hideSidebar() {
     if( !visible )
         return;
     
-    sidebarWidth = $sidebarSplit.position().left;
-
     animateSidebar(0);
 
     visible = false;
@@ -384,11 +382,13 @@ function setIncludeFormVisible(visible) {
 
 function toggle(id){
 
+    var $thisPanel = $(id);
+
     var columns =  2 - $(".nav-wrapper.hidden").length;
-    if (columns > 0)
+    if (columns > 0 && !$sidebarSplit.is(':animated'))
         sidebarWidth =  $sidebarSplit.position().left / columns; 
 
-    var $thisPanel = $(id);
+    
 
     if ($thisPanel.hasClass("hidden")) {
         columns++;
