@@ -3,7 +3,7 @@ const i18n = require("./i18n/i18n.js")
 const {ProjectWindow} = require("./projectWindow.js");
 const {DocumentationWindow} = require("./documentationWindow.js");
 const {AboutWindow} = require("./aboutWindow.js");
-const {setupMenus} = require('./appmenus.js');
+const {AppMenus} = require('./appmenus.js');
 const {onForceQuit} = require('./forceQuitDetect');
 const {Inklecate} = require("./inklecate.js");
 
@@ -118,8 +118,8 @@ app.on('ready', function () {
             app.quit();
         }
     });
-    //We set up the menus for the app
-    setupMenus({
+
+    AppMenus.setCallbacks({
         new: () => {
             ProjectWindow.createEmpty();
         },

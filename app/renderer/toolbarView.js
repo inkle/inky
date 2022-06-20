@@ -160,7 +160,7 @@ function setTitle(title) {
     $("h1.title").text(title);
 
     // Not visible on macOS
-    //ipcRenderer.setTitle(title);
+    ipcRenderer.setTitle(title);
 }
 
 function setBusySpinnerVisible(vis) {

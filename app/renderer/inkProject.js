@@ -1,4 +1,4 @@
-const ipc = require("electron").ipcRenderer;
+const {ipcRenderer} = require("electron");
 const path = require("path");
 const fs = require("fs");
 const _ = require("lodash");
@@ -188,7 +188,7 @@ InkProject.prototype.refreshUnsavedChanges = function() {
 
     // Overall, are there *any* unsaved changes, and has the state changed?
     // Change the dot in the Mac close window button
-    ipc.send("change-mac-dot", this.hasUnsavedChanges);
+    ipcRenderer.send("change-mac-dot", this.hasUnsavedChanges);
 }
 
 InkProject.prototype.startFileWatching = function() {
@@ -220,7 +220,7 @@ InkProject.prototype.startFileWatching = function() {
             return false; // not a settings file
         }
 
-        ipc.send("project-settings-needs-reload", mainInkPath);
+        ipcRenderer.send("project-settings-needs-reload", mainInkPath);
 
         return true; // yes, it was a settings file
     }
@@ -328,7 +328,7 @@ InkProject.prototype.save = function() {
     this.mainInk.save(success => {
         singleFileSaveComplete(this.mainInk, success);
 
-        ipc.send("main-file-saved", this.mainInk.absolutePath());
+        ipcRenderer.send("main-file-saved", this.mainInk.absolutePath());
 
         // May not be a success if cancelled, in which case we stop early
         if( success ) {
@@ -406,7 +406,8 @@ InkProject.prototype.export = function(exportType) {
                 { name: i18n._("JavaScript files"), extensions: ["js"] }
             ]
         }
-        ipc.invoke('showSaveDialog', saveOptions).then((result) => {
+
+        ipcRenderer.invoke('showSaveDialog', saveOptions).then((result) => {
             let targetSavePath = result.filePath;
             if( targetSavePath ) { 
                 this.defaultExportPath = targetSavePath;
@@ -546,7 +547,7 @@ InkProject.prototype.tryClose = function() {
             
             // Cancel
             else { 
-                ipc.send("project-cancelled-close");
+                ipcRenderer.send("project-cancelled-close");
             }
             })
     }
@@ -560,7 +561,7 @@ InkProject.prototype.tryClose = function() {
 
 
 InkProject.prototype.closeImmediate = function() {
-    ipc.send("project-final-close");
+    ipcRenderer.send("project-final-close");
 }
 
 InkProject.prototype.inkFileWithRelativePath = function(relativePath) {
@@ -702,54 +703,54 @@ InkProject.setProject = function(project) {
     InkProject.events.newProject(project);
 }
 
-ipc.on("set-project-main-ink-filepath", (event, filePath) => {
+ipcRenderer.on("set-project-main-ink-filepath", (event, filePath) => {
     InkProject.loadProject(filePath);
 });
 
-ipc.on("open-main-ink", (event) => {
+ipcRenderer.on("open-main-ink", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.showInkFile(InkProject.currentProject.mainInk);
     }
 });
 
-ipc.on("project-new-include", () => {
+ipcRenderer.on("project-new-include", () => {
     if( InkProject.currentProject ) {
         NavView.show();
         NavView.showAddIncludeForm();
     }
 });
 
-ipc.on("project-save", (event) => {
+ipcRenderer.on("project-save", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.save();
     }
 });
 
-ipc.on("project-export", (event) => {
+ipcRenderer.on("project-export", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.exportJson();
     }
 });
 
-ipc.on("project-export-for-web", (event) => {
+ipcRenderer.on("project-export-for-web", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.exportForWeb();
     }
 });
 
-ipc.on("project-export-js-only", (event) => {
+ipcRenderer.on("project-export-js-only", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.exportJSOnly();
     }
 });
 
-ipc.on("project-tryClose", (event) => {
+ipcRenderer.on("project-tryClose", (event) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.tryClose();
     }
 });
 
-ipc.on("project-settings-changed", (event, settings) => {
+ipcRenderer.on("project-settings-changed", (event, settings) => {
     if( InkProject.currentProject ) {
         InkProject.currentProject.refreshProjectSettings(settings);
     }
