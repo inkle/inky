@@ -477,10 +477,12 @@ function refresh() {
     Menu.setApplicationMenu(menu);
 }
 
+exports.AppMenus = {
 
-exports.setCallbacks = c => callbacks = c;
-exports.setRecentFiles = files => recentFiles = files;
-exports.setTheme = t => theme = t;
-exports.setZoom = z => zoom = z;
-exports.setCustomSnippetMenus = snippets => customInkSnippets = snippets;
-exports.refresh = refresh;
+    setCallbacks : (c) => {callbacks = c},
+    setRecentFiles : (files) => {recentFiles = files},
+    setTheme : (t) => theme = t,
+    setZoom : (z) => zoom = z,
+    setCustomSnippetMenus : (snippets) => {customInkSnippets = snippets},
+    refresh : refresh
+}
