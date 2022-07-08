@@ -245,6 +245,10 @@ exports.snippets = [
             },
             {separator: true},
             {
+                name: i18n._('Printing: a (or an)'),
+                ink:  loadLongerSnippet("a_or_an.ink") 
+            },
+            {
                 name: i18n._('Printing: UPPERCASE'),
                 ink:  loadLongerSnippet("uppercase.ink") 
             },
