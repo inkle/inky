@@ -1,7 +1,9 @@
 .window.contrast #main,
 .window.contrast #editor,
-.window.contrast #toolbar {
-    background-color: #282828;
+.window.contrast #toolbar,
+.window.contrast #editor .ace_gutter-layer,
+.window.contrast .split {
+    background-color: #222;
 }
 
 .window.contrast #main .sidebar,
@@ -21,7 +23,7 @@
 }
 
 .window.contrast #main .sidebar .nav-group-item.active {
-    background: #666;
+    background: #2f3e4c;
 }
 
 .window.contrast #main .sidebar .nav-group-item.active .filename {
@@ -46,7 +48,7 @@
 
 
 .window.contrast #toolbar {
-    border-bottom: 1px solid #888;
+    border-bottom: 1px solid #333;
 }
 
 .window.contrast #toolbar div.issuesSummary .issueCount {
@@ -90,10 +92,7 @@
     color: #999;
 }
 
-.window.contrast #editor .ace_gutter-layer,
-.window.contrast .split {
-    background: #444;
-}
+
 
 .window.contrast #editor .ace-error {
     background: #81265b;
@@ -147,11 +146,15 @@
 .window.contrast ::-webkit-scrollbar {
     width: .75rem;
     background: #282828;
-    border-left: 1px solid #323232;
+    border-left: 1px solid #222;
 }
 
 .window.contrast ::-webkit-scrollbar-thumb {
     background: #323232;
+}
+
+.window.contrast .sidebar .nav-wrapper {
+    border-left: 1px solid #222;
 }
 
 .window.contrast .sidebar .nav-wrapper::-webkit-scrollbar-thumb {

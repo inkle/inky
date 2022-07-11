@@ -1,12 +1,18 @@
 .window.dark #main,
 .window.dark #editor,
-.window.dark #toolbar {
+.window.dark #editor .ace_gutter-layer,
+.window.dark .split {
     background-color: #282828;
+}
+
+.window.dark #toolbar {
+    background-color: #131313;
+    border-bottom: #131313;
 }
 
 .window.dark #main .sidebar,
 .window.dark #main .sidebar .footer {
-    background-color: #282828;
+    background-color: #181818;
 }
 
 .window.dark h1.title {
@@ -21,7 +27,7 @@
 }
 
 .window.dark #main .sidebar .nav-group-item.active {
-    background: #666;
+    background: #1a292b;
 }
 
 .window.dark #main .sidebar .nav-group-item.active .filename {
@@ -43,18 +49,12 @@
     color: #888;
 }
 
-
-
-.window.dark #toolbar {
-    border-bottom: 1px solid #888;
-}
-
 .window.dark #toolbar div.issuesSummary .issueCount {
     color: #888;
 }
 
 .window.dark #main .sidebar .footer {
-    border-top: 1px solid #555;
+    border-top: 1px solid #282828;
 }
 
 
@@ -93,11 +93,6 @@
 
 .window.dark #player .innerText p.customInstruction {
     border-top-color: rgb(179, 94, 94);
-}
-
-.window.dark #editor .ace_gutter-layer,
-.window.dark .split {
-    background: #444;
 }
 
 .window.dark #editor .ace-error {
@@ -157,6 +152,10 @@
   
 .window.dark ::-webkit-scrollbar-thumb {
     background: #323232;
+}
+
+.window.dark .sidebar .nav-wrapper {
+    border-left: 1px solid #282828;
 }
 
 .window.dark .sidebar .nav-wrapper::-webkit-scrollbar-thumb {

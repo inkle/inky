@@ -1,12 +1,14 @@
 .window.focus #main,
 .window.focus #editor,
-.window.focus #toolbar {
-    background-color: #282828;
+.window.focus #toolbar,
+.window.focus #editor .ace_gutter-layer,
+.window.focus .split {
+    background-color: #181818;
 }
 
 .window.focus #main .sidebar,
 .window.focus #main .sidebar .footer {
-    background-color: #282828;
+    background-color: #222;
 }
 
 .window.focus h1.title {
@@ -21,7 +23,7 @@
 }
 
 .window.focus #main .sidebar .nav-group-item.active {
-    background: #666;
+    background: #2f2f2f;
 }
 
 .window.focus #main .sidebar .nav-group-item.active .filename {
@@ -46,7 +48,7 @@
 
 
 .window.focus #toolbar {
-    border-bottom: 1px solid #888;
+    border-bottom: 1px solid #222;
 }
 
 .window.focus #toolbar div.issuesSummary .issueCount {
@@ -88,11 +90,6 @@
 
 .window.focus #player p.choice a:hover {
     color: #999;
-}
-
-.window.focus #editor .ace_gutter-layer,
-.window.focus .split {
-    background: #444;
 }
 
 .window.focus #editor .ace-error {
@@ -153,6 +150,10 @@
     background: #323232;
 }
 
+
+.window.focus .sidebar .nav-wrapper {
+    border-left: 1px solid #282828;
+}
 .window.focus .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
     background: #323232;
 }
