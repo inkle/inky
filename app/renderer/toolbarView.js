@@ -109,12 +109,12 @@ function updateIssuesPopupPosition() {
 $(document).ready(function() {
 
     $("#toolbar .nav-toggle.button").on("click", function(event) {
-        events.toggleSidebar("#file-nav-wrapper");
+        events.toggleSidebar("#file-nav-wrapper", ".nav-toggle.button");
         event.preventDefault();
     });
 
     $("#toolbar .knot-toggle.button").on("click", function(event) {
-        events.toggleSidebar("#knot-stitch-wrapper");
+        events.toggleSidebar("#knot-stitch-wrapper", ".knot-toggle.button");
         event.preventDefault();
     });
 

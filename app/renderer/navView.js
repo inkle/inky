@@ -122,10 +122,18 @@ function setKnots(mainInk){
 //anything! 
     mainInk.symbols.parse();
     var ranges = mainInk.symbols.rangeIndex;
-    if (!ranges) {
+
+    $knotStichNavWrapper.empty();
+
+    if (ranges.length == 0) {
+        var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>` + 
+            '<nav class="nav-group"><span class="nav-group-item nav-tooltip">Knots, stitches and functions are indexed here</span></nav>');
+        
+        $knotStichNavWrapper.append($content);
+
         return;
     }
-    $knotStichNavWrapper.empty();
+    
     var extraClass = ""
 
     var externalsList = getExternals(mainInk);
@@ -303,8 +311,6 @@ function hideSidebar() {
     if( !visible )
         return;
     
-    sidebarWidth = $sidebarSplit.position().left;
-
     animateSidebar(0);
 
     visible = false;
@@ -382,25 +388,29 @@ function setIncludeFormVisible(visible) {
     }
 }
 
-function toggle(id){
+function toggle(id, buttonId){
+
+    var $button = $("#toolbar " + buttonId);
+    var $thisPanel = $(id);
 
     var columns =  2 - $(".nav-wrapper.hidden").length;
-    if (columns > 0)
+    if (columns > 0 && !$sidebarSplit.is(':animated'))
         sidebarWidth =  $sidebarSplit.position().left / columns; 
 
-    var $thisPanel = $(id);
+    
 
     if ($thisPanel.hasClass("hidden")) {
         columns++;
         $thisPanel.removeClass("hidden");
         if ($thisPanel.hasClass("hasFooter")) 
             $footer.removeClass("hidden");
-        
+        $button.addClass("selected");
     } else {
         columns--;
         $thisPanel.addClass("hidden");
         if ($thisPanel.hasClass("hasFooter")) 
-            $footer.addClass("hidden");      
+            $footer.addClass("hidden"); 
+        $button.removeClass("selected");     
     }
 
    
