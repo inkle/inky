@@ -458,16 +458,24 @@ var inkHighlightRules = function() {
         "#tags": [{
             // e.g. #tag should be highlighted
             token: "tag",
-            regex: /#/,
-            push: [{
-                token:"tag",
-                regex: /$/,
-                next: "pop"
-            }, {
-                include: "#comments"
-            }, {
-                defaultToken: "tag.innerContent"
-            }]
+
+            // End of tag condition: Note that it's very hard to get
+            // this exactly right because because you can do both:
+            //
+            //   1. # {blue|red|green} {one|two}      
+            //   2. {red #red|blue #blue|green #green} 
+            //
+            // So we can't have "{" or "}" signify the end of a tag
+            // since that would break the most common case (1), but
+            // the compromise is that it breaks the less usual case (2).
+            // (Maybe there's a way to handle this with Ace's push/pop
+            //  state/stack based system? I never fully understood how
+            //  it works!)
+            //
+            // Right now we simply assume that tags are always at the
+            // of a line unless they're in a choice, in which case we
+            // stop parsing the tag at "[" or "]".
+            regex: /#[^\[\]$]+/
         }],
         "#inlineContent": [{ 
             include: "#inlineConditional"
