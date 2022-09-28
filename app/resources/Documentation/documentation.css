@@ -89,3 +89,8 @@ html.dark *::-webkit-scrollbar-thumb:hover {
     background-color: #999;
     transition: background-color 0.6s;
 }
+
+/* Don't need table of contents in inky version since we have a sidebar */
+details {
+    display: none;
+}
