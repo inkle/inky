@@ -10,3 +10,4 @@ app/renderer/documentation/
 .idea/
 *.AppImage
 AppImage
+.DS_Store
