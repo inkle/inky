@@ -1,0 +1,1113 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ink-engine-runtime</name>
+    </assembly>
+    <members>
+        <member name="T:Ink.Runtime.Choice">
+            <summary>
+            A generated Choice from the story.
+            A single ChoicePoint in the Story could potentially generate
+            different Choices dynamically dependent on state, so they're
+            separated.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Choice.text">
+            <summary>
+            The main text to presented to the player for this Choice.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Choice.pathStringOnChoice">
+            <summary>
+            The target path that the Story should be diverted to if
+            this Choice is chosen.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.Choice.sourcePath">
+            <summary>
+            Get the path to the original choice point - where was this choice defined in the story?
+            </summary>
+            <value>A dot separated path into the story data.</value>
+        </member>
+        <member name="P:Ink.Runtime.Choice.index">
+            <summary>
+            The original index into currentChoices list on the Story when
+            this Choice was generated, for convenience.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.ChoicePoint">
+            <summary>
+            The ChoicePoint represents the point within the Story where
+            a Choice instance gets generated. The distinction is made
+            because the text of the Choice can be dynamically generated.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.InkListItem">
+            <summary>
+            The underlying type for a list item in ink. It stores the original list definition
+            name as well as the item name, but without the value of the item. When the value is
+            stored, it's stored in a KeyValuePair of InkListItem and int.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.InkListItem.originName">
+            <summary>
+            The name of the list where the item was originally defined.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.InkListItem.itemName">
+            <summary>
+            The main name of the item as defined in ink.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkListItem.#ctor(System.String,System.String)">
+            <summary>
+            Create an item with the given original list definition name, and the name of this
+            item.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkListItem.#ctor(System.String)">
+            <summary>
+            Create an item from a dot-separted string of the form "listDefinitionName.listItemName".
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.InkListItem.fullName">
+            <summary>
+            Get the full dot-separated name of the item, in the form "listDefinitionName.itemName".
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkListItem.ToString">
+            <summary>
+            Get the full dot-separated name of the item, in the form "listDefinitionName.itemName".
+            Calls fullName internally.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkListItem.Equals(System.Object)">
+            <summary>
+            Is this item the same as another item?
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkListItem.GetHashCode">
+            <summary>
+            Get the hashcode for an item.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.InkList">
+            <summary>
+            The InkList is the underlying type that's used to store an instance of a
+            list in ink. It's not used for the *definition* of the list, but for a list
+            value that's stored in a variable.
+            Somewhat confusingly, it's backed by a C# Dictionary, and has nothing to
+            do with a C# List!
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.#ctor">
+            <summary>
+            Create a new empty ink list.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.#ctor(Ink.Runtime.InkList)">
+            <summary>
+            Create a new ink list that contains the same contents as another list.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.#ctor(System.String,Ink.Runtime.Story)">
+            <summary>
+            Create a new empty ink list that's intended to hold items from a particular origin
+            list definition. The origin Story is needed in order to be able to look up that definition.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.FromString(System.String,Ink.Runtime.Story)">
+            <summary>
+            Converts a string to an ink list and returns for use in the story.
+            </summary>
+            <returns>InkList created from string list item</returns>
+            <param name="itemKey">Item key.</param>
+            <param name="originStory">Origin story.</param>
+        </member>
+        <member name="M:Ink.Runtime.InkList.AddItem(Ink.Runtime.InkListItem)">
+            <summary>
+            Adds the given item to the ink list. Note that the item must come from a list definition that
+            is already "known" to this list, so that the item's value can be looked up. By "known", we mean
+            that it already has items in it from that source, or it did at one point - it can't be a 
+            completely fresh empty list, or a list that only contains items from a different list definition.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.AddItem(System.String)">
+            <summary>
+            Adds the given item to the ink list, attempting to find the origin list definition that it belongs to.
+            The item must therefore come from a list definition that is already "known" to this list, so that the
+            item's value can be looked up. By "known", we mean that it already has items in it from that source, or
+            it did at one point - it can't be a completely fresh empty list, or a list that only contains items from
+            a different list definition.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.ContainsItemNamed(System.String)">
+            <summary>
+            Returns true if this ink list contains an item with the given short name
+            (ignoring the original list where it was defined).
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.InkList.maxItem">
+            <summary>
+            Get the maximum item in the list, equivalent to calling LIST_MAX(list) in ink.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.InkList.minItem">
+            <summary>
+            Get the minimum item in the list, equivalent to calling LIST_MIN(list) in ink.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.InkList.inverse">
+            <summary>
+            The inverse of the list, equivalent to calling LIST_INVERSE(list) in ink
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.InkList.all">
+            <summary>
+            The list of all items from the original list definition, equivalent to calling
+            LIST_ALL(list) in ink.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.Union(Ink.Runtime.InkList)">
+            <summary>
+            Returns a new list that is the combination of the current list and one that's
+            passed in. Equivalent to calling (list1 + list2) in ink.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.Intersect(Ink.Runtime.InkList)">
+            <summary>
+            Returns a new list that is the intersection of the current list with another
+            list that's passed in - i.e. a list of the items that are shared between the
+            two other lists. Equivalent to calling (list1 ^ list2) in ink.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.HasIntersection(Ink.Runtime.InkList)">
+            <summary>
+            Fast test for the existence of any intersection between the current list and another
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.Without(Ink.Runtime.InkList)">
+            <summary>
+            Returns a new list that's the same as the current one, except with the given items
+            removed that are in the passed in list. Equivalent to calling (list1 - list2) in ink.
+            </summary>
+            <param name="listToRemove">List to remove.</param>
+        </member>
+        <member name="M:Ink.Runtime.InkList.Contains(Ink.Runtime.InkList)">
+            <summary>
+            Returns true if the current list contains all the items that are in the list that
+            is passed in. Equivalent to calling (list1 ? list2) in ink.
+            </summary>
+            <param name="otherList">Other list.</param>
+        </member>
+        <member name="M:Ink.Runtime.InkList.Contains(System.String)">
+            <summary>
+            Returns true if the current list contains an item matching the given name.
+            </summary>
+            <param name="otherList">Other list.</param>
+        </member>
+        <member name="M:Ink.Runtime.InkList.GreaterThan(Ink.Runtime.InkList)">
+            <summary>
+            Returns true if all the item values in the current list are greater than all the
+            item values in the passed in list. Equivalent to calling (list1 > list2) in ink.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.GreaterThanOrEquals(Ink.Runtime.InkList)">
+            <summary>
+            Returns true if the item values in the current list overlap or are all greater than
+            the item values in the passed in list. None of the item values in the current list must
+            fall below the item values in the passed in list. Equivalent to (list1 >= list2) in ink,
+            or LIST_MIN(list1) >= LIST_MIN(list2) &amp;&amp; LIST_MAX(list1) >= LIST_MAX(list2).
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.LessThan(Ink.Runtime.InkList)">
+            <summary>
+            Returns true if all the item values in the current list are less than all the
+            item values in the passed in list. Equivalent to calling (list1 &lt; list2) in ink.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.LessThanOrEquals(Ink.Runtime.InkList)">
+            <summary>
+            Returns true if the item values in the current list overlap or are all less than
+            the item values in the passed in list. None of the item values in the current list must
+            go above the item values in the passed in list. Equivalent to (list1 &lt;= list2) in ink,
+            or LIST_MAX(list1) &lt;= LIST_MAX(list2) &amp;&amp; LIST_MIN(list1) &lt;= LIST_MIN(list2).
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.ListWithSubRange(System.Object,System.Object)">
+            <summary>
+            Returns a sublist with the elements given the minimum and maxmimum bounds.
+            The bounds can either be ints which are indices into the entire (sorted) list,
+            or they can be InkLists themselves. These are intended to be single-item lists so
+            you can specify the upper and lower bounds. If you pass in multi-item lists, it'll
+            use the minimum and maximum items in those lists respectively.
+            WARNING: Calling this method requires a full sort of all the elements in the list.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.Equals(System.Object)">
+            <summary>
+            Returns true if the passed object is also an ink list that contains
+            the same items as the current list, false otherwise.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.GetHashCode">
+            <summary>
+            Return the hashcode for this object, used for comparisons and inserting into dictionaries.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.InkList.ToString">
+            <summary>
+            Returns a string in the form "a, b, c" with the names of the items in the list, without
+            the origin list definition names. Equivalent to writing {list} in ink.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.Object">
+            <summary>
+            Base class for all ink runtime content.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Object.parent">
+            <summary>
+            Runtime.Objects can be included in the main Story as a hierarchy.
+            Usually parents are Container objects. (TODO: Always?)
+            </summary>
+            <value>The parent.</value>
+        </member>
+        <member name="M:Ink.Runtime.Object.op_Implicit(Ink.Runtime.Object)~System.Boolean">
+            Allow implicit conversion to bool so you don't have to do:
+            if( myObj != null ) ...
+        </member>
+        <member name="M:Ink.Runtime.Object.op_Equality(Ink.Runtime.Object,Ink.Runtime.Object)">
+            Required for implicit bool comparison
+        </member>
+        <member name="M:Ink.Runtime.Object.op_Inequality(Ink.Runtime.Object,Ink.Runtime.Object)">
+            Required for implicit bool comparison
+        </member>
+        <member name="M:Ink.Runtime.Object.Equals(System.Object)">
+            Required for implicit bool comparison
+        </member>
+        <member name="M:Ink.Runtime.Object.GetHashCode">
+            Required for implicit bool comparison
+        </member>
+        <member name="T:Ink.Runtime.Pointer">
+            <summary>
+            Internal structure used to point to a particular / current point in the story.
+            Where Path is a set of components that make content fully addressable, this is
+            a reference to the current container, and the index of the current piece of 
+            content within that container. This scheme makes it as fast and efficient as
+            possible to increment the pointer (move the story forwards) in a way that's as
+            native to the internal engine as possible.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.Profiler">
+            <summary>
+            Simple ink profiler that logs every instruction in the story and counts frequency and timing.
+            To use:
+             
+              var profiler = story.StartProfiling(), 
+            
+              (play your story for a bit)
+            
+              var reportStr = profiler.Report();
+            
+              story.EndProfiling();
+            
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Profiler.rootNode">
+            <summary>
+            The root node in the hierarchical tree of recorded ink timings.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Profiler.Report">
+            <summary>
+            Generate a printable report based on the data recording during profiling.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Profiler.StepLengthReport">
+            <summary>
+            Generate a printable report specifying the average and maximum times spent
+            stepping over different internal ink instruction types.
+            This report type is primarily used to profile the ink engine itself rather
+            than your own specific ink.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Profiler.Megalog">
+            <summary>
+            Create a large log of all the internal instructions that were evaluated while profiling was active.
+            Log is in a tab-separated format, for easy loading into a spreadsheet application.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.ProfileNode">
+            <summary>
+            Node used in the hierarchical tree of timings used by the Profiler.
+            Each node corresponds to a single line viewable in a UI-based representation.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.ProfileNode.key">
+            <summary>
+            The key for the node corresponds to the printable name of the callstack element.
+            </summary>		
+        </member>
+        <member name="F:Ink.Runtime.ProfileNode.openInUI">
+            <summary>
+            Horribly hacky field only used by ink unity integration,
+            but saves constructing an entire data structure that mirrors
+            the one in here purely to store the state of whether each
+            node in the UI has been opened or not  /// </summary>
+        </member>
+        <member name="P:Ink.Runtime.ProfileNode.hasChildren">
+            <summary>
+            Whether this node contains any sub-nodes - i.e. does it call anything else
+            that has been recorded?
+            </summary>
+            <value><c>true</c> if has children; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Ink.Runtime.ProfileNode.totalMillisecs">
+            <summary>
+            Total number of milliseconds this node has been active for.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.ProfileNode.descendingOrderedNodes">
+            <summary>
+            Returns a sorted enumerable of the nodes in descending order of
+            how long they took to run.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.ProfileNode.ownReport">
+            <summary>
+            Generates a string giving timing information for this single node, including
+            total milliseconds spent on the piece of ink, the time spent within itself
+            (v.s. spent in children), as well as the number of samples (instruction steps)
+            recorded for both too.
+            </summary>
+            <value>The own report.</value>
+        </member>
+        <member name="M:Ink.Runtime.ProfileNode.ToString">
+            <summary>
+            String is a report of the sub-tree from this node, but without any of the header information
+            that's prepended by the Profiler in its Report() method.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.SimpleJson">
+            <summary>
+            Simple custom JSON serialisation implementation that takes JSON-able System.Collections that
+            are produced by the ink engine and converts to and from JSON text.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.Story">
+            <summary>
+            A Story is the core class that represents a complete Ink narrative, and
+            manages the evaluation and state of it.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.Story.inkVersionCurrent">
+            <summary>
+            The current version of the ink story file format.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.Story.inkVersionMinimumCompatible">
+            <summary>
+            The minimum legacy version of ink that can be loaded by the current version of the code.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.currentChoices">
+            <summary>
+            The list of Choice objects available at the current point in
+            the Story. This list will be populated as the Story is stepped
+            through with the Continue() method. Once canContinue becomes
+            false, this list will be populated, and is usually
+            (but not always) on the final Continue() step.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.currentText">
+            <summary>
+            The latest line of text to be generated from a Continue() call.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.currentTags">
+            <summary>
+            Gets a list of tags as defined with '#' in source that were seen
+            during the latest Continue() call.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.currentErrors">
+            <summary>
+            Any errors generated during evaluation of the Story.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.currentWarnings">
+            <summary>
+            Any warnings generated during evaluation of the Story.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.currentFlowName">
+            <summary>
+            The current flow name if using multi-flow functionality - see SwitchFlow
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.currentFlowIsDefaultFlow">
+            <summary>
+            Is the default flow currently active? By definition, will also return true if not using multi-flow functionality - see SwitchFlow
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.aliveFlowNames">
+            <summary>
+            Names of currently alive flows (not including the default flow)
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.hasError">
+            <summary>
+            Whether the currentErrors list contains any errors.
+            THIS MAY BE REMOVED - you should be setting an error handler directly
+            using Story.onError.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.hasWarning">
+            <summary>
+            Whether the currentWarnings list contains any warnings.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.variablesState">
+            <summary>
+            The VariablesState object contains all the global variables in the story.
+            However, note that there's more to the state of a Story than just the
+            global variables. This is a convenience accessor to the full state object.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.Story.state">
+            <summary>
+            The entire current state of the story including (but not limited to):
+            
+             * Global variables
+             * Temporary variables
+             * Read/visit and turn counts
+             * The callstack and evaluation stacks
+             * The current threads
+            
+            </summary>
+        </member>
+        <member name="E:Ink.Runtime.Story.onError">
+            <summary>
+            Error handler for all runtime errors in ink - i.e. problems
+            with the source ink itself that are only discovered when playing
+            the story.
+            It's strongly recommended that you assign an error handler to your
+            story instance to avoid getting exceptions for ink errors.
+            </summary>
+        </member>
+        <member name="E:Ink.Runtime.Story.onDidContinue">
+            <summary>
+            Callback for when ContinueInternal is complete
+            </summary>
+        </member>
+        <member name="E:Ink.Runtime.Story.onMakeChoice">
+            <summary>
+            Callback for when a choice is about to be executed
+            </summary>
+        </member>
+        <member name="E:Ink.Runtime.Story.onEvaluateFunction">
+            <summary>
+            Callback for when a function is about to be evaluated
+            </summary>
+        </member>
+        <member name="E:Ink.Runtime.Story.onCompleteEvaluateFunction">
+            <summary>
+            Callback for when a function has been evaluated
+            This is necessary because evaluating a function can cause continuing
+            </summary>
+        </member>
+        <member name="E:Ink.Runtime.Story.onChoosePathString">
+            <summary>
+            Callback for when a path string is chosen
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.StartProfiling">
+            <summary>
+            Start recording ink profiling information during calls to Continue on Story.
+            Return a Profiler instance that you can request a report from when you're finished.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.EndProfiling">
+            <summary>
+            Stop recording ink profiling information during calls to Continue on Story.
+            To generate a report from the profiler, call 
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.#ctor(System.String)">
+            <summary>
+            Construct a Story object using a JSON string compiled through inklecate.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ToJson">
+            <summary>
+            The Story itself in JSON representation.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ToJson(System.IO.Stream)">
+            <summary>
+            The Story itself in JSON representation.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ResetState">
+            <summary>
+            Reset the Story back to its initial state as it was when it was
+            first constructed.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ResetCallstack">
+            <summary>
+            Unwinds the callstack. Useful to reset the Story's evaluation
+            without actually changing any meaningful state, for example if
+            you want to exit a section of story prematurely and tell it to
+            go elsewhere with a call to ChoosePathString(...).
+            Doing so without calling ResetCallstack() could cause unexpected
+            issues if, for example, the Story was in a tunnel already.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.Continue">
+            <summary>
+            Continue the story for one line of content, if possible.
+            If you're not sure if there's more content available, for example if you
+            want to check whether you're at a choice point or at the end of the story,
+            you should call <c>canContinue</c> before calling this function.
+            </summary>
+            <returns>The line of text content.</returns>
+        </member>
+        <member name="P:Ink.Runtime.Story.canContinue">
+            <summary>
+            Check whether more content is available if you were to call <c>Continue()</c> - i.e.
+            are we mid story rather than at a choice point or at the end.
+            </summary>
+            <value><c>true</c> if it's possible to call <c>Continue()</c>.</value>
+        </member>
+        <member name="P:Ink.Runtime.Story.asyncContinueComplete">
+            <summary>
+            If ContinueAsync was called (with milliseconds limit > 0) then this property
+            will return false if the ink evaluation isn't yet finished, and you need to call 
+            it again in order for the Continue to fully complete.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ContinueAsync(System.Single)">
+            <summary>
+            An "asnychronous" version of Continue that only partially evaluates the ink,
+            with a budget of a certain time limit. It will exit ink evaluation early if
+            the evaluation isn't complete within the time limit, with the
+            asyncContinueComplete property being false.
+            This is useful if ink evaluation takes a long time, and you want to distribute
+            it over multiple game frames for smoother animation.
+            If you pass a limit of zero, then it will fully evaluate the ink in the same
+            way as calling Continue (and in fact, this exactly what Continue does internally).
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ContinueMaximally">
+            <summary>
+            Continue the story until the next choice point or until it runs out of content.
+            This is as opposed to the Continue() method which only evaluates one line of
+            output at a time.
+            </summary>
+            <returns>The resulting text evaluated by the ink engine, concatenated together.</returns>
+        </member>
+        <member name="M:Ink.Runtime.Story.CopyStateForBackgroundThreadSave">
+            <summary>
+            Advanced usage!
+            If you have a large story, and saving state to JSON takes too long for your
+            framerate, you can temporarily freeze a copy of the state for saving on 
+            a separate thread. Internally, the engine maintains a "diff patch".
+            When you've finished saving your state, call BackgroundSaveComplete()
+            and that diff patch will be applied, allowing the story to continue
+            in its usual mode.
+            </summary>
+            <returns>The state for background thread save.</returns>
+        </member>
+        <member name="M:Ink.Runtime.Story.BackgroundSaveComplete">
+            <summary>
+            See CopyStateForBackgroundThreadSave. This method releases the
+            "frozen" save state, applying its patch that it was using internally.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.PerformLogicAndFlowControl(Ink.Runtime.Object)">
+            <summary>
+            Checks whether contentObj is a control or flow object rather than a piece of content, 
+            and performs the required command if necessary.
+            </summary>
+            <returns><c>true</c> if object was logic or flow control, <c>false</c> if it's normal content.</returns>
+            <param name="contentObj">Content object.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.ChoosePathString(System.String,System.Boolean,System.Object[])">
+            <summary>
+            Change the current position of the story to the given path. From here you can 
+            call Continue() to evaluate the next line.
+            
+            The path string is a dot-separated path as used internally by the engine.
+            These examples should work:
+            
+               myKnot
+               myKnot.myStitch
+            
+            Note however that this won't necessarily work:
+            
+               myKnot.myStitch.myLabelledChoice
+            
+            ...because of the way that content is nested within a weave structure.
+            
+            By default this will reset the callstack beforehand, which means that any
+            tunnels, threads or functions you were in at the time of calling will be
+            discarded. This is different from the behaviour of ChooseChoiceIndex, which
+            will always keep the callstack, since the choices are known to come from the
+            correct state, and known their source thread.
+            
+            You have the option of passing false to the resetCallstack parameter if you
+            don't want this behaviour, and will leave any active threads, tunnels or
+            function calls in-tact.
+            
+            This is potentially dangerous! If you're in the middle of a tunnel,
+            it'll redirect only the inner-most tunnel, meaning that when you tunnel-return
+            using '->->', it'll return to where you were before. This may be what you
+            want though. However, if you're in the middle of a function, ChoosePathString
+            will throw an exception.
+            
+            </summary>
+            <param name="path">A dot-separted path string, as specified above.</param>
+            <param name="resetCallstack">Whether to reset the callstack first (see summary description).</param>
+            <param name="arguments">Optional set of arguments to pass, if path is to a knot that takes them.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.ChooseChoiceIndex(System.Int32)">
+            <summary>
+            Chooses the Choice from the currentChoices list with the given
+            index. Internally, this sets the current content path to that
+            pointed to by the Choice, ready to continue story evaluation.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.HasFunction(System.String)">
+            <summary>
+            Checks if a function exists.
+            </summary>
+            <returns>True if the function exists, else false.</returns>
+            <param name="functionName">The name of the function as declared in ink.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.EvaluateFunction(System.String,System.Object[])">
+            <summary>
+            Evaluates a function defined in ink.
+            </summary>
+            <returns>The return value as returned from the ink function with `~ return myValue`, or null if nothing is returned.</returns>
+            <param name="functionName">The name of the function as declared in ink.</param>
+            <param name="arguments">The arguments that the ink function takes, if any. Note that we don't (can't) do any validation on the number of arguments right now, so make sure you get it right!</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.EvaluateFunction(System.String,System.String@,System.Object[])">
+            <summary>
+            Evaluates a function defined in ink, and gathers the possibly multi-line text as generated by the function.
+            This text output is any text written as normal content within the function, as opposed to the return value, as returned with `~ return`.
+            </summary>
+            <returns>The return value as returned from the ink function with `~ return myValue`, or null if nothing is returned.</returns>
+            <param name="functionName">The name of the function as declared in ink.</param>
+            <param name="textOutput">The text content produced by the function via normal ink, if any.</param>
+            <param name="arguments">The arguments that the ink function takes, if any. Note that we don't (can't) do any validation on the number of arguments right now, so make sure you get it right!</param>
+        </member>
+        <member name="P:Ink.Runtime.Story.allowExternalFunctionFallbacks">
+            <summary>
+            An ink file can provide a fallback functions for when when an EXTERNAL has been left
+            unbound by the client, and the fallback function will be called instead. Useful when
+            testing a story in playmode, when it's not possible to write a client-side C# external
+            function, but you don't want it to fail to run.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.Story.ExternalFunction">
+            <summary>
+            General purpose delegate definition for bound EXTERNAL function definitions
+            from ink. Note that this version isn't necessary if you have a function
+            with three arguments or less - see the overloads of BindExternalFunction.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunctionGeneral(System.String,Ink.Runtime.Story.ExternalFunction,System.Boolean)">
+            <summary>
+            Most general form of function binding that returns an object
+            and takes an array of object parameters.
+            The only way to bind a function with more than 3 arguments.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="func">The C# function to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction(System.String,System.Func{System.Object},System.Boolean)">
+            <summary>
+            Bind a C# function to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="func">The C# function to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction(System.String,System.Action,System.Boolean)">
+            <summary>
+            Bind a C# Action to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="act">The C# action to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``1(System.String,System.Func{``0,System.Object},System.Boolean)">
+            <summary>
+            Bind a C# function to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="func">The C# function to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``1(System.String,System.Action{``0},System.Boolean)">
+            <summary>
+            Bind a C# action to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="act">The C# action to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``2(System.String,System.Func{``0,``1,System.Object},System.Boolean)">
+            <summary>
+            Bind a C# function to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="func">The C# function to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``2(System.String,System.Action{``0,``1},System.Boolean)">
+            <summary>
+            Bind a C# action to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="act">The C# action to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``3(System.String,System.Func{``0,``1,``2,System.Object},System.Boolean)">
+            <summary>
+            Bind a C# function to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="func">The C# function to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``3(System.String,System.Action{``0,``1,``2},System.Boolean)">
+            <summary>
+            Bind a C# action to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="act">The C# action to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``4(System.String,System.Func{``0,``1,``2,``3,System.Object},System.Boolean)">
+            <summary>
+            Bind a C# function to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="func">The C# function to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BindExternalFunction``4(System.String,System.Action{``0,``1,``2,``3},System.Boolean)">
+            <summary>
+            Bind a C# action to an ink EXTERNAL function declaration.
+            </summary>
+            <param name="funcName">EXTERNAL ink function name to bind to.</param>
+            <param name="act">The C# action to bind.</param>
+            <param name="lookaheadSafe">The ink engine often evaluates further 
+            than you might expect beyond the current line just in case it sees 
+            glue that will cause the two lines to become one. In this case it's 
+            possible that a function can appear to be called twice instead of 
+            just once, and earlier than you expect. If it's safe for your 
+            function to be called in this way (since the result and side effect 
+            of the function will not change), then you can pass 'true'. 
+            Usually, you want to pass 'false', especially if you want some action 
+            to be performed in game code when this function is called.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.UnbindExternalFunction(System.String)">
+            <summary>
+            Remove a binding for a named EXTERNAL ink function.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ValidateExternalBindings">
+            <summary>
+            Check that all EXTERNAL ink functions have a valid bound C# function.
+            Note that this is automatically called on the first call to Continue().
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.Story.VariableObserver">
+            <summary>
+            Delegate definition for variable observation - see ObserveVariable.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.ObserveVariable(System.String,Ink.Runtime.Story.VariableObserver)">
+            <summary>
+            When the named global variable changes it's value, the observer will be
+            called to notify it of the change. Note that if the value changes multiple
+            times within the ink, the observer will only be called once, at the end
+            of the ink's evaluation. If, during the evaluation, it changes and then
+            changes back again to its original value, it will still be called.
+            Note that the observer will also be fired if the value of the variable
+            is changed externally to the ink, by directly setting a value in
+            story.variablesState.
+            </summary>
+            <param name="variableName">The name of the global variable to observe.</param>
+            <param name="observer">A delegate function to call when the variable changes.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.ObserveVariables(System.Collections.Generic.IList{System.String},Ink.Runtime.Story.VariableObserver)">
+            <summary>
+            Convenience function to allow multiple variables to be observed with the same
+            observer delegate function. See the singular ObserveVariable for details.
+            The observer will get one call for every variable that has changed.
+            </summary>
+            <param name="variableNames">The set of variables to observe.</param>
+            <param name="observer">The delegate function to call when any of the named variables change.</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.RemoveVariableObserver(Ink.Runtime.Story.VariableObserver,System.String)">
+            <summary>
+            Removes the variable observer, to stop getting variable change notifications.
+            If you pass a specific variable name, it will stop observing that particular one. If you
+            pass null (or leave it blank, since it's optional), then the observer will be removed
+            from all variables that it's subscribed to. If you pass in a specific variable name and
+            null for the the observer, all observers for that variable will be removed. 
+            </summary>
+            <param name="observer">(Optional) The observer to stop observing.</param>
+            <param name="specificVariableName">(Optional) Specific variable name to stop observing.</param>
+        </member>
+        <member name="P:Ink.Runtime.Story.globalTags">
+            <summary>
+            Get any global tags associated with the story. These are defined as
+            hash tags defined at the very top of the story.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.Story.TagsForContentAtPath(System.String)">
+            <summary>
+            Gets any tags associated with a particular knot or knot.stitch.
+            These are defined as hash tags defined at the very top of a 
+            knot or stitch.
+            </summary>
+            <param name="path">The path of the knot or stitch, in the form "knot" or "knot.stitch".</param>
+        </member>
+        <member name="M:Ink.Runtime.Story.BuildStringOfHierarchy">
+            <summary>
+            Useful when debugging a (very short) story, to visualise the state of the
+            story. Add this call as a watch and open the extended text. A left-arrow mark
+            will denote the current point of the story.
+            It's only recommended that this is used on very short debug stories, since
+            it can end up generate a large quantity of text otherwise.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.StoryException">
+            <summary>
+            Exception that represents an error when running a Story at runtime.
+            An exception being thrown of this type is typically when there's
+            a bug in your ink, rather than in the ink engine itself!
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.StoryException.#ctor">
+            <summary>
+            Constructs a default instance of a StoryException without a message.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.StoryException.#ctor(System.String)">
+            <summary>
+            Constructs an instance of a StoryException with a message.
+            </summary>
+            <param name="message">The error message.</param>
+        </member>
+        <member name="T:Ink.Runtime.StoryState">
+            <summary>
+            All story state information is included in the StoryState class,
+            including global variables, read counts, the pointer to the current
+            point in the story, the call stack (for tunnels, functions, etc),
+            and a few other smaller bits and pieces. You can save the current
+            state using the json serialisation functions ToJson and LoadJson.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.StoryState.kInkSaveStateVersion">
+            <summary>
+            The current version of the state save file JSON-based format.
+            </summary>
+        </member>
+        <member name="E:Ink.Runtime.StoryState.onDidLoadState">
+            <summary>
+            Callback for when a state is loaded
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.StoryState.ToJson">
+            <summary>
+            Exports the current state to json format, in order to save the game.
+            </summary>
+            <returns>The save state in json format.</returns>
+        </member>
+        <member name="M:Ink.Runtime.StoryState.ToJson(System.IO.Stream)">
+            <summary>
+            Exports the current state to json format, in order to save the game.
+            For this overload you can pass in a custom stream, such as a FileStream.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.StoryState.LoadJson(System.String)">
+            <summary>
+            Loads a previously saved state in JSON format.
+            </summary>
+            <param name="json">The JSON string to load.</param>
+        </member>
+        <member name="M:Ink.Runtime.StoryState.VisitCountAtPathString(System.String)">
+            <summary>
+            Gets the visit/read count of a particular Container at the given path.
+            For a knot or stitch, that path string will be in the form:
+            
+                knot
+                knot.stitch
+            
+            </summary>
+            <returns>The number of times the specific knot or stitch has
+            been enountered by the ink engine.</returns>
+            <param name="pathString">The dot-separated path string of
+            the specific knot or stitch.</param>
+        </member>
+        <member name="P:Ink.Runtime.StoryState.currentPathString">
+            <summary>
+            String representation of the location where the story currently is.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.StoryState.ForceEnd">
+            <summary>
+            Ends the current ink flow, unwrapping the callstack but without
+            affecting any variables. Useful if the ink is (say) in the middle
+            a nested tunnel, and you want it to reset so that you can divert
+            elsewhere using ChoosePathString(). Otherwise, after finishing
+            the content you diverted to, it would continue where it left off.
+            Calling this is equivalent to calling -> END in ink.
+            </summary>
+        </member>
+        <member name="T:Ink.Runtime.VariablesState">
+            <summary>
+            Encompasses all the global variables in an ink Story, and
+            allows binding of a VariableChanged event so that that game
+            code can be notified whenever the global variables change.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.VariablesState.Item(System.String)">
+            <summary>
+            Get or set the value of a named global ink variable.
+            The types available are the standard ink types. Certain
+            types will be implicitly casted when setting.
+            For example, doubles to floats, longs to ints, and bools
+            to ints.
+            </summary>
+        </member>
+        <member name="M:Ink.Runtime.VariablesState.GetEnumerator">
+            <summary>
+            Enumerator to allow iteration over all global variables by name.
+            </summary>
+        </member>
+        <member name="F:Ink.Runtime.VariablesState.dontSaveDefaultValues">
+            <summary>
+            When saving out JSON state, we can skip saving global values that
+            remain equal to the initial values that were declared in ink.
+            This makes the save file (potentially) much smaller assuming that
+            at least a portion of the globals haven't changed. However, it
+            can also take marginally longer to save in the case that the 
+            majority HAVE changed, since it has to compare all globals.
+            It may also be useful to turn this off for testing worst case
+            save timing.
+            </summary>
+        </member>
+        <member name="T:Ink.ErrorHandler">
+            <summary>
+            Callback for errors throughout both the ink runtime and compiler.
+            </summary>
+        </member>
+        <member name="T:Ink.ErrorType">
+            <summary>
+            Author errors will only ever come from the compiler so don't need to be handled
+            by your Story error handler. The "Error" ErrorType is by far the most common
+            for a runtime story error (rather than compiler error), though the Warning type
+            is also possible. 
+            </summary>
+        </member>
+        <member name="F:Ink.ErrorType.Author">
+            Generated by a "TODO" note in the ink source
+        </member>
+        <member name="F:Ink.ErrorType.Warning">
+            You should probably fix this, but it's not critical
+        </member>
+        <member name="F:Ink.ErrorType.Error">
+            Critical error that can't be recovered from
+        </member>
+    </members>
+</doc>
