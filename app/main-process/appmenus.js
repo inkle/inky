@@ -123,6 +123,10 @@ function refresh() {
                     if( menuItem.ink ) {
                         templateMenuItem.click = (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, menuItem.ink)
                         valid = true;
+                        if (menuItem.accelerator)
+                            templateMenuItem.accelerator = menuItem.accelerator;
+                        else if (menuItem.shortcut)
+                            templateMenuItem.accelerator = menuItem.shortcut;
                     }
 
                     else if( menuItem.submenu && Array.isArray(menuItem.submenu) ) {
