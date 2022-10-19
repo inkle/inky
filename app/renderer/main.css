@@ -652,13 +652,18 @@ img.issue-icon.warning {
   text-decoration: underline;
 }
 
-#player p.tags {
+#player p.tags, #player p.choice .tags {
   color: #AAA;
   text-align: center;
   font-family: monospace;
 }
 
-#main.hideTags #player p.tags {
+#player p.choice .tags {
+  padding-left: 1em;
+}
+
+#main.hideTags #player p.tags,
+#main.hideTags #player p.choice .tags {
     display: none;
 }
 

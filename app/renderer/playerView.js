@@ -182,11 +182,25 @@ function addTags(tags)
 
 function addChoice(choice, callback)
 {
-    var $choice = $("<a href='#'>"+choice.text+"</a>");
+    // New format (since ink can have tags directly on choices)
+    // choice: {
+    //    choice: {
+    //      text: "this is a choice",
+    //      tags: ["a tag", "another tag"]
+    //    },
+    //    ... other stuff, e.g. choice number ...
+    // }
+    var $choice = $("<a href='#'>"+choice.choice.text+"</a>");
+    var $tags = null;
+    if( choice.choice.tags != null && choice.choice.tags.length > 0 ) {
+        var tagsStr = "# " + choice.choice.tags.join(" # ");
+        $tags = $(` <span class='tags'>${tagsStr}</span>`);
+    }
 
     // Append the choice
     var $choicePara = $("<p class='choice'></p>");
     $choicePara.append($choice);
+    if( $tags != null ) $choicePara.append($tags);
     $textBuffer.append($choicePara);
 
     // Fade it in

@@ -223,7 +223,7 @@ function compile(compileInstruction, requester) {
                 for(let i=0; i<jsonResponse.choices.length; i++) {
                     requester.send("play-generated-choice", {
                         number: (i+1),
-                        text: jsonResponse.choices[i]
+                        choice: jsonResponse.choices[i]
                     }, sessionId);
                 }
             }
