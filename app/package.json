@@ -32,7 +32,7 @@
     "jsdom": "^16.5.1",
     "markdown-html": "^0.0.8",
     "mocha": "^4.0.1",
-    "spectron": "^3.8.0"
+    "spectron": "^19.0.0"
   },
   "dependencies": {
     "chokidar": "^3.3.1",
