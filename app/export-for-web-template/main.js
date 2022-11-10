@@ -70,6 +70,7 @@
                 // Detect tags of the form "X: Y". Currently used for IMAGE and CLASS but could be
                 // customised to be used for other things too.
                 var splitTag = splitPropertyTag(tag);
+				splitTag.property = splitTag.property.toUpperCase();
 
                 // AUDIO: src
                 if( splitTag && splitTag.property == "AUDIO" ) {
@@ -174,6 +175,11 @@
                 // Don't follow <a> link
                 event.preventDefault();
 
+				// Extend height to fit
+				// We do this manually so that removing elements and creating new ones doesn't
+				// cause the height (and therefore scroll) to jump backwards temporarily.
+				storyContainer.style.height = contentBottomEdgeY()+"px";
+
                 // Remove all existing choices
                 removeAll(".choice");
 
@@ -188,10 +194,8 @@
             });
         });
 
-        // Extend height to fit
-        // We do this manually so that removing elements and creating new ones doesn't
-        // cause the height (and therefore scroll) to jump backwards temporarily.
-        storyContainer.style.height = contentBottomEdgeY()+"px";
+		// Unset storyContainer's height, allowing it to resize itself
+		storyContainer.style.height = "";
 
         if( !firstTime )
             scrollDown(previousBottomEdge);
