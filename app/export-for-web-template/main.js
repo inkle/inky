@@ -219,15 +219,29 @@
     // Various Helper functions
     // -----------------------------------
 
+    // Detects whether the user accepts animations
+    function isAnimationEnabled() {
+        return window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    }
+
     // Fades in an element after a specified delay
     function showAfter(delay, el) {
-        el.classList.add("hide");
-        setTimeout(function() { el.classList.remove("hide") }, delay);
+        if( isAnimationEnabled() ) {
+            el.classList.add("hide");
+            setTimeout(function() { el.classList.remove("hide") }, delay);
+        } else {
+            // If the user doesn't want animations, show immediately
+            el.classList.remove("hide");
+        }
     }
 
     // Scrolls the page down, but no further than the bottom edge of what you could
     // see previously, so it doesn't go too far.
     function scrollDown(previousBottomEdge) {
+        // If the user doesn't want animations, let them scroll manually
+        if ( !isAnimationEnabled() ) {
+            return;
+        }
 
         // Line up top of screen with the bottom of where the previous content ended
         var target = previousBottomEdge;
