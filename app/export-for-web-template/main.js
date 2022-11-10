@@ -70,6 +70,7 @@
                 // Detect tags of the form "X: Y". Currently used for IMAGE and CLASS but could be
                 // customised to be used for other things too.
                 var splitTag = splitPropertyTag(tag);
+				splitTag.property = splitTag.property.toUpperCase();
 
                 // AUDIO: src
                 if( splitTag && splitTag.property == "AUDIO" ) {
