@@ -103,7 +103,7 @@
     "Restart story": "重新开始剧本",
     "Main ink file": "Main ink 文件",
     "Add new include": "添加新的包含",
-    "Enter new ink file name:": "输入新的 ink 文件名称：",
+    "Enter new ink filename:": "输入新的 ink 文件名称：",
     "Folder/inkFileName.ink": "",
     "Add to main ink": "添加到 main ink",
     "Add": "添加",
@@ -126,5 +126,11 @@
     "Unused files": "尚未使用的文件",
     "Line": "行",
     "No issues.": "No issues.",
-    "End of story": "剧情结束"
+    "End of story": "剧情结束",
+    "Content": "内容",
+    "Toggle file browser": "文件浏览器",
+    "Toggle knot browser": "节点浏览器",
+    "Navigate back": "后退",
+    "Navigate forward": "前进",
+    "Knots, stitches and functions are indexed here": "这里将显示节点，章节和函数"
   }
