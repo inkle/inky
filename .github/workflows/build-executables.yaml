@@ -147,8 +147,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            ReleaseUpload/*.zip
-            ReleaseUpload/*.dmg
+            ReleaseUpload/**/*.zip
+            ReleaseUpload/**/*.dmg
             
       
       - name: Release on GitHub (Automated Tag)
@@ -159,6 +159,6 @@ jobs:
         with:
           tag_name: ${{ format('{0}.0.0', github.run_number) }}
           files: |
-            ReleaseUpload/*.zip
-            ReleaseUpload/*.dmg
+            ReleaseUpload/**/*.zip
+            ReleaseUpload/**/*.dmg
             
