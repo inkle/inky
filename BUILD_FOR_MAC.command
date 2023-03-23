@@ -23,7 +23,7 @@ npm exec electron-packager app Inky --platform=darwin --arch=x64 --icon=resource
 # Requires appdmg: npm install -g appdmg
 # https://www.npmjs.com/package/appdmg
 mkdir -p ReleaseUpload
-# npm exec appdmg resources/appdmg.json ReleaseUpload/Inky_mac.dmg
+npm exec appdmg resources/appdmg.json ReleaseUpload/Inky_mac.dmg
 
 # Remove .icns again
 rm resources/Icon.icns
