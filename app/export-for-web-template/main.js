@@ -99,7 +99,6 @@
                 if( splitTag && splitTag.property == "IMAGE" ) {
                     var imageElement = document.createElement('img');
                     imageElement.src = splitTag.val;
-                    console.log(imageElement)
                     storyContainer.appendChild(imageElement);
 
                     imageElement.onload = () => {
