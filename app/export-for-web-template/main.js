@@ -188,7 +188,7 @@
             choiceParagraphElement.classList.add("choice");
 
             for(var i=0; i<customClasses.length; i++)
-                paragraphElement.classList.add(customClasses[i]);
+                choiceParagraphElement.classList.add(customClasses[i]);
 
             if(isClickable){
                 choiceParagraphElement.innerHTML = `<a href='#'>${choice.text}</a>`
