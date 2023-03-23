@@ -63,12 +63,21 @@ jobs:
           mkdir -p ReleaseUpload
           npx appdmg resources/appdmg.json ReleaseUpload/Inky_mac.dmg
 
+      - name: Install zip
+        if: matrix.os == 'windows-latest'
+        uses: montudor/action-zip@v1
+
+
       - name: Build electron app (Win)
         if: matrix.os == 'windows-latest'
         run: |
           npx electron-packager app Inky --platform=win32  --arch=x64 --icon=resources/Icon1024.png.ico --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_mac" --win32metadata.ProductName="Inky" --win32metadata.CompanyName="inkle Ltd" --win32metadata.FileDescription="Inky" --win32metadata.OriginalFilename="Inky" --win32metadata.InternalName="Inky"
           mkdir -p ReleaseUpload
           Compress-Archive Inky-win32-x64 ReleaseUpload\Inky-win32-x64.zip
+
+      - name: Zip output (Win)
+        if: matrix.os == 'windows-latest'
+        run: zip -r ReleaseUpload\Inky-win32-x64.zip Inky-win32-x64
       
       - name: Build electron app (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
