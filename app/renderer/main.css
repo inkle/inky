@@ -593,8 +593,8 @@ img.issue-icon.warning {
   right: 0;
   left: 50%;
 
-  font-family: Verdana, Geneva, sans-serif;
-  font-weight: lighter;
+  font-family: system-ui, -apple-system, Geneva, sans-serif;
+  font-weight: 400;
   color: #555;
 }
 
