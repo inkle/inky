@@ -145,6 +145,11 @@
                     }
                 }
             }
+		
+		// Check if paragraphText is empty
+		if (paragraphText.trim().length == 0) {
+                continue; // Skip empty paragraphs
+		}
 
             // Create paragraph element (initially hidden)
             var paragraphElement = document.createElement('p');
