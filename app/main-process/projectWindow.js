@@ -36,9 +36,9 @@ var events = {
 
 function ProjectWindow(filePath) {
     const getThemeFromMenu = () => Menu.getApplicationMenu().items.find(
-        e => e.label.toLowerCase() === '&view'
+        e => e.label.toLowerCase() === i18n._('&View').toLowerCase()
     ).submenu.items.find(
-        e => e.label.toLowerCase() === 'theme'
+        e => e.label.toLowerCase() === i18n._('Theme').toLowerCase()
     ).submenu.items.find(
         e => e.checked
     ).label.toLowerCase();

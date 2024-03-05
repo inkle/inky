@@ -123,11 +123,17 @@ function setKnots(mainInk){
     mainInk.symbols.parse();
     var ranges = mainInk.symbols.rangeIndex;
 
+    // i18n
+    var strTitle=i18n._("Content");
+    var strTips=i18n._("Knots, stitches and functions are indexed here");
+    var strFunction=i18n._("Functions");
+    var strExternals=i18n._("Externals");
+
     $knotStichNavWrapper.empty();
 
     if (ranges.length == 0) {
-        var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>` + 
-            '<nav class="nav-group"><span class="nav-group-item nav-tooltip">Knots, stitches and functions are indexed here</span></nav>');
+        var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">${strTitle}</h5></nav>` + 
+            `<nav class="nav-group"><span class="nav-group-item nav-tooltip">${strTips}</span></nav>`);
         
         $knotStichNavWrapper.append($content);
 
@@ -138,9 +144,9 @@ function setKnots(mainInk){
 
     var externalsList = getExternals(mainInk);
     
-    var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>`);
-    var $functions = $(`<nav class="nav-group"><h5 class="nav-group-title">Functions</h5></nav>`);
-    var $externals = $(`<nav class="nav-group"><h5 class="nav-group-title">Externals</h5></nav>`);
+    var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">${strTitle}</h5></nav>`);
+    var $functions = $(`<nav class="nav-group"><h5 class="nav-group-title">${strFunction}</h5></nav>`);
+    var $externals = $(`<nav class="nav-group"><h5 class="nav-group-title">${strExternals}</h5></nav>`);
 
     var foundContent = false; 
     var foundFunctions = false;
@@ -252,8 +258,9 @@ function setFiles(mainInk, allFiles) {
     if( mainInk.hasUnsavedChanges ) extraClass = "unsaved";
     if( mainInk.isLoading ) extraClass += " loading";
 
+    var title=i18n._("Main ink file");
     var $main = `<nav class="nav-group main-ink">
-                    <h5 class="nav-group-title">Main ink file</h5>
+                    <h5 class="nav-group-title">${title}</h5>
                     <a class="nav-group-item ${extraClass}" data-file-id="${mainInk.id}">
                         <span class="icon icon-book"></span>
                         <span class="filename">${mainInk.filename()}</span>
