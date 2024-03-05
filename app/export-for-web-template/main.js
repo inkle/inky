@@ -101,6 +101,11 @@
                     imageElement.src = splitTag.val;
                     storyContainer.appendChild(imageElement);
 
+                    imageElement.onload = () => {
+                        console.log(`scrollingto ${previousBottomEdge}`)
+                        scrollDown(previousBottomEdge)
+                    }
+
                     showAfter(delay, imageElement);
                     delay += 200.0;
                 }
@@ -159,9 +164,36 @@
         story.currentChoices.forEach(function(choice) {
 
             // Create paragraph with anchor element
+            var choiceTags = choice.tags;
+            var customClasses = [];
+            var isClickable = true;
+            for(var i=0; i<choiceTags.length; i++) {
+                var choiceTag = choiceTags[i];
+                var splitTag = splitPropertyTag(choiceTag);
+				splitTag.property = splitTag.property.toUpperCase();
+
+                if(choiceTag.toUpperCase() == "UNCLICKABLE"){
+                    isClickable = false
+                }
+
+                if( splitTag && splitTag.property == "CLASS" ) {
+                    customClasses.push(splitTag.val);
+                }
+
+            }
+
+            
             var choiceParagraphElement = document.createElement('p');
             choiceParagraphElement.classList.add("choice");
-            choiceParagraphElement.innerHTML = `<a href='#'>${choice.text}</a>`
+
+            for(var i=0; i<customClasses.length; i++)
+                choiceParagraphElement.classList.add(customClasses[i]);
+
+            if(isClickable){
+                choiceParagraphElement.innerHTML = `<a href='#'>${choice.text}</a>`
+            }else{
+                choiceParagraphElement.innerHTML = `<span class='unclickable'>${choice.text}</span>`
+            }
             storyContainer.appendChild(choiceParagraphElement);
 
             // Fade choice in after a short delay
@@ -169,29 +201,31 @@
             delay += 200.0;
 
             // Click on choice
-            var choiceAnchorEl = choiceParagraphElement.querySelectorAll("a")[0];
-            choiceAnchorEl.addEventListener("click", function(event) {
+            if(isClickable){
+                var choiceAnchorEl = choiceParagraphElement.querySelectorAll("a")[0];
+                choiceAnchorEl.addEventListener("click", function(event) {
 
-                // Don't follow <a> link
-                event.preventDefault();
+                    // Don't follow <a> link
+                    event.preventDefault();
 
-				// Extend height to fit
-				// We do this manually so that removing elements and creating new ones doesn't
-				// cause the height (and therefore scroll) to jump backwards temporarily.
-				storyContainer.style.height = contentBottomEdgeY()+"px";
+                    // Extend height to fit
+                    // We do this manually so that removing elements and creating new ones doesn't
+                    // cause the height (and therefore scroll) to jump backwards temporarily.
+                    storyContainer.style.height = contentBottomEdgeY()+"px";
 
-                // Remove all existing choices
-                removeAll(".choice");
+                    // Remove all existing choices
+                    removeAll(".choice");
 
-                // Tell the story where to go next
-                story.ChooseChoiceIndex(choice.index);
+                    // Tell the story where to go next
+                    story.ChooseChoiceIndex(choice.index);
 
-                // This is where the save button will save from
-                savePoint = story.state.toJson();
+                    // This is where the save button will save from
+                    savePoint = story.state.toJson();
 
-                // Aaand loop
-                continueStory();
-            });
+                    // Aaand loop
+                    continueStory();
+                });
+            }
         });
 
 		// Unset storyContainer's height, allowing it to resize itself

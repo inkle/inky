@@ -127,6 +127,14 @@ a {
     text-decoration: none;
 }
 
+.unclickable {
+    font-weight: 700;
+    color: #4f3411;
+    font-family: sans-serif;
+    text-decoration: none;
+    cursor: not-allowed;
+}
+
 a:hover {
     color: black;
 }
@@ -189,7 +197,7 @@ img {
 /*
   Class applied to choice links
 */
-.choice a {
+.choice a, .choice span {
     font-size: 15pt;
 }
 
@@ -265,6 +273,10 @@ body.dark {
 
 .dark a {
     color: #cc8f1a;
+}
+.dark .unclickable{
+    color: #c4af87;
+    cursor:not-allowed;
 }
 
 .dark a:hover {
