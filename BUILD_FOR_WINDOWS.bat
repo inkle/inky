@@ -1,9 +1,4 @@
 @echo off
-REM Uses: https://github.com/electron-userland/electron-packager
-REM To install it globally:
-REM
-REM     npm install electron-packager -g
-REM
 
 REM Ensure it's correctly/fully installed first
 cd app

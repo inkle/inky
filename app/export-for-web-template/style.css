@@ -7,8 +7,10 @@ body {
     overflow: hidden;
 }
 
-body.switched {
-    transition: color 0.6s, background-color 0.6s;
+@media screen and (prefers-reduced-motion: no-preference) {
+    body.switched {
+        transition: color 0.6s, background-color 0.6s;
+    }
 }
 
 h1,
@@ -55,12 +57,17 @@ h2 {
     display: block;
     width: 100%;
     background: white;
-    transition: color 0.6s, background 0.6s;
     margin: 0;
     padding-top: 6px;
     padding-bottom: 6px;
     height: 14px;
     top: 0;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    .written-in-ink {
+        transition: color 0.6s, background 0.6s;
+    }
 }
 
 /* 
@@ -100,8 +107,10 @@ h2 {
     background: white;
 }
 
-.switched .container {
-    transition: background-color 0.6s;
+@media screen and (prefers-reduced-motion: no-preference) {
+    .switched .container {
+        transition: background-color 0.6s;
+    }
 }
 
 p {
@@ -115,13 +124,29 @@ a {
     font-weight: 700;
     color: #b97c2c;
     font-family: sans-serif;
-    transition: color 0.6s;
     text-decoration: none;
+}
+
+.unclickable {
+    font-weight: 700;
+    color: #4f3411;
+    font-family: sans-serif;
+    text-decoration: none;
+    cursor: not-allowed;
 }
 
 a:hover {
     color: black;
-    transition: color 0.1s;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    a {
+        transition: color 0.6s;
+    }
+
+    a:hover {
+        transition: color 0.1s;
+    }
 }
 
 strong {
@@ -145,7 +170,12 @@ img {
 
 .container>* {
     opacity: 1.0;
-    transition: opacity 1.0s;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    .container>* {
+        transition: opacity 1.0s;
+    }
 }
 
 /*
@@ -167,7 +197,7 @@ img {
 /*
   Class applied to choice links
 */
-.choice a {
+.choice a, .choice span {
     font-size: 15pt;
 }
 
@@ -193,7 +223,12 @@ img {
     top: 4px;
     user-select: none;
     background: white;
-    transition: color 0.6s, background 0.6s;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    #controls {
+        transition: color 0.6s, background 0.6s;
+    }
 }
 
 #controls [disabled] {
@@ -238,11 +273,20 @@ body.dark {
 
 .dark a {
     color: #cc8f1a;
-    transition: color 0.6s;
+}
+.dark .unclickable{
+    color: #c4af87;
+    cursor:not-allowed;
 }
 
 .dark a:hover {
     color: white;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    .dark a {
+        transition: color 0.6s;
+    }
 }
 
 .dark strong {
