@@ -87,7 +87,10 @@ function ProjectWindow(filePath) {
     // Set up theme/zoom from settings
     this.browserWindow.webContents.on('dom-ready', () => {
         this.browserWindow.send("change-theme", getThemeFromMenu());
-        this.zoom(ProjectWindow.getViewSettings().zoom);
+
+        let settings = ProjectWindow.getViewSettings();
+        this.zoom(settings.zoom);
+        this.browserWindow.webContents.send('set-animation-enabled', settings.animationEnabled);
     });
 
     // Project settings may affect menus etc, so we refresh that
@@ -305,15 +308,27 @@ ProjectWindow.open = function(filePath) {
 }
 
 ProjectWindow.getViewSettings = function() {
+    let viewSettingDefaults = { theme:'light', zoom:'100', animationEnabled:true };
+
     if(!fs.existsSync(viewSettingsPath)) {
-        return { theme:'light', zoom:'100' };
+        return viewSettingDefaults;
     }
+    
     const json = fs.readFileSync(viewSettingsPath, "utf-8");
     try {
-        return JSON.parse(json);
+        let loadedSettings = JSON.parse(json);
+
+        // if we've added a new setting or one is missing, make sure they all exist
+        for(requiredKey in viewSettingDefaults) {
+            if(loadedSettings[requiredKey] === undefined) {
+                loadedSettings[requiredKey] = viewSettingDefaults[requiredKey];
+            }
+        }
+
+        return loadedSettings;
     } catch(e) {
         console.error('Error in view settings JSON parsing:', e);
-        return { theme:'light', zoom:'100' };
+        return viewSettingDefaults;
     }
 }
 

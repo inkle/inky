@@ -324,6 +324,10 @@ ipc.on("set-tags-visible", (event, visible) => {
         $("#main").addClass("hideTags");
 });
 
+ipc.on("set-animation-enabled", (event, animationEnabled) => {
+    PlayerView.setAnimationEnabled(animationEnabled)
+});
+
 
 
 function updateTheme(event, newTheme) {
