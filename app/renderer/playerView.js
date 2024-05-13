@@ -5,6 +5,7 @@ var events = {};
 var lastFadeTime = 0;
 var $textBuffer = null;
 var instructionPrefix = null;
+var animationEnabled = true;
 
 document.addEventListener("keyup", function(){
     $("#player").removeClass("altKey");
@@ -91,7 +92,7 @@ function contentReady() {
 
         $scrollContainer.animate({
             scrollTop: (offset)
-        }, 500, function(){
+        }, animationEnabled ? 500 : 100, function(){
             // Shrink, if needed
             if( prevHeight > newHeight ) {
                 $textBuffer.height(newHeight);
@@ -165,7 +166,7 @@ function addTextSection(text)
         }
     });
 
-    if( shouldAnimate() )
+    if( animationEnabled && shouldAnimate() )
         fadeIn($paragraph);
 }
 
@@ -176,7 +177,7 @@ function addTags(tags)
 
     $textBuffer.append($tags);
 
-    if( shouldAnimate() )
+    if( animationEnabled && shouldAnimate() )
         fadeIn($tags);
 }
 
@@ -204,7 +205,7 @@ function addChoice(choice, callback)
     $textBuffer.append($choicePara);
 
     // Fade it in
-    if( shouldAnimate() )
+    if( animationEnabled && shouldAnimate() )
         fadeIn($choicePara);
 
     // When this choice is clicked...
@@ -229,7 +230,7 @@ function addTerminatingMessage(message, cssClass)
     var $message = $(`<p class='${cssClass}'>${message}</p>`);
     $textBuffer.append($message);
 
-    if( shouldAnimate() )
+    if( animationEnabled && shouldAnimate() )
         fadeIn($message);
 }
 
@@ -238,7 +239,7 @@ function addLongMessage(message, cssClass)
     var $message = $(`<pre class='${cssClass}'>${message}</pre>`);
     $textBuffer.append($message);
 
-    if( shouldAnimate() )
+    if( animationEnabled && shouldAnimate() )
         fadeIn($message);
 }
 
@@ -294,6 +295,10 @@ function setInstructionPrefix(prefix) {
     }
 }
 
+function setAnimationEnabled(animEnabled) {
+    animationEnabled = animEnabled;
+}
+
 exports.PlayerView = {
     setEvents: (e) => { events = e; },
     contentReady: contentReady,
@@ -308,5 +313,6 @@ exports.PlayerView = {
     addEvaluationResult: addEvaluationResult,
     showSessionView: showSessionView,
     previewStepBack: previewStepBack,
-    setInstructionPrefix: setInstructionPrefix
+    setInstructionPrefix: setInstructionPrefix,
+    setAnimationEnabled: setAnimationEnabled
 };  

@@ -211,6 +211,15 @@ app.on('ready', function () {
                 ProjectWindow.addOrChangeViewSetting('zoom', zoom)
             }
         },
+        toggleAnimation: () => {
+            let animEnabled = !ProjectWindow.getViewSettings().animationEnabled;
+            ProjectWindow.addOrChangeViewSetting('animationEnabled', animEnabled)
+
+            for(let i=0; i<ProjectWindow.all().length; i++) {
+                let eachWindow = ProjectWindow.all()[i];
+                eachWindow.browserWindow.webContents.send("set-animation-enabled", animEnabled);
+            }
+        },
         insertSnippet: (focussedWindow, snippet) => {
             if( focussedWindow )
             focussedWindow.webContents.send('insertSnippet', snippet);
@@ -226,7 +235,8 @@ app.on('ready', function () {
     AppMenus.setRecentFiles(ProjectWindow.getRecentFiles());
     AppMenus.setTheme(ProjectWindow.getViewSettings().theme);
     AppMenus.setZoom(ProjectWindow.getViewSettings().zoom);
-    
+    AppMenus.setAnimationEnabled(ProjectWindow.getViewSettings().animationEnabled);
+
     AppMenus.refresh();
     ProjectWindow.setEvents({
         onRecentFilesChanged: (recentFiles) => {
@@ -241,6 +251,7 @@ app.on('ready', function () {
         onViewSettingsChanged: (viewSettings) => {
             AppMenus.setTheme(viewSettings.theme);
             AppMenus.setZoom(viewSettings.zoom);
+            AppMenus.setAnimationEnabled(viewSettings.animationEnabled);
             AppMenus.refresh();
         }
     });

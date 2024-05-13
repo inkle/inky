@@ -13,6 +13,7 @@ let recentFiles = [];
 let customInkSnippets = [];
 let theme = null;
 let zoom = null;
+let animationEnabled = null;
 
 
 let callbacks = {
@@ -306,7 +307,14 @@ function refresh() {
                     label: i18n._("Zoom (Decrease) "),
                     accelerator: 'CmdOrCtrl+-',
                     click: callbacks.zoomOut
+                },
+                {
+                    label: i18n._("Play view animation"),
+                    type: "checkbox",
+                    checked: animationEnabled,
+                    click: callbacks.toggleAnimation
                 }
+
             ]
         },
         {
@@ -483,6 +491,7 @@ exports.AppMenus = {
     setRecentFiles : (files) => {recentFiles = files},
     setTheme : (t) => theme = t,
     setZoom : (z) => zoom = z,
+    setAnimationEnabled : (e) => animationEnabled = e,
     setCustomSnippetMenus : (snippets) => {customInkSnippets = snippets},
     refresh : refresh
 }
