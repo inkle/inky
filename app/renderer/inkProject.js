@@ -41,6 +41,9 @@ function InkProject(mainInkFilePath) {
     // Wait for all project files to be found before starting first compilation
     this.ready = false;
 
+    // Make sure a project save is atomic   
+    this.saveActive = false;
+
     this.startFileWatching();
 }
 
@@ -226,6 +229,7 @@ InkProject.prototype.startFileWatching = function() {
     }
 
     this.fileWatcher.on("add", newlyFoundAbsFilePath => {
+        if( this.saveActive ) return; // ignore file watching while atomic save is active
         if( tryUpdateSettingsFile(newlyFoundAbsFilePath) ) return;
         if (!isInkFile(newlyFoundAbsFilePath)) { return; }
 
@@ -248,6 +252,7 @@ InkProject.prototype.startFileWatching = function() {
     });
 
     this.fileWatcher.on("change", updatedAbsFilePath => {
+        if( this.saveActive ) return; // ignore file watching while atomic save is active
         if( tryUpdateSettingsFile(updatedAbsFilePath) ) return;
         if (!isInkFile(updatedAbsFilePath)) { return; }
 
@@ -268,6 +273,7 @@ InkProject.prototype.startFileWatching = function() {
         }
     });
     this.fileWatcher.on("unlink", removedAbsFilePath => {
+        if( this.saveActive ) return; // ignore file watching while atomic save is active
         if( tryUpdateSettingsFile(removedAbsFilePath) ) return;
         if (!isInkFile(removedAbsFilePath)) { return; }
 
@@ -304,6 +310,10 @@ InkProject.prototype.showInkFile = function(inkFile) {
 
 InkProject.prototype.save = function() {
 
+    // Make saving atomic, don't save again if we're already saving
+    if( this.saveActive ) return;
+    this.saveActive = true;
+
     var wasUnsaved = !this.mainInk.projectDir;
 
     var filesRemaining = this.files.length;
@@ -321,6 +331,8 @@ InkProject.prototype.save = function() {
 
             if( allSuccess )
                 InkProject.events.didSave();
+
+            this.saveActive = false;
         }
     }
 
@@ -336,6 +348,11 @@ InkProject.prototype.save = function() {
             if( wasUnsaved ) this.startFileWatching();
 
             includeFiles.forEach(f => f.save(success => singleFileSaveComplete(f, success)));
+        } 
+        
+        // Cancel the save process because main ink file save failed
+        else {
+            this.saveActive = false;
         }
     });
 }
