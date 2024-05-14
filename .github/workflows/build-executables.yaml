@@ -68,7 +68,7 @@ jobs:
         run: |
           npx --yes @electron/packager app Inky --platform=darwin --arch=x64 --icon=./resources/Icon.icns --extend-info=./resources/info.plist --app-bundle-id=com.inkle.inky --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_win.exe"
           mkdir -p ReleaseUpload
-          ditto -c -k --keepParent Inky-darwin-arm64/Inky.app ReleaseUpload/Inky_mac_x64.zip
+          ditto -c -k --keepParent Inky-darwin-x64/Inky.app ReleaseUpload/Inky_mac_x64.zip
 
       - name: Build electron app (Win)
         if: matrix.os == 'windows-latest'
@@ -156,7 +156,6 @@ jobs:
         with:
           files: |
             ReleaseUpload/**/*.zip
-            ReleaseUpload/**/*.dmg
             
       
       - name: Release on GitHub (Automated Tag)
@@ -168,5 +167,4 @@ jobs:
           tag_name: ${{ format('{0}.0.0', github.run_number) }}
           files: |
             ReleaseUpload/**/*.zip
-            ReleaseUpload/**/*.dmg
             
