@@ -1,4 +1,3 @@
-const {ipcRenderer} = require("electron");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const i18n = require("./i18n.js");
 
@@ -158,9 +157,6 @@ $(document).ready(function() {
 
 function setTitle(title) {
     $("h1.title").text(title);
-
-    // Not visible on macOS
-    ipcRenderer.setTitle(title);
 }
 
 function setBusySpinnerVisible(vis) {

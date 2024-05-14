@@ -22,47 +22,6 @@ function inkJSNeedsUpdating() {
 }
 
 // main
-ipcMain.on('show-context-menu', (event) => {
-    const template = [
-        {
-            label: 'Cut',
-            role: 'cut' 
-        },
-        {
-            label: 'Copy',
-            role: 'copy' 
-        },
-        {
-            label: 'Paste',
-            role: 'paste' 
-        },
-      { type: 'separator' },
-    ]
-    const menu = Menu.buildFromTemplate(template)
-    menu.popup(BrowserWindow.fromWebContents(event.sender))
-})
-
-
-ipcMain.handle("showSaveDialog", async (event,saveOptions) => {
-    return dialog.showSaveDialog(saveOptions) 
-
-})
-
-ipcMain.handle("try-close", async (event) =>{
-    return dialog.showMessageBox({
-        type: "warning",
-        message: i18n._("Would you like to save changes before exiting?"),
-        detail: i18n._("Your changes will be lost if you don't save."),
-        buttons: [
-            i18n._("Save"),
-            i18n._("Don't save"),
-            i18n._("Cancel")
-        ],
-        defaultId: 0
-    })
-
-})
-
 let pendingPathToOpen = null;
 let hasFinishedLaunch = false;
 
