@@ -4,10 +4,14 @@ const chai = require('chai');
 
 const chaiAsPromised = require('chai-as-promised');
 
-const inkyPathsByPlatform = {
-  "darwin": "../Inky-darwin-x64/Inky.app/Contents/MacOS/Inky",
-  "linux": "../Inky-linux-x64/Inky",
-  "win32": "../Inky-win32-x64/Inky.exe"
+const inkyPathsByPlatform = (platform, arch) => {
+  if(platform == "darwin"){
+    return `../Inky-darwin-${arch}/Inky.app/Contents/MacOS/Inky`
+  }else if (platform == "linux"){
+    return `../Inky-linux-x64/Inky`
+  }else if (platform == "win32"){
+    return `../Inky-win32-x64/Inky.exe`
+  }
 };
 
 chai.should();
@@ -18,7 +22,7 @@ describe('application launch tests', function () {
 
   beforeEach(function () {
     this.app = new Application({
-      path: inkyPathsByPlatform[process.platform]
+      path: inkyPathsByPlatform(process.platform, process.arch)
     })
     return this.app.start().then(function (app) {
         chaiAsPromised.transferPromiseness = app.transferPromiseness;
@@ -56,7 +60,7 @@ describe('compiles hello world game', function () {
 
   beforeEach(function () {
     this.app = new Application({
-      path: inkyPathsByPlatform[process.platform]
+      path: inkyPathsByPlatform(process.platform, process.arch)
     })
     return this.app.start().then(function (app) {
         chaiAsPromised.transferPromiseness = app.transferPromiseness;
