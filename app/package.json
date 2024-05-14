@@ -9,7 +9,10 @@
     "url": "git+https://github.com/inkle/inky.git"
   },
   "scripts": {
-    "start": "electron main-process/main.js"
+    "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html",
+    "start": "electron main-process/main.js",
+    "test": "./node_modules/mocha/bin/mocha",
+    "generate-locale": "node ../build/generateLocale.js"
   },
   "keywords": [
     "ink",
