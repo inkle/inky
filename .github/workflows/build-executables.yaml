@@ -16,13 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set game configuration
+      - name: Set app configuration
         env:
           APP_NAME: inky
           DESCRIPTION: "An editor for ink: inkle's narrative scripting language"
 
           # This must be of the format "N.N.N", where the N's are all numbers
-          VERSION: 0.15.0
+          VERSION: 0.16.0
 
           # By default, the author will be your name on GitHub. You can manually change this.
           AUTHOR: "inkle ltd."
@@ -36,7 +36,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Test for presence of Windows codesigning secrets
         id: vars
@@ -56,13 +56,19 @@ jobs:
         run: npm install
 
       # insures that the index.html has been built
-      - name: Build electron app (Mac)
+      - name: Build electron app (Mac arm64)
         if: matrix.os == 'macos-latest'
         run: |
           npx --yes @electron/packager app Inky --platform=darwin --arch=arm64 --icon=./resources/Icon.icns --extend-info=./resources/info.plist --app-bundle-id=com.inkle.inky --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_win.exe"
           mkdir -p ReleaseUpload
-          rm ReleaseUpload/Inky_mac.dmg
-          npx --yes appdmg resources/appdmg.json ReleaseUpload/Inky_mac.dmg
+          ditto -c -k --keepParent Inky-darwin-arm64/Inky.app ReleaseUpload/Inky_mac_arm64.zip
+      
+      - name: Build electron app (Mac x64)
+        if: matrix.os == 'macos-latest'
+        run: |
+          npx --yes @electron/packager app Inky --platform=darwin --arch=x64 --icon=./resources/Icon.icns --extend-info=./resources/info.plist --app-bundle-id=com.inkle.inky --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_win.exe"
+          mkdir -p ReleaseUpload
+          ditto -c -k --keepParent Inky-darwin-arm64/Inky.app ReleaseUpload/Inky_mac_x64.zip
 
       - name: Build electron app (Win)
         if: matrix.os == 'windows-latest'
