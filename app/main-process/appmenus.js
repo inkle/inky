@@ -373,15 +373,18 @@ function refresh() {
                             accelerator: 'CmdOrCtrl+R',
                             click(item, focusedWindow) {
                                 if (!focusedWindow) return;
-                                var clickedButtonIdx = dialog.showMessageBox(focusedWindow, {
+                                dialog.showMessageBox(focusedWindow, {
                                     type: 'question',
                                     buttons: [i18n._('Yes'), i18n._('Cancel')],
                                     title: i18n._('Reload?'),
                                     message: i18n._('Are you sure you want to reload the current window? Any unsaved changes will be lost.')
-                                });
-                                if( clickedButtonIdx == 0 ) {
-                                    focusedWindow.reload();
-                                }
+                                }).then(result => {
+                                    let clickedOkay = result.response == 0;
+                                    if( clickedOkay ) {
+                                        focusedWindow.reload();
+                                    }
+                                })
+
                             }
                         },
                         {
