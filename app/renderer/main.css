@@ -109,6 +109,7 @@ h1.title {
   margin: 0 auto;
   max-width: 200px;
   z-index: 1; /* On top of left/right buttons */
+  -webkit-app-region: no-drag;
 }
 
 .win32 #toolbar div.issuesSummary, .linux #toolbar div.issuesSummary {
@@ -168,6 +169,7 @@ img.issue-icon.warning {
   width: 30px;
   height: 30px;
   background: none;
+  -webkit-app-region: no-drag;
 }
 
 #toolbar .button .icon {
@@ -199,6 +201,7 @@ img.issue-icon.warning {
   background: white;
   z-index: 10;
   border: 1px solid #E2E2E2;
+  -webkit-app-region: no-drag;
 }
 
 .win32  #toolbar .issue-popup, .linux #toolbar .issue-popup {

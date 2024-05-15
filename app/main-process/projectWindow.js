@@ -13,7 +13,8 @@ const electronWindowOptions = {
   height: 730,
   minWidth: 350,
   minHeight: 250,
-  titleBarStyle: 'default',
+  titleBarStyle: 'hidden',
+  titleBarOverlay: true,
   webPreferences: {
     preload: path.join(__dirname, '..', 'renderer', 'preload.js'),
     nodeIntegration: true,
