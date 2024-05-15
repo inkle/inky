@@ -4,7 +4,7 @@
   "background": "appdmg-background.png",
   "icon-size": 95,
   "contents": [
-    { "x": 107, "y": 92, "type": "file", "path": "../Inky-darwin-arm64/Inky.app" },
+    { "x": 107, "y": 92, "type": "file", "path": "../Inky-darwin-x64/Inky.app" },
     { "x": 345, "y": 92, "type": "link", "path": "/Applications" }
   ]
 }
