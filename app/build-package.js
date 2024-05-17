@@ -5,7 +5,9 @@ const packager = require('@electron/packager');
 const appdmg = require('appdmg');
 
 const args = process.argv.slice(2);
-const platforms = args.length ? args : ["mac", "windows", "linux"];
+
+// TODO: Add "mac-signed"? Or "mac-unsigned"?
+const platforms = args.length ? args : ["mac", "win32", "win64", "linux"];
 
 
 function runCommand(command) {
@@ -63,51 +65,100 @@ async function makeDMG() {
 }
 
 
+async function createZip(sourceDir, targetZipPath) {
+    sourceDir = path.resolve(sourceDir);
+    targetZipPath = path.resolve(targetZipPath);
 
-async function buildPackage() {
+    if( process.platform == "darwin" || process.platform == "linux" ) {
+        await runCommand(`cd ${sourceDir} && zip -r ${targetZipPath} . -x "*.DS_Store"`);
+    }
     
+    // Assume powershell is available on windows
+    else if( process.platform == "win32") {
+        await runCommand(`powershell Compress-Archive ${sourceDir} ${targetZipPath}`);
+    }
+}
+
+
+async function buildPackageForPlatform(targetPlatform) {
+
+    // Any other cases we need to check?
+    if( process.platform != "darwin" && targetPlatform == "mac" ) {
+        throw "Can only do mac builds on mac";
+    }
+    
+    let outputAppDirPath;
+    let finalZipOrDmgPath;
+    if( targetPlatform == "mac" ) {
+        outputAppDirPath = "../Inky-darwin-universal";
+        finalZipOrDmgPath = "../ReleaseUpload/Inky_mac.dmg";
+    }
+    else if( targetPlatform == "win32" ) {
+        outputAppDirPath = "../Inky-win32-ia32";
+        finalZipOrDmgPath = "../ReleaseUpload/Inky_windows_32.zip";
+    }
+    else if( targetPlatform == "win64" ) {
+        outputAppDirPath = "../Inky-win32-x64";
+        finalZipOrDmgPath = "../ReleaseUpload/Inky_windows_64.zip";
+    }
+    else if( targetPlatform == "linux" ) {
+        outputAppDirPath = "../Inky-linux-x64";
+        finalZipOrDmgPath = "../ReleaseUpload/Inky_linux.zip";
+    } else {
+        throw "Unexpected platform: "+targetPlatform;
+    }
+
     // Clean
-    if( platforms.includes("mac") ) {
-        deleteAtPath("../Inky-darwin-x64");
-        deleteAtPath("../Inky-darwin-arm64");
-        deleteAtPath("../Inky-darwin-universal");
-        deleteAtPath("../ReleaseUpload/Inky_mac.dmg")
-    }
-    if( platforms.includes("windows") ) {
-        deleteAtPath("../Inky-win32-x64");
-        deleteAtPath("../ReleaseUpload/Inky_windows_64.zip")
-        deleteAtPath("../ReleaseUpload/Inky_windows_32.zip")
-    }
-    if( platforms.includes("linux") ) {
-        deleteAtPath("../Inky-linux-x64");
-        deleteAtPath("../ReleaseUpload/Inky_linux.zip")
-    }
+    deleteAtPath(outputAppDirPath);
+    deleteAtPath(finalZipOrDmgPath);
     
     // Mac: Create icon from PNG
-    if( platforms.includes("mac") ) {
+    if( targetPlatform == "mac" ) {
         runCommand("../resources/makeIcns.command");
     }
-        
-    const appPaths = await packager({
+    
+    let opts = {
         dir: '.', // Source directory (app directory)
         out: "..",
-        name: 'Inky', // App name
-        platform: 'darwin', // Target platform
-        arch: 'universal', // Target architecture
-        overwrite: true, // Overwrite existing output
-        icon: '../resources/Icon.icns', // Path to icon file
-        extendInfo: '../resources/info.plist', // Path to extend-info file
-        appBundleId: 'com.inkle.inky', // Application bundle ID
-        prune: true, // Prune non-production dependencies
+        name: 'Inky', 
+        overwrite: true,
+        extendInfo: '../resources/info.plist',
+        appBundleId: 'com.inkle.inky',
+        prune: true,
         asar: {
-            unpackDir: 'main-process/ink' // Unpack specified directories
-        },
-        ignore: ['inklecate_win.exe', 'build-package.js'], // Ignore specified files
-        osxSign: true, // Sign macOS apps,
-        osxNotarize: {
-            keychainProfile: 'notarisationKeychainPassword'
+            unpackDir: 'main-process/ink'
         }
-    });
+    };
+
+    if( targetPlatform == "mac" ) {
+        opts.platform = "darwin";
+        opts.arch = "universal";
+        opts.icon = '../resources/Icon.icns';
+        opts.ignore = ['inklecate_win.exe', 'build-package.js'] 
+        opts.osxSign = true;
+        opts.osxNotarize = {
+            keychainProfile: "notarisationKeychainPassword"
+        };
+    }
+    else if( targetPlatform == "win32" || targetPlatform == "win64" ) {
+        opts.platform = "win32";
+        opts.arch = targetPlatform == "win32" ? "ia32" : "x64";
+        opts.icon = '../resources/Icon1024.png.ico';
+        opts.win32metadata = {
+            CompanyName: "inkle Ltd",
+            FileDescription: "Inky",
+            OriginalFilename: "Inky",
+            InternalName: "Inky"
+        }
+        opts.ignore = ['inklecate_mac', 'build-package.js']
+    }
+    else if( targetPlatform == "linux" ) {
+        opts.platform = "linux";
+        opts.arch = "x64";
+        opts.ignore = ['inklecate_mac', 'build-package.js']
+    }
+
+    const appPaths = await packager(opts);
     
     // Create ReleaseUpload folder if necesscary
     let releaseFolderPath = path.normalize("../ReleaseUpload");
@@ -116,13 +167,16 @@ async function buildPackage() {
     }
     
     // Create .dmg on mac
-    if( platforms.includes("mac") ) {
+    if( targetPlatform == "mac" ) {
         await makeDMG();
     }
 
-    // TODO: Create zips on other platforms
+    // Create .zip on other platforms
+    else {
+        await createZip(outputAppDirPath, finalZipOrDmgPath)
+    }
 
-
+    // Delete temporary icon resource again on mac
     if( platforms.includes("mac") ) {
         deleteAtPath("../resources/Icon.icns")
     }
@@ -131,9 +185,11 @@ async function buildPackage() {
 }
 
 
-(async function tryBuildPackage() {
+(async function tryBuildPackages() {
     try {
-        await buildPackage();
+        for(let i=0; i<platforms.length; i++) {
+            await buildPackageForPlatform(platforms[i]);
+        }
     } catch (error) {
         console.error('Package build failed: ', error);
     }
