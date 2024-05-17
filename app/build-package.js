@@ -4,10 +4,34 @@ const { exec } = require('child_process');
 const packager = require('@electron/packager');
 const appdmg = process.platform == "darwin" ? require('appdmg') : null;
 
+const allPlatforms = ["mac", "win32", "win64", "linux"];
+
 const args = process.argv.slice(2);
 
-// TODO: Add "mac-signed"? Or "mac-unsigned"?
-const platforms = args.length ? args : ["mac", "win32", "win64", "linux"];
+let shouldCodesign = false;
+let shouldZip = false;
+
+let platforms = args.filter(arg => {
+    if (arg === "-codesign") {
+        shouldCodesign = true;
+        return false;
+    }
+    if (arg === "-zip") {
+        shouldZip = true;
+        return false;
+    }
+    if( !allPlatforms.includes(arg) ) {
+        if( arg.startsWith("-") ) {
+            console.error("Unrecognised command line argument: "+arg);
+        } else {
+            console.error(`Unrecognised platform: ${arg}. The available platforms are: ${allPlatforms}`);
+        }
+        process.exit(1);
+    }
+    return true;
+});
+
+platforms = platforms.length ? platforms : ["mac", "win32", "win64", "linux"];
 
 
 function runCommand(command) {
@@ -134,11 +158,16 @@ async function buildPackageForPlatform(targetPlatform) {
         opts.platform = "darwin";
         opts.arch = "universal";
         opts.icon = '../resources/Icon.icns';
-        opts.ignore = ['inklecate_win.exe', 'build-package.js'] 
-        opts.osxSign = true;
-        opts.osxNotarize = {
-            keychainProfile: "notarisationKeychainPassword"
-        };
+        opts.ignore = ['inklecate_win.exe', 'build-package.js']
+
+        // If just doing a quick local build, no need to do the
+        // extremely length process of codesigning + notarising
+        if( shouldCodesign ) {
+            opts.osxSign = true;
+            opts.osxNotarize = {
+                keychainProfile: "notarisationKeychainPassword"
+            };
+        }
     }
     else if( targetPlatform == "win32" || targetPlatform == "win64" ) {
         opts.platform = "win32";
@@ -160,20 +189,26 @@ async function buildPackageForPlatform(targetPlatform) {
 
     const appPaths = await packager(opts);
     
-    // Create ReleaseUpload folder if necesscary
-    let releaseFolderPath = path.normalize("../ReleaseUpload");
-    if( !fs.existsSync(releaseFolderPath) ) {
-        fs.mkdirSync(releaseFolderPath);
-    }
-    
-    // Create .dmg on mac
-    if( targetPlatform == "mac" ) {
-        await makeDMG();
-    }
 
-    // Create .zip on other platforms
-    else {
-        await createZip(outputAppDirPath, finalZipOrDmgPath)
+    // Only zip it up if requested, otherwise assume
+    // we're doing a local build just to run locally
+    if( shouldZip ) {
+
+        // Create ReleaseUpload folder if necesscary
+        let releaseFolderPath = path.normalize("../ReleaseUpload");
+        if( !fs.existsSync(releaseFolderPath) ) {
+            fs.mkdirSync(releaseFolderPath);
+        }
+
+        // Create .dmg on mac
+        if( targetPlatform == "mac" ) {
+            await makeDMG();
+        }
+
+        // Create .zip on other platforms
+        else {
+            await createZip(outputAppDirPath, finalZipOrDmgPath)
+        }
     }
 
     // Delete temporary icon resource again on mac
