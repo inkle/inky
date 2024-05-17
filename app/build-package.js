@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const packager = require('@electron/packager');
-const appdmg = require('appdmg');
+const appdmg = process.platform == "darwin" ? require('appdmg') : null;
 
 const args = process.argv.slice(2);
 
