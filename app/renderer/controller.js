@@ -276,7 +276,12 @@ ToolbarView.setEvents({
         PlayerView.previewStepBack();
         LiveCompiler.stepBack();
     },
-    rewind:   () => { LiveCompiler.rewind(); }
+    rewind:   () => { LiveCompiler.rewind(); },
+    didSetTitle: (title) => {
+        if( process.platform == "win32" ) {
+            ipc.send("set-native-window-title", title);
+        }
+    }
 });
 
 NavView.setEvents({

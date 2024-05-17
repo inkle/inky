@@ -8,13 +8,11 @@ const Inklecate = require("./inklecate.js").Inklecate;
 const Menu = electron.Menu;
 const i18n = require("./i18n/i18n.js");
 
-const electronWindowOptions = {
+var electronWindowOptions = {
   width: 1300,
   height: 730,
   minWidth: 350,
   minHeight: 250,
-  titleBarStyle: 'hidden',
-  titleBarOverlay: true,
   webPreferences: {
     preload: path.join(__dirname, '..', 'renderer', 'preload.js'),
     nodeIntegration: true,
@@ -22,6 +20,12 @@ const electronWindowOptions = {
   },
   
 };
+
+
+if( process.platform == "darwin" ) {
+    electronWindowOptions.titleBarStyle = 'hidden';
+    electronWindowOptions.titleBarOverlay = true;
+}
 
 var windows = [];
 
@@ -363,6 +367,11 @@ ipc.on("project-final-close", (event) => {
 ipc.on("project-settings-needs-reload", (event, rootInkFilePath) => {
     var win = ProjectWindow.withWebContents(event.sender);
     win.refreshProjectSettings(rootInkFilePath);
+});
+
+ipc.on("set-native-window-title", (event, newWindowTitle) => {
+    var win = ProjectWindow.withWebContents(event.sender);
+    win.browserWindow.title = newWindowTitle;
 });
 
 exports.ProjectWindow = ProjectWindow;

@@ -11,3 +11,5 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+window.platform = process.platform;

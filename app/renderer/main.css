@@ -73,8 +73,8 @@ h1.title {
 }
 
 .win32 #toolbar, .linux #toolbar {
-  height: 30px;
-  background: #f0f0f0;
+  height: 34px;
+  background: white;
 }
 
 .win32 h1.title, .linux h1.title {
@@ -516,7 +516,7 @@ img.issue-icon.warning {
 }
 
 .win32 #main, .linux #main {
-  top: 30px;
+  top: 34px;
 }
 
 #editor {

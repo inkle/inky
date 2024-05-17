@@ -5,7 +5,8 @@ const i18n = require("./i18n.js");
 var events = {
     rewind:   () => {},
     stepBack: () => {},
-    selectIssue: () => {}
+    selectIssue: () => {},
+    didSetTitle: () => {}
 };
 
 function updateIssueSummary(issues, issueClickCallback) {
@@ -157,6 +158,7 @@ $(document).ready(function() {
 
 function setTitle(title) {
     $("h1.title").text(title);
+    events.didSetTitle(title);
 }
 
 function setBusySpinnerVisible(vis) {
