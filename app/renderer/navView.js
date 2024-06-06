@@ -126,8 +126,13 @@ function setKnots(mainInk){
     $knotStichNavWrapper.empty();
 
     if (ranges.length == 0) {
-        var $content = $(`<nav class="nav-group"><h5 class="nav-group-title">Content</h5></nav>` + 
-            '<nav class="nav-group"><span class="nav-group-item nav-tooltip">Knots, stitches and functions are indexed here</span></nav>');
+        var contentLoc = i18n._('Content');
+        var descriptionLoc = i18n._('Knots, stitches and functions are indexed here')
+
+        var $content = $(
+          `<nav class="nav-group"><h5 class="nav-group-title">${contentLoc}</h5></nav>` +
+            `<nav class="nav-group"><span class="nav-group-item nav-tooltip">${descriptionLoc}</span></nav>`
+        );
         
         $knotStichNavWrapper.append($content);
 

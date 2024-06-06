@@ -220,6 +220,15 @@ app.on('ready', function () {
                 eachWindow.browserWindow.webContents.send("set-animation-enabled", animEnabled);
             }
         },
+        toggleAnimation: () => {
+            let animEnabled = !ProjectWindow.getViewSettings().animationEnabled;
+            ProjectWindow.addOrChangeViewSetting('animationEnabled', animEnabled)
+
+            for(let i=0; i<ProjectWindow.all().length; i++) {
+                let eachWindow = ProjectWindow.all()[i];
+                eachWindow.browserWindow.webContents.send("set-animation-enabled", animEnabled);
+            }
+        },
         insertSnippet: (focussedWindow, snippet) => {
             if( focussedWindow )
             focussedWindow.webContents.send('insertSnippet', snippet);
