@@ -367,7 +367,7 @@ ipc.on("zoom", (event, amount) => {
     
     if(amount > 2) {
         editorEl.style.fontSize = 12 * amount / 100 + "px";
-        playerEl.style.fontSize = 12 * amount / 100 + "px";
+        playerEl.style.fontSize = 14 * amount / 100 + "px";
     } else {
 
         if(currentSize == "") {
