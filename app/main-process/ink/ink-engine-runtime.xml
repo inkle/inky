@@ -132,13 +132,15 @@
             completely fresh empty list, or a list that only contains items from a different list definition.
             </summary>
         </member>
-        <member name="M:Ink.Runtime.InkList.AddItem(System.String)">
+        <member name="M:Ink.Runtime.InkList.AddItem(System.String,Ink.Runtime.Story)">
             <summary>
             Adds the given item to the ink list, attempting to find the origin list definition that it belongs to.
             The item must therefore come from a list definition that is already "known" to this list, so that the
-            item's value can be looked up. By "known", we mean that it already has items in it from that source, or
+            item's value can be looked up.
+            By "known", we mean that it already has items in it from that source, or
             it did at one point - it can't be a completely fresh empty list, or a list that only contains items from
             a different list definition.
+            You can also provide the Story object, so in the case of an unknown element, it can be created fresh
             </summary>
         </member>
         <member name="M:Ink.Runtime.InkList.ContainsItemNamed(System.String)">
@@ -253,6 +255,11 @@
         <member name="M:Ink.Runtime.InkList.GetHashCode">
             <summary>
             Return the hashcode for this object, used for comparisons and inserting into dictionaries.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.InkList.singleItem">
+            <summary>
+            If you have an InkList that's known to have one single item, this is a convenient way to get it.
             </summary>
         </member>
         <member name="M:Ink.Runtime.InkList.ToString">
@@ -712,6 +719,12 @@
             function, but you don't want it to fail to run.
             </summary>
         </member>
+        <member name="M:Ink.Runtime.Story.TryGetExternalFunction(System.String,Ink.Runtime.Story.ExternalFunction@)">
+            <summary>
+            Try to get a reference to an external function. This was originally exposed for the
+            Ink-Unity integration plugin so that the inspector can list them.
+            </summary>
+        </member>
         <member name="T:Ink.Runtime.Story.ExternalFunction">
             <summary>
             General purpose delegate definition for bound EXTERNAL function definitions
@@ -1042,6 +1055,13 @@
         <member name="P:Ink.Runtime.StoryState.currentPathString">
             <summary>
             String representation of the location where the story currently is.
+            </summary>
+        </member>
+        <member name="P:Ink.Runtime.StoryState.previousPathString">
+            <summary>
+            Get the previous state of currentPathString, which can be helpful
+            for finding out where the story was before it ended (when the path
+            string becomes null)
             </summary>
         </member>
         <member name="M:Ink.Runtime.StoryState.ForceEnd">
