@@ -1,7 +1,7 @@
 {
   "name": "inky",
   "productName": "Inky",
-  "version": "0.16.0-beta",
+  "version": "0.15.1",
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "repository": {
