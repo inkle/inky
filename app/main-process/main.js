@@ -220,13 +220,13 @@ app.on('ready', function () {
                 eachWindow.browserWindow.webContents.send("set-animation-enabled", animEnabled);
             }
         },
-        toggleAnimation: () => {
-            let animEnabled = !ProjectWindow.getViewSettings().animationEnabled;
-            ProjectWindow.addOrChangeViewSetting('animationEnabled', animEnabled)
+        toggleAutoComplete: () => {
+            let autoCompleteDisabled = !ProjectWindow.getViewSettings().autoCompleteDisabled;
+            ProjectWindow.addOrChangeViewSetting('autoCompleteDisabled', autoCompleteDisabled)
 
             for(let i=0; i<ProjectWindow.all().length; i++) {
                 let eachWindow = ProjectWindow.all()[i];
-                eachWindow.browserWindow.webContents.send("set-animation-enabled", animEnabled);
+                eachWindow.browserWindow.webContents.send("set-autocomplete-disabled", autoCompleteDisabled);
             }
         },
         insertSnippet: (focussedWindow, snippet) => {
@@ -245,6 +245,7 @@ app.on('ready', function () {
     AppMenus.setTheme(ProjectWindow.getViewSettings().theme);
     AppMenus.setZoom(ProjectWindow.getViewSettings().zoom);
     AppMenus.setAnimationEnabled(ProjectWindow.getViewSettings().animationEnabled);
+    AppMenus.setAutoCompleteDisabled(ProjectWindow.getViewSettings().autoCompleteDisabled)
 
     AppMenus.refresh();
     ProjectWindow.setEvents({
@@ -261,6 +262,7 @@ app.on('ready', function () {
             AppMenus.setTheme(viewSettings.theme);
             AppMenus.setZoom(viewSettings.zoom);
             AppMenus.setAnimationEnabled(viewSettings.animationEnabled);
+            AppMenus.setAutoCompleteDisabled(viewSettings.autoCompleteDisabled);
             AppMenus.refresh();
         }
     });

@@ -14,6 +14,7 @@ let customInkSnippets = [];
 let theme = null;
 let zoom = null;
 let animationEnabled = null;
+let autoCompleteDisabled = null; // default on
 
 
 let callbacks = {
@@ -309,6 +310,12 @@ function refresh() {
                     click: callbacks.zoomOut
                 },
                 {
+                    label: i18n._("Auto-complete"),
+                    type: "checkbox",
+                    checked: !autoCompleteDisabled,
+                    click: callbacks.toggleAutoComplete
+                },
+                {
                     label: i18n._("Play view animation"),
                     type: "checkbox",
                     checked: animationEnabled,
@@ -495,6 +502,7 @@ exports.AppMenus = {
     setTheme : (t) => theme = t,
     setZoom : (z) => zoom = z,
     setAnimationEnabled : (e) => animationEnabled = e,
+    setAutoCompleteDisabled : (e) => autoCompleteDisabled = e,
     setCustomSnippetMenus : (snippets) => {customInkSnippets = snippets},
     refresh : refresh
 }

@@ -22,7 +22,7 @@ var events = {
 
 editor.setShowPrintMargin(false);
 editor.setOptions({
-    enableBasicAutocompletion: true,
+    enableBasicAutocompletion: true, // defaults only, will be overriden by setAutoCompleteDisabled
     enableLiveAutocompletion: true,
 });
 editor.on("change", () => {
@@ -182,5 +182,11 @@ exports.EditorView = {
     },
     getCurrentCursorPos: ()=>{
         return editor.getCursorPosition();
-    }
+    },
+    setAutoCompleteDisabled: (autoCompleteDisabled) => {
+        editor.setOptions({
+            enableBasicAutocompletion: !autoCompleteDisabled,
+            enableLiveAutocompletion: !autoCompleteDisabled
+        });
+    },
 };

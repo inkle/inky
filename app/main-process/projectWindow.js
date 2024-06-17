@@ -99,6 +99,7 @@ function ProjectWindow(filePath) {
         let settings = ProjectWindow.getViewSettings();
         this.zoom(settings.zoom);
         this.browserWindow.webContents.send('set-animation-enabled', settings.animationEnabled);
+        this.browserWindow.webContents.send('set-autocomplete-disabled', !!settings.autoCompleteDisabled);
     });
 
     // Project settings may affect menus etc, so we refresh that

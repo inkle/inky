@@ -332,6 +332,9 @@ ipc.on("set-tags-visible", (event, visible) => {
 ipc.on("set-animation-enabled", (event, animationEnabled) => {
     PlayerView.setAnimationEnabled(animationEnabled)
 });
+ipc.on("set-autocomplete-disabled", (event, autoCompleteDisabled) => {
+    EditorView.setAutoCompleteDisabled(autoCompleteDisabled)
+});
 
 
 
