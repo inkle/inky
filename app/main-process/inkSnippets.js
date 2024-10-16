@@ -178,6 +178,10 @@ exports.snippets = [
                 ink:  loadLongerSnippet("list_pop_random.ink") 
             },
             {
+                name: i18n._('List: LIST_NEXT and LIST_PREV'),
+                ink:  loadLongerSnippet("list_prev_next.ink") 
+            },
+            {
                 name: i18n._('List: list_item_is_member_of'),
                 ink:  loadLongerSnippet("list_item_is_member_of.ink") 
             },
