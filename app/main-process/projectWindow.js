@@ -158,6 +158,7 @@ ProjectWindow.prototype.zoom = function(amount) {
 
 // Try to load up an optional <ink_root_file_name>.settings.json file
 ProjectWindow.prototype.refreshProjectSettings = function(rootInkFilePath) {
+    if (!rootInkFilePath) return
     
     let self = this;
 
@@ -279,6 +280,7 @@ ProjectWindow.clearRecentFiles = function() {
 }
 
 function addRecentFile(filePath) {
+    if (!filePath) return;
     const resolvedFilePath = path.resolve(filePath);
     const recentFiles = ProjectWindow.getRecentFiles();
     const newRecentFiles = recentFiles.indexOf(resolvedFilePath) >= 0 ?
