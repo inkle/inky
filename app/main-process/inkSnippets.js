@@ -272,6 +272,10 @@ exports.snippets = [
             {
                 name: i18n._('Swing Variables'),
                 ink:  loadLongerSnippet("swing_variables.ink") 
+            },
+            {
+                name: i18n._('Storylets'),
+                ink:  loadLongerSnippet("storylets.ink") 
             }
         ]
     },
