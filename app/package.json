@@ -38,7 +38,7 @@
     "@electron/packager": "^18.3.2",
     "chai": "^5.1.1",
     "chai-as-promised": "^7.1.2",
-    "electron": "^30.0.4",
+    "electron": "^30.0.6",
     "jsdom": "^24.0.0",
     "markdown-html": "^0.0.8",
     "mocha": "^10.4.0"
