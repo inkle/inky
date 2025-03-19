@@ -270,6 +270,10 @@ exports.snippets = [
         categoryName: i18n._('Useful systems'),
         snippets: [
             {
+                name: i18n._('List Items as Integer Variables'),
+                ink:  loadLongerSnippet("listToNumber.ink") 
+            },
+            {
                 name: i18n._('Swing Variables'),
                 ink:  loadLongerSnippet("swing_variables.ink") 
             },
