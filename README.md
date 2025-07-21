@@ -102,12 +102,12 @@ To build the project:
 
 * Install [node.js](https://nodejs.org/en/) if you don't already have it
 * Clone the repo
-* On Mac, double-click the `INSTALL_AND_RUN.command` script. On Windows, open Powershell, cd into the app directory, and type `npm install`, then `npm start`.
+* On Mac, double-click the `INSTALL_AND_RUN.command` script. On Windows and Linux, cd into the app directory, and type `npm install`, then `npm start`.
 * For subsequent runs, if no npm packages have changed, you can run the `RUN.command` script on Mac, or type `npm start` in the shell (on Windows).
 
 ### Linux
 
-Tested on a fresh **Ubuntu 16.04 LTS** VM installation (_equivalent processes should work for other distributions_)
+Tested on a fresh **Arch Linux** installation with kernel `6.15.7-arch1-1` (_equivalent processes should work for other distributions_)
 
 * Install build tools
 
@@ -116,7 +116,6 @@ Tested on a fresh **Ubuntu 16.04 LTS** VM installation (_equivalent processes sh
 * Pre-requisites
 
 `sudo apt install git`
-
 `sudo apt install curl`
 
 * Install node and npm
@@ -125,31 +124,23 @@ Tested on a fresh **Ubuntu 16.04 LTS** VM installation (_equivalent processes sh
 
 `sudo apt-get install -y nodejs`
 
-* Install mono as per http://www.mono-project.com/download/stable/#download-lin
-
-`sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF`
-
-`echo "deb http://download.mono-project.com/repo/ubuntu stable-xenial main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list`
-
-`sudo apt-get update`
-
-`sudo apt-get install mono-complete`
-
 * Clone the inky repo
 
 `git clone https://github.com/inkle/inky.git`
 
-* Test inklecate_win with mono (_should output usage info_)
+* Install
 
-`mono app/main-process/ink/inklecate_win.exe`
+```
+cd inky
+cd app
+npm install
+```
 
-* Install and run inky
-
-`./INSTALL_AND_RUN.command`
-
-* For subsequent runs, if no npm packages have changed, launch inky as below (otherwise re-run previous step):
-
-`./RUN.command`
+* Run
+  
+```
+npm start
+```
 
 ### Translation
 
