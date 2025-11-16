@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';">
+  <title>Ink AI Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">
+        <span class="icon">✨</span>
+        Ink AI Assistant
+      </h1>
+      <div class="header-actions">
+        <button id="openFileBtn" class="btn btn-primary">Open Ink File</button>
+        <div class="status">
+          <span id="status-indicator" class="status-dot"></span>
+          <span id="status-text">Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Sidebar (File Info & Errors) -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h3>Current File</h3>
+          <div id="current-file" class="file-info">
+            <p class="no-file">No file opened</p>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Compilation Status</h3>
+          <div id="compilation-status" class="compilation-status">
+            <p class="no-status">No compilation yet</p>
+          </div>
+        </div>
+
+        <div class="sidebar-section errors-section">
+          <h3>Errors & Warnings</h3>
+          <div id="errors-list" class="errors-list">
+            <p class="no-errors">No errors</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Chat Area -->
+      <main class="chat-area">
+        <div id="chat-messages" class="chat-messages">
+          <div class="message assistant">
+            <div class="message-content">
+              <p><strong>Welcome to Ink AI Assistant!</strong></p>
+              <p>I can help you:</p>
+              <ul>
+                <li>Generate ink code from descriptions</li>
+                <li>Fix compilation errors</li>
+                <li>Explain ink syntax and concepts</li>
+                <li>Answer questions about ink</li>
+              </ul>
+              <p>Open an ink file to get started, or just ask me anything!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-container">
+          <div class="quick-actions">
+            <button class="quick-action-btn" data-action="fix">🔧 Fix Errors</button>
+            <button class="quick-action-btn" data-action="explain">💡 Explain</button>
+            <button class="quick-action-btn" data-action="generate">✨ Generate Code</button>
+          </div>
+          <div class="input-wrapper">
+            <textarea
+              id="chat-input"
+              class="chat-input"
+              placeholder="Ask me anything about ink..."
+              rows="1"
+            ></textarea>
+            <button id="send-btn" class="btn btn-send">Send</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="chat.js"></script>
+</body>
+</html>
