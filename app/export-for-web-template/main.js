@@ -12,7 +12,9 @@
     // We support:
     //  # theme: dark
     //  # author: Your Name
+    //  # direction: rtl
     var globalTags = story.globalTags;
+    var globalTagDirection = null;
     if( globalTags ) {
         for(var i=0; i<story.globalTags.length; i++) {
             var globalTag = story.globalTags[i];
@@ -28,6 +30,11 @@
                 var byline = document.querySelector('.byline');
                 byline.innerHTML = "by "+splitTag.val;
             }
+
+            // direction: rtl
+            else if( splitTag && splitTag.property == "direction" ) {
+                globalTagDirection = splitTag.val.trim().toLowerCase();
+            }
         }
     }
 
@@ -36,6 +43,7 @@
 
     // page features setup
     setupTheme(globalTagTheme);
+    setupDirection(globalTagDirection);
     var hasSave = loadSavePoint();
     setupButtons(hasSave);
 
@@ -385,6 +393,14 @@
             || (savedTheme == undefined && globalTagTheme === "dark")
             || (savedTheme == undefined && globalTagTheme == undefined && browserDark))
             document.body.classList.add("dark");
+    }
+
+    // Sets up RTL (Right-to-Left) text direction when specified via global tag
+    function setupDirection(globalTagDirection) {
+        if( globalTagDirection === "rtl" ) {
+            storyContainer.setAttribute("dir", "rtl");
+            document.body.classList.add("rtl");
+        }
     }
 
     // Used to hook up the functionality for global functionality buttons

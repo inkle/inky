@@ -1,0 +1,149 @@
+@startuml Inky UI Layout and Component Structure
+title Inky -- UI Layout and Component Structure
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam rectangleBorderColor #888888
+skinparam rectangleBackgroundColor #FFFFFF
+
+rectangle "Application Window  (.window)" as win #F5F5F5 {
+
+    ' ==============================
+    '  TOOLBAR
+    ' ==============================
+    rectangle "Toolbar  (#toolbar)  --  fixed top bar" as toolbar #FBFBFB {
+
+        rectangle "Left Buttons" as left_btns #E3F2FD {
+            component "[Nav Toggle]\nToggle file\nbrowser" as btn_nav
+            component "[Knot Toggle]\nToggle knot\nbrowser" as btn_knot
+            component "[Nav Back]\nNavigate\nback" as btn_back
+            component "[Nav Forward]\nNavigate\nforward" as btn_fwd
+        }
+
+        rectangle "Center" as center_area #FFF3E0 {
+            component "Title (h1)\nActive filename\n(macOS only)" as title_bar
+            component "Issues Message\n\"No issues.\"\n(when clean)" as issues_msg
+            component "Issues Summary\nError | Warning | TODO\ncounts with icons" as issues_summary
+            component "Issues Popup\nHoverable table\nof all issues" as issues_popup
+        }
+
+        rectangle "Right Buttons" as right_btns #E8F5E9 {
+            component "[Busy Spinner]\nAnimated GIF\n(visible during compile)" as spinner
+            component "[Step Back]\nRewind one\nchoice" as btn_step
+            component "[Rewind]\nRestart\nstory" as btn_rewind
+        }
+    }
+
+    ' ==============================
+    '  MAIN CONTENT AREA
+    ' ==============================
+    rectangle "Main Content Area  (#main)" as main #FFFFFF {
+
+        ' ==============================
+        '  SIDEBAR
+        ' ==============================
+        rectangle "Sidebar  (.sidebar)\nCollapsible, 200px default" as sidebar #F5F5F4 {
+
+            rectangle "File Browser Panel\n(#file-nav-wrapper)" as file_nav #E3F2FD {
+                component "Main ink file\n(book icon)" as main_ink_item
+                component "Include groups\n(grouped by directory)" as include_groups
+                component "Unused files\nsection" as unused_files
+            }
+
+            rectangle "Footer  (.footer)" as footer #EEEEEE {
+                component "[+] Add new include\nbutton" as add_include_btn
+                component "New Include Form\n- Filename input\n- Add to main ink [x]\n- Add / Cancel" as new_include_form
+            }
+
+            rectangle "Knot Browser Panel\n(#knot-stitch-wrapper)" as knot_nav #E8EAF6 {
+                component "Content section\nKnots with stitch\nchildren" as content_section
+                component "Functions section\nFunction symbols" as functions_section
+                component "Externals section\nExternal declarations" as externals_section
+            }
+        }
+
+        ' ==============================
+        '  SPLIT HANDLE (sidebar <-> twopane)
+        ' ==============================
+        rectangle "Split\nHandle" as sidebar_split #DDDDDD {
+        }
+
+        ' ==============================
+        '  TWO-PANE AREA
+        ' ==============================
+        rectangle "Two-Pane Area  (.twopane)" as twopane #FFFFFF {
+
+            ' ==============================
+            '  EDITOR PANE
+            ' ==============================
+            rectangle "Editor Pane  (#editor)\nLeft half -- Ace Editor" as editor #FFFDE7 {
+                component "Ace Gutter\nLine numbers\nError/Warning/TODO icons" as gutter
+                component "Ace Content\nInk syntax highlighting\nDivert/Include underlines\nAlt+Click navigation" as ace_content
+                component "Ace Autocomplete\nInk symbol completer\n(togglable)" as ace_autocomplete
+                component "Error Markers\nRed (error)\nOrange (warning)\nGreen (TODO)" as error_markers
+                component "RTL / Bidi Mode\n(.bidify-enabled)\nunicode-bidi: plaintext" as bidi_editor_mode
+            }
+
+            ' ==============================
+            '  SPLIT HANDLE (editor <-> player)
+            ' ==============================
+            rectangle "Split\nHandle" as editor_split #DDDDDD {
+            }
+
+            ' ==============================
+            '  PLAYER PANE
+            ' ==============================
+            rectangle "Player Pane  (#player)\nRight half -- Story Output" as player #F3E5F5 {
+                component "Expression Watch Table\n(.expressionWatch)\nMini Ace editors per row\nRemove buttons" as expr_watch
+                component "Scroll Container\n(.scrollContainer)" as scroll_container
+                component "Active Text Buffer\n(.innerText.active)" as active_buffer {
+                    component "Story Text (p.storyText)\nWords in <span>s\nAlt+Click to source" as story_text
+                    component "Choices (p.choice)\nClickable links\nWith optional tags" as choices
+                    component "Tags (p.tags)\nMonospace # prefixed\nToggable visibility" as tags
+                    component "Dividers (<hr>)\nTurn separators" as dividers
+                    component "End Message (p.end)\n\"End of story\"" as end_msg
+                    component "Errors (p.error)\nClickable links to source" as player_errors
+                    component "Eval Results\n(.evaluationResult)\nPill badges" as eval_results
+                }
+                component "Hidden Buffer\n(.hiddenBuffer)\nOff-screen rendering\nfor session swap" as hidden_buffer
+            }
+        }
+    }
+
+    ' ==============================
+    '  GO-TO-ANYTHING OVERLAY
+    ' ==============================
+    rectangle "Go-to-Anything Overlay  (#goto-anything-container)" as goto_overlay #E0F2F1 {
+        component "Search Input\nPlaceholder: File name,\nstitch, knot, line\nnumber, or text" as goto_input
+        component "Results List (ul.results)\n- Files (file icon)\n- Symbols (pencil icon)\n- Content matches\n- Line number jumps\n- Runtime path lookups" as goto_results
+    }
+}
+
+' ==============================
+'  LAYOUT RELATIONSHIPS
+' ==============================
+
+toolbar -[hidden]down- main
+sidebar -[hidden]right- sidebar_split
+sidebar_split -[hidden]right- twopane
+editor -[hidden]right- editor_split
+editor_split -[hidden]right- player
+
+' Button actions
+btn_nav ..> file_nav : toggles
+btn_knot ..> knot_nav : toggles
+btn_step ..> active_buffer : rewinds\none choice
+btn_rewind ..> active_buffer : restarts\nstory
+issues_summary ..> issues_popup : hover\nreveals
+
+' Navigation
+btn_back ..> ace_content : history\nback
+btn_fwd ..> ace_content : history\nforward
+
+' Cross-pane interactions
+story_text ..> ace_content : Alt+Click\njumps to source
+player_errors ..> ace_content : click jumps\nto source line
+choices ..> active_buffer : click continues\nstory
+
+@enduml

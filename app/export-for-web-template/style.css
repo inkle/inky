@@ -304,3 +304,32 @@ body.dark {
 .dark #controls {
     background: black;
 }
+
+/*
+  RTL (Right-to-Left) Language Support (Added in Inky 0.16.0)
+    # direction: rtl
+*/
+
+body.rtl #story p {
+    text-align: right;
+}
+
+body.rtl .choice {
+    text-align: center;
+}
+
+body.rtl .end {
+    text-align: center;
+}
+
+body.rtl #controls {
+    right: auto;
+    left: 14px;
+}
+
+@media screen and (max-width: 980px) {
+    body.rtl #controls {
+        left: 0;
+        right: 0;
+    }
+}

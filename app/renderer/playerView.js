@@ -1,11 +1,13 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const i18n = require('./i18n.js');
+const { bidify } = require('./bidify.js');
 
 var events = {};
 var lastFadeTime = 0;
 var $textBuffer = null;
 var instructionPrefix = null;
 var animationEnabled = true;
+var bidifyEnabled = false;
 
 document.addEventListener("keyup", function(){
     $("#player").removeClass("altKey");
@@ -113,7 +115,9 @@ function prepareForNewPlaythrough(sessionId) {
 
 function addTextSection(text)
 {
-    var $paragraph = $("<p class='storyText'></p>");
+    if (bidifyEnabled) text = bidify(text);
+
+    var $paragraph = $("<p class='storyText' dir='auto'></p>");
 
     // Game-specific instruction prefix, e.g. >>> START CAMERA: Wide shot
     if( instructionPrefix && text.trim().startsWith(instructionPrefix) ) {
@@ -199,7 +203,7 @@ function addChoice(choice, callback)
     }
 
     // Append the choice
-    var $choicePara = $("<p class='choice'></p>");
+    var $choicePara = $("<p class='choice' dir='auto'></p>");
     $choicePara.append($choice);
     if( $tags != null ) $choicePara.append($tags);
     $textBuffer.append($choicePara);
@@ -299,6 +303,17 @@ function setAnimationEnabled(animEnabled) {
     animationEnabled = animEnabled;
 }
 
+function setDirection(direction) {
+    var $player = $("#player");
+    if( direction === "rtl" ) {
+        $player.attr("dir", "rtl");
+        $player.addClass("rtl");
+    } else {
+        $player.attr("dir", "ltr");
+        $player.removeClass("rtl");
+    }
+}
+
 exports.PlayerView = {
     setEvents: (e) => { events = e; },
     contentReady: contentReady,
@@ -314,5 +329,7 @@ exports.PlayerView = {
     showSessionView: showSessionView,
     previewStepBack: previewStepBack,
     setInstructionPrefix: setInstructionPrefix,
-    setAnimationEnabled: setAnimationEnabled
+    setAnimationEnabled: setAnimationEnabled,
+    setDirection: setDirection,
+    setBidifyEnabled: (enabled) => { bidifyEnabled = enabled; }
 };  

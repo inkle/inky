@@ -1,0 +1,53 @@
+@startuml scriptrun-activity
+!theme plain
+title ScriptRun + bidify() Processing
+
+start
+
+:Receive line from .ink file or StoryEngine;
+note right
+  Example:
+  "הבחירה -> next_knot"
+end note
+
+:ScriptRun iterator;
+:Group consecutive codepoints\nby Unicode script property;
+
+partition "ScriptRun Output" {
+    :Run 0: "הבחירה " — Hebrew;
+    :Run 1: "-> " — Common;
+    :Run 2: "next_knot" — Latin;
+}
+
+:Classify each run;
+
+if (isRightToLeft?) then (Hebrew, Arabic, ...)
+    :Wrap in RLI...PDI;
+    note right: \u2067 + text + \u2069
+elseif (isStrong and LTR?) then (Latin, Cyrillic, ...)
+    :Wrap in LRI...PDI;
+    note right: \u2066 + text + \u2069
+else (Common, Inherited)
+    :Leave unwrapped;
+    note right
+      Inherits direction from
+      neighbors. This is correct
+      for -> * ~ = # operators.
+    end note
+endif
+
+:Count rtl vs ltr codepoints;
+
+if (rtlCount > ltrCount?) then (yes)
+    :Base paragraph direction = RTL;
+    :Set dir="rtl" on container;
+else (no)
+    :Base paragraph direction = LTR;
+    :Set dir="ltr" on container;
+endif
+
+:Return isolated string +\nbase direction;
+
+stop
+
+@enduml

@@ -9,9 +9,13 @@
     "url": "git+https://github.com/inkle/inky.git"
   },
   "scripts": {
-    "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html",
+    "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html && node test/patch-spectron.js",
     "start": "electron main-process/main.js",
-    "test": "./node_modules/mocha/bin/mocha",
+    "test": "TEST_LAUNCHER=playwright npx mocha test/test.js --timeout 30000",
+    "test:unit": "node test/bidify.test.js",
+    "test:desktop": "TEST_LAUNCHER=spectron npx mocha test/test.js --timeout 30000",
+    "test:web": "TEST_LAUNCHER=playwright npx mocha test/test.js --timeout 30000",
+    "test:bidi": "TEST_LAUNCHER=playwright npx mocha test/bidi-e2e.test.js --timeout 90000",
     "generate-locale": "node ../build/generateLocale.js",
     "build-package": "node build-package.js"
   },
@@ -27,12 +31,14 @@
   },
   "homepage": "http://www.inklestudios.com/ink",
   "dependencies": {
+    "@electron/remote": "^2.1.3",
     "chokidar": "^3.6.0",
+    "electron-chromedriver": "^30.0.4",
     "fuzzaldrin-plus": "^0.6.0",
-    "inkjs": "^2.2.3",
-    "lodash": "^4.17.21",
+    "inkjs": "^2.4.0",
+    "lodash": "^4.17.23",
     "mkdirp": "^3.0.1",
-    "randomstring": "^1.3.0"
+    "randomstring": "^1.3.1"
   },
   "devDependencies": {
     "@electron/packager": "^18.3.2",
@@ -41,9 +47,16 @@
     "electron": "^30.0.4",
     "jsdom": "^24.0.0",
     "markdown-html": "^0.0.8",
-    "mocha": "^10.4.0"
+    "mocha": "^10.4.0",
+    "playwright-core": "^1.58.2",
+    "spectron": "^19.0.0"
   },
   "optionalDependencies": {
     "appdmg": "^0.6.6"
+  },
+  "overrides": {
+    "spectron": {
+      "electron-chromedriver": "$electron-chromedriver"
+    }
   }
 }

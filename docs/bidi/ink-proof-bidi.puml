@@ -1,0 +1,26 @@
+@startuml ink-proof-bidi
+!theme plain
+title ink-proof Bidi Conformance
+
+rectangle "test.ink\n(Hebrew + Ink syntax)" as ink
+
+fork
+    rectangle "Path A:\nbidify() → stripBidi()\n→ inkjs-compiler" as pathA
+fork again
+    rectangle "Path B:\nraw .ink\n→ inkjs-compiler" as pathB
+end fork
+
+rectangle "Diff JSON output" as diff
+
+pathA --> diff : story_a.ink.json
+pathB --> diff : story_b.ink.json
+
+diff --> diff : assert\nbyte-identical
+
+note bottom of diff
+  Proves: bidi preprocessing
+  is invisible to the compiler.
+  No semantic change.
+end note
+
+@enduml

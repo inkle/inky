@@ -1,0 +1,260 @@
+@startuml Inky User Interaction Workflows
+title Inky -- User Interaction Workflows
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam activityBorderColor #666666
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityDiamondBackgroundColor #FFF9C4
+
+|#E3F2FD|Application Startup|
+start
+:Electron app launches;
+:Load view settings\n(theme, zoom, bidi, animation,\nauto-complete, recent files);
+:Build application menus\nfrom settings;
+if (Opened with .ink file path?) then (yes)
+    :Open project from path\n(drag-drop, command-line,\nor macOS open-file event);
+else (no)
+    :Create new empty project;
+endif
+:Apply stored theme to\nAbout and Documentation windows;
+:Show main project window;
+
+|#FFFDE7|Editing Workflow|
+:Editor pane receives focus;
+
+repeat
+    :User edits ink source\nin Ace editor;
+    note right
+        Editor features available:
+        -- Syntax highlighting (InkMode)
+        -- Auto-complete (if enabled)
+        -- Find (Ctrl/Cmd+F)
+        -- Find & Replace (Ctrl/Cmd+H)
+        -- Toggle comment (Ctrl/Cmd+/)
+        -- Multi-cursor (Ctrl+Alt+Up/Down)
+        -- Code folding (Alt+L)
+        -- Alt+Click divert targets
+        -- Alt+Click INCLUDE paths
+        -- Snippet insertion (Ink menu)
+    end note
+
+    :LiveCompiler detects change;
+    :Toolbar shows busy spinner;
+
+    |#F3E5F5|Compilation|
+    :LiveCompiler recompiles\nink project;
+
+    if (Compilation successful?) then (yes)
+        :Clear all editor errors;
+        :Clear toolbar issue summary;
+        :Show "No issues." message;
+    else (errors/warnings/TODOs)
+        :Add error markers to\neditor gutter and lines;
+        :Update toolbar issue summary\n(error/warning/TODO counts);
+        :Issues popup available\non hover;
+        if (User clicks issue\nin popup or Next Issue?) then (yes)
+            |#FFFDE7|Editing Workflow|
+            :Navigate to issue\nfile and line number;
+        else (no)
+        endif
+    endif
+
+    |#E8F5E9|Playing Workflow|
+    :Player pane prepares\nnew playthrough\n(hidden buffer);
+
+    repeat
+        :Ink runtime produces\nstory text;
+        :Player renders text paragraphs\nwith fade-in animation\n(if enabled);
+
+        if (Tags produced?) then (yes)
+            :Display tags\n(# prefixed, monospace)\n(if Tags visible is checked);
+        else (no)
+        endif
+
+        if (Watch expressions exist?) then (yes)
+            :Evaluate each expression;
+            :Show result badges\nin player;
+        else (no)
+        endif
+
+        if (Choices available?) then (yes)
+            :Render choices as\nclickable links;
+            :Wait for user to\nclick a choice;
+            :Remove choices from view;
+            :Add horizontal divider;
+            :Send choice to\nink runtime;
+        elseif (Story ended?) then (yes)
+            :Display "End of story"\nmessage;
+            break
+        elseif (Runtime error?) then (yes)
+            :Display error in player\nas clickable link;
+            if (User clicks error?) then (yes)
+                |#FFFDE7|Editing Workflow|
+                :Jump to error\nsource line;
+            else (no)
+            endif
+            break
+        else (more content)
+        endif
+    repeat while (Story continues)
+
+    |#E8F5E9|Playing Workflow|
+    :Player shows session view\n(swap hidden buffer to active);
+    :Auto-scroll to latest content;
+
+    |#FFFDE7|Editing Workflow|
+    :Knot browser updates\nto reflect current\ncursor position;
+
+repeat while (User continues editing)
+
+|#E0F7FA|Navigation Workflows|
+
+fork
+    :User clicks Nav Toggle\nin toolbar;
+    :Toggle file browser\nsidebar panel;
+    if (Sidebar visible?) then (show)
+        :Animate sidebar open\n(200px width);
+        :Display file tree\n(main ink, includes,\nunused files);
+        if (User clicks file?) then (yes)
+            :Switch editor to\nselected file;
+            :Update title bar;
+            :Record navigation step;
+        else (no)
+        endif
+    else (hide)
+        :Animate sidebar closed;
+    endif
+fork again
+    :User clicks Knot Toggle\nin toolbar;
+    :Toggle knot browser\nsidebar panel;
+    if (Sidebar visible?) then (show)
+        :Display knot/stitch/\nfunction/external index;
+        if (User clicks symbol?) then (yes)
+            :Jump editor to\nsymbol row;
+        else (no)
+        endif
+    else (hide)
+        :Animate sidebar closed;
+    endif
+fork again
+    :User presses Ctrl/Cmd+P;
+    :Open Go-to-Anything dialog;
+    :User types search query;
+    note right
+        Search types:
+        -- Fuzzy file name match
+        -- Fuzzy symbol match
+        -- Text content search
+        -- Line number (digits)
+        -- Runtime path (dotted)
+    end note
+    :Results built incrementally\n(10 per 35ms tick);
+    :User navigates with\nUp/Down arrows;
+    if (User presses Enter\nor clicks result?) then (yes)
+        :Navigate to file/line/symbol;
+        :Close dialog;
+    else (Escape)
+        :Close dialog;
+        :Restore original\ncursor position;
+    endif
+fork again
+    :User clicks Nav Back/Forward;
+    :Navigate through\neditor history stack;
+end fork
+
+|#FFF3E0|Player Control Workflows|
+
+fork
+    :User clicks Step Back button;
+    :Remove content after\nlast divider in player;
+    :LiveCompiler steps back\none choice;
+    :Replay story up to\nprevious state;
+fork again
+    :User clicks Rewind button;
+    :LiveCompiler rewinds\nto start;
+    :Full story replay\nfrom beginning;
+fork again
+    :User Alt+Clicks word\nin player;
+    :Resolve output text offset\nto source position;
+    :Jump editor to\ncorresponding ink source line;
+end fork
+
+|#FFEBEE|File Operations|
+
+fork
+    :User selects Save\n(Ctrl/Cmd+S);
+    if (Strip bidi on save enabled?) then (yes)
+        :Strip bidi control chars\nfrom file content;
+    else (no)
+    endif
+    :Write .ink files to disk;
+    :Update title bar;
+    :Update file browser\n(remove unsaved indicators);
+fork again
+    :User selects Export to JSON;
+    if (Bidify export enabled?) then (yes)
+        :Apply bidi processing\nto exported text;
+    else (no)
+    endif
+    :Save dialog for JSON file;
+    :Write compiled JSON;
+fork again
+    :User selects Export for web;
+    :Save dialog for folder;
+    :Write HTML + story.js package;
+fork again
+    :User selects Export story.js only;
+    :Save dialog for JS file;
+    :Write story.js;
+fork again
+    :User adds new include file;
+    :Show include form in\nsidebar footer;
+    :User enters filename;
+    if (Filename valid?) then (yes)
+        :Append .ink extension\n(if missing);
+        :Create new InkFile;
+        if (Add to main ink checked?) then (yes)
+            :Insert INCLUDE statement\nin main ink;
+        else (no)
+        endif
+        :Switch editor to new file;
+        :Update file browser;
+    else (no)
+        :Highlight input as error;
+    endif
+end fork
+
+|#E0F2F1|Window Close Workflow|
+
+:User closes window;
+if (Unsaved changes?) then (yes)
+    :Show confirmation dialog\n"Would you like to save\nchanges before exiting?";
+    switch (User choice)
+    case (Save)
+        :Save all files;
+        :Close window;
+    case (Don't save)
+        :Discard changes;
+        :Close window;
+    case (Cancel)
+        :Abort close;
+        :Return to editing;
+    endswitch
+else (no)
+    :Close window;
+endif
+
+if (All windows closed?) then (yes)
+    if (macOS?) then (no)
+        :Quit application;
+        :Kill inklecate sessions;
+    else (yes)
+        :App stays running\n(macOS behavior);
+    endif
+else (no)
+endif
+
+stop
+
+@enduml

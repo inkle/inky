@@ -518,6 +518,13 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
         storyTitle = mainInkTagDict["title"];
     }
 
+    // Detect RTL direction from global tags
+    var storyDirection = "";
+    if( mainInkTagDict && mainInkTagDict["direction"] &&
+        mainInkTagDict["direction"].trim().toLowerCase() === "rtl" ) {
+        storyDirection = "rtl";
+    }
+
     // Create target directory name
     mkdirp.sync(targetDirectory);
 
@@ -528,11 +535,15 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
     // Copy index.html:
     //  - inserting the filename as the <title> and <h1>
     //  - Inserting the correct name of the javascript file
-    copyFile(path.join(templateDir, "index.html"), 
-             path.join(targetDirectory, "index.html"), 
+    //  - Inserting dir="rtl" on <html> if direction tag is set
+    copyFile(path.join(templateDir, "index.html"),
+             path.join(targetDirectory, "index.html"),
              (fileContent) => {
         fileContent = fileContent.replace(/##STORY TITLE##/g, storyTitle);
         fileContent = fileContent.replace(/##JAVASCRIPT FILENAME##/g, this.jsFilename());
+        if( storyDirection === "rtl" ) {
+            fileContent = fileContent.replace('<html lang="en">', '<html lang="en" dir="rtl">');
+        }
         return fileContent;
     });
 

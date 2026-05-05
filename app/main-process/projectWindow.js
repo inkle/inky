@@ -100,6 +100,10 @@ function ProjectWindow(filePath) {
         this.zoom(settings.zoom);
         this.browserWindow.webContents.send('set-animation-enabled', settings.animationEnabled);
         this.browserWindow.webContents.send('set-autocomplete-disabled', !!settings.autoCompleteDisabled);
+        this.browserWindow.webContents.send('set-bidify-editor-enabled', !!settings.bidifyEditorEnabled);
+        this.browserWindow.webContents.send('set-bidify-player-enabled', !!settings.bidifyPlayerEnabled);
+        this.browserWindow.webContents.send('set-strip-bidi-on-save', settings.stripBidiOnSave !== false);
+        this.browserWindow.webContents.send('set-bidify-export-enabled', !!settings.bidifyExportEnabled);
     });
 
     // Project settings may affect menus etc, so we refresh that
@@ -316,7 +320,7 @@ ProjectWindow.open = function(filePath) {
 }
 
 ProjectWindow.getViewSettings = function() {
-    let viewSettingDefaults = { theme:'light', zoom:'100', animationEnabled:true };
+    let viewSettingDefaults = { theme:'light', zoom:'100', animationEnabled:true, bidifyEditorEnabled:false, bidifyPlayerEnabled:false, stripBidiOnSave:true, bidifyExportEnabled:false };
 
     if(!fs.existsSync(viewSettingsPath)) {
         return viewSettingDefaults;

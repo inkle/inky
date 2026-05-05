@@ -1,0 +1,26 @@
+@startuml bidi-data-flow
+!theme plain
+title bidify() Data Flow
+
+rectangle "Raw .ink UTF-8\n(Hebrew + Ink syntax)" as source
+rectangle "bidify()\nScriptRun → LRI/RLI/PDI" as bidifier
+rectangle "Ace Editor Buffer\n(receives pre-isolated text)" as ace
+rectangle "Chromium Bidi Engine\n(handles isolates natively)" as chrome
+rectangle "Correct Visual Display\nהבחירה -> next_knot" as display
+
+rectangle "stripBidi()\none regex" as strip
+rectangle "Clean UTF-8\n(no markers)" as clean
+rectangle "inklecate / inkjs\ncompiler" as compiler
+rectangle "story.ink.json" as json
+
+source --> bidifier : on load / on edit
+bidifier --> ace : isolated string
+ace --> chrome : DOM rendering
+chrome --> display : ✅ correct
+
+ace --> strip : on save / compile
+strip --> clean
+clean --> compiler
+compiler --> json
+
+@enduml

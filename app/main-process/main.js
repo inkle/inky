@@ -229,6 +229,38 @@ app.on('ready', function () {
                 eachWindow.browserWindow.webContents.send("set-autocomplete-disabled", autoCompleteDisabled);
             }
         },
+        toggleBidifyEditor: () => {
+            let enabled = !ProjectWindow.getViewSettings().bidifyEditorEnabled;
+            ProjectWindow.addOrChangeViewSetting('bidifyEditorEnabled', enabled);
+            for(let i=0; i<ProjectWindow.all().length; i++) {
+                let eachWindow = ProjectWindow.all()[i];
+                eachWindow.browserWindow.webContents.send("set-bidify-editor-enabled", enabled);
+            }
+        },
+        toggleBidifyPlayer: () => {
+            let enabled = !ProjectWindow.getViewSettings().bidifyPlayerEnabled;
+            ProjectWindow.addOrChangeViewSetting('bidifyPlayerEnabled', enabled);
+            for(let i=0; i<ProjectWindow.all().length; i++) {
+                let eachWindow = ProjectWindow.all()[i];
+                eachWindow.browserWindow.webContents.send("set-bidify-player-enabled", enabled);
+            }
+        },
+        toggleStripBidiOnSave: () => {
+            let enabled = ProjectWindow.getViewSettings().stripBidiOnSave === false;
+            ProjectWindow.addOrChangeViewSetting('stripBidiOnSave', enabled);
+            for(let i=0; i<ProjectWindow.all().length; i++) {
+                let eachWindow = ProjectWindow.all()[i];
+                eachWindow.browserWindow.webContents.send("set-strip-bidi-on-save", enabled);
+            }
+        },
+        toggleBidifyExport: () => {
+            let enabled = !ProjectWindow.getViewSettings().bidifyExportEnabled;
+            ProjectWindow.addOrChangeViewSetting('bidifyExportEnabled', enabled);
+            for(let i=0; i<ProjectWindow.all().length; i++) {
+                let eachWindow = ProjectWindow.all()[i];
+                eachWindow.browserWindow.webContents.send("set-bidify-export-enabled", enabled);
+            }
+        },
         insertSnippet: (focussedWindow, snippet) => {
             if( focussedWindow )
             focussedWindow.webContents.send('insertSnippet', snippet);
@@ -246,6 +278,10 @@ app.on('ready', function () {
     AppMenus.setZoom(ProjectWindow.getViewSettings().zoom);
     AppMenus.setAnimationEnabled(ProjectWindow.getViewSettings().animationEnabled);
     AppMenus.setAutoCompleteDisabled(ProjectWindow.getViewSettings().autoCompleteDisabled)
+    AppMenus.setBidifyEditorEnabled(ProjectWindow.getViewSettings().bidifyEditorEnabled);
+    AppMenus.setBidifyPlayerEnabled(ProjectWindow.getViewSettings().bidifyPlayerEnabled);
+    AppMenus.setStripBidiOnSave(ProjectWindow.getViewSettings().stripBidiOnSave);
+    AppMenus.setBidifyExportEnabled(ProjectWindow.getViewSettings().bidifyExportEnabled);
 
     AppMenus.refresh();
     ProjectWindow.setEvents({
@@ -263,6 +299,10 @@ app.on('ready', function () {
             AppMenus.setZoom(viewSettings.zoom);
             AppMenus.setAnimationEnabled(viewSettings.animationEnabled);
             AppMenus.setAutoCompleteDisabled(viewSettings.autoCompleteDisabled);
+            AppMenus.setBidifyEditorEnabled(viewSettings.bidifyEditorEnabled);
+            AppMenus.setBidifyPlayerEnabled(viewSettings.bidifyPlayerEnabled);
+            AppMenus.setStripBidiOnSave(viewSettings.stripBidiOnSave);
+            AppMenus.setBidifyExportEnabled(viewSettings.bidifyExportEnabled);
             AppMenus.refresh();
         }
     });

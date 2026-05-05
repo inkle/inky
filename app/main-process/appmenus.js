@@ -15,6 +15,10 @@ let theme = null;
 let zoom = null;
 let animationEnabled = null;
 let autoCompleteDisabled = null; // default on
+let bidifyEditorEnabled = null;
+let bidifyPlayerEnabled = null;
+let stripBidiOnSave = null;
+let bidifyExportEnabled = null;
 
 
 let callbacks = {
@@ -320,6 +324,35 @@ function refresh() {
                     type: "checkbox",
                     checked: animationEnabled,
                     click: callbacks.toggleAnimation
+                },
+                {
+                    label: i18n._("Bidify (RTL)"),
+                    submenu: [
+                        {
+                            label: i18n._("Bidify in editor"),
+                            type: "checkbox",
+                            checked: !!bidifyEditorEnabled,
+                            click: callbacks.toggleBidifyEditor
+                        },
+                        {
+                            label: i18n._("Bidify in player"),
+                            type: "checkbox",
+                            checked: !!bidifyPlayerEnabled,
+                            click: callbacks.toggleBidifyPlayer
+                        },
+                        {
+                            label: i18n._("Strip bidi on save (Recommended)"),
+                            type: "checkbox",
+                            checked: stripBidiOnSave !== false,
+                            click: callbacks.toggleStripBidiOnSave
+                        },
+                        {
+                            label: i18n._("Bidify exported JSON"),
+                            type: "checkbox",
+                            checked: !!bidifyExportEnabled,
+                            click: callbacks.toggleBidifyExport
+                        }
+                    ]
                 }
 
             ]
@@ -503,6 +536,10 @@ exports.AppMenus = {
     setZoom : (z) => zoom = z,
     setAnimationEnabled : (e) => animationEnabled = e,
     setAutoCompleteDisabled : (e) => autoCompleteDisabled = e,
+    setBidifyEditorEnabled : (e) => bidifyEditorEnabled = e,
+    setBidifyPlayerEnabled : (e) => bidifyPlayerEnabled = e,
+    setStripBidiOnSave : (e) => stripBidiOnSave = e,
+    setBidifyExportEnabled : (e) => bidifyExportEnabled = e,
     setCustomSnippetMenus : (snippets) => {customInkSnippets = snippets},
     refresh : refresh
 }

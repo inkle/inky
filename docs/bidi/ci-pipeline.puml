@@ -1,0 +1,68 @@
+@startuml ci-pipeline
+!theme plain
+title CI Pipeline — Test Suites (Current Branch)
+
+|Push / PR|
+start
+:Trigger on push to fork;
+
+|Unit Tests|
+:node test/bidify.test.js;
+note right: 29 tests, <2s
+if (Pass?) then (yes)
+else (no)
+    :Block merge;
+    stop
+endif
+
+|E2E Tests (Playwright)|
+:TEST_LAUNCHER=playwright
+npx mocha test/test.js;
+note right
+  7 tests, ~30s
+  Launches Electron from source
+  via Playwright _electron API
+  Needs Xvfb on Linux CI
+end note
+if (Pass?) then (yes)
+else (no)
+    :Block merge;
+    stop
+endif
+
+|E2E Tests (Spectron)|
+:TEST_LAUNCHER=spectron
+npx mocha test/test.js;
+note right
+  7 tests, ~30s
+  Requires packaged binary
+  Uses ChromeDriver + WebDriverIO
+  Needs Xvfb on Linux CI
+end note
+if (Pass?) then (yes)
+else (no)
+    :Block merge;
+    stop
+endif
+
+|Bidi E2E Tests|
+:TEST_LAUNCHER=playwright
+npx mocha test/bidi-e2e.test.js;
+note right
+  15 tests, ~90s
+  Hebrew/Arabic typing,
+  compilation, story playthrough
+  Playwright-only
+end note
+if (Pass?) then (yes)
+else (no)
+    :Block merge;
+    stop
+endif
+
+|All Green|
+:Total: 58 tests;
+:Allow merge;
+stop
+
+@enduml

@@ -6,6 +6,7 @@ const {ipcRenderer} = require("electron")
 const mkdirp = require('mkdirp');
 
 const InkFileSymbols = require("./inkFileSymbols.js").InkFileSymbols;
+const { stripBidi } = require("./bidify.js");
 
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
@@ -186,6 +187,7 @@ InkFile.prototype.save = function(afterSaveCallback) {
     else {
         this.justSaved = true;
         var fileContent = this.aceDocument.getValue() || "";
+        if (InkFile.stripBidiOnSave) fileContent = stripBidi(fileContent);
         
         // Ensure that the enclosing folder exists beforehand
         var fileAbsPath = this.absolutePath();
@@ -298,5 +300,7 @@ InkFile.prototype.setInkMode = function(newInkMode)
         this.aceSession.setMode(this.inkMode);
     }
 }
+
+InkFile.stripBidiOnSave = true;
 
 exports.InkFile = InkFile;

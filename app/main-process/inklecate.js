@@ -5,6 +5,7 @@ const path = require("path");
 const electron = require('electron');
 const ipc = electron.ipcMain;
 const mkdirp = require('mkdirp');
+const { bidifyJson } = require("../renderer/bidify.js");
 
 // inklecate is packaged outside of the main asar bundle since it's executable
 const inklecateNames = {
@@ -130,6 +131,16 @@ function compile(compileInstruction, requester) {
             sendAnyErrors();
 
             if( code == 0 || code === undefined ) {
+                // Post-process exported JSON to add bidi markers if enabled
+                if (jsonExportPath && compileInstruction.bidifyExportEnabled) {
+                    try {
+                        var json = fs.readFileSync(jsonExportPath, 'utf8');
+                        json = bidifyJson(json);
+                        fs.writeFileSync(jsonExportPath, json);
+                    } catch(e) {
+                        console.error("Failed to bidify exported JSON:", e);
+                    }
+                }
                 requester.send('inklecate-complete', sessionId, jsonExportPath);
             }
             else {

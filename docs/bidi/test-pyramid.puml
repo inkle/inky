@@ -1,0 +1,36 @@
+@startuml test-pyramid
+!theme plain
+title Test Pyramid — bidify (Current Branch)
+
+rectangle "Bidi E2E\n(Playwright + Electron)\n15 tests" as bidi_e2e #ffcccc
+rectangle "App E2E\n(Playwright or Spectron)\n7 tests × 2 launchers" as app_e2e #ffdddd
+rectangle "Unit\n(pure Node.js)\n29 tests" as unit #ccffcc
+
+bidi_e2e -[hidden]down- app_e2e
+app_e2e -[hidden]down- unit
+
+note right of bidi_e2e
+  Full Inky app: type Hebrew/Arabic,
+  compile, verify story playthrough,
+  check bidify toggle, export JSON.
+  Playwright-only. Slow (~6s per test).
+end note
+
+note right of app_e2e
+  General app tests: window launch,
+  title, sidebar, hello world compile,
+  choices, suppressed choices, TODOs.
+  Runs on both Playwright & Spectron
+  via TEST_LAUNCHER env var.
+end note
+
+note right of unit
+  Pure function tests.
+  No DOM, no Electron, no Ace.
+  getScriptRuns(), bidify(),
+  stripBidi(), bidifyJson().
+  10 RTL script coverage tests.
+  Fast (~50ms total).
+end note
+
+@enduml

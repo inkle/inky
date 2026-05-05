@@ -1,0 +1,259 @@
+@startuml Inky Application Menu Hierarchy
+title Inky -- Complete Application Menu Hierarchy
+left to right direction
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+' ============================
+' macOS-only Application Menu
+' ============================
+package "Inky (macOS only)" as AppMenu #E8F5E9 {
+    object "About Inky" as about_mac
+    object "---" as sep_app1
+    object "Services >" as services
+    object "---" as sep_app2
+    object "Hide Inky\n[Cmd+H]" as hide_app
+    object "Hide Others\n[Cmd+Alt+H]" as hide_others
+    object "Show All" as show_all
+    object "---" as sep_app3
+    object "Quit\n[Cmd+Q]" as quit
+}
+
+' ============================
+' File Menu
+' ============================
+package "File" as FileMenu #E3F2FD {
+    object "New Project\n[Ctrl/Cmd+N]" as new_project
+    object "New Included Ink File\n[Ctrl/Cmd+Alt+N]" as new_include
+    object "---" as sep_f1
+    object "Open...\n[Ctrl/Cmd+O]" as open_file
+    object "Open Recent >" as open_recent
+    object "---" as sep_f2
+    object "Save Project\n[Ctrl/Cmd+S]" as save_project
+    object "---" as sep_f3
+    object "Export to JSON...\n[Ctrl/Cmd+Shift+S]" as export_json
+    object "Export for web..." as export_web
+    object "Export story.js only...\n[Ctrl/Cmd+Alt+S]" as export_js
+    object "---" as sep_f4
+    object "Close\n[Ctrl/Cmd+W]" as close_file
+}
+
+package "Open Recent" as RecentSub #BBDEFB {
+    object "<recent file paths>" as recent_paths
+    object "---" as sep_r1
+    object "Clear" as clear_recent
+}
+open_recent --> RecentSub
+
+' ============================
+' Edit Menu
+' ============================
+package "Edit" as EditMenu #FFF3E0 {
+    object "Undo\n[Ctrl/Cmd+Z]" as undo
+    object "Redo\n[Shift+Ctrl/Cmd+Z]" as redo
+    object "---" as sep_e1
+    object "Cut\n[Ctrl/Cmd+X]" as cut
+    object "Copy\n[Ctrl/Cmd+C]" as copy_item
+    object "Paste\n[Ctrl/Cmd+V]" as paste
+    object "Select All\n[Ctrl/Cmd+A]" as select_all
+    object "---" as sep_e2
+    object "Useful Keyboard Shortcuts" as kbd_shortcuts
+}
+
+' ============================
+' View Menu
+' ============================
+package "View" as ViewMenu #F3E5F5 {
+    object "Toggle Full Screen\n[Ctrl+Cmd+F / F11]" as fullscreen
+    object "Theme >" as theme_sub
+    object "Zoom % >" as zoom_sub
+    object "Zoom (Increase)\n[Ctrl/Cmd+=]" as zoom_in
+    object "Zoom (Decrease)\n[Ctrl/Cmd+-]" as zoom_out
+    object "[x] Auto-complete" as autocomplete
+    object "[x] Play view animation" as animation
+    object "Bidify (RTL) >" as bidify_sub
+}
+
+package "Theme" as ThemeSub #E1BEE7 {
+    object "(*) Light" as theme_light
+    object "( ) Dark" as theme_dark
+    object "( ) Contrast" as theme_contrast
+    object "( ) Focus" as theme_focus
+}
+theme_sub --> ThemeSub
+
+package "Zoom %" as ZoomSub #E1BEE7 {
+    object "( ) 50%" as z50
+    object "( ) 75%" as z75
+    object "(*) 100%" as z100
+    object "( ) 125%" as z125
+    object "( ) 150%" as z150
+    object "( ) 175%" as z175
+    object "( ) 200%" as z200
+    object "( ) 250%" as z250
+    object "( ) 300%" as z300
+}
+zoom_sub --> ZoomSub
+
+package "Bidify (RTL)" as BidifySub #E1BEE7 {
+    object "[ ] Bidify in editor" as bidi_editor
+    object "[ ] Bidify in player" as bidi_player
+    object "[x] Strip bidi on save\n(Recommended)" as bidi_strip
+    object "[ ] Bidify exported JSON" as bidi_export
+}
+bidify_sub --> BidifySub
+
+' ============================
+' Story Menu
+' ============================
+package "Story" as StoryMenu #E8EAF6 {
+    object "Go to anything...\n[Ctrl/Cmd+P]" as goto_anything
+    object "Next Issue\n[Ctrl/Cmd+.]" as next_issue
+    object "Add watch expression..." as add_watch
+    object "[x] Tags visible" as tags_visible
+    object "Word count and more\n[Ctrl/Cmd+Shift+C]" as word_count
+}
+
+' ============================
+' Ink Menu
+' ============================
+package "Ink" as InkMenu #FFF9C4 {
+    object "Basic structure >" as cat_basic
+    object "Choices >" as cat_choices
+    object "Variables >" as cat_vars
+    object "Inline logic >" as cat_inline
+    object "Multi-line logic >" as cat_multiline
+    object "Comments >" as cat_comments
+    object "---" as sep_i1
+    object "List-handling >" as cat_lists
+    object "Useful functions >" as cat_functions
+    object "Useful systems >" as cat_systems
+    object "---" as sep_i2
+    object "Full stories >" as cat_stories
+    object "---" as sep_i3
+    object "<Custom Snippets>" as custom_snippets
+}
+
+package "Basic structure" as BasicSub #FFF59D {
+    object "Knot (main section)" as sn_knot
+    object "Stitch (sub-section)" as sn_stitch
+    object "---" as sep_bs1
+    object "Divert" as sn_divert
+    object "Ending indicator" as sn_end
+}
+cat_basic --> BasicSub
+
+package "Choices" as ChoicesSub #FFF59D {
+    object "Basic Choice" as sn_basic_choice
+    object "Sticky choice" as sn_sticky
+    object "Choice without printing" as sn_noprint
+    object "Choice with mixed output" as sn_mixed
+}
+cat_choices --> ChoicesSub
+
+package "Variables" as VarsSub #FFF59D {
+    object "Global variable" as sn_global_var
+    object "Temporary variable" as sn_temp_var
+    object "Modify variable" as sn_mod_var
+    object "Get variable type" as sn_typeof
+}
+cat_vars --> VarsSub
+
+package "Inline logic" as InlineSub #FFF59D {
+    object "Condition" as sn_inline_cond
+}
+cat_inline --> InlineSub
+
+package "Multi-line logic" as MultiSub #FFF59D {
+    object "Condition" as sn_multi_cond
+}
+cat_multiline --> MultiSub
+
+package "Comments" as CommentsSub #FFF59D {
+    object "Single-line comment" as sn_slcomment
+    object "Block comment" as sn_blcomment
+}
+cat_comments --> CommentsSub
+
+package "List-handling" as ListsSub #FFF59D {
+    object "List: pop" as sn_pop
+    object "List: pop_random" as sn_pop_rand
+    object "List: LIST_NEXT / LIST_PREV" as sn_next_prev
+    object "List: list_item_is_member_of" as sn_member
+    object "List: list_random_subset" as sn_rand_sub
+    object "List: list_random_subset_of_size" as sn_rand_sub_sz
+    object "List: string_to_list" as sn_str_list
+}
+cat_lists --> ListsSub
+
+package "Useful functions" as FuncsSub #FFF59D {
+    object "Logic: maybe" as sn_maybe
+    object "---" as sep_uf1
+    object "Mathematics: divisor" as sn_divisor
+    object "Mathematics: abs" as sn_abs
+    object "---" as sep_uf2
+    object "Flow: came_from" as sn_came_from
+    object "Flow: seen_very_recently" as sn_seen_recent
+    object "Flow: seen_more_recently_than" as sn_seen_more
+    object "Flow: seen_this_scene" as sn_seen_scene
+    object "Flow: thread_in_tunnel" as sn_tunnel
+    object "---" as sep_uf3
+    object "Printing: a (or an)" as sn_a_or_an
+    object "Printing: UPPERCASE" as sn_upper
+    object "Printing: print_number" as sn_print_num
+    object "Printing: list_with_commas" as sn_commas
+}
+cat_functions --> FuncsSub
+
+package "Useful systems" as SystemsSub #FFF59D {
+    object "List Items as Integer Variables" as sn_list_int
+    object "Swing Variables" as sn_swing
+    object "Storylets" as sn_storylets
+}
+cat_systems --> SystemsSub
+
+package "Full stories" as StoriesSub #FFF59D {
+    object "Crime Scene\n(Writing with Ink)" as sn_crime
+    object "Swindlestones\n(Sorcery!)" as sn_swindle
+    object "Pontoon Game\n(Overboard!)" as sn_pontoon
+    object "The Intercept" as sn_intercept
+}
+cat_stories --> StoriesSub
+
+' ============================
+' Window Menu
+' ============================
+package "Window" as WindowMenu #E0F7FA {
+    object "Minimize\n[Ctrl/Cmd+M]" as minimize
+    object "Close\n[Ctrl/Cmd+W]" as close_win
+    object "Developer >" as dev_sub
+    object "---\n(macOS only)" as sep_w1
+    object "Bring All to Front\n(macOS only)" as bring_front
+}
+
+package "Developer" as DevSub #B2EBF2 {
+    object "Reload web view\n[Ctrl/Cmd+R]" as reload
+    object "Toggle Developer Tools\n[Alt+Cmd+I / Ctrl+Shift+I]" as devtools
+}
+dev_sub --> DevSub
+
+' ============================
+' Help Menu
+' ============================
+package "Help" as HelpMenu #FFEBEE {
+    object "Show Documentation\n[F1]" as show_docs
+    object "About Inky\n(Win/Linux only)" as about_winlinux
+}
+
+' ============================
+' Context Menu
+' ============================
+package "Context Menu\n(Right-Click)" as CtxMenu #F5F5F5 {
+    object "Cut" as ctx_cut
+    object "Copy" as ctx_copy
+    object "Paste" as ctx_paste
+}
+
+@enduml

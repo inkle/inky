@@ -1,0 +1,583 @@
+@startuml ink-syntax
+' ============================================================
+' Ink Scripting Language — Complete Syntax Reference
+' PlantUML Mind Map / Class Diagram
+'
+' Covers all ink language features organized by category.
+' Reference: https://github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md
+' ============================================================
+
+skinparam backgroundColor #FAFAFA
+skinparam classFontSize 12
+skinparam packageFontSize 14
+skinparam packageStyle rectangle
+skinparam classAttributeFontSize 11
+skinparam shadowing false
+skinparam defaultFontName monospaced
+
+title **Ink Scripting Language — Complete Syntax Map**\n(inkle's narrative scripting language)
+
+' ────────────────────────────────────────
+' TEXT OUTPUT
+' ────────────────────────────────────────
+package "1. Text Output" as TextOutput #E8F5E9 {
+  class "Plain Text" as PlainText {
+    Any line of text is output directly
+    --
+    Hello, world!
+    This is story content.
+  }
+
+  class "Glue  <>  " as Glue {
+    Joins lines without line break
+    --
+    We went <>
+    quickly home.
+    => "We went quickly home."
+  }
+
+  class "Tags  #" as Tags {
+    Invisible metadata on a line
+    --
+    Content here # tag_name
+    # CLEAR
+    # BGM: music_file
+    Content # location: market # mood: busy
+  }
+
+  class "String Interpolation  {var}" as StringInterp {
+    Embed variable values in text
+    --
+    VAR name = "World"
+    Hello, {name}!
+    You have {gold} coins.
+    Status: {describe_health(hp)}
+  }
+
+  class "Escaping  \\{ \\}" as Escaping {
+    Escape special characters
+    --
+    \\{ \\} \\[ \\]
+    Outputs literal: { } [ ]
+  }
+
+  class "Comments" as Comments {
+    Not output to the player
+    --
+    // Single-line comment
+    /* Multi-line
+       block comment */
+  }
+
+  class "TODO" as TodoMarker {
+    Flagged during compilation
+    --
+    TODO: Add more choices here
+  }
+}
+
+' ────────────────────────────────────────
+' FLOW CONTROL
+' ────────────────────────────────────────
+package "2. Flow Control" as FlowControl #E3F2FD {
+  class "Knots  === ===" as Knots {
+    Major story sections
+    --
+    === knot_name ===
+    Content here.
+    ..
+    === knot_with_params(a, b) ===
+  }
+
+  class "Stitches  =" as Stitches {
+    Sub-sections within knots
+    --
+    === my_knot ===
+    = first_stitch
+    Content.
+    = second_stitch
+    More content.
+    ..
+    -> my_knot.first_stitch
+  }
+
+  class "Diverts  ->" as Diverts {
+    Jump to another knot/stitch
+    --
+    -> knot_name
+    -> knot_name.stitch_name
+    -> END   (story ends)
+    -> DONE  (thread/flow ends)
+  }
+
+  class "Tunnels  ->  ->" as Tunnels {
+    Subroutine-style flow (call/return)
+    --
+    -> my_tunnel ->
+    Content continues after tunnel.
+    ..
+    === my_tunnel ===
+    Tunnel content.
+    ->->   (return to caller)
+  }
+
+  class "Threads  <-" as Threads {
+    Merge choices from another knot
+    --
+    <- thread_knot_a
+    <- thread_knot_b
+    * [Own choice] -> next
+    ..
+    === thread_knot_a ===
+    * [Thread A choice] ...
+  }
+
+  class "Gathers  -" as Gathers {
+    Collect branches back together
+    --
+    * [Choice A] Text A.
+    * [Choice B] Text B.
+    - All roads lead here.
+    ..
+    - (label) Labelled gather.
+    - - (nested) Nested gather.
+  }
+
+  class "Labels  (label)" as Labels {
+    Named points for visit counting
+    --
+    - (opts)
+      * [Option] -> opts
+    ..
+    * (myChoice) [Text]
+    { opts > 3: ... }
+  }
+}
+
+' ────────────────────────────────────────
+' CHOICES
+' ────────────────────────────────────────
+package "3. Choices" as ChoicePkg #FFF3E0 {
+  class "Basic Choice  *" as BasicChoice {
+    One-time (consumed after selection)
+    --
+    * Choice text
+      Result of choosing.
+  }
+
+  class "Sticky Choice  +" as StickyChoice {
+    Reappears every time
+    --
+    + [Repeatable option]
+      This keeps appearing.
+  }
+
+  class "Suppressed Text  []" as SuppressedChoice {
+    Text hidden from output after selection
+    --
+    * [Hidden choice text]
+      Only this appears.
+    ..
+    * Start [middle] end
+      "middle" only in choice display
+  }
+
+  class "Nested Choices  ** ***" as NestedChoice {
+    Deeper choice levels
+    --
+    * [Outer]
+      ** [Inner]
+        *** [Deepest]
+  }
+
+  class "Conditional Choice" as ConditionalChoice {
+    Choice appears only when condition met
+    --
+    * {has_key} [Unlock door]
+    * {gold >= 10} [Buy item]
+    + {visited_shop} [Return to shop]
+  }
+
+  class "Fallback Choice  * ->" as FallbackChoice {
+    Auto-selected when no other choices remain
+    --
+    * -> fallback_knot
+    ..
+    + -> (loops back)
+  }
+
+  class "Choice Labels  (label)" as ChoiceLabel {
+    Named choices for visit counting
+    --
+    * (myChoice) [Text]
+    { myChoice: Already chosen. }
+  }
+}
+
+' ────────────────────────────────────────
+' VARIABLES
+' ────────────────────────────────────────
+package "4. Variables & Types" as VarsPkg #F3E5F5 {
+  class "VAR (Global)" as GlobalVar {
+    Persists across entire story
+    --
+    VAR name = "Alice"
+    VAR score = 0
+    VAR alive = true
+    VAR ratio = 0.5
+  }
+
+  class "temp (Local)" as TempVar {
+    Scoped to current knot/stitch
+    --
+    ~ temp damage = 15
+    ~ temp target = -> next_knot
+    ~ temp greeting = "Hello"
+  }
+
+  class "CONST" as ConstVar {
+    Immutable value
+    --
+    CONST MAX_HP = 100
+    CONST CITY = "London"
+  }
+
+  class "Variable Types" as VarTypes {
+    All supported value types
+    --
+    int:     VAR x = 42
+    float:   VAR x = 3.14
+    string:  VAR x = "hello"
+    bool:    VAR x = true / false
+    list:    VAR x = (item1, item2)
+    divert:  VAR x = -> knot_name
+  }
+
+  class "Assignment  ~" as Assignment {
+    Modify variable values
+    --
+    ~ health = 100
+    ~ gold += 25
+    ~ gold -= 10
+    ~ count++
+    ~ count--
+    ~ visited = true
+    ~ mood = happy
+    ~ target = -> knot
+  }
+
+  class "ref Parameters" as RefParams {
+    Pass by reference
+    --
+    === function pop(ref list)
+      ~ temp x = LIST_MIN(list)
+      ~ list -= x
+      ~ return x
+  }
+}
+
+' ────────────────────────────────────────
+' LOGIC & CONDITIONALS
+' ────────────────────────────────────────
+package "5. Logic & Conditionals" as LogicPkg #FFEBEE {
+  class "Inline Logic  ~" as InlineLogic {
+    Execute logic without output
+    --
+    ~ health = health - 10
+    ~ inventory += sword
+    ~ temp x = clamp(v, 0, 100)
+  }
+
+  class "Inline Conditional  {cond: a | b}" as InlineCond {
+    Ternary-style conditional text
+    --
+    {alive: Breathing | Dead}
+    {gold > 0: Rich}
+    {has_key: Can unlock door.}
+  }
+
+  class "Multi-line Conditional" as MultiCond {
+    Switch/if-else block
+    --
+    { - mood == happy: Smiling.
+      - mood == sad: Crying.
+      - else: Neutral. }
+  }
+
+  class "Alternatives" as Alternatives {
+    Text varies across visits
+    --
+    Sequence:  {First|Second|Third}
+    Cycle:     {&AM|PM|AM|PM...}
+    Shuffle:   {~Sun|Rain|Snow}
+    Once:      {!Only once|}
+    Stopping:  {First|Second|Last}
+      (last entry repeats)
+  }
+
+  class "Operators" as Operators {
+    Arithmetic, comparison, logical
+    --
+    Arithmetic: + - * / % (mod)
+    Comparison: == != > < >= <=
+    Logical:    and or not
+               (also: && || !)
+    String:     + (concatenation)
+  }
+
+  class "Visit Counts" as VisitCounts {
+    Track how often content is reached
+    --
+    {knot_name}        (visit count)
+    {knot_name > 2: ...}
+    {stitch > 0: visited}
+    {label_name: been here}
+  }
+
+  class "Built-in Queries" as BuiltinQueries {
+    System query functions
+    --
+    TURNS_SINCE(-> knot)
+    CHOICE_COUNT()
+    TURNS()
+    SEED_RANDOM(seed)
+    RANDOM(min, max)
+  }
+
+  class "Type Conversion" as TypeConversion {
+    Cast between types
+    --
+    INT(value)
+    FLOAT(value)
+    FLOOR(value)
+    LIST_VALUE(item)
+  }
+}
+
+' ────────────────────────────────────────
+' FUNCTIONS
+' ────────────────────────────────────────
+package "6. Functions" as FuncPkg #E0F7FA {
+  class "Function Definition" as FuncDef {
+    Reusable logic with return value
+    --
+    === function name(p1, p2) ===
+      ~ return p1 + p2
+    ..
+    Can contain conditionals:
+    === function clamp(v, lo, hi) ===
+    { - v < lo: ~ return lo
+      - v > hi: ~ return hi
+      - else:   ~ return v }
+  }
+
+  class "Function Call" as FuncCall {
+    Invoke from text or logic
+    --
+    In text: {my_func(arg)}
+    In logic: ~ result = my_func(a, b)
+    As divert: -> my_func(arg)
+  }
+
+  class "Return  ~ return" as FuncReturn {
+    Return value from function
+    --
+    ~ return value
+    ~ return "string result"
+    ~ return list_item
+  }
+
+  class "EXTERNAL" as ExternalFunc {
+    Bind to host language function
+    --
+    EXTERNAL UPPERCASE(txt)
+    === function UPPERCASE(txt)
+      {txt}
+    ..
+    (Fallback defined in ink,
+     real impl in C#/JS host)
+  }
+}
+
+' ────────────────────────────────────────
+' LISTS
+' ────────────────────────────────────────
+package "7. Lists" as ListPkg #FFF9C4 {
+  class "LIST Declaration" as ListDecl {
+    Define enumerated types
+    --
+    LIST mood = happy, sad, angry
+    LIST inv = (nothing), sword, shield
+    ..
+    (item) = initially active
+    item = initially inactive
+    ..
+    LIST vals = (one=1), (five=5)
+      (custom numeric values)
+  }
+
+  class "List Modification" as ListMod {
+    Add / remove items
+    --
+    ~ inventory += sword
+    ~ inventory -= shield
+    ~ mood = happy
+    ~ inventory = (sword, shield)
+  }
+
+  class "List Query  ?  !?" as ListQuery {
+    Test membership
+    --
+    {inv ? sword: Has sword!}
+    {inv !? map: No map.}
+    ..
+    ? = contains
+    !? = does not contain
+    ..
+    {list ? (a, b): has both}
+  }
+
+  class "List Set Operators" as ListSetOps {
+    Union, intersection, difference
+    --
+    list1 + list2   (union)
+    list1 - list2   (difference)
+    list1 ^ list2   (intersection)
+    ..
+    {list1 has item}
+    {list1 hasnt item}
+  }
+
+  class "List Built-in Functions" as ListFuncs {
+    Query and manipulate lists
+    --
+    LIST_COUNT(list)
+    LIST_MIN(list)
+    LIST_MAX(list)
+    LIST_ALL(list_or_item)
+    LIST_RANGE(list, min, max)
+    LIST_INVERT(list)
+    LIST_RANDOM(list)
+    LIST_VALUE(item)
+  }
+
+  class "Multi-valued Lists" as MultiList {
+    Lists as sets of values
+    --
+    VAR hand = (ace, king, queen)
+    ~ hand -= king
+    {LIST_COUNT(hand)} cards left.
+    ..
+    Can combine across LIST types
+  }
+}
+
+' ────────────────────────────────────────
+' MULTI-FILE & INCLUDES
+' ────────────────────────────────────────
+package "8. Project Structure" as ProjectPkg #EFEBE9 {
+  class "INCLUDE" as IncludeStmt {
+    Import another .ink file
+    --
+    INCLUDE other_file.ink
+    INCLUDE subfolder/helpers.ink
+    ..
+    Merges content at compile time.
+    Knots/functions shared globally.
+  }
+
+  class "END / DONE" as EndDone {
+    Terminate story or flow
+    --
+    -> END   (entire story stops)
+    -> DONE  (current thread ends,
+              other threads continue)
+  }
+}
+
+' ────────────────────────────────────────
+' RELATIONSHIPS
+' ────────────────────────────────────────
+
+PlainText -[hidden]-> Glue
+Glue -[hidden]-> Tags
+Tags -[hidden]-> StringInterp
+StringInterp -[hidden]-> Escaping
+Escaping -[hidden]-> Comments
+Comments -[hidden]-> TodoMarker
+
+Knots -[hidden]-> Stitches
+Stitches -[hidden]-> Diverts
+Diverts -[hidden]-> Tunnels
+Tunnels -[hidden]-> Threads
+Threads -[hidden]-> Gathers
+Gathers -[hidden]-> Labels
+
+BasicChoice -[hidden]-> StickyChoice
+StickyChoice -[hidden]-> SuppressedChoice
+SuppressedChoice -[hidden]-> NestedChoice
+NestedChoice -[hidden]-> ConditionalChoice
+ConditionalChoice -[hidden]-> FallbackChoice
+FallbackChoice -[hidden]-> ChoiceLabel
+
+GlobalVar -[hidden]-> TempVar
+TempVar -[hidden]-> ConstVar
+ConstVar -[hidden]-> VarTypes
+VarTypes -[hidden]-> Assignment
+Assignment -[hidden]-> RefParams
+
+InlineLogic -[hidden]-> InlineCond
+InlineCond -[hidden]-> MultiCond
+MultiCond -[hidden]-> Alternatives
+Alternatives -[hidden]-> Operators
+Operators -[hidden]-> VisitCounts
+VisitCounts -[hidden]-> BuiltinQueries
+BuiltinQueries -[hidden]-> TypeConversion
+
+FuncDef -[hidden]-> FuncCall
+FuncCall -[hidden]-> FuncReturn
+FuncReturn -[hidden]-> ExternalFunc
+
+ListDecl -[hidden]-> ListMod
+ListMod -[hidden]-> ListQuery
+ListQuery -[hidden]-> ListSetOps
+ListSetOps -[hidden]-> ListFuncs
+ListFuncs -[hidden]-> MultiList
+
+IncludeStmt -[hidden]-> EndDone
+
+' ────────────────────────────────────────
+' CROSS-PACKAGE RELATIONSHIPS
+' ────────────────────────────────────────
+
+Diverts ..> Knots : references
+Diverts ..> Stitches : references
+Tunnels ..> Knots : calls
+Threads ..> Knots : merges
+ConditionalChoice ..> GlobalVar : reads
+InlineCond ..> GlobalVar : reads
+FuncDef ..> FuncReturn : uses
+ExternalFunc ..> FuncDef : fallback
+ListQuery ..> ListDecl : queries
+ListFuncs ..> ListDecl : operates on
+StringInterp ..> GlobalVar : embeds
+Labels ..> VisitCounts : enables
+Assignment ..> GlobalVar : modifies
+Assignment ..> TempVar : modifies
+
+legend right
+  |= Category |= Count |
+  | Text Output | 7 elements |
+  | Flow Control | 7 elements |
+  | Choices | 7 elements |
+  | Variables & Types | 6 elements |
+  | Logic & Conditionals | 8 elements |
+  | Functions | 4 elements |
+  | Lists | 6 elements |
+  | Project Structure | 2 elements |
+  | **Total** | **47 syntax elements** |
+endlegend
+
+footer Generated for inkle/inky Bidi project — ink language syntax reference
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml bidi-sequence
+!theme plain
+title Edit → Display → Compile Round-Trip
+
+actor "Author" as author
+participant "bidify()" as bidi
+participant "Ace Editor\n(unmodified)" as ace
+participant "Chromium\nBidi Engine" as chrome
+participant "stripBidi()" as strip
+participant "inkjs-compiler\nor inklecate" as compiler
+database "story.ink.json" as json
+
+== Load / Edit ==
+
+author -> ace : types Hebrew + Ink syntax
+ace -> bidi : raw line text
+bidi -> bidi : ScriptRun classify
+bidi -> ace : isolated string\n(with LRI/RLI/PDI)
+ace -> chrome : render DOM
+chrome -> author : ✅ correct display\n"הבחירה -> next_knot"
+note right of chrome
+  Ace sees normal text.
+  Chromium sees isolates.
+  Each script run stays
+  in its correct position.
+end note
+
+== Save / Compile ==
+
+author -> ace : Ctrl+S or Export JSON
+ace -> strip : buffer contents\n(with isolate chars)
+strip -> strip : regex remove\n[\u2066\u2067\u2069]
+strip -> compiler : clean UTF-8\n(original .ink text)
+compiler -> json : story.ink.json
+
+note right of strip
+  One line:
+  text.replace(/[\u2066\u2067\u2069]/g, '')
+end note
+
+== Play in Preview ==
+
+json -> bidi : story output line
+bidi -> bidi : ScriptRun classify
+bidi --> author : <p dir="rtl"> or <p dir="ltr">\nwith isolated content
+
+@enduml

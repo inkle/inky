@@ -1,0 +1,103 @@
+{
+    "assertions": [
+      {
+        "id": "hebrew-period",
+        "input": "שלום עולם.",
+        "expectedDirection": "rtl",
+        "expectedRuns": [
+          { "text": "שלום עולם", "script": "Hebrew", "isRtl": true },
+          { "text": ".", "script": "Common", "isRtl": false }
+        ]
+      },
+      {
+        "id": "hebrew-divert",
+        "input": "הבחירה -> next",
+        "expectedDirection": "rtl",
+        "expectedRuns": [
+          { "text": "הבחירה ", "script": "Hebrew", "isRtl": true },
+          { "text": "-> ", "script": "Common", "isRtl": false },
+          { "text": "next", "script": "Latin", "isRtl": false }
+        ]
+      },
+      {
+        "id": "arabic-divert",
+        "input": "الاختيار -> next",
+        "expectedDirection": "rtl",
+        "expectedRuns": [
+          { "text": "الاختيار ", "script": "Arabic", "isRtl": true },
+          { "text": "-> ", "script": "Common", "isRtl": false },
+          { "text": "next", "script": "Latin", "isRtl": false }
+        ]
+      },
+      {
+        "id": "persian-divert",
+        "input": "انتخاب -> next",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "urdu-period",
+        "input": "ہیلو دنیا.",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "yiddish-divert",
+        "input": "די ברירה -> next",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "syriac-period",
+        "input": "ܫܠܡܐ ܥܠܡܐ.",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "thaana-period",
+        "input": "ހެލޯ ވޯލްޑް.",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "nko-period",
+        "input": "ߊߟߎ ߘߎߢߊ.",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "samaritan-divert",
+        "input": "ࠁࠇࠓࠕ -> next",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "mandaic-period",
+        "input": "ࡔࡋࡀࡌࡀ.",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "pure-english",
+        "input": "The clock reads 3:47 AM.",
+        "expectedDirection": "ltr"
+      },
+      {
+        "id": "emoji-hebrew-mixed",
+        "input": "🧑 \"סוֹף סוֹף... גָּמַרְתִּי.\"",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "ink-choice-hebrew",
+        "input": "* [בחירה ראשונה — ממשיכים הלאה]",
+        "expectedDirection": "rtl"
+      },
+      {
+        "id": "ink-variable-hebrew",
+        "input": "~ attempts = attempts + 1",
+        "expectedDirection": "ltr"
+      },
+      {
+        "id": "ink-tag-hebrew-value",
+        "input": "# BGM: BGM_V1_LEVEL_START",
+        "expectedDirection": "ltr"
+      },
+      {
+        "id": "strip-roundtrip",
+        "input": "הבחירה -> next",
+        "note": "bidify then stripBidi must return original"
+      }
+    ]
+  }
