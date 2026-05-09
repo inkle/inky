@@ -31,7 +31,7 @@ h2 {
     font-style: italic;
     font-family: sans-serif;
     font-weight: lighter;
-    color: #BBB;
+    color: #545454;
 }
 
 .header {
@@ -115,7 +115,7 @@ h2 {
 
 p {
     font-size: 13pt;
-    color: #888;
+    color: #000;
     line-height: 1.7em;
     font-weight: lighter;
 }
@@ -260,7 +260,7 @@ body.dark {
 }
 
 .dark h2 {
-    color: #666;
+    color: #999;
 }
 
 .dark .container {
@@ -269,6 +269,10 @@ body.dark {
 
 .dark .written-in-ink {
     background: black;
+}
+
+.dark p {
+    color: #efefef;
 }
 
 .dark a {
