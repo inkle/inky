@@ -124,7 +124,7 @@ InkProject.prototype.refreshIncludes = function() {
             // fix include relative path on windows
             // on windows path should be either always stored using the same folder separator (\\ or /).
             // mixing them can create unexpected behaviours.
-            incPath = path.format(path.parse(incPath));
+            incPath = path.normalize(incPath);
 
             let alreadyDone = relPathsFromINCLUDEs.contains(incPath);
 
