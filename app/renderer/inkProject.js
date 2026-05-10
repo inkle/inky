@@ -101,7 +101,7 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
     var newIncludeFile = this.createInkFile(newIncludePath || null, isBrandNew = true);
 
     if( addToMainInk )
-        this.mainInk.addIncludeLine(newIncludeFile.relativePath());
+        this.mainInk.addIncludeLine(newIncludePath);
 
     NavView.setFiles(this.mainInk, this.files);
     EditorView.setFiles(this.files);
@@ -120,12 +120,6 @@ InkProject.prototype.refreshIncludes = function() {
             return;
 
         inkFile.includes.forEach(incPath => {
-            
-            // fix include relative path on windows
-            // on windows path should be either always stored using the same folder separator (\\ or /).
-            // mixing them can create unexpected behaviours.
-            incPath = path.format(path.parse(incPath));
-
             let alreadyDone = relPathsFromINCLUDEs.contains(incPath);
 
             relPathsFromINCLUDEs.push(incPath);

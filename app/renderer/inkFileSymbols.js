@@ -1,4 +1,5 @@
 const assert = require("assert");
+const path = require("path");
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 const _ = require("lodash");
 
@@ -154,7 +155,8 @@ InkFileSymbols.prototype.parse = function() {
 
         // INCLUDE
         else if( tok.type.indexOf("include.filepath") != -1 && tok.value.trim().length > 0 ) {
-            includes.push(tok.value);
+            // Normalize path when adding include
+            includes.push(path.normalize(tok.value));
             lastIncludeRow = it.getCurrentTokenRow();
         }
 
