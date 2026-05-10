@@ -25,6 +25,12 @@ function InkFile(anyPath, mainInkFile, isBrandNew, inkMode, events) {
     // Default filename if creating a new file, and passed null to constructor
     anyPath = anyPath || "Untitled.ink";
 
+    // Convert anyPath to a normalized path string
+    if (typeof anyPath === "object") {
+        anyPath = path.parse(anyPath);
+    }
+    anyPath = path.normalize(anyPath);
+
     this.mainInkFile = mainInkFile;
 
     // Obtain relative path by looking at main ink file
@@ -274,7 +280,7 @@ InkFile.prototype.addIncludeLine = function(relativePath) {
 
     // Normally we allow the InkFileSymbols class to do this,
     // but by the time it gets round to doing parsing, it'll be too late.
-    this.includes.push(relativePath);
+    this.includes.push(path.normalize(relativePath));
     this.events.includesChanged();
 
     // Insert the include text itself
