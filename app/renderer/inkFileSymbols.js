@@ -154,7 +154,8 @@ InkFileSymbols.prototype.parse = function() {
 
         // INCLUDE
         else if( tok.type.indexOf("include.filepath") != -1 && tok.value.trim().length > 0 ) {
-            includes.push(tok.value);
+            var includePath = tok.value;
+            includes.push(includePath);
             lastIncludeRow = it.getCurrentTokenRow();
         }
 

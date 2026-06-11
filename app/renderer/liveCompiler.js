@@ -61,7 +61,9 @@ function buildCompileInstruction() {
         // Add Ink Files with changes to be saved before the next compile
         // If we're running for the first time, add all because non of the files has been saved to tempInkPath
         if( inkFile.compilerVersionDirty ) {
-            compileInstruction.updatedFiles[inkFile.relativePath()] = inkFile.getValue();
+            var relPath = inkFile.relativePath();
+            var content = inkFile.getValue();
+            compileInstruction.updatedFiles[relPath] = content;
             inkFile.compilerVersionDirty = false;
         }
     });

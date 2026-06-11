@@ -3,7 +3,7 @@
 Type=Application
 Categories=Development;IDE;
 Name=Inky
-Comment=Inky
+Comment=Story-writing tool
 Exec=/opt/inky/Inky
 Path=/opt/inky/
 Icon=inky

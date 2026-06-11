@@ -1,5 +1,15 @@
 ![](resources/icon-small.jpg)
 
+# NOTICE
+
+This is *not* the official Inky repository. That can be found at the [official GitHub repository](https://github.com/inkle/inky).
+
+This is simply a fork I have made to accomodate for the fact that no new Inky updates have been released to fix issues that have been cropping up from an older version of Electron being used (i.e. segfaulting on maximizing on Linux Mint Cinnamon) as of 16th January 2026. The last official release is a year and a half ago, with the latest commit to master being 4 months ago as of writing.
+
+The only thing that has been changed here is the required Electron version in package.json and the path in the AppImage built from the resources due to it referencing /opt/ which errors out on my menu for some reason.
+
+I will be closing this fork once Inky updates the required Electron version and fixes the [segfault error](https://github.com/electron/electron/issues/41839).
+
 # Inky
 
 **Inky** is an editor for [ink](http://www.inklestudios.com/ink), inkle's markup language for writing interactive narrative in games, as used in [80 Days](http://www.inklestudios.com/80days). It's an IDE (integrated development environment), because it gives you a single app that lets you play in the editor as you write, and fix any bugs in your code.

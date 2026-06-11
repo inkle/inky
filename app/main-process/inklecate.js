@@ -47,7 +47,8 @@ function compile(compileInstruction, requester) {
     // Write out updated files
     for(var relativePath in compileInstruction.updatedFiles) {
 
-        var fullInkPath = path.join(uniqueDirPath, relativePath);
+        var normalizedRelPath = relativePath.replace(/\//g, path.sep);
+        var fullInkPath = path.join(uniqueDirPath, normalizedRelPath);
         var inkFileContent = compileInstruction.updatedFiles[relativePath];
 
         if( path.dirname(relativePath) != "." ) {
@@ -55,7 +56,7 @@ function compile(compileInstruction, requester) {
             mkdirp.sync(fullDir);
         }
 
-        fs.writeFileSync(fullInkPath, inkFileContent);
+        fs.writeFileSync(fullInkPath, inkFileContent, { encoding: 'utf8', flag: 'w' });
     }
 
     var mainInkPath = path.join(uniqueDirPath, compileInstruction.mainName);

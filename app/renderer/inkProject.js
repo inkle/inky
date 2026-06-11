@@ -48,6 +48,27 @@ function InkProject(mainInkFilePath) {
 }
 
 InkProject.prototype.createInkFile = function(anyPath, isBrandNew, loadErrorCallback) {
+
+    // Normalize path for duplicate check
+    var normalizedPath = anyPath ? anyPath.replace(/\\/g, '/') : null;
+
+    // Check if file with same relative path already exists
+    if( normalizedPath ) {
+        var existingFile = _.find(this.files, f => {
+            var existingRelPath = f.relativePath().replace(/\\/g, '/');
+            // For absolute paths, compute relative path for comparison
+            if( path.isAbsolute(normalizedPath) && this.mainInk && this.mainInk.projectDir ) {
+                var expectedRelPath = path.relative(this.mainInk.projectDir, normalizedPath).replace(/\\/g, '/');
+                return existingRelPath == expectedRelPath;
+            }
+            return existingRelPath == normalizedPath;
+        });
+
+        if( existingFile ) {
+            return existingFile;
+        }
+    }
+
     var inkFile = new InkFile(anyPath || null, this.mainInk, isBrandNew, this.inkMode, {
         fileChanged: () => { 
             if( inkFile.hasUnsavedChanges && !this.unsavedFiles.contains(inkFile) ) {
@@ -88,7 +109,9 @@ InkProject.prototype.addNewInclude = function(newIncludePath, addToMainInk) {
     // Convert new include path to relative if it's not already
     if( path.isAbsolute(newIncludePath) ) {
         assert(this.mainInkFile.projectDir, "Main ink needs to be saved before we start loading includes with absolute paths.");
-        newIncludePath = path.relative(this.mainInk.projectDir, newIncludePath);
+        newIncludePath = path.relative(this.mainInk.projectDir, newIncludePath).replace(/\\/g, '/');
+    } else {
+        newIncludePath = newIncludePath.replace(/\\/g, '/');
     }
 
     // Make sure it doesn't already exist
@@ -121,16 +144,13 @@ InkProject.prototype.refreshIncludes = function() {
 
         inkFile.includes.forEach(incPath => {
             
-            // fix include relative path on windows
-            // on windows path should be either always stored using the same folder separator (\\ or /).
-            // mixing them can create unexpected behaviours.
-            incPath = path.format(path.parse(incPath));
+            var normalizedIncPath = incPath.replace(/\\/g, '/');
 
-            let alreadyDone = relPathsFromINCLUDEs.contains(incPath);
+            let alreadyDone = relPathsFromINCLUDEs.contains(normalizedIncPath);
 
-            relPathsFromINCLUDEs.push(incPath);
+            relPathsFromINCLUDEs.push(normalizedIncPath);
 
-            var recurseInkFile = this.inkFileWithRelativePath(incPath);
+            var recurseInkFile = this.inkFileWithRelativePath(normalizedIncPath);
             if( recurseInkFile && !alreadyDone )
                 addIncludePathsFromFile(recurseInkFile);
         });
@@ -154,12 +174,17 @@ InkProject.prototype.refreshIncludes = function() {
             let absPath = path.join(this.mainInk.projectDir, newIncludeRelPath);
             fs.stat(absPath, (err, stats) => {
                 // If it exists, and double check that it hasn't already been created during the async fs.stat
-                if( !!stats && stats.isFile() &&  !_.some(this.files, f => f.relativePath() == newIncludeRelPath) ) {
+                var normalizedNewIncludeRelPath = newIncludeRelPath.replace(/\\/g, '/');
+                var fileAlreadyExists = _.some(this.files, f => f.relativePath().replace(/\\/g, '/') == normalizedNewIncludeRelPath);
+
+                if( !!stats && stats.isFile() && !fileAlreadyExists ) {
                     let newFile = this.createInkFile(newIncludeRelPath, isBrandNew = false, err => {
                         alert(`${i18n._("Failed to load ink file:")} ${err}`);
                         this.files.remove(newFile);
                         this.refreshIncludes();
                     });
+                } else if( fileAlreadyExists ) {
+                    console.log("File already loaded, skipping:", newIncludeRelPath);
                 }
             });
             
@@ -234,7 +259,8 @@ InkProject.prototype.startFileWatching = function() {
         if (!isInkFile(newlyFoundAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, newlyFoundAbsFilePath);
-        var existingFile = _.find(this.files, f => f.relativePath() == relPath);
+        var normalizedRelPath = relPath.replace(/\\/g, '/');
+        var existingFile = _.find(this.files, f => f.relativePath().replace(/\\/g, '/') == normalizedRelPath);
         if( !existingFile ) {
             console.log("Watch found new file - creating it: "+relPath);
 
@@ -257,7 +283,8 @@ InkProject.prototype.startFileWatching = function() {
         if (!isInkFile(updatedAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, updatedAbsFilePath);
-        var inkFile = _.find(this.files, f => f.relativePath() == relPath);
+        var normalizedRelPath = relPath.replace(/\\/g, '/');
+        var inkFile = _.find(this.files, f => f.relativePath().replace(/\\/g, '/') == normalizedRelPath);
         if( inkFile ) {
             // TODO: maybe ask user if they want to overwrite? not sure I want to though
             if( !inkFile.hasUnsavedChanges ) {
@@ -278,7 +305,8 @@ InkProject.prototype.startFileWatching = function() {
         if (!isInkFile(removedAbsFilePath)) { return; }
 
         var relPath = path.relative(this.mainInk.projectDir, removedAbsFilePath);
-        var inkFile = _.find(this.files, f => f.relativePath() == relPath);
+        var normalizedRelPath = relPath.replace(/\\/g, '/');
+        var inkFile = _.find(this.files, f => f.relativePath().replace(/\\/g, '/') == normalizedRelPath);
         if( inkFile ) {
             if( !inkFile.hasUnsavedChanges && inkFile != this.mainInk ) {
                 this.deleteInkFile(inkFile);
@@ -581,8 +609,9 @@ InkProject.prototype.closeImmediate = function() {
     ipcRenderer.send("project-final-close");
 }
 
-InkProject.prototype.inkFileWithRelativePath = function(relativePath) {
-    return _.find(this.files, f => f.relativePath().replace('\\', '/') == relativePath);
+InkProject.prototype.inkFileWithRelativePath = function(relativePath) {// Normalize both paths to use forward slashes for comparison (fixes Windows bug with nested includes)
+    var normalizedInputPath = relativePath.replace(/\\/g, '/');
+    return _.find(this.files, f => f.relativePath().replace(/\\/g, '/') == normalizedInputPath);
 }
 
 InkProject.prototype.inkFileWithId = function(id) {

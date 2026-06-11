@@ -34,13 +34,15 @@ function InkFile(anyPath, mainInkFile, isBrandNew, inkMode, events) {
             this.projectDir = path.dirname(anyPath);
         } else {
             assert(this.mainInkFile.projectDir, "Main ink needs to be saved before we start loading includes with absolute paths.");
-            this.relPath = path.relative(this.mainInkFile.projectDir, anyPath);
+            var rawRelPath = path.relative(this.mainInkFile.projectDir, anyPath);
+            this.relPath = rawRelPath.replace(/\\/g, '/');
         }
     } 
 
     // Already relative
     else {
-        this.relPath = anyPath;
+        // Normalize path separators to forward slashes for consistency across platforms
+        this.relPath = anyPath.replace(/\\/g, '/');
     }
 
     this.events = events;
@@ -133,7 +135,7 @@ InkFile.prototype.absolutePath = function() {
         return null;
     
     // Normal case: combine the project directory with the file's relative path.
-    return path.join(mainInk.projectDir, this.relPath);
+    return path.join(mainInk.projectDir, this.relPath.split('/').join(path.sep));
 }
 
 InkFile.prototype.getValue = function() {
@@ -192,8 +194,8 @@ InkFile.prototype.save = function(afterSaveCallback) {
         var fileDirectory = path.dirname(fileAbsPath);
         mkdirp.sync(fileDirectory);
 
-        fs.writeFile(fileAbsPath, fileContent, "utf8", (err) => {
-            if( err ) 
+        fs.writeFile(fileAbsPath, fileContent, { encoding: 'utf8', flag: 'w' }, (err) => {
+            if( err )
                 afterSaveCallback(false);
             else {
                 this.hasUnsavedChanges = false;
@@ -244,7 +246,7 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
             // https://en.wikipedia.org/wiki/Byte_order_mark
             data = data.replace(/^\uFEFF/, '');
 
-            // Success - fire this callback before other callbacks 
+            // Success - fire this callback before other callbacks
             // like document change get fired
             loadCallback(null);
 
