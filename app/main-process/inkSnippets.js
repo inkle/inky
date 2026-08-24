@@ -100,7 +100,7 @@ exports.snippets = [
             },
             {
                 "name": i18n._('Temporary variable'),
-                "ink": "temp myTemporaryValue = 5\n"
+                "ink": "~ temp myTemporaryValue = 5\n"
             },
             {
                 "name": i18n._('Modify variable'),
