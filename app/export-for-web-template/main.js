@@ -51,6 +51,7 @@
 
         var paragraphIndex = 0;
         var delay = 0.0;
+		var cleared = false;
 
         // Don't over-scroll past new content
         var previousBottomEdge = firstTime ? 0 : contentBottomEdgeY();
@@ -143,6 +144,10 @@
                         restart();
                         return;
                     }
+
+					if (tag == "CLEAR") {
+					    cleared = true;
+					}
                 }
             }
 		
@@ -236,8 +241,13 @@
 		// Unset storyContainer's height, allowing it to resize itself
 		storyContainer.style.height = "";
 
-        if( !firstTime )
-            scrollDown(previousBottomEdge);
+		// it will automatically select the scroll method weither if the #CLEAR tag exist or not.
+        if (!firstTime) {
+			if (cleared)
+				outerScrollContainer.scrollTo(0, 0);
+			else
+				scrollDown(previousBottomEdge);
+		}
 
     }
 
