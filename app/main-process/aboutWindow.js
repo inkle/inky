@@ -7,6 +7,7 @@ const i18n = require('./i18n/i18n.js');
 
 
 const electronWindowOptions = {
+  icon: path.join(__dirname, "icon.png"),
     width: 340,
     height: 270,
     resizable: false,

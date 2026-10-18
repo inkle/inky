@@ -160,6 +160,9 @@ app.on('ready', function () {
         toggleTags: (item, focusedWindow, event) => {
             focusedWindow.webContents.send("set-tags-visible", item.checked);
         },
+        setChoiceAlignment: (alignment, focusedWindow) => {
+            if( focusedWindow ) focusedWindow.webContents.send("set-choice-alignment", alignment);
+        },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
         },

@@ -304,3 +304,7 @@ body.dark {
 .dark #controls {
     background: black;
 }
+
+#story p:not(.choice) {
+    margin: 0;
+}

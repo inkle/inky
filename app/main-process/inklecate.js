@@ -32,6 +32,49 @@ if (process.platform == "darwin" || process.platform == "linux") {
 
 var sessions = {};
 
+// Pressing Enter on an empty line between two plain text lines leaves a visible
+// blank line in the output: that empty line is replaced by a <br> line.
+// Choices, diverts, knots, logic, comments etc. are never touched.
+// The number of lines stays the same, so error line numbers still match.
+const nonTextLineStart = /^(\/\/|\/\*|\*\/|[*+\-=~#{}]|<-|(VAR|CONST|LIST|INCLUDE|EXTERNAL|TODO)\b)/;
+
+function blankLinesBecomeBreaks(source) {
+    var eol = source.indexOf("\r\n") >= 0 ? "\r\n" : "\n";
+    var lines = source.split(/\r?\n/);
+    var kinds = [];
+    var inComment = false;
+
+    for(var i=0; i<lines.length; i++) {
+        var t = lines[i].replace(/^\uFEFF/, "").trim();
+        if( inComment ) {
+            kinds.push("other");
+            if( t.indexOf("*/") >= 0 ) inComment = false;
+        } else if( t === "" ) {
+            kinds.push("blank");
+        } else if( nonTextLineStart.test(t) ) {
+            kinds.push("other");
+            if( t.indexOf("/*") === 0 && t.indexOf("*/", 2) < 0 ) inComment = true;
+        } else {
+            kinds.push("text");
+        }
+    }
+
+    for(var i=0; i<lines.length; i++) {
+        if( kinds[i] !== "blank" ) continue;
+        var start = i;
+        while( i+1 < lines.length && kinds[i+1] === "blank" ) i++;
+        var before = start - 1;
+        var after = i + 1;
+        if( before < 0 || after >= lines.length ) continue;
+        if( kinds[before] !== "text" || kinds[after] !== "text" ) continue;
+        // Keep glue (<>) working
+        if( /<>\s*$/.test(lines[before]) || /^\s*<>/.test(lines[after]) ) continue;
+        for(var j=start; j<=i; j++) lines[j] = "<br>";
+    }
+
+    return lines.join(eol);
+}
+
 
 function compile(compileInstruction, requester) {
 
@@ -55,7 +98,7 @@ function compile(compileInstruction, requester) {
             mkdirp.sync(fullDir);
         }
 
-        fs.writeFileSync(fullInkPath, inkFileContent);
+        fs.writeFileSync(fullInkPath, blankLinesBecomeBreaks(inkFileContent));
     }
 
     var mainInkPath = path.join(uniqueDirPath, compileInstruction.mainName);

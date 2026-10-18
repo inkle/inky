@@ -96,8 +96,12 @@
     border-top-color: #444;
 }
 
+.window.focus #player p.choice a {
+    color: #66B2FF;
+}
+
 .window.focus #player p.choice a:hover {
-    color: #999;
+    color: #8CC5FF;
 }
 
 .window.focus #editor .ace-error {

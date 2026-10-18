@@ -540,8 +540,27 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
     copyFile(path.join(__dirname, "../node_modules/inkjs/dist/ink.js"),
              path.join(targetDirectory, "ink.js"));
 
-    copyFile(path.join(templateDir, "style.css"), 
-             path.join(targetDirectory, "style.css"));
+    // Preserve the choice alignment selected in Inky's preview when exporting.
+    // The preview stores this setting as a class on #main, while the web template
+    // has its own .choice CSS rule. Without translating it, exported stories
+    // always use the template's default alignment (center).
+    var choiceAlignment = "left";
+    var preview = window.jQuery ? window.jQuery("#main") : null;
+    if( preview && preview.hasClass("choicesRight") ) {
+        choiceAlignment = "right";
+    }
+    else if( preview && preview.hasClass("choicesCenter") ) {
+        choiceAlignment = "center";
+    }
+
+    copyFile(path.join(templateDir, "style.css"),
+             path.join(targetDirectory, "style.css"),
+             (fileContent) => {
+        return fileContent.replace(
+            /(\.choice\s*\{\s*text-align:\s*)(left|center|right)(\s*;)/,
+            `$1${choiceAlignment}$3`
+        );
+    });
 
     copyFile(path.join(templateDir, "main.js"), 
          path.join(targetDirectory, "main.js"));

@@ -170,9 +170,41 @@ function addTextSection(text)
         fadeIn($paragraph);
 }
 
+function isCleanTag(tag)
+{
+    return String(tag).trim().replace(/^#/, "").toUpperCase() === "CLEAN";
+}
+
+// Clear the previous scene. Inky's inklecate protocol sends the line's text
+// before its tags, so when CLEAN is received we keep the newest story paragraph
+// (the first paragraph of the incoming scene) and remove everything before it.
+function clearScene(preserveLatestStoryText)
+{
+    var $latestStoryText = preserveLatestStoryText
+        ? $textBuffer.children(".storyText").last().detach()
+        : $();
+
+    $textBuffer.empty();
+    if( $latestStoryText.length )
+        $textBuffer.append($latestStoryText);
+
+    $textBuffer.height(0);
+}
+
 function addTags(tags)
 {
-    var tagsStr = tags.join(", ");
+    tags = tags || [];
+
+    // #clean is a control tag, not presentation text. Apply it after the
+    // incoming paragraph has been received, but before the next scene renders.
+    if( tags.some(isCleanTag) )
+        clearScene(true);
+
+    var visibleTags = tags.filter(tag => !isCleanTag(tag));
+    if( visibleTags.length == 0 )
+        return;
+
+    var tagsStr = visibleTags.join(", ");
     var $tags = $(`<p class='tags'># ${tagsStr}</p>`);
 
     $textBuffer.append($tags);
@@ -192,9 +224,12 @@ function addChoice(choice, callback)
     //    ... other stuff, e.g. choice number ...
     // }
     var $choice = $("<a href='#'>"+choice.choice.text+"</a>");
+    var allChoiceTags = choice.choice.tags || [];
+    var cleanWhenChosen = allChoiceTags.some(isCleanTag);
+    var visibleChoiceTags = allChoiceTags.filter(tag => !isCleanTag(tag));
     var $tags = null;
-    if( choice.choice.tags != null && choice.choice.tags.length > 0 ) {
-        var tagsStr = "# " + choice.choice.tags.join(" # ");
+    if( visibleChoiceTags.length > 0 ) {
+        var tagsStr = "# " + visibleChoiceTags.join(" # ");
         $tags = $(` <span class='tags'>${tagsStr}</span>`);
     }
 
@@ -214,12 +249,16 @@ function addChoice(choice, callback)
         var existingHeight = $textBuffer.height();
         $textBuffer.height(existingHeight);
 
-        // Remove any existing choices, and add a divider
+        // Remove existing choices. A CLEAN-tagged choice starts a new scene;
+        // otherwise preserve the transcript and separate the next turn visually.
         $(".choice").remove();
 
-        addHorizontalDivider();
-
         event.preventDefault();
+
+        if( cleanWhenChosen )
+            clearScene(false);
+        else
+            addHorizontalDivider();
 
         callback();
     });

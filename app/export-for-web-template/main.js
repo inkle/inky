@@ -60,17 +60,23 @@
 
             // Get ink to generate the next paragraph
             var paragraphText = story.Continue();
-            var tags = story.currentTags;
+            var tags = story.currentTags || [];
+
+            // A CLEAN tag marks the beginning of a new scene. Process it before
+            // rendering this line so the incoming scene remains visible.
+            if( tags.some(isCleanTag) )
+                clearScene();
 
             // Any special tags included with this line
             var customClasses = [];
             for(var i=0; i<tags.length; i++) {
                 var tag = tags[i];
+                if( isCleanTag(tag) ) continue;
 
                 // Detect tags of the form "X: Y". Currently used for IMAGE and CLASS but could be
                 // customised to be used for other things too.
                 var splitTag = splitPropertyTag(tag);
-				splitTag.property = splitTag.property.toUpperCase();
+                if( splitTag ) splitTag.property = splitTag.property.toUpperCase();
 
                 // AUDIO: src
                 if( splitTag && splitTag.property == "AUDIO" ) {
@@ -130,16 +136,15 @@
                     customClasses.push(splitTag.val);
                 }
 
-                // CLEAR - removes all existing content.
-                // RESTART - clears everything and restarts the story from the beginning
-                else if( tag == "CLEAR" || tag == "RESTART" ) {
-                    removeAll("p");
-                    removeAll("img");
-
-                    // Comment out this line if you want to leave the header visible when clearing
+                // CLEAR - removes all existing content and hides the header.
+                // RESTART - clears everything and restarts the story from the beginning.
+                // CLEAN - clears the previous scene while keeping the header visible.
+                else if( tag.trim().replace(/^#/, "").toUpperCase() == "CLEAR" ||
+                         tag.trim().replace(/^#/, "").toUpperCase() == "RESTART" ) {
+                    clearScene();
                     setVisible(".header", false);
 
-                    if( tag == "RESTART" ) {
+                    if( tag.trim().replace(/^#/, "").toUpperCase() == "RESTART" ) {
                         restart();
                         return;
                     }
@@ -169,15 +174,19 @@
         story.currentChoices.forEach(function(choice) {
 
             // Create paragraph with anchor element
-            var choiceTags = choice.tags;
+            var choiceTags = choice.tags || [];
             var customClasses = [];
             var isClickable = true;
+            var cleanWhenChosen = choiceTags.some(isCleanTag);
             for(var i=0; i<choiceTags.length; i++) {
                 var choiceTag = choiceTags[i];
-                var splitTag = splitPropertyTag(choiceTag);
-				splitTag.property = splitTag.property.toUpperCase();
+                if( isCleanTag(choiceTag) ) continue;
 
-                if(choiceTag.toUpperCase() == "UNCLICKABLE"){
+                var normalizedChoiceTag = choiceTag.trim().replace(/^#/, "").toUpperCase();
+                var splitTag = splitPropertyTag(choiceTag);
+                if( splitTag ) splitTag.property = splitTag.property.toUpperCase();
+
+                if(normalizedChoiceTag == "UNCLICKABLE"){
                     isClickable = false
                 }
 
@@ -218,8 +227,12 @@
                     // cause the height (and therefore scroll) to jump backwards temporarily.
                     storyContainer.style.height = contentBottomEdgeY()+"px";
 
-                    // Remove all existing choices
-                    removeAll(".choice");
+                    // Remove choices and, when requested, start the selected branch
+                    // with a clean scene instead of appending to the previous one.
+                    if( cleanWhenChosen )
+                        clearScene();
+                    else
+                        removeAll(".choice");
 
                     // Tell the story where to go next
                     story.ChooseChoiceIndex(choice.index);
@@ -311,8 +324,20 @@
         return bottomElement ? bottomElement.offsetTop + bottomElement.offsetHeight : 0;
     }
 
+    function isCleanTag(tag) {
+        return String(tag).trim().replace(/^#/, "").toUpperCase() == "CLEAN";
+    }
+
+    // Clear the story content while preserving the page header and background.
+    // The incoming line or selected branch is rendered after this call.
+    function clearScene() {
+        removeAll("p");
+        removeAll("img");
+        removeAll("hr");
+    }
+
     // Remove all elements that match the given selector. Used for removing choices after
-    // you've picked one, as well as for the CLEAR and RESTART tags.
+    // you've picked one, as well as for the CLEAR, CLEAN and RESTART tags.
     function removeAll(selector)
     {
         var allElements = storyContainer.querySelectorAll(selector);
