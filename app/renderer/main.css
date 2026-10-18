@@ -641,17 +641,27 @@ img.issue-icon.warning {
 }
 
 #player p.choice {
+  text-align: left;
+}
+
+#main.choicesCenter #player p.choice,
+#main.choicesCenter #player p.choice .tags {
   text-align: center;
 }
 
+#main.choicesRight #player p.choice,
+#main.choicesRight #player p.choice .tags {
+  text-align: right;
+}
+
 #player p.choice a {
-  color: #BBB;
+  color: #0066CC;
   transition: color 0.2s;
   text-decoration: none;
 }
 
 #player p.choice a:hover {
-  color: #555;
+  color: #004C99;
   text-decoration: underline;
 }
 
@@ -927,4 +937,7 @@ img.issue-icon.warning {
 
 .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
   background: #DDDDDD;
+}
+#player .innerText p.storyText {
+  margin: 0;
 }

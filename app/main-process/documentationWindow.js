@@ -3,6 +3,7 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 
 const electronWindowOptions = {
+  icon: path.join(__dirname, "icon.png"),
   width: 1000,
   height: 650,
   minWidth: 700,

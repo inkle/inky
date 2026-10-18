@@ -9,6 +9,7 @@ const Menu = electron.Menu;
 const i18n = require("./i18n/i18n.js");
 
 var electronWindowOptions = {
+  icon: path.join(__dirname, "icon.png"),
   width: 1300,
   height: 730,
   minWidth: 350,

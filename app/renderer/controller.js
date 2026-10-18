@@ -329,6 +329,12 @@ ipc.on("set-tags-visible", (event, visible) => {
         $("#main").addClass("hideTags");
 });
 
+ipc.on("set-choice-alignment", (event, alignment) => {
+    $("#main").removeClass("choicesLeft choicesCenter choicesRight");
+    if( alignment === "center" ) $("#main").addClass("choicesCenter");
+    if( alignment === "right" )  $("#main").addClass("choicesRight");
+});
+
 ipc.on("set-animation-enabled", (event, animationEnabled) => {
     PlayerView.setAnimationEnabled(animationEnabled)
 });

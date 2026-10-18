@@ -1,174 +1,267 @@
-![](resources/icon-small.jpg)
+# Inky · fork
 
-# Inky
+**A fork of [Inky](https://github.com/inkle/inky), inkle's editor for [ink](https://github.com/inkle/ink), focused on creating, testing, and publishing complete text games using only the Inky IDE.**
 
-**Inky** is an editor for [ink](http://www.inklestudios.com/ink), inkle's markup language for writing interactive narrative in games, as used in [80 Days](http://www.inklestudios.com/80days). It's an IDE (integrated development environment), because it gives you a single app that lets you play in the editor as you write, and fix any bugs in your code.
+Developed in collaboration with generative AI, under human direction, with implementation, debugging, testing, and validation of custom features.
 
-![](resources/screenshot.gif)
+<div align="center">
 
-## Features
+[![Fork of inkle/inky](https://img.shields.io/badge/fork%20of-inkle%2Finky-blue)](https://github.com/inkle/inky)
+![Base version](https://img.shields.io/badge/based%20on-0.15.2-informational)
+![Electron](https://img.shields.io/badge/Electron-44.9.0-47848F)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-- **Play as you write**: The play pane remembers the choices that you made, so when Inky recompiles, it fast-forwards to the last point you were at in the flow.
-- **Syntax highlighting**
-- **As-you-type error highlighting**. Inky is constantly compiling, allowing you to fix errors early.
-- **Issue browser**: Lists errors, warnings and TODOs in your **ink**,  and allows you to jump to the exact line number and file in the source.
-- **Jump to definition**: Divert targets (like `-> theStreet`) are hyperlinked can be followed by alt-clicking.
-- **Support multi-file projects**: - Inky automatically infers your story's structure from the `INCLUDE` lines, meaning that there's no need for an additional project file. To create a new include file, simply type `INCLUDE yourfile.ink` where you want to include it.
-- **Export to JSON**: Although this isn't necessary if you're using the [ink-Unity-integration plugin](https://assetstore.unity.com/packages/tools/integration/ink-unity-integration-60055), Inky allows you to export to ink's compiled JSON format, which is especially useful in other ink runtime implementations, such as [inkjs](https://github.com/y-lohse/inkjs), for running **ink** on the web.
-- **File watching**: Modern text editors, including Inky, watch for changes to files on disk, so that if you change them it reflects those changes. This is especially helpful if you keep your **ink** in source control.
+<img src="docs/screenshot-choice-alignment.png" alt="Inky fork showing blue choices and the Choice alignment menu" width="720">
+
+</div>
+
+> **Unofficial fork:** This project is not affiliated with, endorsed by, or officially supported by inkle Ltd. Inky and ink remain credited to their original creators.
+
+---
 
 ## Project status
 
-Inky has been used extensively on multiple projects by different developers. Nevertheless, it isn't as robust or feature complete as many other text editors you may have used, since it's specialist software made by game developers in their spare time.
+This fork is in its **early stages of development**, with a focus on refining the Inky writing, preview, and web publishing experience.
 
-The informal [TODO.md](TODO.md) lists some missing features and known issues. If you want to discuss one, or request a new fix or feature, please [create a github issue](http://www.github.com/inkle/inky/issues).
+The core features described in this README have been implemented and tested in the development environment. As the project continues to evolve, further testing, refinements, and compatibility improvements may be introduced.
 
-To keep up to date with the latest news about ink [sign up for the mailing list](http://www.inklestudios.com/ink#signup).
+Feedback, bug reports, and suggestions are welcome and will help guide future improvements.
+
+**Please note:** this fork is independently maintained and is not an official release of inkle's Inky. Users are encouraged to keep backups of their stories and project files, as they would with any software under active development.
+
+---
+
+## Why this fork?
+
+The goal is simple: **write, play, and publish a complete text game using only the Inky IDE**, without requiring Unity or another game engine.
+
+The fork focuses on making the editor's live preview and its web export behave consistently.
+
+- **Write:** create interactive stories using ink's familiar syntax.
+- **Play:** test your story in the live preview, with compact line spacing, blue choices, configurable choice alignment, and scene clearing.
+- **Publish:** use **Export for web** to generate a playable web version with the same presentation.
+
+The primary target is the Inky IDE and its web export. Using compiled JSON in other engines, such as Unity or custom inkjs players, is not a primary goal. Some custom presentation features may require additional handling in other runtimes.
+
+## What's different from upstream?
+
+Compared with the official [Inky 0.15.2](https://github.com/inkle/inky/releases/tag/0.15.2):
+
+| Feature | Official Inky 0.15.2 | This fork |
+|---|---|---|
+| **Line breaks** | Empty lines are ignored; paragraphs use default spacing | Consecutive story lines appear tightly together; an empty line between text lines creates a visible line break |
+| **Choice color** | Gray (`#BBB`) | Blue (`#0066CC`), like web links; lighter blue (`#66B2FF`) in dark, focus, and contrast themes |
+| **`#clean` tag** | Not available | Clears the previous scene's text when the tagged scene or choice is entered |
+| **Choice alignment** | Choices are centered | Left, center, or right alignment through **Story → Choice alignment**; defaults to left |
+| **Web export** | Standard upstream behavior | Includes the fork's custom presentation features |
+
+---
+
+## Features
+
+### 1. Compact line spacing and line breaks
+
+Story text is displayed with consecutive lines close together, without the extra paragraph spacing found in the original editor.
+
+To insert a visible line break, leave an empty line between two lines of story text. Press **Enter** to move to the next line, and press **Enter** again on an empty line to create the separation.
+
+For example:
+
+**Editor:**
+
+```ink
+Once upon a time...
+Once upon a time...
+
+* There were two choices.
+* There were four lines of content.
+
+- They lived happily ever after.
+    -> END
+```
+
+**View:**
+
+```text
+Once upon a time...
+Once upon a time...
+There were two choices.
+There were four lines of content.
+```
+
+The blank line separates the first two lines from the following choices. The choices themselves retain their normal behavior.
+
+![Inky fork showing line breaks created by pressing Enter in the editor](docs/screenshot-line-breaks.png)
+
+**How it works**
+
+- Consecutive story lines stay close together.
+- An empty line between two text lines becomes a visible line break.
+- Choices, diverts, knots, logic, comments, and glue (`<>`) retain their normal ink behavior.
+- Source line numbering remains unchanged, so compiler error locations continue to correspond to the source.
+
+**Compatibility note:** this fork targets the Inky IDE and its web export. Empty lines between text lines are represented in the compiled JSON as literal `<br>` text. The preview and web export render this as a line break. Other runtimes, including Unity or custom inkjs players, may display `<br>` literally unless they explicitly handle it.
+
+### 2. Blue choices
+
+Choices are displayed in blue (`#0066CC`), matching the familiar appearance of web links.
+
+In dark, focus, and contrast themes, a lighter blue (`#66B2FF`) is used to improve readability.
+
+The goal is to make interactive choices visually distinct from narrative text while preserving a clean, link-like appearance.
+
+![Inky fork showing blue choices styled like web links](docs/screenshot-blue-choices.png)
+
+### 3. Choice alignment
+
+Choose how interactive choices are aligned within the story view.
+
+Open **Story → Choice alignment** and select one of the available options:
+
+- **Left** — aligns choices to the left.
+- **Center** — centers choices.
+- **Right** — aligns choices to the right.
+
+The default alignment is **left**.
+
+![Inky fork showing the Choice alignment menu](docs/screenshot-choice-alignment.png)
+
+Only choices are affected. Narrative text, titles, and other elements retain their own alignment settings.
+
+The selected alignment is also preserved when using **Export for web**, keeping the published story consistent with the live preview.
+
+### 4. `#clean`: clear the screen between scenes
+
+The `#clean` tag clears the previous scene's text when a new scene begins. The page header and background remain visible.
+
+Place the tag on the first line of the incoming scene:
+
+```ink
+=== scene_1 ===
+You are in the first scene.
+
+-> scene_2
+
+=== scene_2 ===
+#clean
+The new scene starts here.
+This line continues normally.
+```
+
+When `scene_2` begins, the previous scene's text is cleared, and the new scene starts with `The new scene starts here.`
+
+**Behavior**
+
+- Case-insensitive: `#clean` and `#CLEAN` both work.
+- The tag is a control instruction and is not displayed as story text.
+- A choice tagged with `#clean` also clears the previous transcript when selected.
+- Without `#clean`, the usual transcript behavior remains: previous text is retained and a divider is added when applicable.
+- Works in the live preview and in exported web stories.
+
+This feature makes it possible to create scene transitions without requiring a separate game engine or custom runtime code.
+
+---
 
 ## Download
 
-### Mac, Windows and Linux
+Ready-to-use Linux builds for x86_64 are available on the project's [**Releases**](https://github.com/ytriosa/inky/releases) page.
 
-[Download the latest release](http://www.github.com/inkle/inky/releases/latest)
+### Debian, Ubuntu, PureOS, and derivatives (`.deb`)
 
-## Project settings file
+Download `inky_0.15.2-1_amd64.deb` from the Releases page, then install it with:
 
-**Warning: For the technically inclined - you need to understand what a JSON file is to do the following!**
+```bash
+sudo apt install ./inky_0.15.2-1_amd64.deb
+```
 
-To customise Inky settings for your specific ink project, create a JSON file with the same name as your main ink file, except with a `.settings.json` extension. For example, if your main ink file is called `my_great_story.ink`, then name your JSON file `my_great_story.settings.json`.
+### Other Linux distributions (`.AppImage`)
 
-Here is an example settings file:
+Download `Inky-0.15.2-x86_64.AppImage` from the Releases page, then run:
 
-    {
-        "customInkSnippets": [
-            {
-                "name": "Heaven's Vault",
-                "submenu": [
-                    {
-                        "name": "Camera",
-                        "ink": ">>> CAMERA: Wide shot"
-                    },
-                    {
-                        "separator": true
-                    },
-                    {
-                        "name": "Walk",
-                        "ink": ">>> WALK: TheInscription"
-                    },
-                    {
-                        "name": "More snippets",
-                        "submenu": [
-                            {
-                                "name": "A snippet in a submenu",
-                                "ink": "This snippet of ink came from a submenu."
-                            },
-                        ]
-                    }
-                ]
-            }
-        ],
+```bash
+chmod +x Inky-0.15.2-x86_64.AppImage
+./Inky-0.15.2-x86_64.AppImage
+```
 
-        "instructionPrefix": ">>>"
-    }
+**Troubleshooting**
 
-* `customInkSnippets` - this array allows your to add your own project-specific ink snippets to the Ink menu. There are three types of item you can add to the array:
-    * **An ink snippet**: Requires `name` for the name of the menu item and `ink` for the snippet of ink it will insert into the editor.
-    * **A separator**: Use `{"separator": true}` to add a horizonal line separator into the menu at this point.
-    * **A sub-menu**: To nest more snippets into a sub-menu, use `name` for the sub-menu name, and then `submenu` with another array in the same format.
+- If FUSE is unavailable, try running the AppImage with `--appimage-extract-and-run`.
+- If your distribution blocks unprivileged user namespaces, the application may require additional sandbox configuration.
+- If a `SHA256SUMS` file is provided with the release, verify the downloaded files from the directory containing them:
 
+```bash
+sha256sum -c SHA256SUMS
+```
 
-* `instructionPrefix` - A common convention is to use a particular text format in ink to instruct the game to perform certain actions rather than presenting the text verbatim to players.
+Check the release notes for the available packages and their corresponding checksums.
 
-    For example, at inkle we would write something like `>>> CAMERA: BigSwoop` in ink. The `>>>` isn't directly built into ink, and this entire text is simply passed through as plain text. But we have custom game code to interpret it and turn it into an action that takes place in-game. To help support this within Inky, you can define an *instructionPrefix*, if you have a particular consistent way of writing these actions. 
-    
-    When Inky sees this, it will highlight the line of text both in the editor and player views, so that you can clearly see that it's not part of the game text itself.
+---
 
+## Build from source
 
-## Implementation details
+### Requirements
 
-Inky is built using:
+- [Node.js](https://nodejs.org/)
+- npm
+- Git
 
-* [Electron](http://electron.atom.io/), a framework by GitHub to build cross-platform Desktop app using HTML, CSS and JavaScript.
-* [Ace](https://ace.c9.io/#nav=about), a full-featured code editor built for the web.
-* [Photon](http://photonkit.com/), for some of the components. However, the dependency could probably be removed, since its only used for small portions of the CSS.
+### Clone and run
 
-Inky includes a copy of **inklecate**, the command line **ink** compiler.
+```bash
+git clone https://github.com/ytriosa/inky.git
+cd inky/app
+npm install
+npm start
+```
 
-## Help develop Inky!
+### Package the application
 
-Take a look at the [issues page](https://github.com/inkle/inky/issues) for an issue with a "help wanted" label. We try to provide some basic instructions on how to get started with the development of the feature whenever we add the label.
+From the `app/` directory:
 
-To build the project:
+```bash
+npm run build-package -- linux
+```
 
-* Install [node.js](https://nodejs.org/en/) if you don't already have it
-* Clone the repo
-* On Mac, double-click the `INSTALL_AND_RUN.command` script. On Windows, open Powershell, cd into the app directory, and type `npm install`, then `npm start`.
-* For subsequent runs, if no npm packages have changed, you can run the `RUN.command` script on Mac, or type `npm start` in the shell (on Windows).
+Other supported packaging targets may include `win32`, `win64`, and `mac`, depending on the build scripts and environment.
 
-### Linux
+For upstream platform-specific instructions and additional details, see the [official Inky README](https://github.com/inkle/inky#readme).
 
-Tested on a fresh **Ubuntu 16.04 LTS** VM installation (_equivalent processes should work for other distributions_)
+---
 
-* Install build tools
+## Staying in sync with upstream
 
-`sudo apt-get install -y dkms build-essential linux-headers-generic linux-headers-$(uname -r)`
+To add the official repository as an upstream remote:
 
-* Pre-requisites
+```bash
+git remote add upstream https://github.com/inkle/inky.git
+git fetch upstream
+```
 
-`sudo apt install git`
+Before merging upstream changes, review the differences carefully. Changes to the editor, renderer, compiler integration, and web export may affect this fork's custom features.
 
-`sudo apt install curl`
+To inspect the changes:
 
-* Install node and npm
+```bash
+git diff upstream/master
+```
 
-`curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -`
+If the upstream branch has changed, use the appropriate branch name for the comparison and merge.
 
-`sudo apt-get install -y nodejs`
+---
 
-* Install mono as per http://www.mono-project.com/download/stable/#download-lin
+## Credits and license
 
-`sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF`
+- **Inky and ink:** © inkle Ltd. Inky is distributed under the MIT License. Original project: [inkle/inky](https://github.com/inkle/inky).
+- **Fork development:** developed in collaboration with generative AI, under human direction, including implementation, debugging, testing, and validation of custom features.
+- **Fork modifications:** © 2026 Kernel Trace (核追跡), MIT License.
+- **Third-party software:** Electron, Chromium and its bundled libraries, inkjs, and the Node.js dependencies listed in `app/package.json` are subject to their respective licenses. See the included third-party notices, including `LICENSES.chromium.html`, where applicable. The bundled `libffmpeg.so` is LGPL-2.1+ and is unmodified.
 
-`echo "deb http://download.mono-project.com/repo/ubuntu stable-xenial main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list`
-
-`sudo apt-get update`
-
-`sudo apt-get install mono-complete`
-
-* Clone the inky repo
-
-`git clone https://github.com/inkle/inky.git`
-
-* Test inklecate_win with mono (_should output usage info_)
-
-`mono app/main-process/ink/inklecate_win.exe`
-
-* Install and run inky
-
-`./INSTALL_AND_RUN.command`
-
-* For subsequent runs, if no npm packages have changed, launch inky as below (otherwise re-run previous step):
-
-`./RUN.command`
-
-### Translation
-
-Translation files are located under `app/main-process/i18n/`.  
-If a particular locale file is missing (or if it's missing some keys), you can generate it with the following command: `cd app && npm run generate-locale -- <locale> ./main-process/i18n/`.
-
-## License
-
-**Inky** and **ink** are released under the MIT license. Although we don't require attribution, we'd love to know if you decide to use **ink** a project! Let us know on [Twitter](http://www.twitter.com/inkleStudios) or [by email](mailto:info@inklestudios.com).
-
-### The MIT License (MIT)
-Copyright (c) 2016 inkle Ltd.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
--
+The full MIT license text is available in [`LICENSE`](LICENSE). Binary packages include third-party notices in `/opt/inky/licenses/` for `.deb` packages and `inky-app/licenses/` for AppImage packages.
 
 *Inky is named after a black cat based in Cambridge, UK.*
+
+---
+
+## Disclaimer
+
+This project is an independent community fork intended to extend the Inky editing workflow. It is not an official inkle product. Please report fork-specific bugs and feature requests through this fork's issue tracker.

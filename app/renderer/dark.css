@@ -94,8 +94,12 @@
     border-top-color: #444;
 }
 
+.window.dark #player p.choice a {
+    color: #66B2FF;
+}
+
 .window.dark #player p.choice a:hover {
-    color: #999;
+    color: #8CC5FF;
 }
 
 

@@ -348,6 +348,29 @@ function refresh() {
                     click: callbacks.toggleTags
                 },
                 {
+                    label: i18n._('Choice alignment'),
+                    submenu: [
+                        {
+                            label: i18n._('Left'),
+                            type: "radio",
+                            checked: true,
+                            click: (item, win, ev) => callbacks.setChoiceAlignment("left", win)
+                        },
+                        {
+                            label: i18n._('Center'),
+                            type: "radio",
+                            checked: false,
+                            click: (item, win, ev) => callbacks.setChoiceAlignment("center", win)
+                        },
+                        {
+                            label: i18n._('Right'),
+                            type: "radio",
+                            checked: false,
+                            click: (item, win, ev) => callbacks.setChoiceAlignment("right", win)
+                        }
+                    ]
+                },
+                {
                         label: i18n._('Word count and more'),
                         accelerator: 'CmdOrCtrl+Shift+C',
                         enabled: callbacks.isFocusedWindow,

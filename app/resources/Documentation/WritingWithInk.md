@@ -105,6 +105,14 @@ Text content from the game will appear 'as is' when the engine runs. However, it
 
 These don't show up in the main text flow, but can be read off by the game and used as you see fit. See [Running Your Ink](RunningYourInk.md#marking-up-your-ink-content-with-tags) for more information.
 
+In Inky's live preview and exported web stories, the custom `#clean` tag clears the visible content from the previous scene while keeping the page header and background. Put it on the first line of the incoming scene:
+
+        === next_scene ===
+        The new scene starts here. #clean
+
+The tagged line is kept as the first visible line after the previous scene is cleared. The tag is case-insensitive (`#clean` or `#CLEAN`).
+
+
 
 ## 2) Choices
 
