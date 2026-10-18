@@ -162,41 +162,6 @@ This feature makes it possible to create scene transitions without requiring a s
 
 ---
 
-## Download
-
-Ready-to-use Linux builds for x86_64 are available on the project's [**Releases**](https://github.com/ytriosa/inky/releases) page.
-
-### Debian, Ubuntu, PureOS, and derivatives (`.deb`)
-
-Download `inky_0.15.2-1_amd64.deb` from the Releases page, then install it with:
-
-```bash
-sudo apt install ./inky_0.15.2-1_amd64.deb
-```
-
-### Other Linux distributions (`.AppImage`)
-
-Download `Inky-0.15.2-x86_64.AppImage` from the Releases page, then run:
-
-```bash
-chmod +x Inky-0.15.2-x86_64.AppImage
-./Inky-0.15.2-x86_64.AppImage
-```
-
-**Troubleshooting**
-
-- If FUSE is unavailable, try running the AppImage with `--appimage-extract-and-run`.
-- If your distribution blocks unprivileged user namespaces, the application may require additional sandbox configuration.
-- If a `SHA256SUMS` file is provided with the release, verify the downloaded files from the directory containing them:
-
-```bash
-sha256sum -c SHA256SUMS
-```
-
-Check the release notes for the available packages and their corresponding checksums.
-
----
-
 ## Build from source
 
 ### Requirements
