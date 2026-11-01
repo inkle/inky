@@ -4,6 +4,6 @@ Type=Application
 Categories=Development;IDE;
 Name=Inky
 Comment=Inky
-Exec=/opt/inky/Inky
+Exec=/opt/inky/Inky %f
 Path=/opt/inky/
 Icon=inky

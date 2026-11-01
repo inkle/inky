@@ -267,12 +267,12 @@ app.on('ready', function () {
         }
     });
 
-    // Windows passed file to open on command line?
-    if (process.platform == "win32" && process.argv.length > 1 && !pendingPathToOpen) {
+    // File passed to open on command line? (Windows file association, Linux .desktop %f, terminal)
+    if (process.platform != "darwin" && process.argv.length > 1 && !pendingPathToOpen) {
         for (let i = 1; i < process.argv.length; i++) {
-            var arg = process.argv[i].toLowerCase();
-            if (arg.endsWith(".ink")) {
-                pendingPathToOpen = process.argv[1];
+            var arg = process.argv[i];
+            if (arg.toLowerCase().endsWith(".ink")) {
+                pendingPathToOpen = require("path").resolve(arg);
                 break;
             }
         }
