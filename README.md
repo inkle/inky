@@ -1,100 +1,100 @@
 <div align="center">
 
-<img src="resources/icon-small.jpg" alt="Ícone do Inky" width="112">
+<img src="resources/icon-small.jpg" alt="Inky icon" width="112">
 
-# Inky · Fork da comunidade
+# Inky · Community fork
 
-**Escreva, teste e publique histórias interativas com [ink](https://github.com/inkle/ink) em um só lugar.**
+**Write, test, and publish interactive stories with [ink](https://github.com/inkle/ink), all in one place.**
 
-Este fork amplia o [Inky original](https://github.com/inkle/inky) com ferramentas para organizar projetos, personalizar a apresentação das histórias e exportá-las para a web.
+This fork builds on [the original Inky](https://github.com/inkle/inky) with tools to organize projects, customize how stories look, and export them to the web.
 
-[![Fork do Inky](https://img.shields.io/badge/fork-de%20inkle%2Finky-blue)](https://github.com/inkle/inky)
-![Versão base](https://img.shields.io/badge/versão%20base-0.15.2-informational)
+[![Fork of Inky](https://img.shields.io/badge/fork-of%20inkle%2Finky-blue)](https://github.com/inkle/inky)
+![Base version](https://img.shields.io/badge/base%20version-0.15.2-informational)
 ![Electron](https://img.shields.io/badge/Electron-30.0.4-47848F)
-![Licença](https://img.shields.io/badge/licença-MIT-green)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-<img src="docs/screenshot-choice-alignment.png" alt="Inky com escolhas azuis e o menu de alinhamento" width="760">
+<img src="docs/screenshot-choice-alignment.png" alt="Inky showing blue choices and the alignment menu" width="760">
 
 </div>
 
-> **Projeto independente:** este fork não é afiliado, endossado ou mantido oficialmente pela inkle Ltd. Inky e ink continuam sendo creditados aos seus criadores originais.
+> **Independent project:** This fork is not affiliated with, endorsed by, or officially maintained by inkle Ltd. Inky and ink remain credited to their original creators.
 
 ---
 
-## Sobre o projeto
+## About
 
-O **Inky** é um editor para **ink**, a linguagem de criação de narrativas interativas usada em jogos como *80 Days*. O editor combina escrita, compilação em tempo real e pré-visualização jogável.
+**Inky** is an editor for **ink**, the interactive narrative scripting language used in games such as *80 Days*. It combines writing, live compilation, and a playable preview.
 
-Este fork parte da versão **0.15.2** e concentra melhorias na experiência de autoria: organização de arquivos, ajustes visuais, áudio, imagens e maior consistência entre a prévia do editor e a versão exportada para a web.
+This fork is based on version **0.15.2** and focuses on the authoring experience: project organization, visual customization, audio, images, and greater consistency between the editor preview and the web export.
 
-## Recursos em destaque
+## Highlights
 
-- **Escrita com prévia ao vivo:** veja a história e teste escolhas enquanto edita.
-- **Compilação contínua:** erros, avisos e TODOs aparecem no editor; navegue até o trecho correspondente.
-- **Projetos com vários arquivos:** organize cenas e pastas; o Inky acompanha linhas `INCLUDE`.
-- **Explorer de projeto:** crie, importe, renomeie e remova arquivos e pastas.
-- **Configurações visuais:** ajuste título, autoria, tipografia, cores, layout e alinhamento pela interface.
-- **Tags de mídia:** use imagens e áudio na história, com prévia de arquivos no projeto.
-- **Exportação para web:** publique uma versão jogável com controles, estilo e recursos da história.
-- **Temas do editor:** alterne entre temas claros e escuros.
+- **Live preview:** see your story and test choices as you edit.
+- **Continuous compilation:** errors, warnings, and TODOs appear in the editor, with navigation to the relevant source.
+- **Multi-file projects:** organize scenes and folders; Inky follows `INCLUDE` lines.
+- **Project Explorer:** create, import, rename, and delete files and folders.
+- **Visual settings:** configure the title, author, typography, colors, layout, and alignment through the interface.
+- **Media tags:** add images and audio to your story, and preview project files.
+- **Web export:** publish a playable version with controls, styling, and story assets.
+- **Editor themes:** switch between light and dark themes.
 
-## O que este fork acrescenta
+## What this fork adds
 
-| Recurso | Comportamento |
+| Feature | Behavior |
 |---|---|
-| Linhas e parágrafos | Linhas consecutivas ficam compactas; uma linha vazia cria uma quebra visual. |
-| Escolhas | Cor azul, com alinhamento à esquerda, ao centro ou à direita. |
-| `#clean` | Limpa o texto anterior ao entrar em uma cena ou escolha marcada. |
-| Alinhamento por cena | `#align:` pode ajustar uma cena sem mudar o alinhamento geral da história. |
-| Títulos | Configure título da história, autoria e títulos de cena. |
-| Áudio | `#music:` controla música; `#sound:` reproduz efeitos sonoros. |
-| Imagens | `#image:` inclui imagens locais ou remotas na história. |
-| Exportação | A apresentação e as configurações visuais acompanham a história exportada. |
+| Lines and paragraphs | Consecutive lines stay compact; a blank line creates a visible line break. |
+| Choices | Blue text, with left, center, or right alignment. |
+| `#clean` | Clears previous text when entering a tagged scene or choice. |
+| Per-scene alignment | Use `#align:` to align a scene independently of the story-wide setting. |
+| Titles | Configure the story title, author, and scene titles. |
+| Audio | Use `#music:` for music and `#sound:` for sound effects. |
+| Images | Use `#image:` to include local or remote images in a story. |
+| Export | Story presentation and visual settings carry over to the web export. |
 
-### Exemplo de tags
+### Tag example
 
 ```ink
-=== chegada ===
-#title: A estação
+=== arrival ===
+#title: The Station
 #align: center
 #image: station.jpg
 
-O último trem parte à meia-noite.
+The last train leaves at midnight.
 #sound: train.mp3
 
-* Esperar pelo próximo trem.
-    -> noite #clean
+* Wait for the next train.
+    -> night #clean
 
-* Voltar para casa.
-    -> casa
+* Head back home.
+    -> home
 ```
 
-Para música de fundo, use `#music: arquivo.mp3`. Para encerrar a música, use `#music: stop`; para interromper efeitos sonoros, use `#sound: stop`.
+For background music, use `#music: filename.mp3`. Use `#music: stop` to stop the music, or `#sound: stop` to stop sound effects.
 
-> **Compatibilidade:** as melhorias visuais deste fork têm como foco o Inky e seu player exportado para a web. Por exemplo, a quebra visual criada por uma linha vazia é representada como `<br>` no conteúdo compilado; outros runtimes podem exibir essa marcação literalmente se não tiverem suporte específico.
+> **Compatibility:** This fork's visual enhancements target Inky and its web player. For example, a visual line break created by a blank line is represented as `<br>` in the compiled content; other runtimes may display that markup literally unless they handle it explicitly.
 
-## Capturas de tela
+## Screenshots
 
-**Alinhamento das escolhas**
+**Choice alignment**
 
-![Menu de alinhamento das escolhas](docs/screenshot-choice-alignment.png)
+![Choice alignment menu](docs/screenshot-choice-alignment.png)
 
-**Quebras de linha**
+**Line breaks**
 
-![Exemplo de quebras de linha na prévia](docs/screenshot-line-breaks.png)
+![Line breaks in the preview](docs/screenshot-line-breaks.png)
 
-**Escolhas azuis**
+**Blue choices**
 
-![Exemplo de escolhas azuis](docs/screenshot-blue-choices.png)
+![Blue choices](docs/screenshot-blue-choices.png)
 
-## Instalação para desenvolvimento
+## Development setup
 
-### Requisitos
+### Requirements
 
-- [Node.js](https://nodejs.org/) e npm
+- [Node.js](https://nodejs.org/) and npm
 - Git
 
-### Executar o Inky
+### Run Inky
 
 ```bash
 git clone https://github.com/ytriosa/inky.git
@@ -103,30 +103,31 @@ npm install
 npm start
 ```
 
-### Executar os testes
+### Run the tests
+
+From the repository root:
 
 ```bash
 cd inky/app
 npm test
 ```
 
-### Gerar pacotes
+### Build packages
 
-Na pasta `app/`, o script aceita os destinos `linux`, `mac`, `win32` (32 bits) e `win64` (64 bits). Exemplo a partir da raiz do repositório:
+From the repository root, the packaging script supports `linux`, `mac`, `win32` (32-bit), and `win64` (64-bit):
 
 ```bash
-cd app
+cd inky/app
 npm run build-package -- linux
 ```
 
-Para criar um arquivo de distribuição compactado, acrescente `-zip`:
+Add `-zip` to create a distributable archive:
 
 ```bash
-cd app
 npm run build-package -- linux -zip
 ```
 
-Compilações para macOS precisam ser executadas em um Mac. No Linux, o script de distribuição gera o bundle do aplicativo, o AppImage e o pacote Debian:
+macOS builds must be run on a Mac. On Linux, the release script builds the application bundle, AppImage, and Debian package:
 
 ```bash
 cd inky
@@ -134,22 +135,22 @@ npm install --global electron-packager
 ./BUILD_FOR_LINUX.sh
 ```
 
-O pacote Debian é destinado a Linux x86_64. Consulte os scripts de compilação para os pré-requisitos específicos de cada plataforma.
+The Debian package targets Linux x86_64. Refer to the build scripts for platform-specific prerequisites.
 
 ## Downloads
 
-Pacotes publicados, quando disponíveis, estarão na página de [Releases](https://github.com/ytriosa/inky/releases).
+Published packages, when available, will be listed on the [Releases](https://github.com/ytriosa/inky/releases) page.
 
-## Desenvolvimento e contribuições
+## Development and contributions
 
-Sugestões, problemas e contribuições são bem-vindos. Abra uma [issue](https://github.com/ytriosa/inky/issues) descrevendo o comportamento observado e, se possível, os passos para reproduzi-lo.
+Suggestions, bug reports, and contributions are welcome. Open an [issue](https://github.com/ytriosa/inky/issues) describing the behavior you observed and, if possible, the steps to reproduce it.
 
-Este fork é desenvolvido com orientação humana e assistência de ferramentas de IA. As mudanças são implementadas, testadas e revisadas no projeto.
+This fork is developed with human direction and AI assistance. Changes are implemented, tested, and reviewed in the project.
 
-## Créditos e licença
+## Credits and license
 
-- **Inky e ink:** criados pela [inkle Ltd](https://github.com/inkle). O projeto original é distribuído sob a licença MIT.
-- **Este fork:** as alterações estão identificadas no arquivo [`LICENSE`](LICENSE), junto aos créditos do projeto original.
-- **Dependências:** Electron, Chromium, inkjs e demais dependências têm licenças próprias; consulte os avisos incluídos na distribuição.
+- **Inky and ink:** created by [inkle Ltd](https://github.com/inkle). The original project is distributed under the MIT License.
+- **This fork:** changes are identified in [`LICENSE`](LICENSE), alongside credits for the original project.
+- **Dependencies:** Electron, Chromium, inkjs, and other dependencies have their own licenses; see the notices included with the distribution.
 
-*Inky recebeu esse nome em homenagem a um gato preto de Cambridge, no Reino Unido.*
+*Inky is named after a black cat based in Cambridge, UK.*
