@@ -5,6 +5,7 @@ const path = require("path");
 const electron = require('electron');
 const ipc = electron.ipcMain;
 const mkdirp = require('mkdirp');
+const TagFormat = require('../renderer/tagFormat.js').TagFormat;
 
 // inklecate is packaged outside of the main asar bundle since it's executable
 const inklecateNames = {
@@ -32,49 +33,6 @@ if (process.platform == "darwin" || process.platform == "linux") {
 
 var sessions = {};
 
-// Pressing Enter on an empty line between two plain text lines leaves a visible
-// blank line in the output: that empty line is replaced by a <br> line.
-// Choices, diverts, knots, logic, comments etc. are never touched.
-// The number of lines stays the same, so error line numbers still match.
-const nonTextLineStart = /^(\/\/|\/\*|\*\/|[*+\-=~#{}]|<-|(VAR|CONST|LIST|INCLUDE|EXTERNAL|TODO)\b)/;
-
-function blankLinesBecomeBreaks(source) {
-    var eol = source.indexOf("\r\n") >= 0 ? "\r\n" : "\n";
-    var lines = source.split(/\r?\n/);
-    var kinds = [];
-    var inComment = false;
-
-    for(var i=0; i<lines.length; i++) {
-        var t = lines[i].replace(/^\uFEFF/, "").trim();
-        if( inComment ) {
-            kinds.push("other");
-            if( t.indexOf("*/") >= 0 ) inComment = false;
-        } else if( t === "" ) {
-            kinds.push("blank");
-        } else if( nonTextLineStart.test(t) ) {
-            kinds.push("other");
-            if( t.indexOf("/*") === 0 && t.indexOf("*/", 2) < 0 ) inComment = true;
-        } else {
-            kinds.push("text");
-        }
-    }
-
-    for(var i=0; i<lines.length; i++) {
-        if( kinds[i] !== "blank" ) continue;
-        var start = i;
-        while( i+1 < lines.length && kinds[i+1] === "blank" ) i++;
-        var before = start - 1;
-        var after = i + 1;
-        if( before < 0 || after >= lines.length ) continue;
-        if( kinds[before] !== "text" || kinds[after] !== "text" ) continue;
-        // Keep glue (<>) working
-        if( /<>\s*$/.test(lines[before]) || /^\s*<>/.test(lines[after]) ) continue;
-        for(var j=start; j<=i; j++) lines[j] = "<br>";
-    }
-
-    return lines.join(eol);
-}
-
 
 function compile(compileInstruction, requester) {
 
@@ -93,12 +51,17 @@ function compile(compileInstruction, requester) {
         var fullInkPath = path.join(uniqueDirPath, relativePath);
         var inkFileContent = compileInstruction.updatedFiles[relativePath];
 
+        // The compiler only ever sees tags in their one accepted shape (#tag: value,
+        // flush left), whatever the text looked like when it arrived.
+        if( path.extname(relativePath).toLowerCase() === ".ink" )
+            inkFileContent = TagFormat.normalizeText(inkFileContent);
+
         if( path.dirname(relativePath) != "." ) {
             var fullDir = path.dirname(fullInkPath);
             mkdirp.sync(fullDir);
         }
 
-        fs.writeFileSync(fullInkPath, blankLinesBecomeBreaks(inkFileContent));
+        fs.writeFileSync(fullInkPath, inkFileContent);
     }
 
     var mainInkPath = path.join(uniqueDirPath, compileInstruction.mainName);
@@ -131,6 +94,7 @@ function compile(compileInstruction, requester) {
     const playProcess = spawn(inklecatePathToUse, inklecateOptions, {
         "cwd": path.dirname(inklecatePathToUse),
         "env": {
+            ...process.env,
             "MONO_BUNDLED_OPTIONS": "--debug"
         }
     });
@@ -144,6 +108,13 @@ function compile(compileInstruction, requester) {
         justRequestedDebugSource: false
     };
     var session = sessions[sessionId];
+
+    playProcess.on('error', (error) => {
+        console.error(`Failed to launch inklecate at '${inklecatePathToUse}':`, error);
+        if( !requester.isDestroyed() ) {
+            requester.send('play-story-unexpected-error', error.message, sessionId);
+        }
+    });
 
     playProcess.stderr.setEncoding('utf8');
     playProcess.stderr.on('data', (data) => {

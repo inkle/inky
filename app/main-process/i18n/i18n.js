@@ -1,14 +1,12 @@
 const electron = require('electron');
-const fs = require('fs');
-const path = require('path');
 
 class i18n {
     constructor() {
-        this.currentLocale = null;
-        this.msgs = {}
+        this.currentLocale = 'en';
+        this.msgs = {};
 
         electron.app.on('ready', () => {
-            this.switch(electron.app.getLocale());
+            this.switch();
         });
 
         electron.ipcMain.on('i18n._', (event, msgid) => {
@@ -23,17 +21,9 @@ class i18n {
         return this.msgs[msgid];
     }
 
-    switch(lang) {
-        this.currentLocale = lang;
-        const file = path.join(__dirname, `${lang}.json`)
-        if (fs.existsSync(file)) {
-            this.msgs = require(file);
-        } else {
-            const defaultLocale = electron.app.getLocale();
-            if (lang != defaultLocale) {
-                this.switch(defaultLocale);
-            }
-        }
+    switch() {
+        this.currentLocale = 'en';
+        this.msgs = {};
     }
 }
 

@@ -3,6 +3,7 @@ const TextMode = ace.require("ace/mode/text").Mode;
 const Tokenizer = ace.require("ace/tokenizer").Tokenizer;
 const TextHighlightRules = ace.require("ace/mode/text_highlight_rules").TextHighlightRules;
 const BaseFoldMode = ace.require("ace/mode/folding/fold_mode").FoldMode;
+const RichTextFormatting = require("../richTextFormatting.js").RichTextFormatting;
 var Range = ace.require("ace/range").Range;
 
 
@@ -477,7 +478,7 @@ var inkHighlightRules = function() {
             // stop parsing the tag at "[" or "]".
             regex: /#[^\[\]$]+/
         }],
-        "#inlineContent": [{ 
+        "#inlineContent": [{
             include: "#inlineConditional"
         }, {
             include: "#inlineSequence"
@@ -688,12 +689,32 @@ var InkMode = function(instructionPrefix) {
 };
 oop.inherits(InkMode, TextMode);
 
+InkMode.prototype.getTokenizer = function() {
+    const tokenizer = TextMode.prototype.getTokenizer.call(this);
+    if( !tokenizer.$richTextFormattingWrapped ) {
+        const getLineTokens = tokenizer.getLineTokens;
+        tokenizer.getLineTokens = function(line, state) {
+            const result = getLineTokens.call(this, line, state);
+            result.tokens = RichTextFormatting.decorateTokens(line, result.tokens);
+            return result;
+        };
+        tokenizer.$richTextFormattingWrapped = true;
+    }
+    return tokenizer;
+};
+
 (function() {
     // configure comment start/end characters
     this.lineCommentStart = "//";
     this.blockComment = {start: "/*", end: "*/"};
 
     this.$id = "ace/mode/ink"
+
+    this.getNextLineIndent = function(state, line, tab) {
+        var indent = line.match(/^\s*/)[0];
+        if( /^\s*(?:\*|\+)(?:\s|$)/.test(line) ) indent += tab;
+        return indent;
+    };
 
     this.getCompletions = function(state, session, pos, prefix) {
         return keywords.map((keyword) => ({

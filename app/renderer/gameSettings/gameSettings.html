@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Game settings</title>
+    <link rel="stylesheet" href="gameSettings.css">
+</head>
+<body>
+    <header>
+        <h1>Game settings</h1>
+        <p class="hint">Changes update the preview right away and are stored in this project’s <code>game.yaml</code>.</p>
+    </header>
+
+    <main id="settings-scroll" tabindex="0">
+    <div id="warnings" class="warnings" hidden></div>
+
+    <section>
+        <h2>Presets</h2>
+        <div id="presets" class="chips"></div>
+    </section>
+
+    <section>
+        <h2>Theme</h2>
+        <div class="segmented" id="theme">
+            <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+            <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+        </div>
+    </section>
+
+    <section>
+        <h2>Colors</h2>
+        <div class="row"><label for="hex-background">Background</label>
+            <input type="color" id="pick-background"><input type="text" id="hex-background" spellcheck="false"></div>
+        <div class="row"><label for="hex-text">Text</label>
+            <input type="color" id="pick-text"><input type="text" id="hex-text" spellcheck="false"></div>
+        <div class="row"><label for="hex-choice">Choices</label>
+            <input type="color" id="pick-choice"><input type="text" id="hex-choice" spellcheck="false"></div>
+        <div class="row"><label for="hex-hover">Choice on hover</label>
+            <input type="color" id="pick-hover"><input type="text" id="hex-hover" spellcheck="false">
+            <label class="inline"><input type="checkbox" id="hover-auto"> Automatic</label></div>
+    </section>
+
+    <section>
+        <h2>Text</h2>
+        <div class="row"><label for="font-family">Font</label>
+            <select id="font-family">
+                <option value="system">System (sans-serif)</option>
+                <option value="serif">Serif</option>
+                <option value="mono">Monospace</option>
+                <option value="custom">Other…</option>
+            </select>
+            <input type="text" id="font-custom" placeholder="Font name" spellcheck="false" hidden></div>
+        <div class="row range-row"><label for="font-size">Size</label>
+            <div class="range-control">
+                <input type="range" id="font-size" min="12" max="32" step="1">
+                <input type="number" id="font-size-number" min="12" max="32" step="1" aria-label="Font size">
+                <span class="unit">px</span>
+            </div></div>
+        <div class="row range-row"><label for="line-height">Line height</label>
+            <div class="range-control">
+                <input type="range" id="line-height" min="1" max="2.2" step="0.05">
+                <input type="number" id="line-height-number" min="1" max="2.2" step="0.05" aria-label="Line height">
+                <span class="unit">×</span>
+            </div></div>
+        <div class="row range-row"><label for="width">Text width</label>
+            <div class="range-control">
+                <input type="range" id="width" min="24" max="70" step="1">
+                <input type="number" id="width-number" min="24" max="70" step="1" aria-label="Text width">
+                <span class="unit">rem</span>
+            </div>
+            <label class="inline"><input type="checkbox" id="width-full"> Full width</label></div>
+    </section>
+
+    <section>
+        <h2>Story information</h2>
+        <div class="row"><label for="story-title">Title</label>
+            <input type="text" id="story-title" placeholder="add a title">
+            <button type="button" class="clear-text-button" id="clear-story-title" aria-label="Clear title" title="Clear title">×</button></div>
+        <div class="row"><label for="story-author">Author</label>
+            <input type="text" id="story-author" placeholder="author name">
+            <button type="button" class="clear-text-button" id="clear-story-author" aria-label="Clear author" title="Clear author">×</button></div>
+        <div class="row"><label for="story-cover">Cover</label>
+            <input type="text" id="story-cover" placeholder="images/cover.jpg" spellcheck="false">
+            <button type="button" class="text-button" id="choose-story-cover" title="Choose an image; a picture from outside the project is copied into its images folder">Choose…</button>
+            <button type="button" class="clear-text-button" id="clear-story-cover" aria-label="Clear cover" title="Clear cover">×</button>
+            <div class="cover-thumb" id="story-cover-thumb" data-state="empty" title="How the cover fills the title screen">
+                <img class="cover-thumb-image" id="story-cover-thumb-image" alt="">
+                <span class="cover-thumb-message" id="story-cover-thumb-note">No cover yet</span>
+            </div></div>
+    </section>
+
+    <section>
+        <h2>Text styling</h2>
+        <h3>Titles</h3>
+        <h4>Scene</h4>
+        <div class="row"><label for="scene-title-family">Font</label>
+            <select id="scene-title-family">
+                <option value="inherit">Default</option><option value="system">System</option>
+                <option value="serif">Serif</option><option value="mono">Monospace</option><option value="custom">Other…</option>
+            </select><input type="text" id="scene-title-custom" placeholder="Font name" spellcheck="false" hidden></div>
+        <div class="row range-row"><label for="scene-title-size">Size</label>
+            <div class="range-control">
+                <input type="range" id="scene-title-size" min="10" max="100" step="1">
+                <input type="number" id="scene-title-size-number" min="10" max="100" step="1" aria-label="Scene title size">
+                <span class="unit">px</span>
+            </div></div>
+        <div class="row"><label for="scene-title-color">Color</label>
+            <input type="color" id="scene-title-pick"><input type="text" id="scene-title-color" spellcheck="false">
+            <label class="inline"><input type="checkbox" id="scene-title-color-auto"> Default</label></div>
+        <div class="row"><label>Alignment</label>
+            <div class="segmented" id="scene-title-align">
+                <label><input type="radio" name="scene-title-align" value="auto" title="Follow the text below"><span>Auto</span></label>
+                <label><input type="radio" name="scene-title-align" value="left"><span>Left</span></label>
+                <label><input type="radio" name="scene-title-align" value="center"><span>Center</span></label>
+                <label><input type="radio" name="scene-title-align" value="right"><span>Right</span></label>
+            </div></div>
+    </section>
+
+    <section>
+        <h2>Alignment</h2>
+        <div class="row"><label>Story text</label>
+            <div class="segmented" id="align">
+                <label><input type="radio" name="align" value="left" checked><span>Left</span></label>
+                <label><input type="radio" name="align" value="center"><span>Center</span></label>
+                <label><input type="radio" name="align" value="right"><span>Right</span></label>
+            </div></div>
+        <div class="row"><label>Choices</label>
+            <div class="segmented" id="choice-align">
+                <label><input type="radio" name="choice-align" value="left" checked><span>Left</span></label>
+                <label><input type="radio" name="choice-align" value="center"><span>Center</span></label>
+                <label><input type="radio" name="choice-align" value="right"><span>Right</span></label>
+            </div></div>
+    </section>
+
+    <section>
+        <h2>Sound</h2>
+        <div class="row range-row"><label for="audio-master">Master</label>
+            <div class="range-control">
+                <input type="range" id="audio-master" min="0" max="100" step="1">
+                <input type="number" id="audio-master-number" min="0" max="100" step="1" aria-label="Master volume">
+                <span class="unit">%</span>
+            </div></div>
+        <div class="row range-row"><label for="audio-music">Music</label>
+            <div class="range-control">
+                <input type="range" id="audio-music" min="0" max="100" step="1">
+                <input type="number" id="audio-music-number" min="0" max="100" step="1" aria-label="Music volume">
+                <span class="unit">%</span>
+            </div></div>
+        <div class="row range-row"><label for="audio-sfx">SFX</label>
+            <div class="range-control">
+                <input type="range" id="audio-sfx" min="0" max="100" step="1">
+                <input type="number" id="audio-sfx-number" min="0" max="100" step="1" aria-label="SFX volume">
+                <span class="unit">%</span>
+            </div></div>
+    </section>
+
+    <section>
+        <h2>Exported page</h2>
+        <div class="row"><label class="inline"><input type="checkbox" id="controls-show"> Show the restart, save and load buttons</label></div>
+        <div class="row"><label class="inline"><input type="checkbox" id="controls-theme-toggle"> Let the player switch between light and dark</label></div>
+        <p class="hint" id="theme-toggle-hint"></p>
+    </section>
+
+    </main>
+
+    <footer>
+        <button id="reset" type="button">Reset to classic</button>
+    </footer>
+
+    <script src="gameSettings.js"></script>
+</body>
+</html>

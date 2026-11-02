@@ -6,6 +6,7 @@ const {ipcRenderer} = require("electron")
 const mkdirp = require('mkdirp');
 
 const InkFileSymbols = require("./inkFileSymbols.js").InkFileSymbols;
+const TagFormat = require("./tagFormat.js").TagFormat;
 
 const Document = ace.require('ace/document').Document;
 const EditSession = ace.require('ace/edit_session').EditSession;
@@ -51,11 +52,41 @@ function InkFile(anyPath, mainInkFile, isBrandNew, inkMode, events) {
     // removed Included files without warning the user.
     var initialContent = "";
     if( mainInkFile == null ) {
-        initialContent = "Once upon a time...\n\n"
-            + " * There were two choices.\n"
-            + " * There were four lines of content.\n\n"
-            + "- They lived happily ever after.\n"
-            + "    -> END\n"
+        initialContent = [
+            "-> start",
+            "",
+            "=== start ===",
+            "",
+            "#title: The Signal",
+            "",
+            "The tide rose before its time and covered the stone steps. High in the tower, a thin light cuts through the fog.",
+            "",
+            "Across the bay, someone lights a lantern and answers.",
+            "",
+            "+ [Climb to the lantern] -> tower",
+            "+ [Go back to the beach] -> beach",
+            "",
+            "=== tower ===",
+            "#title: The Lantern",
+            "",
+            "The stairs creak with every step. Up top, the wind carries",
+            "the smell of salt and burnt iron.",
+            "",
+            "+ [Light the lamp] -> ending",
+            "+ [Put out the lantern] -> ending",
+            "",
+            "=== beach ===",
+            "#title: The Beach",
+            "",
+            "The sand holds the marks of a walk that is not yours.",
+            "",
+            "+ [Follow the footprints] -> ending",
+            "",
+            "=== ending ===",
+            "The lighthouse blinks once, then again.",
+            "-> END",
+            ""
+        ].join("\n");
     }
     this.aceDocument = new Document(initialContent);
     this.aceSession = null;
@@ -105,7 +136,11 @@ function InkFile(anyPath, mainInkFile, isBrandNew, inkMode, events) {
         this.hasUnsavedChanges = true;
         this.compilerVersionDirty = true;
         this.justSaved = false;
-        
+
+        // Tags have a single accepted shape (#tag: value, flush left). The editor fixes
+        // them as the writer types; this catches any change that bypasses the editor.
+        this.scheduleTagFix();
+
         if( !this.justLoadedContent ) 
             this.events.fileChanged();
     });
@@ -141,13 +176,38 @@ InkFile.prototype.getValue = function() {
 }
 
 InkFile.prototype.setValue = function(text) {
+    if( this.isInkFile ) text = TagFormat.normalizeText(text);
     this.aceDocument.setValue(text);
+}
+
+InkFile.prototype.scheduleTagFix = function() {
+    if( !this.isInkFile || this.tagFixPending ) return;
+    this.tagFixPending = true;
+    setTimeout(() => {
+        this.tagFixPending = false;
+        this.fixTags();
+    }, 0);
+}
+
+InkFile.prototype.fixTags = function() {
+    if( !this.isInkFile ) return;
+    if( this.aceSession && this.aceSession.$fromUndo ) return;
+    if( TagFormat.normalizeText(this.aceDocument.getValue()) === this.aceDocument.getValue() ) return;
+    // Same undo step as the edit that caused it
+    if( this.aceSession ) this.aceSession.mergeUndoDeltas = true;
+    TagFormat.fixDocument(this.aceDocument);
 }
 
 InkFile.prototype.getAceSession = function() {
     if( this.aceSession == null ) {
         this.aceSession = new EditSession(this.aceDocument, this.inkMode);
+        // game.yaml is plain YAML, not Ink. Use Ace's standard YAML highlighter
+        // so keys, strings, numbers and booleans get the native syntax colors.
+        if( this.isYamlFile ) this.aceSession.setMode("ace/mode/yaml");
         this.aceSession.setUseWrapMode(true);
+        // A row that wraps belongs to the line above it, so it starts in the same column.
+        // Ace indents it by a tab, which in prose reads as whitespace that isn't there.
+        this.aceSession.setOption("indentedSoftWrap", false);
         this.aceSession.setUndoManager(new ace.UndoManager());
     }
 
@@ -186,6 +246,7 @@ InkFile.prototype.save = function(afterSaveCallback) {
     else {
         this.justSaved = true;
         var fileContent = this.aceDocument.getValue() || "";
+        if( this.isInkFile ) fileContent = TagFormat.normalizeText(fileContent);
         
         // Ensure that the enclosing folder exists beforehand
         var fileAbsPath = this.absolutePath();
@@ -206,7 +267,9 @@ InkFile.prototype.save = function(afterSaveCallback) {
 InkFile.prototype.deleteFromDisk = function() {
     var absPath = this.absolutePath();
     if( absPath )
-        fs.exists(absPath, (exists) => { if( exists ) fs.unlink(absPath) });
+        fs.unlink(absPath, err => {
+            if( err && err.code !== "ENOENT" ) console.error("Could not delete", absPath, err);
+        });
 }
 
 InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
@@ -244,6 +307,15 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
             // https://en.wikipedia.org/wiki/Byte_order_mark
             data = data.replace(/^\uFEFF/, '');
 
+            // The file may have been changed outside Inky (another editor): fix the
+            // tags before the text ever reaches the editor.
+            var tagsFixed = false;
+            if( this.isInkFile ) {
+                var fixed = TagFormat.normalizeText(data);
+                tagsFixed = fixed !== data;
+                data = fixed;
+            }
+
             // Success - fire this callback before other callbacks 
             // like document change get fired
             loadCallback(null);
@@ -256,7 +328,7 @@ InkFile.prototype.tryLoadFromDisk = function(loadCallback) {
 
             this.aceDocument.setValue(data);
             if( this.aceSession ) this.aceSession.setUndoManager(new ace.UndoManager());
-            this.hasUnsavedChanges = false;
+            this.hasUnsavedChanges = tagsFixed;
             this.events.fileChanged();
 
             // Force immediate symbol re-parse (rather than the lazy scheduling)

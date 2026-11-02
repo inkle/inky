@@ -208,21 +208,9 @@ function refresh() {
                     type: 'separator'
                 },
                 {
-                    label: i18n._('Export to JSON...'),
-                    accelerator: 'CmdOrCtrl+Shift+S',
-                    enabled: callbacks.isFocusedWindow,
-                    click: callbacks.exportJson
-                },
-                {
                     label: i18n._('Export for web...'),
-                    enabled: callbacks.isFocusedWindow,
+                    accelerator: 'CmdOrCtrl+Shift+S',
                     click: callbacks.exportForWeb
-                },
-                {
-                    label: i18n._('Export story.js only...'),
-                    accelerator: 'CmdOrCtrl+Alt+S',
-                    enabled: callbacks.isFocusedWindow,
-                    click: callbacks.exportJSOnly
                 },
                 {
                     type: 'separator'
@@ -347,29 +335,7 @@ function refresh() {
                     checked: true,
                     click: callbacks.toggleTags
                 },
-                {
-                    label: i18n._('Choice alignment'),
-                    submenu: [
-                        {
-                            label: i18n._('Left'),
-                            type: "radio",
-                            checked: true,
-                            click: (item, win, ev) => callbacks.setChoiceAlignment("left", win)
-                        },
-                        {
-                            label: i18n._('Center'),
-                            type: "radio",
-                            checked: false,
-                            click: (item, win, ev) => callbacks.setChoiceAlignment("center", win)
-                        },
-                        {
-                            label: i18n._('Right'),
-                            type: "radio",
-                            checked: false,
-                            click: (item, win, ev) => callbacks.setChoiceAlignment("right", win)
-                        }
-                    ]
-                },
+
                 {
                         label: i18n._('Word count and more'),
                         accelerator: 'CmdOrCtrl+Shift+C',

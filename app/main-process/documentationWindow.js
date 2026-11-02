@@ -3,12 +3,12 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 
 const electronWindowOptions = {
-  icon: path.join(__dirname, "icon.png"),
   width: 1000,
   height: 650,
   minWidth: 700,
   minHeight: 300,
   title: "Documentation",
+  icon: path.join(__dirname, '..', 'renderer', 'about', 'icon-round.png'),
   autoHideMenuBar: true
 };
 

@@ -3,7 +3,8 @@
 Type=Application
 Categories=Development;IDE;
 Name=Inky
-Comment=Inky
-Exec=/opt/inky/Inky
+Comment=Editor for ink interactive narrative.
+Exec=/opt/inky/Inky %F
+Terminal=false
 Path=/opt/inky/
 Icon=inky

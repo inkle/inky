@@ -1,0 +1,26 @@
+theme: light
+
+colors:
+  background: "#ffffff"
+  text: "#000000"
+  choice: "#0066CC"
+  choice_hover: null
+
+font:
+  family: system
+  size: 18
+
+layout:
+  line_height: 1.7
+  width: 42
+  align: left
+  choice_align: left
+
+controls:
+  show: true
+
+audio:
+  volume: 50
+  master: 100
+  music: 100
+  sfx: 100

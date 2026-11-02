@@ -35,6 +35,29 @@
     color: red;
 }
 
+.ace_editor span.ace_richBold {
+    font-weight: 700;
+}
+
+.ace_editor span.ace_richItalic {
+    font-style: italic;
+}
+
+.ace_editor .ace_line span.ace_fold:empty,
+.ace_editor .ace_line span.ace_fold:empty:hover,
+.ace_editor .ace_line span.ace_fold:empty::selection {
+    display: none !important;
+    background: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    cursor: text !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+}
+
 #main.hideTags .ace_editor span.ace_tag {
     color: white;
 }

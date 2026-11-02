@@ -2,6 +2,7 @@ const editor = ace.edit("editor");
 const Range = ace.require("ace/range").Range;
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 const language_tools = ace.require("ace/ext/language_tools");
+const TagFormat = require("./tagFormat.js").TagFormat;
 
 const inkCompleter = require("./inkCompleter.js").inkCompleter;
 
@@ -24,6 +25,7 @@ editor.setShowPrintMargin(false);
 editor.setOptions({
     enableBasicAutocompletion: true, // defaults only, will be overriden by setAutoCompleteDisabled
     enableLiveAutocompletion: true,
+    behavioursEnabled: true,
 });
 editor.on("change", () => {
     events.change();
@@ -36,6 +38,10 @@ editor.on("changeSelection", ()=>{
 editor.completers = editor.completers.filter(
     (completer) => completer !== language_tools.textCompleter);
 editor.completers.push(inkCompleter);
+require("./tagPicker.js").TagPicker.install(editor, inkCompleter);
+require("./fileReference.js").FileReference.install(editor, inkCompleter);
+require("./yamlTitleGuard.js").YamlTitleGuard.install(editor);
+require("./richTextFormatting.js").RichTextFormatting.install(editor, Range);
 
 // Unbind windows CTRL-P: "Jump to matching bracket" since it collides with
 // our "go to anything" command.
@@ -152,6 +158,18 @@ function clearErrors() {
     editorMarkers = [];
 }
 
+// Tags have a single accepted shape (#tag: value, always flush left). Anything typed,
+// pasted or dropped in a different shape is fixed before the operation ends, in the same
+// undo step, so the wrong form never stays in the editor.
+var currentInkFile = null;
+editor.on("beforeEndOperation", function() {
+    if( !currentInkFile || !currentInkFile.isInkFile ) return;
+    if( !editor.curOp || !editor.curOp.docChanged ) return;
+    var session = editor.session;
+    if( session.$fromUndo ) return;
+    TagFormat.fixDocument(session.doc);
+});
+
 exports.EditorView = {
     clearErrors: clearErrors,
     setEvents: (e) => { events = e; },
@@ -166,6 +184,7 @@ exports.EditorView = {
     },
     showInkFile: (inkFile) => {
         clearErrors();
+        currentInkFile = inkFile;
         editor.setSession(inkFile.getAceSession());
         editor.focus();
     },

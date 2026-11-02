@@ -1,4 +1,5 @@
 const {app, BrowserWindow, ipcMain, dialog, ipcRenderer, Menu} = require('electron')
+const path = require("path");
 const i18n = require("./i18n/i18n.js")
 const {ProjectWindow} = require("./projectWindow.js");
 const {DocumentationWindow} = require("./documentationWindow.js");
@@ -8,6 +9,9 @@ const {onForceQuit} = require('./forceQuitDetect');
 const {Inklecate} = require("./inklecate.js");
 const { fstat } = require('original-fs');
 const {fs} = require("fs");
+const { listSystemFonts } = require("./systemFonts.js");
+
+ipcMain.handle("list-system-fonts", () => listSystemFonts());
 
 
 function inkJSNeedsUpdating() {
@@ -46,6 +50,10 @@ ipcMain.on('show-context-menu', (event) => {
     menu.popup(BrowserWindow.fromWebContents(event.sender))
 })
 
+
+ipcMain.handle("showOpenDialog", async (event, openOptions) => {
+    return dialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender), openOptions)
+})
 
 ipcMain.handle("showSaveDialog", async (event,saveOptions) => {
     return dialog.showSaveDialog(saveOptions) 
@@ -143,25 +151,13 @@ app.on('ready', function () {
             var win = ProjectWindow.focused();
             if (win) win.save();
         },
-        exportJson: () => {
-            var win = ProjectWindow.focused();
-            if (win) win.exportJson();
-        },
         exportForWeb: () => {
             if( inkJSNeedsUpdating() ) return;
             var win = ProjectWindow.focused();
             if (win) win.exportForWeb();
         },
-        exportJSOnly: () => {
-            if( inkJSNeedsUpdating() ) return;
-            var win = ProjectWindow.focused();
-            if (win) win.exportJSOnly();
-        },
         toggleTags: (item, focusedWindow, event) => {
             focusedWindow.webContents.send("set-tags-visible", item.checked);
-        },
-        setChoiceAlignment: (alignment, focusedWindow) => {
-            if( focusedWindow ) focusedWindow.webContents.send("set-choice-alignment", alignment);
         },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
@@ -270,12 +266,15 @@ app.on('ready', function () {
         }
     });
 
-    // Windows passed file to open on command line?
-    if (process.platform == "win32" && process.argv.length > 1 && !pendingPathToOpen) {
+    // Open a story passed on the command line on any platform.
+    if (process.argv.length > 1 && !pendingPathToOpen) {
+        const baseDir = process.env.OWD || process.cwd();
         for (let i = 1; i < process.argv.length; i++) {
-            var arg = process.argv[i].toLowerCase();
-            if (arg.endsWith(".ink")) {
-                pendingPathToOpen = process.argv[1];
+            const arg = process.argv[i];
+            if( arg.startsWith("-") || !arg.toLowerCase().endsWith(".ink") ) continue;
+            const candidate = path.resolve(baseDir, arg);
+            if( require("fs").existsSync(candidate) ) {
+                pendingPathToOpen = candidate;
                 break;
             }
         }
@@ -287,7 +286,7 @@ app.on('ready', function () {
         pendingPathToOpen = null;
     }
     
-    // Otherwise, show new empty window
+    // No file requested: start a new project holding the Glass Tide story (see InkFile's initialContent).
     else {
         ProjectWindow.createEmpty();
     }

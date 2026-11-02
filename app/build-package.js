@@ -151,7 +151,9 @@ async function buildPackageForPlatform(targetPlatform) {
         prune: true,
         asar: {
             unpackDir: 'main-process/ink'
-        }
+        },
+        // Sample story shipped beside app.asar so it can be opened with File > Open.
+        extraResource: [path.join(__dirname, "../examples/mare-de-vidro")]
     };
 
     if( targetPlatform == "mac" ) {

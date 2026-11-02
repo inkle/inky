@@ -8,7 +8,7 @@ Developed in collaboration with generative AI, under human direction, with imple
 
 [![Fork of inkle/inky](https://img.shields.io/badge/fork%20of-inkle%2Finky-blue)](https://github.com/inkle/inky)
 ![Base version](https://img.shields.io/badge/based%20on-0.15.2-informational)
-![Electron](https://img.shields.io/badge/Electron-44.9.0-47848F)
+![Electron](https://img.shields.io/badge/Electron-30.0.4-47848F)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 <img src="docs/screenshot-choice-alignment.png" alt="Inky fork showing blue choices and the Choice alignment menu" width="720">
@@ -21,9 +21,9 @@ Developed in collaboration with generative AI, under human direction, with imple
 
 ## Project status
 
-This fork is in its **early stages of development**, with a focus on refining the Inky writing, preview, and web publishing experience.
+This is an actively developed community fork of Inky 0.15.2. It builds on the original editor with a richer story-authoring workflow, expanded project tools, and closer visual parity between the live preview and web export.
 
-The core features described in this README have been implemented and tested in the development environment. As the project continues to evolve, further testing, refinements, and compatibility improvements may be introduced.
+The project includes automated tests for editor behavior, story rendering, audio, project management, and web export. Compatibility and new improvements continue to be refined.
 
 Feedback, bug reports, and suggestions are welcome and will help guide future improvements.
 
@@ -42,6 +42,17 @@ The fork focuses on making the editor's live preview and its web export behave c
 - **Publish:** use **Export for web** to generate a playable web version with the same presentation.
 
 The primary target is the Inky IDE and its web export. Using compiled JSON in other engines, such as Unity or custom inkjs players, is not a primary goal. Some custom presentation features may require additional handling in other runtimes.
+
+## More authoring tools
+
+Beyond the presentation changes below, this fork adds tools for managing and styling complete story projects:
+
+- **Project Explorer:** organize scenes and folders, import story and media files, and rename or remove project items.
+- **Visual story settings:** configure story information, typography, alignment, layout, and other presentation options without editing YAML by hand.
+- **Audio workflow:** preview sound files in the Explorer, use `#music:` and `#sound:` tags, and tune the exported player's audio mix.
+- **Richer web export:** publish a playable web version with story styling, title information, audio, and reader controls.
+
+The interface also supports scene-specific alignment and title styling, while keeping the original ink syntax and live compiler workflow.
 
 ## What's different from upstream?
 
@@ -187,7 +198,13 @@ From the `app/` directory:
 npm run build-package -- linux
 ```
 
-Other supported packaging targets may include `win32`, `win64`, and `mac`, depending on the build scripts and environment.
+The package script supports `linux`, `mac`, `win32` (32-bit), and `win64` (64-bit). Add `-zip` to produce distributable archives; Mac builds require macOS.
+
+For Linux, the repository also provides a release script that builds the application bundle, AppImage, and Debian package:
+
+```bash
+./BUILD_FOR_LINUX.sh
+```
 
 For upstream platform-specific instructions and additional details, see the [official Inky README](https://github.com/inkle/inky#readme).
 
