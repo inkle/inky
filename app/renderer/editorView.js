@@ -41,7 +41,8 @@ editor.completers.push(inkCompleter);
 require("./tagPicker.js").TagPicker.install(editor, inkCompleter);
 require("./fileReference.js").FileReference.install(editor, inkCompleter);
 require("./yamlTitleGuard.js").YamlTitleGuard.install(editor);
-require("./richTextFormatting.js").RichTextFormatting.install(editor, Range);
+const richText = require("./richTextFormatting.js").RichTextFormatting.install(editor, Range);
+require("./richTextToolbar.js").RichTextToolbar.install(editor, richText);
 
 // Unbind windows CTRL-P: "Jump to matching bracket" since it collides with
 // our "go to anything" command.

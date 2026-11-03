@@ -7,7 +7,7 @@ const { JSDOM } = require("jsdom");
 const { RichTextFormatting } = require("../renderer/richTextFormatting.js");
 
 describe("rich text formatting in the Ink editor", function () {
-    let window, editor, Range, primarySession;
+    let window, editor, Range, primarySession, richText;
 
     before(function () {
         const dom = new JSDOM('<!doctype html><body><div id="editor" style="width:600px;height:400px"></div></body>', {
@@ -23,7 +23,7 @@ describe("rich text formatting in the Ink editor", function () {
         editor.$blockScrolling = Infinity;
         editor.session.setMode(new window.exports.InkMode());
         Range = window.ace.require("ace/range").Range;
-        RichTextFormatting.install(editor, Range);
+        richText = RichTextFormatting.install(editor, Range);
         primarySession = editor.session;
     });
 
@@ -332,12 +332,77 @@ describe("rich text formatting in the Ink editor", function () {
         assert.strictEqual(editor.session.getAllFolds().length, 0);
     });
 
-    it("still formats the story text of a gather", async function () {
-        await setText("- Texto do gather");
-        editor.selection.setRange(new Range(0, 2, 0, 7));
+    it("keeps gathers plain too: only the plain story text is formatted", async function () {
+        for( const line of ["- Texto do gather", "- (rotulo) texto", "   - - nested gather"] ) {
+            await setText(line);
+            editor.selection.setRange(new Range(0, 0, 0, line.length));
+            editor.execCommand("toggleRichTextBold");
+            await tick();
+            assert.strictEqual(editor.getValue(), line, line);
+        }
+        // A divert starts with "-" but it is not a gather; it is not story text either
+        await setText("-> fim");
+        editor.selection.setRange(new Range(0, 0, 0, 6));
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "- ⟦b⟧Texto⟦/b⟧ do gather");
+        assert.strictEqual(editor.getValue(), "-> fim");
+        await setText("Texto normal -> fim");
+        editor.selection.setRange(new Range(0, 0, 0, 5));
+        editor.execCommand("toggleRichTextBold");
+        await tick();
+        assert.strictEqual(editor.getValue(), "⟦b⟧Texto⟦/b⟧ normal -> fim");
+    });
+
+    it("keeps the selection on the same text after formatting, so bold and italic can be combined", async function () {
+        await setText("A maré subiu");
+        editor.selection.setRange(new Range(0, 2, 0, 6));
+        editor.execCommand("toggleRichTextBold");
+        await tick();
+        assert.strictEqual(editor.getValue(), "A ⟦b⟧maré⟦/b⟧ subiu");
+        assert.strictEqual(editor.getSelectedText(), "maré");
+        editor.execCommand("toggleRichTextItalic");
+        await tick();
+        assert.strictEqual(editor.getValue(), "A ⟦b⟧⟦i⟧maré⟦/i⟧⟦/b⟧ subiu");
+        assert.strictEqual(editor.getSelectedText(), "maré");
+        editor.execCommand("toggleRichTextBold");
+        await tick();
+        assert.strictEqual(editor.getValue(), "A ⟦i⟧maré⟦/i⟧ subiu");
+        assert.strictEqual(editor.getSelectedText(), "maré");
+    });
+
+    it("keeps a selection that covers several lines", async function () {
+        await setText("Primeira linha\nSegunda linha");
+        editor.selection.setRange(new Range(0, 0, 1, 7));
+        editor.execCommand("toggleRichTextItalic");
+        await tick();
+        assert.strictEqual(editor.getValue(), "⟦i⟧Primeira linha⟦/i⟧\n⟦i⟧Segunda⟦/i⟧ linha");
+        // The visible text stays selected, from its first letter to the end of "Segunda"
+        const kept = editor.getSelectionRange();
+        assert.deepStrictEqual([kept.start.row, kept.start.column, kept.end.row, kept.end.column], [0, 3, 1, 10]);
+    });
+
+    it("tells the toolbar what the selection allows and what it already has", async function () {
+        const state = () => richText.selectionState(editor);
+        await setText("A maré subiu\n* escolha\n#tag: x\n- gather");
+        assert.deepStrictEqual(state(), { enabled: false, bold: false, italic: false }, "empty selection");
+        editor.selection.setRange(new Range(0, 2, 0, 6));
+        assert.deepStrictEqual(state(), { enabled: true, bold: false, italic: false });
+        editor.execCommand("toggleRichTextBold");
+        await tick();
+        assert.deepStrictEqual(state(), { enabled: true, bold: true, italic: false });
+        editor.selection.setRange(new Range(0, 0, 0, 12));
+        assert.deepStrictEqual(state(), { enabled: true, bold: false, italic: false }, "only part is bold");
+        editor.selection.setRange(new Range(1, 0, 1, 5));
+        assert.strictEqual(state().enabled, false, "a choice");
+        editor.selection.setRange(new Range(3, 0, 3, 5));
+        assert.strictEqual(state().enabled, false, "a gather");
+        editor.selection.setRange(new Range(2, 0, 2, 4));
+        assert.strictEqual(state().enabled, false, "a tag");
+        editor.selection.setRange(new Range(0, 11, 1, 0));
+        assert.strictEqual(state().enabled, true, "text up to the line break");
+        await setText("A   B");
+        editor.selection.setRange(new Range(0, 1, 0, 4));
+        assert.strictEqual(state().enabled, false, "only spaces");
     });
 
     it("reapplies marker folds when a story session is loaded", async function () {

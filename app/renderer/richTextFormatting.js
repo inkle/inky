@@ -7,11 +7,10 @@ function baseTokenType(type) {
     return String(type || "").replace(/\.rich(?:Bold|Italic)/g, "");
 }
 
-// Formatting is for the story text only: the narrative lines and the text of a gather. Choices,
-// tags, logic, comments and every other line of the ink stay plain.
+// Formatting is for the plain story text only: the narrative lines. Choices, gathers, tags, logic,
+// comments and every other line of the ink stay plain.
 function isEligibleType(type) {
-    type = baseTokenType(type);
-    return type === "text" || type === "gather.innerContent";
+    return baseTokenType(type) === "text";
 }
 
 // A choice line starts with * or + (nested choices repeat them: "* * text"). The whole line is plain.
@@ -19,9 +18,14 @@ function isChoiceLine(line) {
     return /^\s*[*+]/.test(line);
 }
 
+// A gather starts with - (but "->" is a divert). The whole line is plain.
+function isGatherLine(line) {
+    return /^\s*-(?!>)/.test(line);
+}
+
 function parseLine(line, tokens) {
     const eligible = new Array(line.length).fill(false);
-    if( isChoiceLine(line) ) return { pairs: [], eligible, styles: new Array(line.length) };
+    if( isChoiceLine(line) || isGatherLine(line) ) return { pairs: [], eligible, styles: new Array(line.length) };
     let offset = 0;
     (tokens || []).forEach(token => {
         const end = Math.min(line.length, offset + token.value.length);
@@ -516,12 +520,20 @@ function install(editor, Range) {
                 const pairs = parsed.pairs.filter(item => item.tag === tag &&
                     item.contentStart < to && item.contentEnd > from);
                 pairs.forEach(pair => {
-                    if( pair.contentStart < from ) {
+                    // Hidden markers of another format at the edge are not text: a selection that
+                    // covers all the visible text of the pair removes the pair, it does not split it
+                    let edge = from;
+                    while( edge > pair.contentStart && isMarkerColumn(parsed.pairs, edge - 1) ) edge--;
+                    const coversStart = edge <= pair.contentStart;
+                    edge = to;
+                    while( edge < pair.contentEnd && isMarkerColumn(parsed.pairs, edge) ) edge++;
+                    const coversEnd = edge >= pair.contentEnd;
+                    if( !coversStart ) {
                         edits.push({ row, start: from, end: from, text: CLOSE[tag] });
                     } else {
                         edits.push({ row, start: pair.openStart, end: pair.openEnd, text: "" });
                     }
-                    if( pair.contentEnd > to ) {
+                    if( !coversEnd ) {
                         edits.push({ row, start: to, end: to, text: OPEN[tag] });
                     } else {
                         edits.push({ row, start: pair.closeStart, end: pair.closeEnd, text: "" });
@@ -541,6 +553,11 @@ function install(editor, Range) {
             }
         }
         if( !edits.length ) return;
+        // The selection stays on the same text, so the writer can go on (bold, then italic).
+        // Anchors follow the text while the hidden markers are added or removed around it.
+        const startAnchor = session.doc.createAnchor(range.start.row, lineSelectionBounds(session, range.start.row, range).from);
+        const endAnchor = session.doc.createAnchor(range.end.row, lineSelectionBounds(session, range.end.row, range).to);
+        endAnchor.$insertRight = true;
         session.markUndoGroup();
         edits.sort((a, b) => b.row - a.row || b.start - a.start);
         edits.forEach(edit => {
@@ -548,7 +565,26 @@ function install(editor, Range) {
             else removeRange(session, new Range(edit.row, edit.start, edit.row, edit.end));
         });
         session.markUndoGroup();
-        editor.clearSelection();
+        const kept = new Range(startAnchor.row, startAnchor.column, endAnchor.row, endAnchor.column);
+        startAnchor.detach();
+        endAnchor.detach();
+        editor.selection.setRange(kept);
+    }
+
+    // What the formatting toolbar needs to know about the selection: whether it can be formatted,
+    // and whether all of its text already is bold or italic.
+    function selectionState(editor) {
+        const none = { enabled: false, bold: false, italic: false };
+        if( (editor.getReadOnly && editor.getReadOnly()) || editor.inMultiSelectMode || editor.selection.isEmpty() ) return none;
+        const session = editor.session;
+        const range = editor.getSelectionRange();
+        const plain = session.getTextRange(range).replace(/\u27e6\/?[bi]\u27e7/g, "").trim();
+        if( !plain || !selectionIsEligible(session, range) ) return none;
+        return {
+            enabled: true,
+            bold: selectionHasFormat(session, range, "b"),
+            italic: selectionHasFormat(session, range, "i")
+        };
     }
 
     function toggleAtCursor(editor, tag) {
@@ -604,7 +640,7 @@ function install(editor, Range) {
         }
     });
 
-    return { syncSession };
+    return { syncSession, selectionState };
 }
 
 exports.RichTextFormatting = { OPEN, CLOSE, parseLine, decorateTokens, install };
