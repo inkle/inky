@@ -2,7 +2,7 @@
 
 <img src="resources/icon-small.jpg" alt="Inky icon" width="112">
 
-# Inky — enhanced community fork
+# Inky enhanced community fork
 
 **Create and play ink-powered games without leaving your IDE [ink](https://github.com/inkle/ink).**
 
