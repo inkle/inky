@@ -62,10 +62,13 @@ Use ink tags to add media to passages:
 
 ```ink
 === station ===
-#title: The Station
 
-The last train pulls in. #image: station.jpg
-Its brakes shriek in the night. #sound: train.mp3
+#title: The Station
+#image: station.jpg
+#sound: train.mp3
+
+The last train pulls in.
+Its brakes shriek in the night.
 ```
 
 **Sound tags**
