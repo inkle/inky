@@ -13,7 +13,7 @@ A feature-rich continuation of [inkle's Inky](https://github.com/inkle/inky), wi
 ![Electron 30](https://img.shields.io/badge/Electron-30.0.4-47848F)
 ![MIT License](https://img.shields.io/badge/license-MIT-green)
 
-<img src="docs/screenshots/title-screen.png" alt="Inky editor and the story title screen" width="760">
+<img src="docs/screenshots/welcome.png" alt="Inky editor and the story title screen" width="760">
 
 </div>
 
