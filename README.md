@@ -13,7 +13,7 @@ A feature-rich continuation of [inkle's Inky](https://github.com/inkle/inky), wi
 ![Electron 30](https://img.shields.io/badge/Electron-30.0.4-47848F)
 ![MIT License](https://img.shields.io/badge/license-MIT-green)
 
-<img src="docs/screenshot-choice-alignment.png" alt="Inky editor and live story preview with choice alignment settings" width="760">
+<img src="docs/screenshots/title-screen.png" alt="Inky editor and the story title screen" width="760">
 
 </div>
 
@@ -85,15 +85,14 @@ Use `#image: filename.png` to show a picture in the story. Local pictures are co
 |---|---|---|
 | Story line breaks | Standard paragraph spacing | Consecutive lines can stay compact; a blank line creates a visible break. |
 | Choices | Original choice styling | Blue choices with independent left, center, or right alignment. |
-| Scene transitions | Original transcript behavior | `#clean` clears earlier story text when its scene or choice is entered. |
 | Story alignment | Story-wide alignment | `#align:` can override alignment for a scene or paragraph. |
 | Authoring settings | Edit presentation in project files | Configure appearance through Visual settings or edit `game.yaml` directly. |
 | Media | Basic story editing | Preview and manage audio and images; export referenced story assets. |
 | Publishing | Standard web export | Export a styled, playable web version with the title screen and reader controls. |
 
-### Scene tags
+### Alignment tags
 
-`#clean` clears the previous transcript when a tagged scene or choice is reached. `#align: left`, `#align: center`, or `#align: right` changes text alignment; on a scene's opening line alongside `#title:` or `#clean`, it applies to that scene. On another paragraph, it applies only to that paragraph.
+`#align: left`, `#align: center`, or `#align: right` changes text alignment. On a scene's opening line alongside `#title:`, it applies to that scene; on another paragraph, it applies only to that paragraph.
 
 ### Web export
 
@@ -101,17 +100,13 @@ Use `#image: filename.png` to show a picture in the story. Local pictures are co
 
 ## Screenshots
 
-**Choice alignment**
+**Title screen**
 
-![Choice alignment menu in the Inky preview](docs/screenshot-choice-alignment.png)
+![Story title screen with cover art, author, and Start button](docs/screenshots/title-screen.png)
 
-**Compact lines and visible line breaks**
+**Live story preview**
 
-![Line breaks in an Inky story preview](docs/screenshot-line-breaks.png)
-
-**Blue choices**
-
-![Blue interactive choices in the story preview](docs/screenshot-blue-choices.png)
+![Rendered passage and interactive choices in Inky's preview](docs/screenshots/live-preview.png)
 
 ## Compatibility notes
 
