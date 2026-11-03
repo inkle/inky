@@ -4,7 +4,7 @@
 
 # Inky — enhanced community fork
 
-**Write, play, and publish interactive stories with [ink](https://github.com/inkle/ink).**
+**Create and play ink-powered games without leaving your IDE [ink](https://github.com/inkle/ink).**
 
 A feature-rich continuation of [inkle's Inky](https://github.com/inkle/inky), with a project Explorer, visual game settings, media support, and a web player.
 
