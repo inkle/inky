@@ -2,99 +2,129 @@
 
 <img src="resources/icon-small.jpg" alt="Inky icon" width="112">
 
-# Inky · Community fork
+# Inky — enhanced community fork
 
-**Write, test, and publish interactive stories with [ink](https://github.com/inkle/ink), all in one place.**
+**Write, play, and publish interactive stories with [ink](https://github.com/inkle/ink).**
 
-This fork builds on [the original Inky](https://github.com/inkle/inky) with tools to organize projects, customize how stories look, and export them to the web.
+A feature-rich continuation of [inkle's Inky](https://github.com/inkle/inky), with a project Explorer, visual game settings, media support, and a web player.
 
-[![Fork of Inky](https://img.shields.io/badge/fork-of%20inkle%2Finky-blue)](https://github.com/inkle/inky)
-![Base version](https://img.shields.io/badge/base%20version-0.15.2-informational)
-![Electron](https://img.shields.io/badge/Electron-30.0.4-47848F)
-![License](https://img.shields.io/badge/license-MIT-green)
+[![Fork of inkle/inky](https://img.shields.io/badge/fork-inkle%2Finky-blue)](https://github.com/inkle/inky)
+![Based on Inky 0.15.2](https://img.shields.io/badge/based%20on-Inky%200.15.2-informational)
+![Electron 30](https://img.shields.io/badge/Electron-30.0.4-47848F)
+![MIT License](https://img.shields.io/badge/license-MIT-green)
 
-<img src="docs/screenshot-choice-alignment.png" alt="Inky showing blue choices and the alignment menu" width="760">
+<img src="docs/screenshot-choice-alignment.png" alt="Inky editor and live story preview with choice alignment settings" width="760">
 
 </div>
 
-> **Independent project:** This fork is not affiliated with, endorsed by, or officially maintained by inkle Ltd. Inky and ink remain credited to their original creators.
+> **Independent community fork.** This project is not affiliated with, endorsed by, or officially maintained by inkle Ltd. Inky and ink remain credited to their original creators.
 
 ---
 
-## About
+## What is Inky?
 
-**Inky** is an editor for **ink**, the interactive narrative scripting language used in games such as *80 Days*. It combines writing, live compilation, and a playable preview.
+Inky is a desktop editor for **ink**, inkle's scripting language for interactive narrative. Write a story in plain-text `.ink` files, compile as you work, and play through choices in the built-in preview.
 
-This fork is based on version **0.15.2** and focuses on the authoring experience: project organization, visual customization, audio, images, and greater consistency between the editor preview and the web export.
+This fork builds on Inky **0.15.2** with expanded authoring tools and a web export designed to carry your story's presentation and media with it.
 
-## Highlights
+## Features
 
-- **Live preview:** see your story and test choices as you edit.
-- **Continuous compilation:** errors, warnings, and TODOs appear in the editor, with navigation to the relevant source.
-- **Multi-file projects:** organize scenes and folders; Inky follows `INCLUDE` lines.
-- **Project Explorer:** create, import, rename, and delete files and folders.
-- **Visual settings:** configure the title, author, typography, colors, layout, and alignment through the interface.
-- **Media tags:** add images and audio to your story, and preview project files.
-- **Web export:** publish a playable version with controls, styling, and story assets.
-- **Editor themes:** switch between light and dark themes.
+### Write and test in one place
 
-## What this fork adds
+- Syntax highlighting, ink snippets, tag autocomplete, and jump-to-definition.
+- Live compilation with errors, warnings, and TODOs linked to their source locations.
+- A playable preview that keeps your place as the story recompiles.
+- Bold and italic formatting for narrative text with **Ctrl/Cmd+B** and **Ctrl/Cmd+I**.
+- Light, dark, focus, and contrast editor themes.
 
-| Feature | Behavior |
-|---|---|
-| Lines and paragraphs | Consecutive lines stay compact; a blank line creates a visible line break. |
-| Choices | Blue text, with left, center, or right alignment. |
-| `#clean` | Clears previous text when entering a tagged scene or choice. |
-| Per-scene alignment | Use `#align:` to align a scene independently of the story-wide setting. |
-| Titles | Configure the story title, author, and scene titles. |
-| Audio | Use `#music:` for music and `#sound:` for sound effects. |
-| Images | Use `#image:` to include local or remote images in a story. |
-| Export | Story presentation and visual settings carry over to the web export. |
+### Organize complete story projects
 
-### Tag example
+- A project Explorer for scenes, folders, style files, images, and audio.
+- Create and import project files, rename or delete them, and select multiple items for batch actions.
+- Include-aware projects: Inky follows `INCLUDE` statements and helps create included scenes.
+- A file watcher that reflects changes made outside Inky.
+- Preview image and audio files directly from the Explorer.
+
+### Shape the reader experience
+
+Use the **Visual** settings panel to configure the story without hand-editing YAML. Changes update the preview and are stored in the project's `game.yaml`; the **Advanced** tab remains available for direct YAML editing.
+
+- Preset looks, light/dark palettes, custom colors, fonts, font size, line height, and text width.
+- Story text and choice alignment can be set independently.
+- Reading layouts: automatic, portrait (9:16), landscape (16:9), square (1:1), or a custom aspect ratio.
+- Story title, author, cover art, and a dedicated title screen with a **Start** button.
+- Scene-title typography and alignment, with per-scene alignment overrides.
+- Optional reader controls, including a light/dark appearance toggle.
+
+### Add sound and images
+
+Use ink tags to add media to passages:
 
 ```ink
-=== arrival ===
+=== station ===
 #title: The Station
-#align: center
-#image: station.jpg
 
-The last train leaves at midnight.
-#sound: train.mp3
-
-* Wait for the next train.
-    -> night #clean
-
-* Head back home.
-    -> home
+The last train pulls in. #image: station.jpg
+Its brakes shriek in the night. #sound: train.mp3
 ```
 
-For background music, use `#music: filename.mp3`. Use `#music: stop` to stop the music, or `#sound: stop` to stop sound effects.
+**Sound tags**
 
-> **Compatibility:** This fork's visual enhancements target Inky and its web player. For example, a visual line break created by a blank line is represented as `<br>` in the compiled content; other runtimes may display that markup literally unless they handle it explicitly.
+- `#music: filename.mp3` starts or changes looping music.
+- `#music: stop` stops the music.
+- `#sound: filename.mp3` plays a sound effect once.
+- `#sound: stop` stops active sound effects.
+
+Audio files can be organized in `audio/` (including `music/`, `musics/`, and `sfx/` subfolders). Supported formats include MP3, OGG, WAV, M4A, AAC, FLAC, Opus, and WebM. The Visual settings provide separate master, music, and sound-effect levels.
+
+Use `#image: filename.png` to show a picture in the story. Local pictures are collected into the web export; remote HTTP(S) images remain remote. Import images into the project or use the Explorer to inspect them. A project favicon can also be included in the exported page.
+
+## What this fork changes
+
+| Area | Inky 0.15.2 | This fork |
+|---|---|---|
+| Story line breaks | Standard paragraph spacing | Consecutive lines can stay compact; a blank line creates a visible break. |
+| Choices | Original choice styling | Blue choices with independent left, center, or right alignment. |
+| Scene transitions | Original transcript behavior | `#clean` clears earlier story text when its scene or choice is entered. |
+| Story alignment | Story-wide alignment | `#align:` can override alignment for a scene or paragraph. |
+| Authoring settings | Edit presentation in project files | Configure appearance through Visual settings or edit `game.yaml` directly. |
+| Media | Basic story editing | Preview and manage audio and images; export referenced story assets. |
+| Publishing | Standard web export | Export a styled, playable web version with the title screen and reader controls. |
+
+### Scene tags
+
+`#clean` clears the previous transcript when a tagged scene or choice is reached. `#align: left`, `#align: center`, or `#align: right` changes text alignment; on a scene's opening line alongside `#title:` or `#clean`, it applies to that scene. On another paragraph, it applies only to that paragraph.
+
+### Web export
+
+**File → Export for web** creates a complete player folder with the compiled story, the inkjs runtime, styles, and the assets referenced by the story, including audio, local images, cover art, and favicon when present. Remote images remain online references. The exported player includes a title screen, reader controls, and save/load support.
 
 ## Screenshots
 
 **Choice alignment**
 
-![Choice alignment menu](docs/screenshot-choice-alignment.png)
+![Choice alignment menu in the Inky preview](docs/screenshot-choice-alignment.png)
 
-**Line breaks**
+**Compact lines and visible line breaks**
 
-![Line breaks in the preview](docs/screenshot-line-breaks.png)
+![Line breaks in an Inky story preview](docs/screenshot-line-breaks.png)
 
 **Blue choices**
 
-![Blue choices](docs/screenshot-blue-choices.png)
+![Blue interactive choices in the story preview](docs/screenshot-blue-choices.png)
 
-## Development setup
+## Compatibility notes
+
+The main target is the Inky editor and its web export. Some presentation features are specific to this fork. In particular, blank-line formatting is represented as literal `<br>` text in compiled story content; other game runtimes may show `<br>` literally unless they handle it.
+
+## Get started
 
 ### Requirements
 
 - [Node.js](https://nodejs.org/) and npm
 - Git
 
-### Run Inky
+### Install and run from source
 
 ```bash
 git clone https://github.com/ytriosa/inky.git
@@ -103,54 +133,48 @@ npm install
 npm start
 ```
 
-### Run the tests
+### Run tests
 
-From the repository root:
+From `inky/app/`:
 
 ```bash
-cd inky/app
 npm test
+```
+
+To run the web-export smoke tests only:
+
+```bash
+npm run test:web-export
 ```
 
 ### Build packages
 
-From the repository root, the packaging script supports `linux`, `mac`, `win32` (32-bit), and `win64` (64-bit):
+From `inky/app/`, build for Linux, macOS, Windows 32-bit, or Windows 64-bit:
 
 ```bash
-cd inky/app
 npm run build-package -- linux
 ```
 
-Add `-zip` to create a distributable archive:
+Add `-zip` to produce a distributable archive:
 
 ```bash
 npm run build-package -- linux -zip
 ```
 
-macOS builds must be run on a Mac. On Linux, the release script builds the application bundle, AppImage, and Debian package:
-
-```bash
-cd inky
-npm install --global electron-packager
-./BUILD_FOR_LINUX.sh
-```
-
-The Debian package targets Linux x86_64. Refer to the build scripts for platform-specific prerequisites.
+macOS builds must run on macOS. The root-level `BUILD_FOR_LINUX.sh` builds the Linux x64 application bundle, AppImage, and Debian package. Consult the build scripts for platform-specific tools and requirements.
 
 ## Downloads
 
-Published packages, when available, will be listed on the [Releases](https://github.com/ytriosa/inky/releases) page.
+Check [GitHub Releases](https://github.com/ytriosa/inky/releases) for downloadable packages when they are published.
 
-## Development and contributions
+## Contributing
 
-Suggestions, bug reports, and contributions are welcome. Open an [issue](https://github.com/ytriosa/inky/issues) describing the behavior you observed and, if possible, the steps to reproduce it.
-
-This fork is developed with human direction and AI assistance. Changes are implemented, tested, and reviewed in the project.
+Bug reports, suggestions, and contributions are welcome. Please open an [issue](https://github.com/ytriosa/inky/issues) with a description and steps to reproduce the behavior, if applicable.
 
 ## Credits and license
 
-- **Inky and ink:** created by [inkle Ltd](https://github.com/inkle). The original project is distributed under the MIT License.
-- **This fork:** changes are identified in [`LICENSE`](LICENSE), alongside credits for the original project.
-- **Dependencies:** Electron, Chromium, inkjs, and other dependencies have their own licenses; see the notices included with the distribution.
+- **Inky and ink** are projects by [inkle Ltd](https://github.com/inkle). The original Inky project is distributed under the MIT License.
+- This fork's changes and the applicable copyright notices are documented in [`LICENSE`](LICENSE).
+- Electron, Chromium, inkjs, and other dependencies are distributed under their respective licenses; see the included third-party notices.
 
 *Inky is named after a black cat based in Cambridge, UK.*
