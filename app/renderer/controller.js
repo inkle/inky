@@ -7,7 +7,6 @@ const { pathToFileURL } = require("url");
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 
 // Debug
-const loadTestInk = false;
 //remote.getCurrentWindow().webContents.openDevTools();
 
 // Helpers in global objects and namespace
@@ -44,18 +43,22 @@ function resolveContainedProjectPath(projectRoot, relativePath) {
     return GameStyle.pathStaysInsideRoot(root, target) ? target : null;
 }
 
-// "# image: src" in the Preview: remote pictures load as in the exported page; project files
-// are found as the export finds them: at the path written, else in "images" or "image", so a
-// picture imported into "images/" shows up with just its name while the writer works.
-function resolvePreviewImage(value) {
+// "# image: src" and "# bg: src" use the same typed project lookup as the web exporter.
+// Bare #image names resolve through image/; bare #bg names through image/background/.
+// Explicit relative paths remain available for custom project layouts.
+function resolvePreviewImage(value, kind) {
     const source = String(value || "").trim().replace(/\\/g, "/");
     if( !source || source.startsWith("//") ) return null;
     if( /^https?:\/\//i.test(source) ) return source;
     if( /^[a-z][a-z0-9+.-]*:/i.test(source) ) return null;
     const project = InkProject.currentProject;
     const projectDir = project && project.mainInk ? project.mainInk.projectDir : null;
-    // Same lookup as the export: the path written, then the "images" and "image" folders.
-    const resolved = resolveImageReference(projectDir, source);
+    // Same tag-aware lookup as the export, including the conventional image/background folder.
+    const resolved = resolveImageReference(projectDir, source, kind);
+    if( resolved.kind === "ambiguous" ) {
+        console.warn(`Ambiguous image file name: ${source}. Use an explicit path to select one: ${resolved.candidates.join(" or ")}`);
+        return null;
+    }
     if( resolved.kind !== "ok" ) return null;
     const file = resolveContainedProjectPath(projectDir, resolved.relative);
     if( !file || !isImageFileName(file) ) return null;
@@ -148,11 +151,6 @@ InkProject.setEvents({
 $(document).ready(() => {
     if( InkProject.currentProject == null ) {
         InkProject.startNew();
-        // Debug
-        if( loadTestInk ) {
-            var testInk = require("fs").readFileSync(path.join(__dirname, "test.ink"), "utf8");
-            InkProject.currentProject.mainInk.setValue(testInk);
-        }
         NavView.setKnots(InkProject.currentProject.mainInk);
     }
     // Show Explorer for both a brand-new project and a project restored from
@@ -198,7 +196,7 @@ GameStyle.setReloadListener(() => AudioPreview.refreshVolume());
 require("./inkCompleter.js").inkCompleter.getProjectDir = () =>
     InkProject.currentProject && InkProject.currentProject.mainInk ? InkProject.currentProject.mainInk.projectDir : null;
 
-// While the title screen is up, the story's sounds wait for "Iniciar" (see PlayerView.startStory).
+// While the title screen is up, the story's sounds wait for "Start" (see PlayerView.startStory).
 // Each held call remembers whether it was on the live turn and which player action it belongs to.
 let heldSounds = [];
 function playTags(tags, isLiveTurn) {
@@ -228,7 +226,7 @@ LiveCompiler.setEvents({
         PlayerView.addTags(tags);
         playTags(tags, LiveCompiler.isLiveTurn());
     },
-    choiceAdded: (choice, isLatestTurn) => {
+    choiceAdded: (choice, isLatestTurn, isReplayChoice) => {
         AudioPreview.noteTags(choice.choice.tags || []);
         if( isLatestTurn ) {
             PlayerView.addChoice(choice, () => {
@@ -236,6 +234,8 @@ LiveCompiler.setEvents({
                 LiveCompiler.choose(choice)
             });
         } else {
+            // During Save/Load replay, remember the option Ink will echo at the next screen.
+            if( isReplayChoice ) PlayerView.setSelectedChoiceText(choice.choice.text);
             playTags(choice.choice.tags || [], false);
         }
     },
@@ -286,7 +286,8 @@ LiveCompiler.setEvents({
         PlayerView.showSessionView(sessionId);
     },
     storyCompleted: () => {
-        PlayerView.addTerminatingMessage(i18n._("End of story"), "end");
+        PlayerView.addEndingMarker();
+        PlayerView.contentReady();
     },
     exitDueToError: () => {
         // No need to do anything - errors themselves being displayed are enough
@@ -390,6 +391,7 @@ EditorView.setEvents({
 });
 
 PlayerView.setEvents({
+    "restartStory": () => restartStory(),
     "storyStarted": () => {
         const held = heldSounds;
         heldSounds = [];
@@ -429,6 +431,7 @@ function saveProgress() {
 function loadProgress() {
     if( !hasSavedProgress() ) return;
     AudioPreview.stopSoundEffects();
+    if( PlayerView.isTitleScreenPending() ) PlayerView.startStoryFromTitle();
     LiveCompiler.loadChoiceSequence(savedChoiceSequence);
 }
 
@@ -1160,10 +1163,15 @@ window.addEventListener("message", event => {
         completePendingFormHideIfReady();
         return;
     }
+    if( data.type === "game-settings-preview-theme" && ["light", "dark"].includes(data.theme) ) {
+        if( event.source === styleFormFrame.contentWindow ) GameStyle.setPreviewTheme(data.theme);
+        return;
+    }
     if( data.type === "game-style-virtual-update" && typeof data.yaml === "string" ) {
         const project = InkProject.currentProject;
         const file = project && project.fileWithRelativePath(GameStyle.FILE_NAME);
         if( file && file.isYamlFile && file.getValue() !== data.yaml ) file.setValue(data.yaml);
+        if( ["light", "dark"].includes(data.previewTheme) ) GameStyle.setPreviewTheme(data.previewTheme);
         return;
     }
     if( data.type !== "game-style-reload" || typeof data.path !== "string" ) return;
@@ -1175,6 +1183,7 @@ window.addEventListener("message", event => {
     let file = project.fileWithRelativePath(relative);
     const reloadStyleAndFinish = countedReload => {
         GameStyle.reload(project);
+        if( ["light", "dark"].includes(data.previewTheme) ) GameStyle.setPreviewTheme(data.previewTheme);
         StoryAlignment.apply(project);
         if( countedReload && pendingStyleReloadCount > 0 ) pendingStyleReloadCount--;
         completePendingFormHideIfReady();

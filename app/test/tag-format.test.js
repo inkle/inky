@@ -41,9 +41,9 @@ describe("tag format", function () {
     });
 
     it("allows one single space between the words of a scene title", function () {
-        assert.strictEqual(fix("#title: A Floresta Escura"), "#title: A Floresta Escura");
-        assert.strictEqual(fix("#title: A Floresta                         Escura"), "#title: A Floresta Escura");
-        assert.strictEqual(fix("#title:   A      Floresta \t  Escura  "), "#title: A Floresta Escura ");
+        assert.strictEqual(fix("#title: The Dark Forest"), "#title: The Dark Forest");
+        assert.strictEqual(fix("#title: The Dark                         Forest"), "#title: The Dark Forest");
+        assert.strictEqual(fix("#title:   The      Dark \t  Forest  "), "#title: The Dark Forest ");
         assert.strictEqual(fix("# title : A   B   #align:   left"), "#title: A B #align: left");
         assert.strictEqual(fix("#image: a   b.png"), "#image: a   b.png");
     });

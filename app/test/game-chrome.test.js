@@ -3,7 +3,7 @@ const { JSDOM } = require("jsdom");
 
 const PLAYER = '<div id="player" data-story-title="O Farol" data-story-author="Clara Santos">' +
     '<div class="scrollContainer">' +
-    '<div class="innerText active"><p class="storyText">The train arrives.</p></div>' +
+    '<div class="innerText active"><div class="title-screen"><button id="title-load" disabled>Load</button></div><p class="storyText">The train arrives.</p></div>' +
     '<div class="hiddenBuffer"><div class="innerText"><p class="storyText">Old turn</p></div></div>' +
     '</div></div>';
 
@@ -45,7 +45,7 @@ describe("game chrome", function () {
             assert.strictEqual(hud.querySelectorAll(".story-actions").length, 1);
             assert.ok(hud.querySelector("#menu-toggle"));
             assert.ok(hud.querySelector("#story-menu[hidden]"));
-            ["rewind", "save", "reload"].forEach(id =>
+            ["rewind", "save"].forEach(id =>
                 assert.strictEqual(hud.querySelectorAll("#story-menu #" + id).length, 1, id));
             // The audio controls live in the same place as the export, but stay hidden in the editor.
             assert.ok(hud.querySelector("#audio-settings-anchor[hidden]"));
@@ -74,8 +74,9 @@ describe("game chrome", function () {
             assert.strictEqual(menu.hidden, true);
             assert.strictEqual(toggle.getAttribute("aria-expanded"), "false");
 
-            // Load is disabled until something was saved
-            assert.strictEqual(player.querySelector("#reload").disabled, true);
+            // Load is disabled on the title screen until a save exists.
+            assert.strictEqual(player.querySelector("#reload"), null);
+            assert.strictEqual(player.querySelector("#title-load").disabled, true);
 
             toggle.click();
             player.querySelector("#save").click();
@@ -83,10 +84,9 @@ describe("game chrome", function () {
             assert.strictEqual(menu.hidden, true, "choosing an action closes the menu");
             // the host reports the new save, as the controller does after recording the choices
             GameChrome.setSaveAvailable(true);
-            assert.strictEqual(player.querySelector("#reload").disabled, false);
+            assert.strictEqual(player.querySelector("#title-load").disabled, false);
 
-            toggle.click();
-            player.querySelector("#reload").click();
+            player.querySelector("#title-load").click();
             toggle.click();
             player.querySelector("#rewind").click();
             assert.deepStrictEqual(events, ["save", "load", "restart"]);

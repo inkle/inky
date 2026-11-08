@@ -81,7 +81,7 @@ describe("Export audio mixer", function () {
         }
     });
 
-    it("stops active effects when an exported sound tag has an incomplete extension", function () {
+    it("ignores incomplete sound references while preserving active effects", function () {
         const source = fs.readFileSync(path.join(__dirname, "../export-for-web-template/main.js"), "utf8");
         const start = source.indexOf("    function processAudioTag(tag) {");
         const end = source.indexOf("\n    // What the saved game remembers", start);
@@ -110,6 +110,9 @@ describe("Export audio mixer", function () {
             );
 
             window.processAudioTagForTest("sound: fire.mp");
+            window.processAudioTagForTest("sound:");
+            assert.strictEqual(stopCount, 0);
+            window.processAudioTagForTest("sound: stop");
             assert.strictEqual(stopCount, 1);
 
             // The retired audio and audioloop tags are plain, unknown tags now.
@@ -154,9 +157,11 @@ describe("Export audio mixer", function () {
         try {
             window.eval(audioEngineCode(source));
             const engine = window.audioEngineForTest;
+            assert.strictEqual(window.document.getElementById("audio-settings-anchor").hidden, true);
+            assert.strictEqual(window.document.getElementById("audio-control").hidden, true);
+            engine.playSoundUrl("fx.ogg");
             assert.strictEqual(window.document.getElementById("audio-settings-anchor").hidden, false);
             assert.strictEqual(window.document.getElementById("audio-control").hidden, false);
-            engine.playSoundUrl("fx.ogg");
             engine.setMusicUrl("music.mp3");
             const effect = players[0];
             const music = players[1];

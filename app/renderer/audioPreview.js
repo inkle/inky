@@ -5,7 +5,7 @@
 // going and sound effects only play on the turn being played now, never on a replay.
 const fs = require("fs");
 const { pathToFileURL } = require("url");
-const { parseAudioTag, resolveAudioFile } = require("./audioTags.js");
+const { parseAudioTag, resolveAudioReference } = require("./audioTags.js");
 
 const FADE_MS = 500;
 
@@ -22,8 +22,10 @@ let level = null;            // slider position, 0..1; null until first needed
 let lastBase = null;         // the initial volume the slider was last set from
 let muted = false;
 let lastAudible = 1;
-let sawAudioTag = false;     // the controls are shown: the story uses sound
-let sawAudioThisRun = false;
+let sawAudioTag = false;     // whether the menu currently has an active, resolvable audio source
+// Keep referenced tags, including missing files, so an added/removed asset updates the menu.
+// Only valid file references are stored: music/sound stop and malformed names do not count.
+const referencedAudio = new Map();
 let controlListener = null;
 const warned = new Set();
 const sounds = new Map();     // active sound elements and their local source paths, if any
@@ -41,7 +43,7 @@ function configure(options) {
     lastBase = null;
     muted = false;
     sawAudioTag = false;
-    sawAudioThisRun = false;
+    referencedAudio.clear();
 }
 
 function clampVolume(value) {
@@ -77,12 +79,19 @@ function previewFileVolume() {
 // Resolve a sound file from the project folder.
 function resolveRequest(request, warnOnFailure = true) {
     const dir = getProjectDir();
-    const resolved = dir ? resolveAudioFile(dir, request.file, request.kind) : null;
-    if( !resolved ) {
-        if( dir && warnOnFailure ) warnOnce(`Sound file not found: ${request.file} (looked in audio, music, musics, sfx and next to the main story)`);
+    const resolved = dir ? resolveAudioReference(dir, request.file, request.kind) : null;
+    if( !resolved || resolved.kind !== "ok" ) {
+        if( dir && warnOnFailure ) {
+            if( resolved && resolved.kind === "ambiguous" )
+                warnOnce(`Ambiguous sound file name: ${request.file}. Use an explicit path to select one: ${resolved.candidates.join(" or ")}`);
+            else {
+                const categoryFolder = request.kind === "music" ? "audio/music" : "audio/sfx";
+                warnOnce(`Sound file not found: ${request.file} (looked in ${categoryFolder}, audio and the main story folder)`);
+            }
+        }
         return null;
     }
-    return { url: pathToFileURL(resolved).href, sourcePath: resolved };
+    return { url: pathToFileURL(resolved.source).href, sourcePath: resolved.source };
 }
 
 function warnOnce(message) {
@@ -91,8 +100,8 @@ function warnOnce(message) {
     console.warn(message);
 }
 
-function fadeOutAndRemove(element) {
-    const fade = { factor: 1 };
+function fadeOutAndRemove(element, sourcePath) {
+    const fade = { factor: 1, sourcePath };
     fadingMusic.set(element, fade);
     const started = Date.now();
     const timer = setInterval(() => {
@@ -105,6 +114,7 @@ function fadeOutAndRemove(element) {
             element.pause();
             element.removeAttribute("src");
             element.load();
+            refreshReferencedAudioControl();
         }
     }, 40);
 }
@@ -113,7 +123,8 @@ function stopMusic() {
     if( !music ) return;
     const old = music;
     music = null;
-    fadeOutAndRemove(old.element);
+    fadeOutAndRemove(old.element, old.sourcePath);
+    refreshReferencedAudioControl();
 }
 
 function startMusic(request, resolved) {
@@ -125,9 +136,16 @@ function startMusic(request, resolved) {
     element.addEventListener("error", () => {
         warnOnce(`Sound file not found or not playable: ${request.file}`);
         // A track that cannot play must not count as "already playing", or it could never be started again.
-        if( music && music.element === element ) { music = null; fadeOutAndRemove(element); }
+        if( music && music.element === element ) {
+            music = null;
+            element.pause();
+            element.removeAttribute("src");
+            element.load();
+            refreshReferencedAudioControl();
+        }
     });
     music = { file: request.file, url: resolved.url, sourcePath: resolved.sourcePath, element: element };
+    refreshReferencedAudioControl();
     const attempt = element.play();
     if( attempt && attempt.catch ) attempt.catch(() => { /* error event reports a missing file */ });
 }
@@ -136,8 +154,11 @@ function playSound(request, resolved) {
     if( !resolved ) return;
     const element = new Audio(resolved.url);
     element.volume = volumeFor("sfx");
-    const finished = () => sounds.delete(element);
+    const finished = () => {
+        if( sounds.delete(element) ) refreshReferencedAudioControl();
+    };
     sounds.set(element, { sourcePath: resolved.sourcePath, category: "sfx" });
+    refreshReferencedAudioControl();
     element.addEventListener("ended", finished);
     element.addEventListener("error", () => {
         warnOnce(`Sound file not found or not playable: ${request.file}`);
@@ -150,18 +171,16 @@ function playSound(request, resolved) {
 // A new play-through starts (the story was recompiled or restarted).
 function beginPlaythrough() {
     sawMusicTag = false;
-    sawAudioThisRun = false;
+    referencedAudio.clear();
     soundCounter = 0;
 }
 
 // The replay of earlier turns is over: if no music tag was met on the way, none should be playing.
 function endReplay() {
     if( !sawMusicTag ) { wantedMusic = null; stopMusic(); }
-    // The story no longer uses sound (the writer removed the tags): the controls go away.
-    if( !sawAudioThisRun && sawAudioTag ) {
-        sawAudioTag = false;
-        notifyControl();
-    }
+    // Once the compiler replay finishes, hide a stale volume row if the new story no longer
+    // references any resolvable audio. Keep the old row during replay to avoid flicker.
+    refreshReferencedAudioControl();
 }
 
 // A sound file was added, deleted or replaced. A file that is gone must not keep playing from what
@@ -181,6 +200,7 @@ function refreshAvailability() {
     });
     if( !music && wantedMusic ) startMusic(wantedMusic, resolveRequest(wantedMusic, false));
     if( listening && !require("fs").existsSync(listening.absPath) ) stopListening();
+    refreshReferencedAudioControl();
 }
 
 // For tests and diagnostics: what is playing now.
@@ -200,21 +220,25 @@ function handleTags(tags, isLiveTurn, actionId) {
             stopSoundEffects();
             return;
         }
-        if( parsed.invalid ) {
-            if( parsed.kind === "sound" ) stopSoundEffects();
-            warnOnce(`#${parsed.kind}: "${parsed.invalid}" is not a valid audio file reference. Use an audio filename or relative/absolute path (mp3, ogg, wav...).`);
+        // Empty or malformed references are inert while the writer edits a tag.
+        // Only explicit stop commands may stop an otherwise playing track/effect.
+        if( Object.prototype.hasOwnProperty.call(parsed, "invalid") ) {
+            if( parsed.invalid )
+                warnOnce(`#${parsed.kind}: "${parsed.invalid}" is not a valid audio file reference. Use an audio filename or project-relative path (mp3, ogg, wav...).`);
             return;
         }
         if( parsed.kind === "music" ) {
             sawMusicTag = true;
-            wantedMusic = parsed.file === null ? null : { file: parsed.file };
+            wantedMusic = parsed.file === null ? null : { file: parsed.file, kind: "music" };
             if( !wantedMusic ) stopMusic();
             else {
                 const resolved = resolveRequest(wantedMusic, !music || music.file !== parsed.file);
                 if( resolved && (!music || music.url !== resolved.url) ) startMusic(wantedMusic, resolved);
-                // The same file, but it was deleted from the disk since: stop instead of playing on.
-                else if( !resolved && music ) {
-                    if( music.file === parsed.file ) warnOnce(`Sound file removed, music stopped: ${parsed.file}`);
+                // A missing replacement must not silence a still-valid current track.
+                // If the *playing* file itself disappeared, stop it (also checked by
+                // refreshAvailability when the project file watcher reports the change).
+                else if( !resolved && music && music.file === parsed.file ) {
+                    warnOnce(`Sound file removed, music stopped: ${parsed.file}`);
                     stopMusic();
                 }
             }
@@ -222,7 +246,7 @@ function handleTags(tags, isLiveTurn, actionId) {
             const key = soundCounter++ + "|" + parsed.file;
             if( !soundsPlayed.has(key) ) {
                 soundsPlayed.add(key);
-                const request = { file: parsed.file };
+                const request = { file: parsed.file, kind: "sound" };
                 playSound(request, resolveRequest(request));
             }
         }
@@ -245,7 +269,8 @@ function refreshVolume() {
 
 // ---- The volume row of the menu -------------------------------------------
 
-// What the menu shows: whether the story uses sound, the slider position and whether it is silent.
+// What the menu shows: whether a valid story audio source is currently active,
+// the slider position and whether the listener has muted it.
 function getControlState() {
     syncBase();
     return {
@@ -286,17 +311,32 @@ function toggleMute() {
     notifyControl();
 }
 
-// Any sound tag (#music, #sound, even "stop" or an invalid name) makes the controls appear,
-// the same rule the export uses to decide that a story has sound.
-function noteTags(tags) {
-    let found = false;
-    (tags || []).forEach(tag => { if( parseAudioTag(tag) ) found = true; });
-    if( !found ) return;
-    sawAudioThisRun = true;
-    if( !sawAudioTag ) {
-        sawAudioTag = true;
+// Once a referenced file has been resolved and started, its own source path determines
+// availability. A valid but inactive tag does not keep the slider on screen.
+function refreshReferencedAudioControl() {
+    // The source of truth is the file the player has *actually started*, not every tag
+    // observed in earlier scenes. This also handles overlapping music and sound effects.
+    const playable = sourcePath => !!sourcePath && fs.existsSync(sourcePath);
+    const available = (music && playable(music.sourcePath)) ||
+        Array.from(fadingMusic.values()).some(fade => playable(fade.sourcePath)) ||
+        Array.from(sounds.values()).some(sound => playable(sound.sourcePath));
+    if( available !== sawAudioTag ) {
+        sawAudioTag = available;
         notifyControl();
     }
+}
+
+function noteTags(tags) {
+    let changed = false;
+    (tags || []).forEach(tag => {
+        const parsed = parseAudioTag(tag);
+        if( !parsed || !parsed.file ) return; // stops and invalid references have no media
+        const key = parsed.kind + "\u0000" + parsed.file;
+        if( referencedAudio.has(key) ) return;
+        referencedAudio.set(key, { kind: parsed.kind, file: parsed.file });
+        changed = true;
+    });
+    if( changed ) refreshReferencedAudioControl();
 }
 
 // Listening to a sound file from the Explorer: click to play, click again to stop.
@@ -319,6 +359,7 @@ function stopSoundEffects() {
         element.load();
     });
     sounds.clear();
+    refreshReferencedAudioControl();
 }
 
 // onChange(true|false) tells the caller whether this file is playing, also when it ends by itself.

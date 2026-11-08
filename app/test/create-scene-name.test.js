@@ -38,7 +38,7 @@ describe("Explorer createScene name rules", function () {
 
     function listing() { return fs.readdirSync(root, { recursive: true }).sort(); }
 
-    ["game.yaml", "x.txt", "x.json", "game.yaml.ink", "outro.yml.ink", "GAME.YAML.INK", "pasta/game.yaml"].forEach(name => {
+    ["game.yaml", "x.txt", "x.json", "game.yaml.ink", "another.yml.ink", "GAME.YAML.INK", "folder/game.yaml"].forEach(name => {
         it(`refuses "${name}" without touching disk or story.ink`, function () {
             assert.strictEqual(create(name, true), false);
             assert.deepStrictEqual(messages, [REFUSAL]);
@@ -47,13 +47,13 @@ describe("Explorer createScene name rules", function () {
         });
     });
 
-    it('turns "cena" into cena.ink', function () {
-        assert.strictEqual(create("cena", true), true);
-        assert.deepStrictEqual(listing(), ["cena.ink"]);
-        assert.deepStrictEqual(includes, ["cena.ink"]);
+    it('turns "scene" into scene.ink', function () {
+        assert.strictEqual(create("scene", true), true);
+        assert.deepStrictEqual(listing(), ["scene.ink"]);
+        assert.deepStrictEqual(includes, ["scene.ink"]);
     });
 
-    ["cena.ink", "CENA.INK"].forEach(name => {
+    ["scene.ink", "SCENE.INK"].forEach(name => {
         it(`accepts "${name}"`, function () {
             assert.strictEqual(create(name, false), true);
             assert.deepStrictEqual(listing(), [name]);
@@ -61,10 +61,10 @@ describe("Explorer createScene name rules", function () {
         });
     });
 
-    it('accepts a dotted folder name: "capitulo.1/cena"', function () {
-        assert.strictEqual(create("capitulo.1/cena", true), true);
-        assert.ok(fs.existsSync(path.join(root, "capitulo.1", "cena.ink")));
-        assert.deepStrictEqual(includes, ["capitulo.1/cena.ink"]);
+    it('accepts a dotted folder name: "chapter.1/scene"', function () {
+        assert.strictEqual(create("chapter.1/scene", true), true);
+        assert.ok(fs.existsSync(path.join(root, "chapter.1", "scene.ink")));
+        assert.deepStrictEqual(includes, ["chapter.1/scene.ink"]);
         assert.deepStrictEqual(messages, []);
     });
 });

@@ -196,14 +196,13 @@ describe('compiles hello world game', function () {
 
   it('writes and selects a choice', async function () {
     const input = "Hello World! \n * Hello back \n Nice to hear from you! \n -> END";
-    const resultChoice = "Hello back";
     const resultAnswer = "Nice to hear from you!";
 
     await setStory(this.app.browser, input);
     await startStory(this.app.browser);
     await waitForParagraphs(this.app.browser, ["Hello World!"]);
     await clickChoice(this.app.browser);
-    await waitForParagraphs(this.app.browser, [resultChoice, resultAnswer]);
+    await waitForParagraphs(this.app.browser, [resultAnswer]);
   });
 
   it('suppresses choice text', async function () {
@@ -214,7 +213,7 @@ describe('compiles hello world game', function () {
     await startStory(this.app.browser);
     await waitForParagraphs(this.app.browser, ["Hello World!"]);
     await clickChoice(this.app.browser);
-    await waitForParagraphs(this.app.browser, ["", resultAnswer]);
+    await waitForParagraphs(this.app.browser, [resultAnswer]);
   });
 
   it('shows TODOs', async function () {
@@ -246,7 +245,7 @@ describe('file tags show the whole project', function () {
       this.skip();
     }
     dir = fs.mkdtempSync(path.join(require("os").tmpdir(), "inky-file-tags-"));
-    fs.writeFileSync(path.join(dir, "story.ink"), "-> start\n=== start ===\nOlá.\n-> END\n");
+    fs.writeFileSync(path.join(dir, "story.ink"), "-> start\n=== start ===\nHello.\n-> END\n");
     fs.mkdirSync(path.join(dir, "audio"));
     fs.mkdirSync(path.join(dir, "image"));
     ["dark.mp3", "rain.ogg"].forEach(name => fs.writeFileSync(path.join(dir, "audio", name), ""));
@@ -288,7 +287,7 @@ describe('file tags show the whole project', function () {
     assert.ok(picturesOfTheProject().length > 1, "the sample project has pictures to list");
 
     const browser = this.app.browser;
-    await setStory(browser, "Você acorda na praia.\n");
+    await setStory(browser, "You wake up on the beach.\n");
 
     await newStoryLine(browser);
     await browser.keys("#music: ");
@@ -306,7 +305,7 @@ describe('file tags show the whole project', function () {
 
   it('lists the files again as soon as the tag is picked from the list', async function () {
     const browser = this.app.browser;
-    await setStory(browser, "Você acorda na praia.\n");
+    await setStory(browser, "You wake up on the beach.\n");
     await newStoryLine(browser);
     await browser.keys("#");
     await browser.keys(["Tab"]);

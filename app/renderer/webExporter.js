@@ -5,16 +5,21 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
-const { collectAudioFromStory, resolveAudioFile, parseAudioTag, AUDIO_FOLDER, AUDIO_FOLDERS } = require("./audioTags.js");
-const { collectImagesFromStory, resolveImageReference, rewriteImageReferences } = require("./imageTags.js");
+const { collectAudioFromStory, resolveAudioReference, parseAudioTag, AUDIO_FOLDER, AUDIO_FOLDERS, audioTagKey } = require("./audioTags.js");
+const { collectImagesFromStory, resolveImageReference, rewriteImageReferences, imageTagKey } = require("./imageTags.js");
 const { FAVICON_EXTENSIONS, COVER_EXTENSIONS, imageMimeType } = require("./imageTypes.js");
 const { TitleScreen } = require("./titleScreen.js");
 
 function rewriteAudioTag(text, references) {
     const tag = parseAudioTag(text);
-    if( !tag || !tag.file || !references.has(tag.file) ) return text;
+    if( !tag || !tag.file ) return text;
+    const replacement = references.get(audioTagKey(tag.kind, tag.file)) || references.get(tag.file);
+    // Export unresolved references as inert tags: the browser must not try to
+    // play a missing/ambiguous file or briefly display a nonfunctional control.
+    // The export report still lists the unresolved original reference.
+    if( !replacement ) return String(text).replace(/^(\s*#?\s*(?:music|sound)\s*:)\s*.*$/i, "$1");
     return String(text).replace(/^(\s*#?\s*(?:music|sound)\s*:\s*)(.*?)(\s*)$/i,
-        (_, prefix, value, suffix) => prefix + references.get(tag.file) + suffix);
+        (_, prefix, value, suffix) => prefix + replacement + suffix);
 }
 
 function rewriteAudioReferences(story, references) {
@@ -52,14 +57,12 @@ function rewriteAudioReferences(story, references) {
 }
 
 function exportedAudioPath(projectRoot, source, reference) {
-    let relative = reference;
-    if( path.isAbsolute(reference) || /[\\/]/.test(reference) ) {
-        relative = path.relative(projectRoot, source);
-        const segments = relative.split(path.sep);
-        if( AUDIO_FOLDERS.concat(["music", "musics", "sfx"]).indexOf(String(segments[0]).toLowerCase()) !== -1 )
-            segments.shift();
-        relative = segments.join(path.sep);
-    }
+    // The web player adds "audio/" to every audio tag. Keep category/custom subfolders below
+    // that root so music and SFX may safely use the same basename without colliding.
+    let relative = path.relative(projectRoot, source);
+    const segments = relative.split(path.sep);
+    if( AUDIO_FOLDERS.indexOf(String(segments[0]).toLowerCase()) !== -1 ) segments.shift();
+    relative = segments.join(path.sep);
     const normalized = path.normalize(relative);
     if( !normalized || normalized === "." || path.isAbsolute(normalized) || normalized === ".." || normalized.startsWith(".." + path.sep) ) {
         const digest = crypto.createHash("sha256").update(source).digest("hex").slice(0, 12);
@@ -112,7 +115,10 @@ async function buildWebExport(options) {
     const templateMain = path.join(templateDirectory, "main.js");
     const templateCss = path.join(templateDirectory, "style.css");
     const templateFavicon = path.join(templateDirectory, "favicon.ico");
-    for (const filename of [compiledJsonPath, templateIndex, templateMain, templateCss, templateFavicon, inkRuntimePath]) {
+    const choiceTextHelper = path.join(__dirname, "choiceText.js");
+    const screenModeHelper = path.join(__dirname, "screenMode.js");
+    const endingMarkerHelper = path.join(__dirname, "endingMarker.js");
+    for (const filename of [compiledJsonPath, templateIndex, templateMain, templateCss, templateFavicon, inkRuntimePath, choiceTextHelper, screenModeHelper, endingMarkerHelper]) {
         let stat;
         try {
             stat = await fs.promises.stat(filename);
@@ -180,7 +186,8 @@ async function buildWebExport(options) {
         throw new Error("The compiled story JSON is invalid: " + error.message);
     }
 
-    // Sound: which files the story names, and whether the page needs its volume control.
+    // Sound: which files the story names. The volume control is enabled only after we
+    // have copied at least one actual, resolvable file into the exported project.
     const audioUse = collectAudioFromStory(parsedStory);
     // Pictures: which local files the story names, so the bundle carries them too.
     const imageUse = collectImagesFromStory(parsedStory);
@@ -195,17 +202,22 @@ async function buildWebExport(options) {
     indexHtml = indexHtml.replace(/##JAVASCRIPT FILENAME##/g, escapeHtml(jsFilename));
     indexHtml = indexHtml.replace(/##FAVICON-FILENAME##/g, faviconFilename);
     indexHtml = indexHtml.replace(/##FAVICON-TYPE##/g, faviconMime);
-    indexHtml = indexHtml.replace(/##AUDIO##/g, audioUse.usesAudio ? "on" : "off");
     indexHtml = indexHtml.replace(/##VOLUME##/g, String(audioVolume));
     indexHtml = indexHtml.replace(/##MASTER-VOLUME##/g, String(audioLevel("master")));
     indexHtml = indexHtml.replace(/##MUSIC-VOLUME##/g, String(audioLevel("music")));
     indexHtml = indexHtml.replace(/##SFX-VOLUME##/g, String(audioLevel("sfx")));
     // The light/dark switch: off unless the writer allowed it
+    indexHtml = indexHtml.replace(/##PRESENTATION##/g, options.presentation === "screen" ? "screen" : "traditional");
+    const endingOptions = options.ending || {};
+    indexHtml = indexHtml.replace(/##ENDING-SHOW##/g, endingOptions.show === false ? "off" : "on");
+    indexHtml = indexHtml.replace(/##ENDING-TEXT##/g, escapeHtml(typeof endingOptions.text === "string" && endingOptions.text.trim() ? endingOptions.text.trim() : "The End"));
+    indexHtml = indexHtml.replace(/##PLAY-AGAIN-SHOW##/g, endingOptions.playAgainShow === false ? "off" : "on");
+    indexHtml = indexHtml.replace(/##PLAY-AGAIN-TEXT##/g, escapeHtml(typeof endingOptions.playAgainText === "string" && endingOptions.playAgainText.trim() ? endingOptions.playAgainText.trim() : "Play Again"));
     indexHtml = indexHtml.replace(/##THEME-TOGGLE##/g, options.themeToggle ? "on" : "off");
     indexHtml = indexHtml.replace(/##THEME-INITIAL##/g, options.themeInitial === "dark" ? "dark" : "light");
     indexHtml = indexHtml.replace(/##THEME-ALTERNATE##/g, options.themeAlternate === "dark" ? "dark" : "light");
     // Last, so that text the writer typed can never be taken for another placeholder
-    indexHtml = indexHtml.replace(/##TITLE-SCREEN##/g, () => TitleScreen.html({ title: storyTitle, author: storyAuthor, coverSrc: coverFilename }));
+    indexHtml = indexHtml.replace(/##TITLE-SCREEN##/g, () => TitleScreen.html({ title: storyTitle, titleSize: options.storyTitleSize, author: storyAuthor, coverSrc: coverFilename }));
 
     const mainJs = await fs.promises.readFile(templateMain, "utf8");
 
@@ -255,26 +267,36 @@ async function buildWebExport(options) {
     await fs.promises.mkdir(targetDirectory, { recursive: true });
     const storyJsPath = path.join(targetDirectory, jsFilename);
     await Promise.all([
-        fs.promises.writeFile(path.join(targetDirectory, "index.html"), indexHtml, "utf8"),
         fs.promises.writeFile(path.join(targetDirectory, "main.js"), mainJs, "utf8"),
         fs.promises.writeFile(path.join(targetDirectory, "style.css"), css, "utf8"),
         fs.promises.copyFile(inkRuntimePath, path.join(targetDirectory, "ink.js")),
         fs.promises.copyFile(path.join(__dirname, "richTextDom.js"), path.join(targetDirectory, "richtext.js")),
         fs.promises.copyFile(path.join(__dirname, "pager.js"), path.join(targetDirectory, "pager.js")),
+        fs.promises.copyFile(choiceTextHelper, path.join(targetDirectory, "choice-text.js")),
+        fs.promises.copyFile(screenModeHelper, path.join(targetDirectory, "screen-mode.js")),
+        fs.promises.copyFile(endingMarkerHelper, path.join(targetDirectory, "ending-marker.js")),
         fs.promises.copyFile(faviconPath, path.join(targetDirectory, faviconFilename)),
         ...(coverFilename ? [fs.promises.copyFile(coverFilePath, path.join(targetDirectory, coverFilename))] : [])
     ]);
 
     // Copy the sound files the story uses into the exported folder's own audio folder.
-    const audio = { copied: [], missing: [], invalid: audioUse.invalid };
+    const audio = { copied: [], missing: [], ambiguous: [], invalid: audioUse.invalid };
     const audioReferences = new Map();
-    if (audioUse.files.length > 0) {
+    const typedAudioReferences = audioUse.musicFiles.map(file => ({ kind: "music", file }))
+        .concat(audioUse.soundFiles.map(file => ({ kind: "sound", file })));
+    if (typedAudioReferences.length > 0) {
         const audioTarget = path.join(targetDirectory, AUDIO_FOLDER);
         const projectRoot = options.projectDirectory ? path.resolve(options.projectDirectory) : null;
         const copiedSources = new Map();
-        for (const file of audioUse.files) {
-            const source = projectRoot ? resolveAudioFile(projectRoot, file) : null;
-            if (!source) { audio.missing.push(file); continue; }
+        for (const reference of typedAudioReferences) {
+            const file = reference.file;
+            const resolved = projectRoot ? resolveAudioReference(projectRoot, file, reference.kind) : { kind: "missing" };
+            if( resolved.kind === "ambiguous" ) {
+                audio.ambiguous.push({ kind: reference.kind, file, candidates: resolved.candidates });
+                continue;
+            }
+            if( resolved.kind !== "ok" ) { audio.missing.push(file); continue; }
+            const source = resolved.source;
             let relativeOutput = exportedAudioPath(projectRoot, source, file);
             const previousSource = copiedSources.get(relativeOutput);
             if( previousSource && previousSource !== source ) {
@@ -288,37 +310,59 @@ async function buildWebExport(options) {
             await fs.promises.mkdir(path.dirname(destination), { recursive: true });
             await fs.promises.copyFile(source, destination);
             copiedSources.set(relativeOutput, source);
-            audioReferences.set(file, relativeOutput);
+            audioReferences.set(audioTagKey(reference.kind, file), relativeOutput);
             audio.copied.push(file);
         }
     }
     rewriteAudioReferences(parsedStory, audioReferences);
+    // Tags alone are not evidence of audio. Even `music: stop`, missing files and ambiguous
+    // references cannot create a working volume control in the exported player.
+    indexHtml = indexHtml.replace(/##AUDIO##/g, audio.copied.length > 0 ? "on" : "off");
+    await fs.promises.writeFile(path.join(targetDirectory, "index.html"), indexHtml, "utf8");
 
     // Copy the pictures the story shows. A picture keeps the path its tag uses; one named without
-    // a folder and found in "images" or "image" is copied there and its tag is rewritten to that
+    // a folder and found in "image" (or the legacy "images" folder) is copied there and its tag is rewritten to that
     // path, so the exported page finds it. Remote pictures stay online.
-    const images = { copied: [], missing: [], invalid: [] };
+    const images = { copied: [], missing: [], ambiguous: [], invalid: [] };
     const imageOutputs = new Set();
     const imageRewrites = new Map();
-    if (imageUse.files.length > 0) {
+    if (imageUse.references.length > 0) {
         const projectRoot = options.projectDirectory ? path.resolve(options.projectDirectory) : null;
         // Cover and favicon are already in the bundle; a story picture may be the same file.
         const knownOutputs = new Map([[faviconFilename, path.resolve(faviconPath)]]);
         if( coverFilename ) knownOutputs.set(coverFilename, path.resolve(coverFilePath));
-        for (const reference of imageUse.files) {
-            const resolved = resolveImageReference(projectRoot, reference);
+        for (const picture of imageUse.references) {
+            const reference = picture.reference;
+            const resolved = resolveImageReference(projectRoot, reference, picture.kind);
             if (resolved.kind === "remote") continue;
-            if (resolved.kind === "invalid") { images.invalid.push(reference); continue; }
-            if (resolved.kind === "missing") { images.missing.push(reference); continue; }
+            // Invalid, ambiguous and missing local references are reported, then
+            // neutralized in the exported story. Preview skips them as well.
+            if (resolved.kind === "invalid") {
+                images.invalid.push(reference);
+                imageRewrites.set(imageTagKey(picture.kind, reference), "");
+                continue;
+            }
+            if (resolved.kind === "ambiguous") {
+                images.ambiguous.push({ kind: picture.kind, reference, candidates: resolved.candidates });
+                imageRewrites.set(imageTagKey(picture.kind, reference), "");
+                continue;
+            }
+            if (resolved.kind === "missing") {
+                images.missing.push(reference);
+                imageRewrites.set(imageTagKey(picture.kind, reference), "");
+                continue;
+            }
             const owner = knownOutputs.get(resolved.relative);
             if( owner && owner !== resolved.source ) {
                 console.warn(`Skipping picture "${reference}": it would replace the exported ${resolved.relative}.`);
                 images.invalid.push(reference);
+                imageRewrites.set(imageTagKey(picture.kind, reference), "");
                 continue;
             }
             const destination = path.resolve(targetDirectory, resolved.relative.split("/").join(path.sep));
             if( !destination.startsWith(targetDirectory + path.sep) ) {
                 images.invalid.push(reference);
+                imageRewrites.set(imageTagKey(picture.kind, reference), "");
                 continue;
             }
             if( !owner ) {
@@ -328,17 +372,26 @@ async function buildWebExport(options) {
             }
             imageOutputs.add(resolved.relative);
             images.copied.push(reference);
-            if( resolved.defaulted ) imageRewrites.set(reference, resolved.relative);
+            if( resolved.defaulted ) imageRewrites.set(imageTagKey(picture.kind, reference), resolved.relative);
         }
     }
     if( imageRewrites.size ) rewriteImageReferences(parsedStory, imageRewrites);
 
     await fs.promises.writeFile(storyJsPath, "var storyContent = " + JSON.stringify(parsedStory) + ";\n", "utf8");
 
-    const files = ["index.html", jsFilename, "main.js", "style.css", "ink.js", "richtext.js", "pager.js", faviconFilename]
+    const files = ["index.html", jsFilename, "main.js", "style.css", "ink.js", "richtext.js", "pager.js", "choice-text.js", "screen-mode.js", "ending-marker.js", faviconFilename]
         .concat(coverFilename ? [coverFilename] : [])
         .concat(Array.from(audioReferences.values()).map(file => AUDIO_FOLDER + "/" + file))
         .concat(Array.from(imageOutputs));
+
+    audio.copied.sort((a, b) => a.localeCompare(b));
+    audio.missing.sort((a, b) => a.localeCompare(b));
+    audio.invalid.sort((a, b) => a.localeCompare(b));
+    audio.ambiguous.sort((a, b) => a.file.localeCompare(b.file));
+    images.copied.sort((a, b) => a.localeCompare(b));
+    images.missing.sort((a, b) => a.localeCompare(b));
+    images.invalid.sort((a, b) => a.localeCompare(b));
+    images.ambiguous.sort((a, b) => a.reference.localeCompare(b.reference));
 
     return {
         targetDirectory: targetDirectory,

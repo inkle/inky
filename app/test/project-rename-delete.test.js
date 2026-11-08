@@ -173,15 +173,15 @@ describe("project Explorer rename and delete", function () {
     });
 
     it("rewrites INCLUDE lines whose path contains spaces", function () {
-        const { project } = makeProject({ "main.ink": "INCLUDE cena do lago.ink\nHi\n", "cena do lago.ink": "x\n" });
-        assert.strictEqual(project.renameProjectItem("file", "cena do lago.ink", "final").ok, true);
+        const { project } = makeProject({ "main.ink": "INCLUDE lake scene.ink\nHi\n", "lake scene.ink": "x\n" });
+        assert.strictEqual(project.renameProjectItem("file", "lake scene.ink", "final").ok, true);
         assert.strictEqual(project.mainInk.text, "INCLUDE final.ink\nHi\n");
 
         const spaced = makeProject({ "main.ink": "INCLUDE a.ink\n", "a.ink": "x\n" });
-        spaced.project.renameProjectItem("file", "a.ink", "minha cena");
-        assert.strictEqual(spaced.project.mainInk.text, "INCLUDE minha cena.ink\n");
-        spaced.project.renameProjectItem("file", "minha cena.ink", "outra");
-        assert.strictEqual(spaced.project.mainInk.text, "INCLUDE outra.ink\n");
+        spaced.project.renameProjectItem("file", "a.ink", "my scene");
+        assert.strictEqual(spaced.project.mainInk.text, "INCLUDE my scene.ink\n");
+        spaced.project.renameProjectItem("file", "my scene.ink", "another");
+        assert.strictEqual(spaced.project.mainInk.text, "INCLUDE another.ink\n");
 
         const folder = makeProject({ "main.ink": "INCLUDE meus capitulos/c1.ink\n", "meus capitulos/c1.ink": "x\n" });
         assert.strictEqual(folder.project.renameProjectItem("folder", "meus capitulos", "caps").ok, true);
@@ -229,19 +229,19 @@ describe("project Explorer rename and delete", function () {
         const { project, root } = makeProject({ "main.ink": "x\n", "game.yaml": "theme: dark\n" });
         assert.strictEqual(path.basename(GameStyle.entryFilePathFor(project)), "game.yaml");
 
-        const result = project.renameProjectItem("file", "game.yaml", "floresta");
+        const result = project.renameProjectItem("file", "game.yaml", "forest");
         assert.strictEqual(result.ok, true);
-        assert.ok(fs.existsSync(path.join(root, "floresta.yaml")));
+        assert.ok(fs.existsSync(path.join(root, "forest.yaml")));
         assert.ok(!fs.existsSync(path.join(root, "game.yaml")));
-        assert.strictEqual(path.basename(GameStyle.entryFilePathFor(project)), "floresta.yaml");
-        assert.ok(GameStyle.isActiveStylePath(project, path.join(root, "floresta.yaml")));
+        assert.strictEqual(path.basename(GameStyle.entryFilePathFor(project)), "forest.yaml");
+        assert.ok(GameStyle.isActiveStylePath(project, path.join(root, "forest.yaml")));
 
         // Another YAML file in the folder does not take over, even without a pointer to follow.
         fs.writeFileSync(path.join(root, "notas.yaml"), "a: 1\n");
-        assert.strictEqual(path.basename(GameStyle.entryFilePathFor(project)), "floresta.yaml");
+        assert.strictEqual(path.basename(GameStyle.entryFilePathFor(project)), "forest.yaml");
 
         // Back to the default name: no pointer is needed any more.
-        assert.strictEqual(project.renameProjectItem("file", "floresta.yaml", "game").ok, true);
+        assert.strictEqual(project.renameProjectItem("file", "forest.yaml", "game").ok, true);
         assert.strictEqual(path.basename(GameStyle.entryFilePathFor(project)), "game.yaml");
         assert.ok(!fs.existsSync(path.join(root, GameStyle.POINTER_FILE)));
     });

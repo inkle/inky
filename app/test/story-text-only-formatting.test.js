@@ -2,6 +2,7 @@ const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
 const { JSDOM } = require("jsdom");
+const { loadExportHelpers } = require("./helpers/export-player.js");
 
 const mainSource = fs.readFileSync(path.join(__dirname, "../export-for-web-template/main.js"), "utf8");
 const richText = fs.readFileSync(path.join(__dirname, "../renderer/richTextDom.js"), "utf8");
@@ -13,6 +14,7 @@ function run(line, choices, withRichText) {
         state: { toJson: () => "{}", LoadJson: () => {} },
         currentTags: [],
         currentChoices: choices,
+        ResetState() {},
         get canContinue() { return line.text !== null; },
         Continue() {
             const text = line.text;
@@ -34,6 +36,7 @@ function run(line, choices, withRichText) {
     window.storyContent = {};
     if( withRichText ) window.eval(richText);
     try {
+        loadExportHelpers(window);
         window.eval(mainSource);
     } catch(error) {
         window.close();
@@ -48,7 +51,7 @@ describe("formatting is for the story text only", function () {
 
         it("formats the story text, and keeps choices and scene titles plain, " + label, function () {
             const { window, storyView } = run(
-                { text: "A maré ⟦b⟧subiu⟦/b⟧ e ⟦i⟧cobriu⟦/i⟧.", tags: ["title: The ⟦b⟧Signal⟦/b⟧"] },
+                { text: "A tide ⟦b⟧rises⟦/b⟧ e ⟦i⟧covered⟦/i⟧.", tags: ["title: The ⟦b⟧Signal⟦/b⟧"] },
                 [{ index: 0, text: "⟦b⟧Climb⟦/b⟧ to the ⟦i⟧lantern⟦/i⟧" }, { index: 1, text: "Go back" }],
                 withRichText
             );
@@ -58,9 +61,9 @@ describe("formatting is for the story text only", function () {
 
                 const paragraph = storyView.querySelector("p:not(.choice):not(.tags)");
                 if( withRichText ) {
-                    assert.strictEqual(paragraph.innerHTML, "A maré <strong>subiu</strong> e <em>cobriu</em>.");
+                    assert.strictEqual(paragraph.innerHTML, "A tide <strong>rises</strong> e <em>covered</em>.");
                 } else {
-                    assert.strictEqual(paragraph.textContent, "A maré subiu e cobriu.");
+                    assert.strictEqual(paragraph.textContent, "A tide rises e covered.");
                 }
 
                 const buttons = Array.from(storyView.querySelectorAll(".choice button"));

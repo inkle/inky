@@ -5,7 +5,10 @@ const InkRichText = require('./richTextDom.js');
 const { isSoundTag } = require("./audioTags.js");
 const { TitleScreen } = require("./titleScreen.js");
 const { GameChrome } = require("./gameChrome.js");
+const ChoiceText = require("./choiceText.js");
 const InkyPager = require("./pager.js");
+const ScreenMode = require("./screenMode.js");
+const EndingMarker = require("./endingMarker.js");
 
 var events = {};
 var lastFadeTime = 0;
@@ -16,13 +19,11 @@ var imageResolver = () => null;
 // Alignment chosen by the scene's first paragraph ("# align:" together with "# title:").
 // It applies to every paragraph of that scene until the next scene starts.
 var sceneAlignment = null;
-
-document.addEventListener("keyup", function(){
-    $("#player").removeClass("altKey");
-});
-document.addEventListener("keydown", function(){
-    $("#player").addClass("altKey");
-});
+// Ink repeats the selected option at the start of the next generated passage.
+var selectedChoiceText = null;
+// Inklecate sends paragraph text before its tags. Buffer it to apply # screen
+// before painting that paragraph (not after).
+var pendingStoryText = null;
 
 // The frame (.innerText) holds the picture band and the scrolling passage; the story text lives
 // in the passage. Older markup without those children is upgraded in place.
@@ -190,12 +191,15 @@ function updateMoreBelow() {
     $("#player").on("load", "img", updateMoreBelow);
 })();
 
-// "Iniciar" on the title screen. This is the one place where the Preview's story starts: the story
+// "Start" on the title screen. This is the one place where the Preview's story starts: the story
 // becomes visible here and the controller releases the sounds it held back (events.storyStarted).
 function startStory() {
     var player = document.getElementById("player");
     if( !TitleScreen.isPending(player) ) return;
     TitleScreen.start(player);
+    // The Preview compiles the first passage behind the title screen. Keep its background
+    // pending until Start is clicked so a scene background can never become the title cover.
+    applyPendingStoryBackground(activeFrame());
     $("#player .scrollContainer, #player .innerText.active, #player .story-passage").each(function() { this.scrollTop = 0; });
     GameChrome.sync(player);
     updateMoreBelow();
@@ -203,7 +207,7 @@ function startStory() {
     if( events.storyStarted ) events.storyStarted();
 }
 
-$("#player").on("click", ".title-screen .choice-button", startStory);
+$("#player").on("click", ".title-screen .choice-button:not(#title-load)", startStory);
 
 function isTitleScreenPending() {
     return TitleScreen.isPending(document.getElementById("player"));
@@ -211,11 +215,14 @@ function isTitleScreenPending() {
 
 // The "Restart story" button resets the play-through; the title screen comes back with it.
 function resetTitleScreen() {
+    // A restarted story returns to its title screen; never carry the last scene's background there.
+    clearStoryBackground(activeFrame());
     TitleScreen.reset(document.getElementById("player"));
     GameChrome.sync(document.getElementById("player"));
 }
 
 function contentReady() {
+    flushPendingStoryText();
     if( !shouldAnimate() ) {
         updateMoreBelow();
         return;
@@ -229,6 +236,8 @@ function contentReady() {
 
 function prepareForNewPlaythrough(sessionId) {
 
+    pendingStoryText = null;
+    selectedChoiceText = null;
     var $frame = $("#player .hiddenBuffer .innerText");
     GameChrome.ensureStructure($frame[0]);
     // showSessionView decides what to swap by looking at the frame, so the frame
@@ -243,12 +252,32 @@ function prepareForNewPlaythrough(sessionId) {
     $textBuffer[0].style.setProperty("--story-top-cover", "0px");
     clearChoices($frame);
     clearStoryImage();
+    clearStoryBackground($frame);
     $frame.removeClass("has-more-below has-visual");
     sceneAlignment = null;
 }
 
-function addTextSection(text)
+function addTextSection(text) {
+    flushPendingStoryText();
+    pendingStoryText = String(text == null ? "" : text);
+}
+
+function flushPendingStoryText() {
+    if( pendingStoryText === null ) return;
+    const text = pendingStoryText;
+    pendingStoryText = null;
+    renderTextSection(text);
+}
+
+function renderTextSection(text)
 {
+    text = String(text == null ? "" : text);
+    var choiceTextResult = ChoiceText.stripSelectedChoiceText(text, selectedChoiceText);
+    text = choiceTextResult.text;
+    if( choiceTextResult.consumed ) selectedChoiceText = null;
+    // A selected option is navigation, not narrative content in the next screen.
+    if( text.trim().length === 0 ) return;
+
     var $paragraph = $("<p class='storyText'></p>");
 
     // Game-specific instruction prefix, e.g. >>> START CAMERA: Wide shot
@@ -257,9 +286,8 @@ function addTextSection(text)
     }
 
     // Story text is plain text: markup is shown as written, never interpreted.
-    // Split individual words into span tags, so that they can be underlined
-    // when the user holds down the alt key, and so that they can be individually
-    // clicked in order to jump to the source.
+    // Keep word spans only to preserve the author's Alt-click jump-to-source;
+    // ordinary reading and hovering must not change narrative text styling.
     $paragraph[0].appendChild(InkRichText.toNodes(text, document));
     SafeHtml.wrapWords($paragraph[0]);
     if( sceneAlignment ) $paragraph.addClass(alignClassName(sceneAlignment));
@@ -319,6 +347,29 @@ function clearStoryImage($frame) {
     $frame.removeClass("has-visual");
 }
 
+function applyStoryBackground($frame, url) {
+    $frame = $frame && $frame.length ? $frame : bufferFrame();
+    if( !$frame.length || !url ) return;
+    $frame[0].style.backgroundImage = "url(" + JSON.stringify(url) + ")";
+    $frame.addClass("has-background");
+}
+
+function applyPendingStoryBackground($frame) {
+    $frame = $frame && $frame.length ? $frame : activeFrame();
+    if( !$frame.length ) return;
+    var url = $frame.data("pendingStoryBackground");
+    $frame.removeData("pendingStoryBackground");
+    if( url ) applyStoryBackground($frame, url);
+}
+
+function clearStoryBackground($frame) {
+    $frame = $frame && $frame.length ? $frame : bufferFrame();
+    if( !$frame.length ) return;
+    $frame[0].style.backgroundImage = "";
+    $frame.removeClass("has-background");
+    $frame.removeData("pendingStoryBackground");
+}
+
 // The first picture of a turn becomes the frame's visual panel; any further pictures stay
 // in the text, exactly as in the exported page.
 function showSceneImage(imageElement) {
@@ -338,7 +389,7 @@ function imageFromTag(tag) {
 function addImageTag(tag) {
     var value = imageFromTag(tag);
     if( value === null || value === undefined ) return;
-    var url = value ? imageResolver(value) : null;
+    var url = value ? imageResolver(value, "image") : null;
     if( !url ) {
         if( value && !warnedImages.has(value) ) {
             warnedImages.add(value);
@@ -352,14 +403,45 @@ function addImageTag(tag) {
     if( !showSceneImage(imageElement) ) $textBuffer.append(imageElement);
 }
 
+function backgroundFromTag(tag) {
+    var match = String(tag).trim().replace(/^#\s*/, "").match(/^bg\s*:\s*(.*)$/i);
+    return match && match[1].trim();
+}
+
+function addBackgroundTag(tag) {
+    var value = backgroundFromTag(tag);
+    if( value === null || value === undefined ) return;
+    var url = value ? imageResolver(value, "background") : null;
+    if( !url ) {
+        if( value && !warnedImages.has(value) ) {
+            warnedImages.add(value);
+            console.warn(`Background image not found or not allowed: ${value}`);
+        }
+        return;
+    }
+    var $frame = bufferFrame();
+    if( !$frame.length ) return;
+    // The frame is the background canvas. Its visual band (#image) and passage are children,
+    // so they naturally render above this image without changing #image's layout or sizing.
+    // During initial Preview compilation the first passage is rendered behind the title screen.
+    // Defer its background until Start is clicked; otherwise it leaks into the title screen.
+    if( isTitleScreenPending() ) {
+        $frame.data("pendingStoryBackground", url);
+        return;
+    }
+    applyStoryBackground($frame, url);
+}
+
 // Every passage replaces the previous one: a choice drops the narrative so far,
 // its pictures and its choices before the selected branch is rendered.
 function clearScene() {
+    pendingStoryText = null;
     sceneAlignment = null;
     $textBuffer.children().not(".title-screen").stop(true, true).remove();
     $textBuffer[0].scrollTop = 0;
     clearChoices();
     clearStoryImage();
+    clearStoryBackground();
 }
 
 function sceneTitleFromTag(tag) {
@@ -389,6 +471,17 @@ function alignmentFromTag(tag) {
 function addTags(tags)
 {
     tags = tags || [];
+    // # screen begins an independent visual page, but does not stop or redirect
+    // the Ink engine. Crucially, the incoming paragraph has not rendered yet.
+    const presentation = document.getElementById("player")?.dataset.presentation || "traditional";
+    if( ScreenMode.startsScreen(presentation, tags) ) {
+        const hadVisibleContent = $textBuffer.children(".storyText, .scene-title, .story-visual, img").length > 0;
+        if( hadVisibleContent ) console.warn("Screen Mode: text before # screen in the same turn is not shown. Put action text in its destination screen or end the previous screen with a choice.");
+        const followingText = pendingStoryText;
+        clearScene();
+        pendingStoryText = followingText;
+    }
+    flushPendingStoryText();
 
     // Alignment is resolved first: the scene title (and, for the first paragraph,
     // the story title and author) follow the paragraph they sit above.
@@ -414,6 +507,8 @@ function addTags(tags)
         if( animationEnabled && shouldAnimate() ) fadeIn($sceneTitle);
     }
 
+    // The frame background is applied first; the scene picture remains a child above it.
+    tags.forEach(addBackgroundTag);
     // image: src follows the paragraph it belongs to, as in the exported page.
     tags.forEach(addImageTag);
 
@@ -422,7 +517,8 @@ function addTags(tags)
     var visibleTags = tags.filter(tag =>
         !globalTags.has(String(tag)) && !isSoundTag(tag)
             && sceneTitleFromTag(tag) === null && alignmentFromTag(tag) === null
-            && imageFromTag(tag) === null);
+            && imageFromTag(tag) === null && backgroundFromTag(tag) === null
+            && !ScreenMode.isScreenTag(tag));
     if( visibleTags.length === 0 ) {
         contentReady();
         return;
@@ -447,12 +543,16 @@ function choicesFor($frame) {
 function clearChoices($frame) {
     $frame = $frame && $frame.length ? $frame : bufferFrame();
     var $choices = $frame.children(".story-choices").first();
-    if( $choices.length ) $choices.empty().prop("hidden", true);
+    if( $choices.length ) {
+        $choices.empty().prop("hidden", true);
+        $choices[0].scrollTop = 0;
+    }
     $frame.removeClass("has-choices");
 }
 
 function addChoice(choice, callback)
 {
+    flushPendingStoryText();
     // New format (since ink can have tags directly on choices)
     // choice: {
     //    choice: {
@@ -465,7 +565,9 @@ function addChoice(choice, callback)
     // Choices are plain text: formatting markers, if any are left in the file, are dropped
     $choice[0].appendChild(document.createTextNode(InkRichText.plainText(choice.choice.text)));
     var choiceTags = (choice.choice.tags || []);
-    var visibleChoiceTags = choiceTags.filter(tag => !isSoundTag(tag));
+    // Picture tags on choices belong to the chosen branch, not to its label.
+    var visibleChoiceTags = choiceTags.filter(tag => !isSoundTag(tag)
+        && imageFromTag(tag) === null && backgroundFromTag(tag) === null);
     var $tags = null;
     if( visibleChoiceTags.length > 0 ) {
         var tagsStr = "# " + visibleChoiceTags.join(" # ");
@@ -489,12 +591,38 @@ function addChoice(choice, callback)
     // When this choice is clicked, the chosen branch replaces the passage on screen.
     $choice.on("click", () => {
         clearScene();
+        selectedChoiceText = choice.choice.text;
         callback();
     });
 }
 
+function addEndingMarker() {
+    flushPendingStoryText();
+    const player = document.getElementById("player");
+    if (!player || !$textBuffer.length) return;
+    // Do not produce duplicate markers if compilation completion is replayed.
+    $textBuffer.children(".story-ending").remove();
+    const element = EndingMarker.create(document, player.dataset.endingText || EndingMarker.DEFAULT_TEXT);
+    EndingMarker.update(element, player.dataset.endingShow !== "0", player.dataset.endingText);
+    $textBuffer.append(element);
+    // Terminal state: provide a reader-level replay action for *every* Ink story.
+    // The ending marker belongs to the narrative, while replay belongs to the choices footer.
+    var $frame = bufferFrame();
+    var $choices = choicesFor($frame);
+    $choices.children(".story-replay-choice").remove();
+    const replayEnabled = player.dataset.endingPlayAgainShow !== "0";
+    const replay = EndingMarker.createReplayChoice(document, player.dataset.endingPlayAgainText);
+    replay.hidden = !replayEnabled;
+    replay.querySelector("button").addEventListener("click", function() {
+        if( events.restartStory ) events.restartStory();
+    });
+    $choices.append(replay).prop("hidden", !replayEnabled);
+    $frame.toggleClass("has-choices", replayEnabled);
+}
+
 function addTerminatingMessage(message, cssClass)
 {
+    flushPendingStoryText();
     var $message = $("<p></p>").addClass(cssClass).text(message);
     $textBuffer.append($message);
 
@@ -504,6 +632,7 @@ function addTerminatingMessage(message, cssClass)
 
 function addLongMessage(message, cssClass)
 {
+    flushPendingStoryText();
     var $message = $("<pre></pre>").addClass(cssClass).text(message);
     $textBuffer.append($message);
 
@@ -556,6 +685,7 @@ function setAnimationEnabled(animEnabled) {
 }
 
 exports.PlayerView = {
+    startStoryFromTitle: startStory,
     setEvents: (e) => { events = e; },
     contentReady: contentReady,
     isTitleScreenPending: isTitleScreenPending,
@@ -565,6 +695,7 @@ exports.PlayerView = {
     addTags: addTags,
     addChoice: addChoice,
     addTerminatingMessage: addTerminatingMessage,
+    addEndingMarker: addEndingMarker,
     addLongMessage: addLongMessage,
     clearScene: clearScene,
     addLineError: addLineError,
@@ -572,5 +703,6 @@ exports.PlayerView = {
     showSessionView: showSessionView,
     setInstructionPrefix: setInstructionPrefix,
     setImageResolver: resolver => { imageResolver = typeof resolver === "function" ? resolver : () => null; },
+    setSelectedChoiceText: text => { selectedChoiceText = text == null ? null : String(text); },
     setAnimationEnabled: setAnimationEnabled
 };  

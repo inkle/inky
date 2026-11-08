@@ -10,7 +10,7 @@
 // - a tag that sits alone on its line always starts in column 0
 //   (no indentation: "     #tag: x" -> "#tag: x"). Only vertical moves are possible.
 // - a scene title has one single space between its words
-//   ("#title: A   Floresta    Escura" -> "#title: A Floresta Escura").
+//   ("#title: The   Dark    Forest" -> "#title: The Dark Forest").
 //
 // Everything here is a pure function over text, shared by the editor, the file
 // loader, the save step and the compiler, so all of them agree on the same rule.

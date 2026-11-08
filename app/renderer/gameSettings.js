@@ -3,7 +3,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const { pathToFileURL } = require("url");
 const { ipcRenderer } = require("electron");
 const { GameStyle: G } = require("../gameStyle.js");
 const { COVER_EXTENSIONS, IMAGE_FOLDER, LARGE_IMAGE_BYTES } = require("../imageTypes.js");
@@ -104,50 +103,7 @@ function showCoverThumbMessage(box, image, note, message) {
     note.textContent = message;
 }
 
-// The same crop as the title screen (object-fit: cover, centered), so the writer
-// sees which part of the picture the exported frame keeps.
-function updateCoverThumb() {
-    const box = $("story-cover-thumb");
-    const image = $("story-cover-thumb-image");
-    const note = $("story-cover-thumb-note");
-    const ratio = coverFrameRatio();
-    const setRatio = value => {
-        if( value ) box.style.setProperty("--cover-ratio", value);
-        else box.style.removeProperty("--cover-ratio");
-    };
-    setRatio(ratio);
-
-    const reference = model.titles.cover;
-    const file = reference ? G.resolveCoverFile(projectFolder(), reference) : null;
-
-    if( !file ) {
-        coverThumbToken++;
-        showCoverThumbMessage(box, image, note, reference ? "The cover image is not in the project folder" : "No cover yet");
-        return;
-    }
-    const url = pathToFileURL(file).href;
-    if( image.getAttribute("src") === url ) return;   // same picture: only the frame may have changed
-
-    const token = ++coverThumbToken;
-    box.dataset.state = "loading";
-    note.textContent = "Reading cover...";
-    image.onload = () => {
-        if( token !== coverThumbToken ) return;
-        // With no format proportion the thumbnail keeps the picture's own shape.
-        const natural = image.naturalWidth > 0 && image.naturalHeight > 0
-            ? `${image.naturalWidth} / ${image.naturalHeight}`
-            : null;
-        setRatio(coverFrameRatio() || natural);
-        box.dataset.state = "ready";
-    };
-    image.onerror = () => {
-        if( token !== coverThumbToken ) return;
-        showCoverThumbMessage(box, image, note, "The cover image could not be read");
-    };
-    image.src = url;
-}
-
-// Bringing a picture chosen outside the project into it: "<project>/images/<name>",
+// Bringing a picture chosen outside the project into it: "<project>/image/<name>",
 // with confirmation before an existing file is replaced. Returns { reference } or { error }.
 const NOT_A_COVER = "Choose a cover image (JPG, JPEG, PNG, WebP, GIF or SVG).";
 
@@ -368,6 +324,7 @@ function render() {
     $("controls-show").checked = model.controls.show;
     ["master", "music", "sfx"].forEach(category => setRangeValue(`audio-${category}`, model.audio[category]));
     $("story-title").value = model.titles.story;
+    setRangeValue("story-title-size", model.titles.storySize);
     $("story-author").value = model.titles.author;
     $("story-cover").value = model.titles.cover;
     $("story-cover").classList.remove("invalid");
@@ -395,13 +352,11 @@ function render() {
     if( sceneAlignment ) sceneAlignment.checked = true;
 
     updatePresetHighlight();
-    updateCoverThumb();
 }
 
 // Something changed in the form: show it, and save
 function changed() {
     updatePresetHighlight();
-    updateCoverThumb();
     scheduleSave();
 }
 
@@ -545,6 +500,7 @@ function wire() {
         changed();
     });
 
+    wireRange("story-title-size", value => { model.titles.storySize = value; changed(); });
     $("story-title").addEventListener("input", () => {
         model.titles.story = $("story-title").value.trim();
         changed();
@@ -577,7 +533,7 @@ function wire() {
         if( !picked || picked.canceled || !picked.filePaths || picked.filePaths.length === 0 ) return;
         const source = picked.filePaths[0];
         let reference = G.coverReferenceForFile(projectDir, source);
-        // A picture outside the project is copied into its "images" folder, so the
+        // A picture outside the project is copied into its "image" folder, so the
         // exported game can carry it; inside the project it is used where it is.
         if( !reference ) {
             const copied = copyCoverIntoProject(projectDir, source);

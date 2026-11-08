@@ -104,7 +104,7 @@ exports.inkCompleter = {
                 const suggestions = [];
                 TAG_NAMES.forEach(name => {
                     const definition = TagPicker.TAG_REGISTRY[name];
-                    suggestions.push({caption: "#" + name, value: name + ": ", meta: "Ink Tag"});
+                    suggestions.push({caption: "#" + name, value: name + (definition.kind === "flag" ? "" : ": "), meta: "Ink Tag"});
                     TagPicker.valuesForTag(name, this.getProjectDir()).forEach(value => suggestions.push({
                         caption: "#" + name + ": " + value,
                         value: name + ": " + value,
@@ -114,7 +114,7 @@ exports.inkCompleter = {
                 callback(null, suggestions.sort((a, b) => a.value < b.value ? -1 : a.value > b.value ? 1 : 0));
                 return;
             }
-            callback(null, TAG_NAMES.map(name => ({caption: "#" + name, value: name + ": ", meta: "Ink Tag"})));
+            callback(null, TAG_NAMES.map(name => ({caption: "#" + name, value: name + (definition.kind === "flag" ? "" : ": "), meta: "Ink Tag"})));
             return;
         }
 

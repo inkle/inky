@@ -9,8 +9,9 @@ function escapeHtml(value) {
         .replace(/'/g, "&#39;");
 }
 
-// Splits a plain-text passage into word spans, so words can be underlined with Alt held down and
-// clicked to jump to the source. Only text nodes are touched.
+// Split a plain-text passage into word spans for the author's Alt-click jump-to-source.
+// Hovering or typing does not add any visual styling to narrative text.
+// Only text nodes are touched.
 function wrapWords(root) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const textNodes = [];

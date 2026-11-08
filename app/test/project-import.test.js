@@ -3,7 +3,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { importKind, planImport, applyImport, IMPORT_EXTENSIONS } = require("../renderer/projectImport.js");
-const { IMAGE_EXTENSIONS, FAVICON_EXTENSIONS, COVER_EXTENSIONS, IMAGE_FOLDER, LARGE_IMAGE_BYTES, isImageFileName, isFaviconFileName, imageMimeType } = require("../renderer/imageTypes.js");
+const { IMAGE_EXTENSIONS, FAVICON_EXTENSIONS, COVER_EXTENSIONS, IMAGE_FOLDER, IMAGE_BACKGROUND_FOLDER, IMAGE_CHARACTER_FOLDER, LARGE_IMAGE_BYTES, isImageFileName, isFaviconFileName, imageMimeType } = require("../renderer/imageTypes.js");
 
 function temp(prefix) { return fs.mkdtempSync(path.join(os.tmpdir(), prefix)); }
 
@@ -13,7 +13,9 @@ describe("project image formats", function () {
         [".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg", ".ico"].forEach(ext => assert.ok(IMAGE_EXTENSIONS.includes(ext), ext));
         assert.ok(!COVER_EXTENSIONS.includes(".ico"), "an .ico is never a cover");
         assert.deepStrictEqual(FAVICON_EXTENSIONS, [".ico", ".png", ".svg"]);
-        assert.strictEqual(IMAGE_FOLDER, "images");
+        assert.strictEqual(IMAGE_FOLDER, "image");
+        assert.strictEqual(IMAGE_BACKGROUND_FOLDER, path.join("image", "background"));
+        assert.strictEqual(IMAGE_CHARACTER_FOLDER, path.join("image", "character"));
         ["cover.jpg", "COVER.JPEG", "a.png", "a.webp", "a.gif", "a.svg", "a.ico"].forEach(name => assert.ok(isImageFileName(name), name));
         ["notes.txt", "a.mp3", "a.jpg.bak", "a"].forEach(name => assert.strictEqual(isImageFileName(name), false, name));
     });
@@ -43,7 +45,7 @@ describe("project image formats", function () {
 
 describe("Importing files into a project", function () {
     it("accepts only sound files, Ink scenes, YAML files and pictures", function () {
-        ["a.mp3", "a.WAV", "a.ogg", "a.m4a", "a.flac", "a.opus", "cena.ink", "game.yaml", "x.YML", "favicon.ico", "brand.PNG", "mark.svg",
+        ["a.mp3", "a.WAV", "a.ogg", "a.m4a", "a.flac", "a.opus", "scene.ink", "game.yaml", "x.YML", "favicon.ico", "brand.PNG", "mark.svg",
             "cover.jpg", "COVER.JPEG", "hero.webp", "anim.gif"].forEach(name => assert.ok(importKind(name), name));
         ["a.txt", "a.js", "a.exe", "a.zip", "a.pdf", "a", ".mp3x", "a.ink.bak"].forEach(name => assert.strictEqual(importKind(name), null, name));
         assert.strictEqual(importKind("a.png"), "image");
@@ -54,25 +56,25 @@ describe("Importing files into a project", function () {
     it("sends each kind of file to its folder and refuses everything else", function () {
         const root = temp("inky-import-root-"), source = temp("inky-import-src-");
         try {
-            fs.mkdirSync(path.join(root, "cenas"));
-            const files = ["musica.mp3", "passos.WAV", "praia.ink", "estilo.yaml", "marca.png", "script.js", "sem-extensao"];
+            fs.mkdirSync(path.join(root, "scenes"));
+            const files = ["music.mp3", "steps.WAV", "beach.ink", "style.yaml", "mark.png", "script.js", "no-extension"];
             files.forEach(name => fs.writeFileSync(path.join(source, name), "x"));
-            fs.mkdirSync(path.join(source, "pasta"));
-            const plan = planImport(root, files.concat(["pasta", "nao-existe.mp3"]).map(name => path.join(source, name)), "cenas");
+            fs.mkdirSync(path.join(source, "folder"));
+            const plan = planImport(root, files.concat(["folder", "missing-file.mp3"]).map(name => path.join(source, name)), "scenes");
 
             assert.deepStrictEqual(plan.items.map(item => [item.name, item.destRel]).sort(), [
-                ["estilo.yaml", "estilo.yaml"],
-                ["marca.png", "images/marca.png"],
-                ["musica.mp3", "audio/musica.mp3"],
-                ["passos.WAV", "audio/passos.WAV"],
-                ["praia.ink", "cenas/praia.ink"]
+                ["beach.ink", "scenes/beach.ink"],
+                ["mark.png", "image/mark.png"],
+                ["music.mp3", "audio/music.mp3"],
+                ["steps.WAV", "audio/steps.WAV"],
+                ["style.yaml", "style.yaml"]
             ]);
-            assert.deepStrictEqual(plan.rejected.map(item => item.name).sort(), ["nao-existe.mp3", "pasta", "script.js", "sem-extensao"]);
+            assert.deepStrictEqual(plan.rejected.map(item => item.name).sort(), ["folder", "missing-file.mp3", "no-extension", "script.js"]);
 
             const result = applyImport(plan, { replaceExisting: false });
             assert.strictEqual(result.imported.length, 5);
-            ["audio/musica.mp3", "audio/passos.WAV", "cenas/praia.ink", "estilo.yaml", "images/marca.png"].forEach(rel => assert.ok(fs.existsSync(path.join(root, rel)), rel));
-            assert.ok(!fs.existsSync(path.join(root, "marca.png")) && !fs.existsSync(path.join(root, "script.js")));
+            ["audio/music.mp3", "audio/steps.WAV", "scenes/beach.ink", "style.yaml", "image/mark.png"].forEach(rel => assert.ok(fs.existsSync(path.join(root, rel)), rel));
+            assert.ok(!fs.existsSync(path.join(root, "mark.png")) && !fs.existsSync(path.join(root, "script.js")));
         } finally {
             fs.rmSync(root, { recursive: true, force: true }); fs.rmSync(source, { recursive: true, force: true });
         }
@@ -102,15 +104,15 @@ describe("Importing files into a project", function () {
         }
     });
 
-    it("imports several pictures at once into images, and never lets one replace the favicon", function () {
+    it("imports several pictures at once into image, and never lets one replace the favicon", function () {
         const root = temp("inky-import-images-root-"), source = temp("inky-import-images-src-");
         try {
             fs.writeFileSync(path.join(root, "favicon.png"), "the real favicon");
-            ["capa.jpg", "HERO.WEBP", "logo.svg", "anim.gif", "outra.png"].forEach(name => fs.writeFileSync(path.join(source, name), "x"));
+            ["cover.jpg", "HERO.WEBP", "logo.svg", "anim.gif", "other.png"].forEach(name => fs.writeFileSync(path.join(source, name), "x"));
 
-            const plan = planImport(root, ["capa.jpg", "HERO.WEBP", "logo.svg", "anim.gif", "outra.png"].map(name => path.join(source, name)), "cenas");
+            const plan = planImport(root, ["cover.jpg", "HERO.WEBP", "logo.svg", "anim.gif", "other.png"].map(name => path.join(source, name)), "scenes");
             assert.deepStrictEqual(plan.items.map(item => item.destRel), [
-                "images/capa.jpg", "images/HERO.WEBP", "images/logo.svg", "images/anim.gif", "images/outra.png"
+                "image/cover.jpg", "image/HERO.WEBP", "image/logo.svg", "image/anim.gif", "image/other.png"
             ]);
             assert.ok(plan.items.every(item => item.isFavicon === false));
 
@@ -119,19 +121,19 @@ describe("Importing files into a project", function () {
             assert.strictEqual(fs.readFileSync(path.join(root, "favicon.png"), "utf8"), "the real favicon", "the favicon is left alone");
 
             // an .ico, and anything called favicon.*, are the only pictures that reach the project root
-            fs.writeFileSync(path.join(source, "selo.ico"), "ico bytes");
+            fs.writeFileSync(path.join(source, "seal.ico"), "ico bytes");
             fs.writeFileSync(path.join(source, "favicon.jpg"), "not a favicon format");
-            const mixed = planImport(root, [path.join(source, "selo.ico"), path.join(source, "favicon.jpg")], "");
+            const mixed = planImport(root, [path.join(source, "seal.ico"), path.join(source, "favicon.jpg")], "");
             assert.deepStrictEqual(mixed.items.map(item => [item.destRel, item.isFavicon]), [
                 ["favicon.ico", true],
-                ["images/favicon.jpg", false]
+                ["image/favicon.jpg", false]
             ]);
             applyImport(mixed, { replaceExisting: true });
-            assert.strictEqual(fs.existsSync(path.join(root, "images", "favicon.jpg")), true);
+            assert.strictEqual(fs.existsSync(path.join(root, "image", "favicon.jpg")), true);
 
             // still only one favicon per import
-            fs.writeFileSync(path.join(source, "outro.ico"), "2");
-            const two = planImport(root, [path.join(source, "selo.ico"), path.join(source, "outro.ico")], "");
+            fs.writeFileSync(path.join(source, "another.ico"), "2");
+            const two = planImport(root, [path.join(source, "seal.ico"), path.join(source, "another.ico")], "");
             assert.strictEqual(two.items.length, 1);
             assert.strictEqual(two.rejected[0].reason, "only one favicon image can be imported at a time");
         } finally {
@@ -154,9 +156,9 @@ describe("Importing files into a project", function () {
             assert.strictEqual(plan.items[0].imageBytes, LARGE_IMAGE_BYTES + 1024);
             assert.strictEqual(plan.items[1].largeImage, false);
             assert.deepStrictEqual(applyImport(plan, { replaceExisting: false }).imported.map(item => item.destRel), [
-                "images/grande.png", "images/pequena.png"
+                "image/grande.png", "image/pequena.png"
             ]);
-            assert.strictEqual(fs.statSync(path.join(root, "images", "grande.png")).size, LARGE_IMAGE_BYTES + 1024, "the picture is copied unchanged");
+            assert.strictEqual(fs.statSync(path.join(root, "image", "grande.png")).size, LARGE_IMAGE_BYTES + 1024, "the picture is copied unchanged");
         } finally {
             fs.rmSync(root, { recursive: true, force: true });
             fs.rmSync(source, { recursive: true, force: true });

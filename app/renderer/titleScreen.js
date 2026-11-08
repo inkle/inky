@@ -1,9 +1,10 @@
-// The title screen: a cover, the title, the author and "Iniciar", shown inside the story's own
+// The title screen: a cover, the title, the author and "Start", shown inside the story's own
 // frame until the player starts. The web export and the Preview use the same markup
 // (titleScreenHtml) and the same stylesheet (titleScreen.css).
 
 const START_LABEL = "Start";
-const AUTHOR_PREFIX = "by ";
+const LOAD_LABEL = "Load";
+const AUTHOR_PREFIX = "Written by ";
 
 function escapeHtml(value) {
     return String(value == null ? "" : value)
@@ -14,18 +15,27 @@ function escapeHtml(value) {
         .replace(/'/g, "&#39;");
 }
 
-// "Iniciar" is a regular story choice (p.choice > button.choice-button), so it looks and behaves
+// "Start" is a regular story choice (p.choice > button.choice-button), so it looks and behaves
 // like the choices of the story. Missing data is simply left out.
 function titleScreenHtml(data) {
     const title = String(data.title || "").trim();
     const author = String(data.author || "").trim();
     const coverSrc = String(data.coverSrc || "").trim();
+    // The author edits an actual CSS font size in px. The default is also
+    // used when opening a project with no Story Information settings.
+    const requestedSize = Number(data.titleSize);
+    const titleSize = Number.isFinite(requestedSize) && requestedSize >= 16 && requestedSize <= 100
+        ? requestedSize : 56;
+    const customSize = titleSize === 56 ? "" : ` style="--title-screen-title-size: ${titleSize}px"`;
     return `<div class="title-screen${coverSrc ? " has-cover" : ""}" id="title-screen">` +
         (coverSrc ? `<img class="title-screen-cover" src="${escapeHtml(coverSrc)}" alt="">` : "") +
         `<div class="title-screen-body">` +
-        (title ? `<h1 class="title-screen-title">${escapeHtml(title)}</h1>` : "") +
+        (title ? `<h1 class="title-screen-title"${customSize}>${escapeHtml(title)}</h1>` : "") +
         (author ? `<div class="title-screen-author">${escapeHtml(AUTHOR_PREFIX + author)}</div>` : "") +
+        `<div class="title-screen-actions">` +
         `<p class="choice"><button type="button" class="choice-button">${START_LABEL}</button></p>` +
+        `<p class="choice title-screen-load-choice"><button type="button" id="title-load" class="choice-button" disabled>${LOAD_LABEL}</button></p>` +
+        `</div>` +
         `</div></div>`;
 }
 
@@ -48,10 +58,13 @@ function sync(player) {
     if( !frame ) return;
     frame.insertAdjacentHTML("afterbegin", titleScreenHtml({
         title: player.dataset.storyTitle,
+        titleSize: player.dataset.storyTitleSize,
         author: player.dataset.storyAuthor,
         coverSrc: player.dataset.storyCover
     }));
     frame.classList.add("title-screen-active");
+    const load = frame.querySelector("#title-load");
+    if( load ) load.disabled = player.dataset.titleSaveAvailable !== "1";
 }
 
 function start(player) {

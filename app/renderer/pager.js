@@ -78,6 +78,30 @@
         var previous = nav.querySelector(".pager-prev");
         var next = nav.querySelector(".pager-next");
         var dots = nav.querySelector(".pager-dots");
+        var choices = options.getChoices && options.getChoices();
+
+        // The choices footer grows naturally until its CSS maximum height is reached.
+        // Beyond that, it becomes a keyboard-accessible scroll region.  Scrollbars and
+        // the small bottom fade are visible only while there is actual overflow.
+        // This belongs in the shared pager so Preview and Web Export stay identical.
+        function updateChoicesOverflow() {
+            if( !choices ) return;
+            var overflow = !choices.hidden && choices.clientHeight > 0 &&
+                choices.scrollHeight - choices.clientHeight > 2;
+            var moreBelow = overflow &&
+                choices.scrollHeight - choices.clientHeight - choices.scrollTop > 2;
+            choices.classList.toggle("choices-scrollable", overflow);
+            frame.classList.toggle("choices-more-below", !!moreBelow);
+            if( overflow ) {
+                if( !choices.hasAttribute("tabindex") ) choices.setAttribute("tabindex", "0");
+                if( !choices.hasAttribute("aria-label") ) choices.setAttribute("aria-label", "Choices. Scroll for more options.");
+                if( !choices.hasAttribute("role") ) choices.setAttribute("role", "region");
+            } else {
+                choices.removeAttribute("tabindex");
+                choices.removeAttribute("aria-label");
+                choices.removeAttribute("role");
+            }
+        }
 
         function blocksOf() {
             return Array.prototype.filter.call(passage.children, function (child) { return child.nodeType === 1; });
@@ -257,6 +281,7 @@
                 dots.setAttribute("aria-label", "Page " + (state.index + 1) + " of " + total);
             }
             lockChoices();
+            updateChoicesOverflow();
         }
 
         function refresh() {
@@ -337,11 +362,22 @@
         if( win.MutationObserver ) {
             observer = new win.MutationObserver(function () { if( !busy ) schedule(); });
             observer.observe(passage, { childList: true });
-            var choices = options.getChoices && options.getChoices();
-            if( choices ) new win.MutationObserver(function () { if( !busy ) lockChoices(); }).observe(choices, { childList: true });
+            if( choices ) new win.MutationObserver(function () {
+                if( !busy ) lockChoices();
+                updateChoicesOverflow();
+            }).observe(choices, { childList: true, subtree: true });
         }
-        if( win.ResizeObserver ) new win.ResizeObserver(function () { if( !busy ) schedule(); }).observe(passage);
+        if( win.ResizeObserver ) {
+            new win.ResizeObserver(function () { if( !busy ) schedule(); }).observe(passage);
+            if( choices ) {
+                var choiceResize = new win.ResizeObserver(updateChoicesOverflow);
+                choiceResize.observe(choices);
+                choiceResize.observe(frame);
+            }
+        }
+        if( choices ) choices.addEventListener("scroll", updateChoicesOverflow, { passive: true });
         passage.addEventListener("load", schedule, true);
+        updateChoicesOverflow();
 
         return {
             refresh: refresh,

@@ -90,10 +90,10 @@ describe("project Explorer file actions", function () {
         assert.doesNotMatch(navView + fs.readFileSync(path.join(rendererDir, "explorerTree.js"), "utf8"), /\.png|\.svg|\.jpg/);
         assert.doesNotMatch(viewer, /"\.png"|"\.svg"|"\.jpg"/);
         assert.ok(IMAGE_EXTENSIONS.includes(".jpg") && IMAGE_EXTENSIONS.includes(".webp") && IMAGE_EXTENSIONS.includes(".gif"));
-        assert.strictEqual(IMAGE_FOLDER, "images");
+        assert.strictEqual(IMAGE_FOLDER, "image");
     });
 
-    it("imports pictures into images, and the favicon into the project root", function () {
+    it("imports pictures into image, and the favicon into the project root", function () {
         assert.match(controller, /name: "Images"/);
         assert.match(controller, /project\.noteImageFiles\(imageRels\)/);
         assert.match(controller, /largeImages/);

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../resources/Documentation/documentationWindow.css">
+    <link rel="stylesheet" type="text/css" href="../../resources/Documentation/documentationWindow.dark.css">
+    <script>
+      function adjustToScreen() {
+            document.getElementById("contentView").height = window.innerHeight - 20;
+       }
+      function openPath(link) {
+          var pathToDocumentation = "embedded.html";
+          if (document.getElementById("contentView").src != pathToDocumentation + link) {
+          document.getElementById("contentView").src = pathToDocumentation + link;
+          }
+          return false;
+      }
+    </script>
+</head>
+<!-- The content view is resized every time the window is resized. It ist also resized initialy once the window is opend. -->
+
+<body onresize="adjustToScreen()" onload="adjustToScreen();">
+    <ul id="nav">
+         <li><a id="#writing-with-ink "onclick="openPath(this.id)" class="nav-h1">Writing with ink</a></li>
+ <li><a id="#introduction "onclick="openPath(this.id)" class="nav-h2">Introduction</a></li>
+ <li><a id="#part-one-the-basics "onclick="openPath(this.id)" class="nav-h1">Part One: The Basics</a></li>
+ <li><a id="#1-content "onclick="openPath(this.id)" class="nav-h2">1) Content</a></li>
+ <li><a id="#the-simplest-ink-script "onclick="openPath(this.id)" class="nav-h3">The simplest ink script</a></li>
+ <li><a id="#comments "onclick="openPath(this.id)" class="nav-h3">Comments</a></li>
+ <li><a id="#tags "onclick="openPath(this.id)" class="nav-h3">Tags</a></li>
+ <li><a id="#scene-pictures-and-backgrounds "onclick="openPath(this.id)" class="nav-h3">Scene pictures and backgrounds</a></li>
+ <li><a id="#bg-enchanted-forestjpg "onclick="openPath(this.id)" class="nav-h1">bg: enchanted-forest.jpg</a></li>
+ <li><a id="#image-forestpng "onclick="openPath(this.id)" class="nav-h1">image: forest.png</a></li>
+ <li><a id="#music-forest-themeogg "onclick="openPath(this.id)" class="nav-h1">music: forest-theme.ogg</a></li>
+ <li><a id="#sound-birdswav "onclick="openPath(this.id)" class="nav-h1">sound: birds.wav</a></li>
+ <li><a id="#sound "onclick="openPath(this.id)" class="nav-h3">Sound</a></li>
+ <li><a id="#2-choices "onclick="openPath(this.id)" class="nav-h2">2) Choices</a></li>
+ <li><a id="#suppressing-choice-text "onclick="openPath(this.id)" class="nav-h3">Suppressing choice text</a></li>
+ <li><a id="#advanced-mixing-choice-and-output-text "onclick="openPath(this.id)" class="nav-h4">Advanced: mixing choice and output text</a></li>
+ <li><a id="#multiple-choices "onclick="openPath(this.id)" class="nav-h3">Multiple Choices</a></li>
+ <li><a id="#3-knots "onclick="openPath(this.id)" class="nav-h2">3) Knots</a></li>
+ <li><a id="#pieces-of-content-are-called-knots "onclick="openPath(this.id)" class="nav-h3">Pieces of content are called knots</a></li>
+ <li><a id="#writing-a-knot "onclick="openPath(this.id)" class="nav-h3">Writing a knot</a></li>
+ <li><a id="#advanced-a-knottier-hello-world "onclick="openPath(this.id)" class="nav-h4">Advanced: a knottier "hello world"</a></li>
+ <li><a id="#4-diverts "onclick="openPath(this.id)" class="nav-h2">4) Diverts</a></li>
+ <li><a id="#knots-divert-to-knots "onclick="openPath(this.id)" class="nav-h3">Knots divert to knots</a></li>
+ <li><a id="#diverts-are-invisible "onclick="openPath(this.id)" class="nav-h4">Diverts are invisible</a></li>
+ <li><a id="#glue "onclick="openPath(this.id)" class="nav-h4">Glue</a></li>
+ <li><a id="#5-branching-the-flow "onclick="openPath(this.id)" class="nav-h2">5) Branching The Flow</a></li>
+ <li><a id="#basic-branching "onclick="openPath(this.id)" class="nav-h3">Basic branching</a></li>
+ <li><a id="#branching-and-joining "onclick="openPath(this.id)" class="nav-h3">Branching and joining</a></li>
+ <li><a id="#the-story-flow "onclick="openPath(this.id)" class="nav-h3">The story flow</a></li>
+ <li><a id="#advanced-loops "onclick="openPath(this.id)" class="nav-h4">Advanced: Loops</a></li>
+ <li><a id="#6-includes-and-stitches "onclick="openPath(this.id)" class="nav-h2">6) Includes and Stitches</a></li>
+ <li><a id="#knots-can-be-subdivided "onclick="openPath(this.id)" class="nav-h3">Knots can be subdivided</a></li>
+ <li><a id="#stitches-have-unique-names "onclick="openPath(this.id)" class="nav-h3">Stitches have unique names</a></li>
+ <li><a id="#the-first-stitch-is-the-default "onclick="openPath(this.id)" class="nav-h3">The first stitch is the default</a></li>
+ <li><a id="#local-diverts "onclick="openPath(this.id)" class="nav-h3">Local diverts</a></li>
+ <li><a id="#script-files-can-be-combined "onclick="openPath(this.id)" class="nav-h3">Script files can be combined</a></li>
+ <li><a id="#7-varying-choices "onclick="openPath(this.id)" class="nav-h2">7) Varying Choices</a></li>
+ <li><a id="#choices-can-only-be-used-once "onclick="openPath(this.id)" class="nav-h3">Choices can only be used once</a></li>
+ <li><a id="#fallback-choices "onclick="openPath(this.id)" class="nav-h4">Fallback choices</a></li>
+ <li><a id="#example-of-a-fallback-choice "onclick="openPath(this.id)" class="nav-h4">Example of a fallback choice</a></li>
+ <li><a id="#sticky-choices "onclick="openPath(this.id)" class="nav-h3">Sticky choices</a></li>
+ <li><a id="#conditional-choices "onclick="openPath(this.id)" class="nav-h3">Conditional Choices</a></li>
+ <li><a id="#advanced-multiple-conditions "onclick="openPath(this.id)" class="nav-h4">Advanced: multiple conditions</a></li>
+ <li><a id="#logical-operators-and-and-or "onclick="openPath(this.id)" class="nav-h4">Logical operators: AND and OR</a></li>
+ <li><a id="#advanced-knot-stitch-labels-are-actually-read-counts "onclick="openPath(this.id)" class="nav-h4">Advanced: knot/stitch labels are actually read counts</a></li>
+ <li><a id="#advanced-more-logic "onclick="openPath(this.id)" class="nav-h4">Advanced: more logic</a></li>
+ <li><a id="#8-variable-text "onclick="openPath(this.id)" class="nav-h2">8) Variable Text</a></li>
+ <li><a id="#text-can-vary "onclick="openPath(this.id)" class="nav-h3">Text can vary</a></li>
+ <li><a id="#sequences-cycles-and-other-alternatives "onclick="openPath(this.id)" class="nav-h3">Sequences, cycles and other alternatives</a></li>
+ <li><a id="#types-of-alternatives "onclick="openPath(this.id)" class="nav-h4">Types of alternatives</a></li>
+ <li><a id="#features-of-alternatives "onclick="openPath(this.id)" class="nav-h4">Features of Alternatives</a></li>
+ <li><a id="#examples "onclick="openPath(this.id)" class="nav-h4">Examples</a></li>
+ <li><a id="#sneak-preview-multiline-alternatives "onclick="openPath(this.id)" class="nav-h4">Sneak Preview: Multiline alternatives</a></li>
+ <li><a id="#conditional-text "onclick="openPath(this.id)" class="nav-h3">Conditional Text</a></li>
+ <li><a id="#9-game-queries-and-functions "onclick="openPath(this.id)" class="nav-h2">9) Game Queries and Functions</a></li>
+ <li><a id="#choice_count- "onclick="openPath(this.id)" class="nav-h3">CHOICE_COUNT()</a></li>
+ <li><a id="#turns- "onclick="openPath(this.id)" class="nav-h3">TURNS()</a></li>
+ <li><a id="#turns_since-knot- "onclick="openPath(this.id)" class="nav-h3">TURNS_SINCE(-> knot)</a></li>
+ <li><a id="#sneak-preview-using-turns_since-in-a-function "onclick="openPath(this.id)" class="nav-h4">Sneak preview: using TURNS_SINCE in a function</a></li>
+ <li><a id="#seed_random- "onclick="openPath(this.id)" class="nav-h3">SEED_RANDOM()</a></li>
+ <li><a id="#advanced-more-queries "onclick="openPath(this.id)" class="nav-h4">Advanced: more queries</a></li>
+ <li><a id="#part-2-weave "onclick="openPath(this.id)" class="nav-h1">Part 2: Weave</a></li>
+ <li><a id="#1-gathers "onclick="openPath(this.id)" class="nav-h2">1) Gathers</a></li>
+ <li><a id="#gather-points-gather-the-flow-back-together "onclick="openPath(this.id)" class="nav-h3">Gather points gather the flow back together</a></li>
+ <li><a id="#options-and-gathers-form-chains-of-content "onclick="openPath(this.id)" class="nav-h3">Options and gathers form chains of content</a></li>
+ <li><a id="#the-weave-philosophy "onclick="openPath(this.id)" class="nav-h4">The weave philosophy</a></li>
+ <li><a id="#2-nested-flow "onclick="openPath(this.id)" class="nav-h2">2) Nested Flow</a></li>
+ <li><a id="#options-can-be-nested "onclick="openPath(this.id)" class="nav-h3">Options can be nested</a></li>
+ <li><a id="#gather-points-can-be-nested-too "onclick="openPath(this.id)" class="nav-h3">Gather points can be nested too</a></li>
+ <li><a id="#advanced-what-gathers-do "onclick="openPath(this.id)" class="nav-h4">Advanced: What gathers do</a></li>
+ <li><a id="#you-can-nest-as-many-levels-are-you-like "onclick="openPath(this.id)" class="nav-h3">You can nest as many levels are you like</a></li>
+ <li><a id="#example-a-conversation-with-nested-nodes "onclick="openPath(this.id)" class="nav-h3">Example: a conversation with nested nodes</a></li>
+ <li><a id="#3-tracking-a-weave "onclick="openPath(this.id)" class="nav-h2">3) Tracking a Weave</a></li>
+ <li><a id="#weaves-are-largely-unaddressed "onclick="openPath(this.id)" class="nav-h3">Weaves are largely unaddressed</a></li>
+ <li><a id="#gathers-and-options-can-be-labelled "onclick="openPath(this.id)" class="nav-h3">Gathers and options can be labelled</a></li>
+ <li><a id="#scope "onclick="openPath(this.id)" class="nav-h3">Scope</a></li>
+ <li><a id="#advanced-all-options-can-be-labelled "onclick="openPath(this.id)" class="nav-h4">Advanced: all options can be labelled</a></li>
+ <li><a id="#advanced-loops-in-a-weave "onclick="openPath(this.id)" class="nav-h4">Advanced: Loops in a weave</a></li>
+ <li><a id="#advanced-diverting-to-options "onclick="openPath(this.id)" class="nav-h4">Advanced: diverting to options</a></li>
+ <li><a id="#advanced-gathers-directly-after-an-option "onclick="openPath(this.id)" class="nav-h4">Advanced: Gathers directly after an option</a></li>
+ <li><a id="#part-3-variables-and-logic "onclick="openPath(this.id)" class="nav-h1">Part 3: Variables and Logic</a></li>
+ <li><a id="#1-global-variables "onclick="openPath(this.id)" class="nav-h2">1) Global Variables</a></li>
+ <li><a id="#defining-global-variables "onclick="openPath(this.id)" class="nav-h3">Defining Global Variables</a></li>
+ <li><a id="#using-global-variables "onclick="openPath(this.id)" class="nav-h3">Using Global Variables</a></li>
+ <li><a id="#advanced-storing-diverts-as-variables "onclick="openPath(this.id)" class="nav-h4">Advanced: storing diverts as variables</a></li>
+ <li><a id="#advanced-global-variables-are-externally-visible "onclick="openPath(this.id)" class="nav-h4">Advanced: Global variables are externally visible</a></li>
+ <li><a id="#printing-variables "onclick="openPath(this.id)" class="nav-h3">Printing variables</a></li>
+ <li><a id="#evaluating-strings "onclick="openPath(this.id)" class="nav-h3">Evaluating strings</a></li>
+ <li><a id="#2-logic "onclick="openPath(this.id)" class="nav-h2">2) Logic</a></li>
+ <li><a id="#mathematics "onclick="openPath(this.id)" class="nav-h3">Mathematics</a></li>
+ <li><a id="#random-min-max- "onclick="openPath(this.id)" class="nav-h4">RANDOM(min, max)</a></li>
+ <li><a id="#advanced-numerical-types-are-implicit "onclick="openPath(this.id)" class="nav-h4">Advanced: numerical types are implicit</a></li>
+ <li><a id="#advanced-int-floor-and-float- "onclick="openPath(this.id)" class="nav-h4">Advanced: INT(), FLOOR() and FLOAT()</a></li>
+ <li><a id="#string-queries "onclick="openPath(this.id)" class="nav-h3">String queries</a></li>
+ <li><a id="#3-conditional-blocks-if-else- "onclick="openPath(this.id)" class="nav-h2">3) Conditional blocks (if/else)</a></li>
+ <li><a id="#a-simple-if- "onclick="openPath(this.id)" class="nav-h3">A simple 'if'</a></li>
+ <li><a id="#extended-if-else-if-else-blocks "onclick="openPath(this.id)" class="nav-h3">Extended if/else if/else blocks</a></li>
+ <li><a id="#switch-blocks "onclick="openPath(this.id)" class="nav-h3">Switch blocks</a></li>
+ <li><a id="#example-context-relevant-content "onclick="openPath(this.id)" class="nav-h4">Example: context-relevant content</a></li>
+ <li><a id="#conditional-blocks-are-not-limited-to-logic "onclick="openPath(this.id)" class="nav-h3">Conditional blocks are not limited to logic</a></li>
+ <li><a id="#multiline-blocks "onclick="openPath(this.id)" class="nav-h3">Multiline blocks</a></li>
+ <li><a id="#advanced-modified-shuffles "onclick="openPath(this.id)" class="nav-h4">Advanced: modified shuffles</a></li>
+ <li><a id="#4-temporary-variables "onclick="openPath(this.id)" class="nav-h2">4) Temporary Variables</a></li>
+ <li><a id="#temporary-variables-are-for-scratch-calculations "onclick="openPath(this.id)" class="nav-h3">Temporary variables are for scratch calculations</a></li>
+ <li><a id="#knots-and-stitches-can-take-parameters "onclick="openPath(this.id)" class="nav-h3">Knots and stitches can take parameters</a></li>
+ <li><a id="#example-a-recursive-knot-definition "onclick="openPath(this.id)" class="nav-h4">Example: a recursive knot definition</a></li>
+ <li><a id="#advanced-sending-divert-targets-as-parameters "onclick="openPath(this.id)" class="nav-h4">Advanced: sending divert targets as parameters</a></li>
+ <li><a id="#5-functions "onclick="openPath(this.id)" class="nav-h2">5) Functions</a></li>
+ <li><a id="#defining-and-calling-functions "onclick="openPath(this.id)" class="nav-h3">Defining and calling functions</a></li>
+ <li><a id="#functions-don-t-have-to-return-anything "onclick="openPath(this.id)" class="nav-h3">Functions don't have to return anything</a></li>
+ <li><a id="#functions-can-be-called-inline "onclick="openPath(this.id)" class="nav-h3">Functions can be called inline</a></li>
+ <li><a id="#examples "onclick="openPath(this.id)" class="nav-h4">Examples</a></li>
+ <li><a id="#example-turning-numbers-into-words "onclick="openPath(this.id)" class="nav-h4">Example: turning numbers into words</a></li>
+ <li><a id="#parameters-can-be-passed-by-reference "onclick="openPath(this.id)" class="nav-h3">Parameters can be passed by reference</a></li>
+ <li><a id="#6-constants "onclick="openPath(this.id)" class="nav-h2">6) Constants</a></li>
+ <li><a id="#global-constants "onclick="openPath(this.id)" class="nav-h3">Global Constants</a></li>
+ <li><a id="#7-advanced-game-side-logic "onclick="openPath(this.id)" class="nav-h2">7) Advanced: Game-side logic</a></li>
+ <li><a id="#part-4-advanced-flow-control "onclick="openPath(this.id)" class="nav-h1">Part 4: Advanced Flow Control</a></li>
+ <li><a id="#1-tunnels "onclick="openPath(this.id)" class="nav-h2">1) Tunnels</a></li>
+ <li><a id="#tunnels-run-sub-stories "onclick="openPath(this.id)" class="nav-h3">Tunnels run sub-stories</a></li>
+ <li><a id="#advanced-tunnels-can-return-elsewhere "onclick="openPath(this.id)" class="nav-h4">Advanced: Tunnels can return elsewhere</a></li>
+ <li><a id="#advanced-tunnels-use-a-call-stack "onclick="openPath(this.id)" class="nav-h4">Advanced: Tunnels use a call-stack</a></li>
+ <li><a id="#2-threads "onclick="openPath(this.id)" class="nav-h2">2) Threads</a></li>
+ <li><a id="#threads-join-multiple-sections-together "onclick="openPath(this.id)" class="nav-h3">Threads join multiple sections together</a></li>
+ <li><a id="#uses-of-threads "onclick="openPath(this.id)" class="nav-h3">Uses of threads</a></li>
+ <li><a id="#when-does-a-side-thread-end- "onclick="openPath(this.id)" class="nav-h3">When does a side-thread end?</a></li>
+ <li><a id="#using-done "onclick="openPath(this.id)" class="nav-h3">Using `-> DONE`</a></li>
+ <li><a id="#example-adding-the-same-choice-to-several-places "onclick="openPath(this.id)" class="nav-h4">Example: adding the same choice to several places</a></li>
+ <li><a id="#example-organisation-of-wide-choice-points "onclick="openPath(this.id)" class="nav-h4">Example: organisation of wide choice points</a></li>
+ <li><a id="#part-5-advanced-state-tracking "onclick="openPath(this.id)" class="nav-h1">Part 5: Advanced State Tracking</a></li>
+ <li><a id="#note-new-feature-alert- "onclick="openPath(this.id)" class="nav-h4">Note: New feature alert!</a></li>
+ <li><a id="#1-basic-lists "onclick="openPath(this.id)" class="nav-h2">1) Basic Lists</a></li>
+ <li><a id="#2-reusing-lists "onclick="openPath(this.id)" class="nav-h2">2) Reusing Lists</a></li>
+ <li><a id="#states-can-be-used-repeatedly "onclick="openPath(this.id)" class="nav-h3">States can be used repeatedly</a></li>
+ <li><a id="#list-values-can-share-names "onclick="openPath(this.id)" class="nav-h4">List values can share names</a></li>
+ <li><a id="#advanced-a-list-is-actually-a-variable "onclick="openPath(this.id)" class="nav-h4">Advanced: a LIST is actually a variable</a></li>
+ <li><a id="#3-list-values "onclick="openPath(this.id)" class="nav-h2">3) List Values</a></li>
+ <li><a id="#converting-values-to-numbers "onclick="openPath(this.id)" class="nav-h3">Converting values to numbers</a></li>
+ <li><a id="#converting-numbers-to-values "onclick="openPath(this.id)" class="nav-h3">Converting numbers to values</a></li>
+ <li><a id="#advanced-defining-your-own-numerical-values "onclick="openPath(this.id)" class="nav-h3">Advanced: defining your own numerical values</a></li>
+ <li><a id="#4-multivalued-lists "onclick="openPath(this.id)" class="nav-h2">4) Multivalued Lists</a></li>
+ <li><a id="#lists-are-boolean-sets "onclick="openPath(this.id)" class="nav-h3">Lists are boolean sets</a></li>
+ <li><a id="#assiging-multiple-values "onclick="openPath(this.id)" class="nav-h4">Assiging multiple values</a></li>
+ <li><a id="#adding-and-removing-entries "onclick="openPath(this.id)" class="nav-h4">Adding and removing entries</a></li>
+ <li><a id="#basic-queries "onclick="openPath(this.id)" class="nav-h3">Basic Queries</a></li>
+ <li><a id="#testing-for-emptiness "onclick="openPath(this.id)" class="nav-h4">Testing for emptiness</a></li>
+ <li><a id="#testing-for-exact-equality "onclick="openPath(this.id)" class="nav-h4">Testing for exact equality</a></li>
+ <li><a id="#testing-for-containment "onclick="openPath(this.id)" class="nav-h4">Testing for containment</a></li>
+ <li><a id="#warning-no-lists-contain-the-empty-list "onclick="openPath(this.id)" class="nav-h4">Warning: no lists contain the empty list</a></li>
+ <li><a id="#example-basic-knowledge-tracking "onclick="openPath(this.id)" class="nav-h4">Example: basic knowledge tracking</a></li>
+ <li><a id="#example-a-doctor-s-surgery "onclick="openPath(this.id)" class="nav-h4">Example: a doctor's surgery</a></li>
+ <li><a id="#advanced-nicer-list-printing "onclick="openPath(this.id)" class="nav-h4">Advanced: nicer list printing</a></li>
+ <li><a id="#lists-don-t-need-to-have-multiple-entries "onclick="openPath(this.id)" class="nav-h4">Lists don't need to have multiple entries</a></li>
+ <li><a id="#the-full-list "onclick="openPath(this.id)" class="nav-h3">The "full" list</a></li>
+ <li><a id="#advanced-refreshing-a-list-s-type "onclick="openPath(this.id)" class="nav-h4">Advanced: "refreshing" a list's type</a></li>
+ <li><a id="#advanced-a-portion-of-the-full-list "onclick="openPath(this.id)" class="nav-h4">Advanced: a portion of the "full" list</a></li>
+ <li><a id="#example-tower-of-hanoi "onclick="openPath(this.id)" class="nav-h3">Example: Tower of Hanoi</a></li>
+ <li><a id="#5-advanced-list-operations "onclick="openPath(this.id)" class="nav-h2">5) Advanced List Operations</a></li>
+ <li><a id="#comparing-lists "onclick="openPath(this.id)" class="nav-h3">Comparing lists</a></li>
+ <li><a id="#distinctly-bigger-than "onclick="openPath(this.id)" class="nav-h4">"Distinctly bigger than"</a></li>
+ <li><a id="#definitely-never-smaller-than "onclick="openPath(this.id)" class="nav-h4">"Definitely never smaller than"</a></li>
+ <li><a id="#health-warning- "onclick="openPath(this.id)" class="nav-h4">Health warning!</a></li>
+ <li><a id="#inverting-lists "onclick="openPath(this.id)" class="nav-h3">Inverting lists</a></li>
+ <li><a id="#footnote "onclick="openPath(this.id)" class="nav-h4">Footnote</a></li>
+ <li><a id="#intersecting-lists "onclick="openPath(this.id)" class="nav-h3">Intersecting lists</a></li>
+ <li><a id="#6-multi-list-lists "onclick="openPath(this.id)" class="nav-h2">6) Multi-list Lists</a></li>
+ <li><a id="#lists-to-track-objects "onclick="openPath(this.id)" class="nav-h3">Lists to track objects</a></li>
+ <li><a id="#lists-to-track-multiple-states "onclick="openPath(this.id)" class="nav-h3">Lists to track multiple states</a></li>
+ <li><a id="#how-does-this-affect-queries- "onclick="openPath(this.id)" class="nav-h4">How does this affect queries?</a></li>
+ <li><a id="#7-long-example-crime-scene "onclick="openPath(this.id)" class="nav-h2">7) Long example: crime scene</a></li>
+ <li><a id="#8-summary "onclick="openPath(this.id)" class="nav-h2">8) Summary</a></li>
+ <li><a id="#flags "onclick="openPath(this.id)" class="nav-h3">Flags</a></li>
+ <li><a id="#state-machines "onclick="openPath(this.id)" class="nav-h3">State machines</a></li>
+ <li><a id="#properties "onclick="openPath(this.id)" class="nav-h3">Properties</a></li>
+ <li><a id="#part-6-international-character-support-in-identifiers "onclick="openPath(this.id)" class="nav-h1">Part 6: International character support in identifiers</a></li>
+ <li><a id="#supported-identifier-characters "onclick="openPath(this.id)" class="nav-h3">Supported Identifier Characters</a></li>
+
+    </ul>
+    <div class="contentContainer">
+        <section>
+            <iframe id="contentView" height="100" width="100%" src="embedded.html" style="border:none;"></iframe>
+        </section>
+    </div>
+</body>
+
+<script>
+    require('../../resources/Documentation/controller.js');
+</script>
+
+
+</html>

@@ -6,7 +6,7 @@
 //   .ink scenes -> the chosen folder (the project folder by default)
 //   .yaml files -> the project folder (where the style file lives)
 //   the favicon -> the project root as favicon.<extension>
-//   other pictures -> the project's "images" folder, with their own name
+//   other pictures -> the project's "image" folder, with their own name
 const fs = require("fs");
 const path = require("path");
 const { AUDIO_EXTENSIONS, AUDIO_FOLDER } = require("./audioTags.js");

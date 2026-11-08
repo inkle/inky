@@ -3,7 +3,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const { pathToFileURL } = require("url");
 const { ipcRenderer } = require("electron");
 const { GameStyle: G } = require("../gameStyle.js");
 const { COVER_EXTENSIONS, IMAGE_FOLDER, LARGE_IMAGE_BYTES } = require("../imageTypes.js");
@@ -19,6 +18,7 @@ const FONT_NAME = /^[\p{L}\p{N} .\-']{1,60}$/u;
 
 let model = G.defaultModel();
 let customFontMode = false;
+let editingTheme = "light";
 let saveTimer = null;
 
 // ---- story title and author: single plain spaces only (see GameStyle.normalizeTitleText) ----
@@ -124,47 +124,7 @@ function projectFolder() {
     return yamlPath && path.isAbsolute(yamlPath) ? path.dirname(yamlPath) : null;
 }
 
-// The same crop as the title screen (object-fit: cover, centered), so the writer
-// sees which part of the picture the exported frame keeps.
-let coverThumbToken = 0;
-
-function showCoverThumbMessage(box, image, note, message) {
-    box.dataset.state = "empty";
-    image.removeAttribute("src");
-    note.textContent = message;
-}
-
-function updateCoverThumb() {
-    const box = $("story-cover-thumb");
-    const image = $("story-cover-thumb-image");
-    const note = $("story-cover-thumb-note");
-
-    const reference = model.titles.cover;
-    const file = reference ? G.resolveCoverFile(projectFolder(), reference) : null;
-
-    if( !file ) {
-        coverThumbToken++;
-        showCoverThumbMessage(box, image, note, reference ? "The cover image is not in the project folder" : "No cover yet");
-        return;
-    }
-    const url = pathToFileURL(file).href;
-    if( image.getAttribute("src") === url ) return;   // same picture: only the frame may have changed
-
-    const token = ++coverThumbToken;
-    box.dataset.state = "loading";
-    note.textContent = "Reading cover...";
-    image.onload = () => {
-        if( token !== coverThumbToken ) return;
-        box.dataset.state = "ready";
-    };
-    image.onerror = () => {
-        if( token !== coverThumbToken ) return;
-        showCoverThumbMessage(box, image, note, "The cover image could not be read");
-    };
-    image.src = url;
-}
-
-// Bringing a picture chosen outside the project into it: "<project>/images/<name>",
+// Bringing a picture chosen outside the project into it: "<project>/image/<name>",
 // with confirmation before an existing file is replaced. Returns { reference } or { error }.
 const NOT_A_COVER = "Choose a cover image (JPG, JPEG, PNG, WebP, GIF or SVG).";
 
@@ -226,7 +186,7 @@ function writeNow(notifyParent = true) {
         // project document. Keep that document and the live preview in sync;
         // InkProject.save() will persist it beside the new .ink file.
         if( notifyParent && window.parent && window.parent !== window ) {
-            window.parent.postMessage({ type: "game-style-virtual-update", path: "game.yaml", yaml: yaml }, "*");
+            window.parent.postMessage({ type: "game-style-virtual-update", path: "game.yaml", yaml: yaml, previewTheme: model.themeMode === "dual" ? editingTheme : model.theme }, "*");
         }
         showWarnings([]);
         return;
@@ -236,7 +196,7 @@ function writeNow(notifyParent = true) {
     // In the integrated editor, notify the parent page directly so it can
     // reload the matching Ace document as well as refreshing the preview.
     if( window.parent && window.parent !== window ) {
-        if( notifyParent ) window.parent.postMessage({ type: "game-style-reload", path: yamlPath }, "*");
+        if( notifyParent ) window.parent.postMessage({ type: "game-style-reload", path: yamlPath, previewTheme: model.themeMode === "dual" ? editingTheme : model.theme }, "*");
     } else if( notifyParent ) {
         ipcRenderer.send("game-settings-changed", parentId);
     }
@@ -269,6 +229,7 @@ window.addEventListener("message", event => {
         saveTimer = null;
         const r = G.parseText(data.yaml);
         model = r.model;
+        editingTheme = model.theme;
         showWarnings(r.warnings);
         render();
         updatePresetHighlight();
@@ -290,18 +251,58 @@ function sameColor(a, b) {
     return String(a).toLowerCase() === String(b).toLowerCase();
 }
 
+function editableLook() {
+    return model.themeMode === "dual" ? model.themes[editingTheme]
+        : { colors: model.colors, fontFamily: model.font.family };
+}
+function setEditableColors(colors) {
+    if( model.themeMode === "dual" )
+        G.setThemeLook(model, editingTheme, { colors, fontFamily: editableLook().fontFamily, fontSize: editableLook().fontSize });
+    else model.colors = colors;
+}
+function setEditableFont(family) {
+    if( model.themeMode === "dual" )
+        G.setThemeLook(model, editingTheme, { colors: editableLook().colors, fontFamily: family, fontSize: editableLook().fontSize });
+    else model.font.family = family;
+}
+function setEditableSize(size) {
+    if( model.themeMode === "dual" ) {
+        const look = editableLook();
+        G.setThemeLook(model, editingTheme, { colors: look.colors, fontFamily: look.fontFamily, fontSize: size });
+    } else model.font.size = size;
+}
+function matchingPreset(side) {
+    const look = model.themeMode === "dual" ? model.themes[side] : editableLook();
+    return G.PRESETS.find(p => p.theme === side
+        && p.font === look.fontFamily
+        && ["background", "text", "choice"].every(key => sameColor(p.colors[key], look.colors[key]))
+        && !look.colors.choiceHover);
+}
 function updatePresetHighlight() {
+    const look = editableLook();
     document.querySelectorAll(".chip").forEach(chip => {
         const preset = G.PRESETS.find(p => p.id === chip.dataset.preset);
-        const c = model.colors;
         const active = preset.theme === model.theme
-            && preset.font === model.font.family
-            && sameColor(preset.colors.background, c.background)
-            && sameColor(preset.colors.text, c.text)
-            && sameColor(preset.colors.choice, c.choice)
-            && !c.choiceHover;
+            && preset.font === look.fontFamily
+            && ["background", "text", "choice"].every(key => sameColor(preset.colors[key], look.colors[key]))
+            && !look.colors.choiceHover;
         chip.classList.toggle("active", active);
     });
+    for( const side of ["light", "dark"] ) {
+        const select = $(side + "-preset");
+        const preset = matchingPreset(side);
+        select.value = preset ? preset.id : "custom";
+    }
+    const c = look.colors;
+    const sample = $("theme-sample");
+    sample.style.setProperty("--sample-bg", c.background);
+    sample.style.setProperty("--sample-text", c.text);
+    sample.style.setProperty("--sample-choice", c.choice);
+    sample.style.fontFamily = fontStackFor(look.fontFamily);
+}
+function showThemeInPreview() {
+    if( window.parent && window.parent !== window )
+        window.parent.postMessage({ type: "game-settings-preview-theme", theme: model.themeMode === "dual" ? editingTheme : model.theme }, "*");
 }
 
 function setRangeValue(id, value) {
@@ -343,32 +344,25 @@ function wireRange(id, onChange) {
     });
 }
 
-// The player's light/dark switch lives in the story menu, so it needs the buttons to be shown.
-// The hint names the look the switch leads to.
-function renderThemeToggle() {
-    const box = $("controls-theme-toggle");
-    box.checked = !!model.controls.themeToggle;
-    box.disabled = !model.controls.show;
-    const hint = $("theme-toggle-hint");
-    if( !model.controls.show ) {
-        hint.textContent = "Turn on the buttons above to let the player switch themes.";
-        return;
-    }
-    if( !model.controls.themeToggle ) {
-        hint.textContent = "";
-        return;
-    }
-    const look = G.alternateLook(model);
-    const preset = G.PRESETS.find(p => p.theme === look.theme && p.font === look.fontFamily
-        && p.colors.background.toLowerCase() === look.colors.background.toLowerCase());
-    const name = preset ? preset.label : `the plain ${look.theme} theme`;
-    hint.textContent = `The player can switch to the ${look.theme} look: ${name}. Pick a preset to choose its pair; Classic goes with Night, Sepia with Terminal.`;
+function renderAppearance() {
+    const dual = model.themeMode === "dual";
+    const mode = document.querySelector(`input[name="theme-mode"][value="${model.themeMode}"]`);
+    if( mode ) mode.checked = true;
+    $("dual-appearance").hidden = !dual;
+    $("single-appearance").hidden = dual;
+    const current = document.querySelector(`input[name="edit-theme"][value="${editingTheme}"]`);
+    if( current ) current.checked = true;
+    $("editing-look-label").textContent = dual ? `(${editingTheme} theme)` : "";
+    updatePresetHighlight();
 }
 
 function render() {
-    document.querySelector(`input[name="theme"][value="${model.theme}"]`).checked = true;
-
-    const c = model.colors;
+    const selectedPresentation = document.querySelector(`input[name="presentation-mode"][value="${model.presentation || "traditional"}"]`);
+    if( selectedPresentation ) selectedPresentation.checked = true;
+    if( model.themeMode !== "dual" ) editingTheme = model.theme;
+    renderAppearance();
+    const look = editableLook();
+    const c = look.colors;
     ["background", "text", "choice"].forEach(key => {
         $("hex-" + key).value = c[key];
         $("hex-" + key).classList.remove("invalid");
@@ -384,15 +378,15 @@ function render() {
     $("pick-hover").value = toHex(auto ? c.choice : c.choiceHover);
 
     const hasFontOption = select => Array.from(select.options)
-        .some(option => option.value === model.font.family);
+        .some(option => option.value === look.fontFamily);
     const isCustom = !hasFontOption($("font-family"));
     customFontMode = isCustom;
-    $("font-family").value = isCustom ? "custom" : model.font.family;
+    $("font-family").value = isCustom ? "custom" : look.fontFamily;
     $("font-custom").hidden = !customFontMode;
-    if( isCustom ) $("font-custom").value = model.font.family;
-    $("font-family").style.fontFamily = fontStackFor(model.font.family);
+    if( isCustom ) $("font-custom").value = look.fontFamily;
+    $("font-family").style.fontFamily = fontStackFor(look.fontFamily);
 
-    setRangeValue("font-size", model.font.size);
+    setRangeValue("font-size", model.themeMode === "dual" ? look.fontSize : model.font.size);
     setRangeValue("line-height", model.layout.lineHeight);
     const full = model.layout.width === "full";
     $("width-full").checked = full;
@@ -405,9 +399,15 @@ function render() {
     if( textAlignment ) textAlignment.checked = true;
     if( choiceAlignment ) choiceAlignment.checked = true;
     $("controls-show").checked = model.controls.show;
-    renderThemeToggle();
+    $("ending-show").checked = model.ending.show;
+    $("ending-text").value = model.ending.text;
+    $("ending-text").disabled = !model.ending.show;
+    $("ending-play-again-show").checked = model.ending.playAgainShow;
+    $("ending-play-again-text").value = model.ending.playAgainText;
+    $("ending-play-again-text").disabled = !model.ending.playAgainShow;
     ["master", "music", "sfx"].forEach(category => setRangeValue(`audio-${category}`, model.audio[category]));
     showTitleText("story-title", model.titles.story);
+    setRangeValue("story-title-size", model.titles.storySize);
     showTitleText("story-author", model.titles.author);
     $("story-cover").value = model.titles.cover;
     $("story-cover").classList.remove("invalid");
@@ -430,18 +430,16 @@ function render() {
     $("scene-title-color").value = sceneColorDefault ? "" : sceneStyle.color;
     $("scene-title-color").placeholder = sceneColorDefault ? "default" : "";
     $("scene-title-color").classList.remove("invalid");
-    $("scene-title-pick").value = toHex(sceneStyle.color || model.colors.text);
+    $("scene-title-pick").value = toHex(sceneStyle.color || editableLook().colors.text);
     const sceneAlignment = document.querySelector(`input[name="scene-title-align"][value="${sceneStyle.align}"]`);
     if( sceneAlignment ) sceneAlignment.checked = true;
 
     updatePresetHighlight();
-    updateCoverThumb();
 }
 
 // Something changed in the form: show it, and save
 function changed() {
     updatePresetHighlight();
-    updateCoverThumb();
     scheduleSave();
 }
 
@@ -460,6 +458,11 @@ function buildPresets() {
         b.querySelector("small").textContent = p.label;
         b.addEventListener("click", () => {
             model = G.applyPreset(model, p.id);
+            editingTheme = model.theme;
+            G.applyThemePreset(model, p.theme, p.id);
+            // In single mode selecting a family provides its sensible counterpart.
+            const other = p.theme === "light" ? "dark" : "light";
+            G.applyThemePreset(model, other, G.FAMILIES[p.family][other]);
             customFontMode = false;
             render();
             scheduleSave();
@@ -469,27 +472,48 @@ function buildPresets() {
 }
 
 function wire() {
-    document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener("change", () => {
+    document.querySelectorAll('input[name="presentation-mode"]').forEach(r => r.addEventListener("change", () => {
         if( !r.checked ) return;
-        model.theme = r.value;
-        // each theme starts from its own colors
-        const base = G.PALETTES[r.value === "dark" ? "dark" : "light"];
-        model.colors = { background: base.background, text: base.text, choice: base.choice, choiceHover: null };
+        model.presentation = r.value;
+        scheduleSave();
+    }));
+    document.querySelectorAll('input[name="theme-mode"]').forEach(r => r.addEventListener("change", () => {
+        if( !r.checked ) return;
+        G.setThemeMode(model, r.value);
+        editingTheme = model.theme;
         render();
         scheduleSave();
+        showThemeInPreview();
+    }));
+    for( const side of ["light", "dark"] ) {
+        $(side + "-preset").addEventListener("change", () => {
+            const preset = $(side + "-preset").value;
+            if( preset === "custom" ) return;
+            G.applyThemePreset(model, side, preset);
+            editingTheme = side;
+            render();
+            scheduleSave();
+            showThemeInPreview();
+        });
+    }
+    document.querySelectorAll('input[name="edit-theme"]').forEach(r => r.addEventListener("change", () => {
+        if( !r.checked ) return;
+        editingTheme = r.value;
+        render();
+        showThemeInPreview();
     }));
 
     ["background", "text", "choice"].forEach(key => {
         $("pick-" + key).addEventListener("input", () => {
-            model.colors[key] = $("pick-" + key).value;
-            $("hex-" + key).value = model.colors[key];
+            setEditableColors(Object.assign({}, editableLook().colors, { [key]: $("pick-" + key).value }));
+            $("hex-" + key).value = editableLook().colors[key];
             $("hex-" + key).classList.remove("invalid");
             changed();
         });
         $("hex-" + key).addEventListener("input", () => {
             const v = $("hex-" + key).value.trim();
             if( G.isColor(v) ) {
-                model.colors[key] = v;
+                setEditableColors(Object.assign({}, editableLook().colors, { [key]: v }));
                 $("hex-" + key).classList.remove("invalid");
                 $("pick-" + key).value = toHex(v);
                 changed();
@@ -500,20 +524,20 @@ function wire() {
     });
 
     $("hover-auto").addEventListener("change", () => {
-        model.colors.choiceHover = $("hover-auto").checked ? null : toHex(model.colors.choice);
+        setEditableColors(Object.assign({}, editableLook().colors, { choiceHover: $("hover-auto").checked ? null : toHex(editableLook().colors.choice) }));
         render();
         scheduleSave();
     });
     $("pick-hover").addEventListener("input", () => {
-        model.colors.choiceHover = $("pick-hover").value;
-        $("hex-hover").value = model.colors.choiceHover;
+        setEditableColors(Object.assign({}, editableLook().colors, { choiceHover: $("pick-hover").value }));
+        $("hex-hover").value = editableLook().colors.choiceHover;
         $("hex-hover").classList.remove("invalid");
         changed();
     });
     $("hex-hover").addEventListener("input", () => {
         const v = $("hex-hover").value.trim();
         if( G.isColor(v) ) {
-            model.colors.choiceHover = v;
+            setEditableColors(Object.assign({}, editableLook().colors, { choiceHover: v }));
             $("hex-hover").classList.remove("invalid");
             $("pick-hover").value = toHex(v);
             changed();
@@ -529,10 +553,10 @@ function wire() {
             $("font-custom").hidden = false;
             $("font-custom").focus();
             const typed = $("font-custom").value.trim();
-            if( FONT_NAME.test(typed) ) { model.font.family = typed; changed(); }
+            if( FONT_NAME.test(typed) ) { setEditableFont(typed); changed(); }
         } else {
             customFontMode = false;
-            model.font.family = v;
+            setEditableFont(v);
             $("font-custom").hidden = true;
             changed();
         }
@@ -540,7 +564,7 @@ function wire() {
     $("font-custom").addEventListener("input", () => {
         const v = $("font-custom").value.trim();
         if( FONT_NAME.test(v) ) {
-            model.font.family = v.replace(/'/g, "");
+            setEditableFont(v.replace(/'/g, ""));
             $("font-custom").classList.remove("invalid");
             changed();
         } else {
@@ -549,7 +573,7 @@ function wire() {
     });
 
     wireRange("font-size", value => {
-        model.font.size = value;
+        setEditableSize(value);
         changed();
     });
     wireRange("line-height", value => {
@@ -580,18 +604,35 @@ function wire() {
             changed();
         });
     });
-    $("controls-show").addEventListener("change", () => {
-        model.controls.show = $("controls-show").checked;
-        renderThemeToggle();
+    $("ending-show").addEventListener("change", () => {
+        model.ending.show = $("ending-show").checked;
+        $("ending-text").disabled = !model.ending.show;
         changed();
     });
-    $("controls-theme-toggle").addEventListener("change", () => {
-        model.controls.themeToggle = $("controls-theme-toggle").checked;
-        renderThemeToggle();
+    $("ending-text").addEventListener("change", () => {
+        const value = $("ending-text").value.trim().replace(/[\x00-\x1f\x7f]/g, " ");
+        model.ending.text = value.slice(0, 60) || "The End";
+        $("ending-text").value = model.ending.text;
+        changed();
+    });
+    $("ending-play-again-show").addEventListener("change", () => {
+        model.ending.playAgainShow = $("ending-play-again-show").checked;
+        $("ending-play-again-text").disabled = !model.ending.playAgainShow;
+        changed();
+    });
+    $("ending-play-again-text").addEventListener("change", () => {
+        const value = $("ending-play-again-text").value.trim().replace(/[\x00-\x1f\x7f]/g, " ");
+        model.ending.playAgainText = value.slice(0, 60) || "Play Again";
+        $("ending-play-again-text").value = model.ending.playAgainText;
+        changed();
+    });
+    $("controls-show").addEventListener("change", () => {
+        model.controls.show = $("controls-show").checked;
         changed();
     });
 
     wireTitleField("story-title", value => { model.titles.story = value; });
+    wireRange("story-title-size", value => { model.titles.storySize = value; changed(); });
     wireTitleField("story-author", value => { model.titles.author = value; });
     // The cover is saved when the field is left or Enter is pressed, not on every key
     $("story-cover").addEventListener("change", () => {
@@ -617,7 +658,7 @@ function wire() {
         if( !picked || picked.canceled || !picked.filePaths || picked.filePaths.length === 0 ) return;
         const source = picked.filePaths[0];
         let reference = G.coverReferenceForFile(projectDir, source);
-        // A picture outside the project is copied into its "images" folder, so the
+        // A picture outside the project is copied into its "image" folder, so the
         // exported game can carry it; inside the project it is used where it is.
         if( !reference ) {
             const copied = copyCoverIntoProject(projectDir, source);
@@ -686,7 +727,7 @@ function wire() {
         sceneStyleChanged();
     });
     $("scene-title-color-auto").addEventListener("change", () => {
-        sceneStyle().color = $("scene-title-color-auto").checked ? null : toHex(model.colors.text);
+        sceneStyle().color = $("scene-title-color-auto").checked ? null : toHex(editableLook().colors.text);
         render();
         sceneStyleChanged();
     });
@@ -744,6 +785,7 @@ if( virtualMode ) {
     }
 }
 
+editingTheme = model.theme;
 buildPresets();
 wire();
 render();

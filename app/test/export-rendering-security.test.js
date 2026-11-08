@@ -2,6 +2,7 @@ const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
 const { JSDOM } = require("jsdom");
+const { loadExportHelpers } = require("./helpers/export-player.js");
 
 describe("export story rendering", function () {
     it("renders story markup as plain text and replaces the passage on every choice", function () {
@@ -30,6 +31,7 @@ describe("export story rendering", function () {
             state: { toJson: () => "{}", LoadJson: () => {} },
             currentTags: [],
             currentChoices: [],
+            ResetState() {},
             get canContinue() { return storyLines.length > 0; },
             Continue() {
                 const line = storyLines.shift();
@@ -55,6 +57,7 @@ describe("export story rendering", function () {
         window.matchMedia = () => ({ matches: false });
 
         try {
+            loadExportHelpers(window);
             window.eval(template);
             const storyView = window.document.getElementById("story");
             const firstParagraph = storyView.querySelector("p:not(.tags)");
@@ -70,7 +73,7 @@ describe("export story rendering", function () {
             assert.match(storyView.querySelector("p.tags").textContent, /mood: quiet/);
             assert.match(storyView.querySelector("p.tags").textContent, /titulo: legacy title/);
             assert.doesNotMatch(storyView.querySelector("p.tags").textContent, /Global title|<img src=x/);
-            assert.strictEqual(storyView.querySelector("script, img, svg"), null);
+            assert.strictEqual(storyView.querySelector("script, img, svg[onload]"), null);
 
             const choice = storyView.querySelector(".choice button");
             assert.strictEqual(choice.type, "button");
@@ -81,12 +84,12 @@ describe("export story rendering", function () {
             // The chosen passage replaced the one before it, with the echoed choice text removed.
             assert.deepStrictEqual(renderedLines, ["; then continue.", "Second paragraph in the new turn."]);
             assert.doesNotMatch(storyView.textContent, /First\s+.*safe/);
-            assert.strictEqual(storyView.querySelector("script, img, svg"), null);
+            assert.strictEqual(storyView.querySelector("script, img, svg[onload]"), null);
 
             storyView.querySelector(".choice button").click();
             renderedLines = Array.from(storyView.querySelectorAll("p:not(.choice):not(.tags)"), paragraph => paragraph.textContent);
             assert.deepStrictEqual(renderedLines, ["Third paragraph in the new turn.", "Fourth paragraph in the new turn."]);
-            assert.strictEqual(storyView.querySelector("script, img, svg"), null);
+            assert.strictEqual(storyView.querySelector("script, img, svg[onload]"), null);
         } finally {
             dom.window.close();
         }
