@@ -1,10 +1,10 @@
-#!/usr/bin/env xdg-open
 [Desktop Entry]
-Type=Application
-Categories=Development;IDE;
 Name=Inky
-Comment=Editor for ink interactive narrative.
+Comment=Editor for Ink interactive stories
 Exec=/opt/inky/Inky %F
 Terminal=false
-Path=/opt/inky/
+Type=Application
 Icon=inky
+Categories=Development;IDE;
+StartupWMClass=Inky
+MimeType=text/x-ink;

@@ -3,22 +3,25 @@
 // Sound tags in a story:
 //   # music: forest.mp3   loops until another music tag; "# music: stop" ends it
 //   # sound: branch.mp3   plays once
-// Bare file names are searched in the standard sound folders; explicit paths can name other files.
+// Bare names use the matching category folder. Explicit relative paths can address any file
+// inside the project. Files directly in "audio" remain available as a general-purpose fallback.
 
 const fs = require("fs");
 const path = require("path");
 
 const AUDIO_EXTENSIONS = [".mp3", ".ogg", ".oga", ".wav", ".m4a", ".aac", ".flac", ".opus", ".webm"];
 const AUDIO_FOLDER = "audio";
-// The standard sound folders, in search order: "audio" (where imports go) and "audios". A bare name
-// is looked for in each of them and in their "music", "musics" and "sfx" subfolders.
-const AUDIO_FOLDERS = [AUDIO_FOLDER, "audios"];
-const AUDIO_SUBFOLDERS = ["music", "musics", "sfx"];
-const MUSIC_FOLDERS = ["music", "musics"];
+const AUDIO_MUSIC_FOLDER = path.join(AUDIO_FOLDER, "music");
+const AUDIO_SFX_FOLDER = path.join(AUDIO_FOLDER, "sfx");
+// Read-only lookup fallback for older projects. New imports always use "audio".
+const LEGACY_AUDIO_FOLDERS = ["audios"];
+const LEGACY_MUSIC_SUBFOLDERS = ["musics"];
+const AUDIO_FOLDERS = [AUDIO_FOLDER].concat(LEGACY_AUDIO_FOLDERS);
+const MUSIC_FOLDERS = ["music"].concat(LEGACY_MUSIC_SUBFOLDERS);
+const SFX_FOLDER = "sfx";
 
-// A plain file name from the audio folder, or null (paths, "..", other file types).
 function safeAudioFile(value) {
-    const name = String(value == null ? "" : value).trim().replace(/^["']|["']$/g, "");
+    const name = String(value == null ? "" : value).trim().replace(/^['"]|['"]$/g, "");
     if( !name || /[\\/\x00-\x1f]/.test(name) || name === "." || name === ".." ) return null;
     const dot = name.lastIndexOf(".");
     if( dot <= 0 || AUDIO_EXTENSIONS.indexOf(name.slice(dot).toLowerCase()) === -1 ) return null;
@@ -26,16 +29,13 @@ function safeAudioFile(value) {
 }
 
 function safeAudioReference(value) {
-    const reference = String(value == null ? "" : value).trim().replace(/^["']|["']$/g, "");
+    const reference = String(value == null ? "" : value).trim().replace(/^['"]|['"]$/g, "");
     if( !reference || /[\x00-\x1f]/.test(reference) || /^[a-z][a-z0-9+.-]*:\/\//i.test(reference) ) return null;
     const extension = path.extname(reference.replace(/\\/g, "/")).toLowerCase();
     if( AUDIO_EXTENSIONS.indexOf(extension) === -1 ) return null;
     return reference;
 }
 
-// "music: x.mp3" -> { kind: "music", file: "x.mp3" }; "music: stop" -> { kind: "music", file: null };
-// "sound: x.mp3" -> { kind: "sound", file: "x.mp3" }. Anything else -> null.
-// A name that is not a safe audio file name comes back as { kind, invalid: "name" }.
 function parseAudioTag(tag) {
     const match = /^\s*#?\s*(music|sound)\s*:\s*(.*?)\s*$/i.exec(String(tag == null ? "" : tag));
     if( !match ) return null;
@@ -47,20 +47,15 @@ function parseAudioTag(tag) {
     return file ? { kind: kind, file: file } : { kind: kind, invalid: value };
 }
 
-// True for any sound tag: music and sound. These tags drive the sound player and are never shown
-// to the writer or the player as text.
 function isSoundTag(tag) {
     return /^\s*#?\s*(music|sound)\s*:/i.test(String(tag == null ? "" : tag));
 }
 
-// Every music/sound file named in a compiled story (the JSON that inklecate writes), and whether
-// the story uses sound at all.
 function collectAudioFromStory(storyJson) {
     const files = new Set();
     const musicFiles = new Set();
     const soundFiles = new Set();
     let usesAudio = false;
-    // In compiled ink a tag is "#", its text pieces (each starting with "^"), then "/#".
     const visit = node => {
         if( Array.isArray(node) ) {
             let tagText = null;
@@ -98,73 +93,141 @@ function collectAudioFromStory(storyJson) {
     };
 }
 
-// True for a file name with a sound extension (any letter case): song.mp3, Song.MP3, step.wav...
 function isAudioFileName(name) {
     return AUDIO_EXTENSIONS.indexOf(path.extname(String(name || "")).toLowerCase()) !== -1;
 }
 
-// Bare names use the standard folder order; explicit paths are resolved directly from the project
-// directory (or from the filesystem root when absolute).
-function resolveAudioFile(projectDir, name) {
+function projectRelativePath(projectDir, file) {
+    const platformPath = String(file).replace(/[\\/]/g, path.sep);
+    const normalized = path.normalize(platformPath);
+    if( normalized === ".." || normalized.startsWith(".." + path.sep) ) return null;
+    const root = path.resolve(projectDir);
+    const candidate = path.resolve(root, normalized);
+    const relative = path.relative(root, candidate);
+    if( !relative || relative === ".." || relative.startsWith(".." + path.sep) || path.isAbsolute(relative) ) return null;
+    return candidate;
+}
+
+function existingAudioFile(candidate, projectRoot) {
+    try {
+        if( !fs.statSync(candidate).isFile() ) return false;
+        // A symlink may point outside the project even when its visible path is inside it.
+        // Only files that really live within this project are eligible for playback/export.
+        const root = fs.realpathSync(projectRoot);
+        const target = fs.realpathSync(candidate);
+        const relative = path.relative(root, target);
+        return relative !== "" && relative !== ".." &&
+            !relative.startsWith(".." + path.sep) && !path.isAbsolute(relative);
+    } catch(error) { return false; }
+}
+
+function audioTagKey(kind, reference) {
+    return String(kind || "sound") + "\u0000" + String(reference || "");
+}
+
+// Return detailed status so the exporter can report ambiguous basenames rather than silently
+// choosing one. A bare name checks the project root, audio/, and only the category matching the tag.
+function resolveAudioReference(projectDir, name, kind) {
     const file = safeAudioReference(name);
-    if( !projectDir || !file ) return null;
-    const platformPath = file.replace(/[\\/]/g, path.sep);
-    if( path.isAbsolute(platformPath) || /[\\/]/.test(file) ) {
-        const candidate = path.isAbsolute(platformPath) ? platformPath : path.resolve(projectDir, platformPath);
-        try { if( fs.statSync(candidate).isFile() ) return candidate; }
-        catch(e) { /* not there */ }
-        return null;
+    if( !projectDir || !file ) return { kind: "invalid" };
+    const normalized = file.replace(/\\/g, "/");
+    const explicit = /\//.test(normalized) || path.isAbsolute(file);
+    const root = path.resolve(projectDir);
+    if( explicit ) {
+        const candidate = projectRelativePath(root, normalized);
+        if( !candidate ) return { kind: "invalid" };
+        return existingAudioFile(candidate, root)
+            ? { kind: "ok", source: candidate, relative: path.relative(root, candidate).split(path.sep).join("/"), defaulted: false }
+            : { kind: "missing" };
     }
-    const candidates = [];
-    AUDIO_FOLDERS.forEach(folder => {
-        candidates.push(path.join(projectDir, folder, file));
-        AUDIO_SUBFOLDERS.forEach(sub => candidates.push(path.join(projectDir, folder, sub, file)));
+
+    let categoryFolders;
+    if( kind === "music" ) {
+        categoryFolders = [AUDIO_MUSIC_FOLDER]
+            .concat(LEGACY_MUSIC_SUBFOLDERS.map(folder => path.join(AUDIO_FOLDER, folder)))
+            .concat(LEGACY_AUDIO_FOLDERS.flatMap(folder => [path.join(folder, "music")].concat(LEGACY_MUSIC_SUBFOLDERS.map(sub => path.join(folder, sub)))));
+    } else if( kind === "sound" ) {
+        categoryFolders = [AUDIO_SFX_FOLDER].concat(LEGACY_AUDIO_FOLDERS.map(folder => path.join(folder, SFX_FOLDER)));
+    } else {
+        categoryFolders = [AUDIO_MUSIC_FOLDER, AUDIO_SFX_FOLDER]
+            .concat(LEGACY_MUSIC_SUBFOLDERS.map(folder => path.join(AUDIO_FOLDER, folder)))
+            .concat(LEGACY_AUDIO_FOLDERS.flatMap(folder => [path.join(folder, "music"), path.join(folder, SFX_FOLDER)]));
+    }
+    const relativeCandidates = [file]
+        .concat(AUDIO_FOLDERS.map(folder => path.join(folder, file)))
+        .concat(categoryFolders.map(folder => path.join(folder, file)));
+    const matches = [];
+    relativeCandidates.forEach(relative => {
+        const candidate = path.resolve(root, relative);
+        if( !projectRelativePath(root, relative) || !existingAudioFile(candidate, root) ) return;
+        if( !matches.some(match => match.source === candidate) )
+            matches.push({ source: candidate, relative: relative.split(path.sep).join("/") });
     });
-    AUDIO_SUBFOLDERS.forEach(sub => candidates.push(path.join(projectDir, sub, file)));
-    candidates.push(path.join(projectDir, file));
-    for( const candidate of candidates ) {
-        try { if( fs.statSync(candidate).isFile() ) return candidate; }
-        catch(e) { /* not there */ }
-    }
-    return null;
+    if( matches.length > 1 ) return { kind: "ambiguous", candidates: matches.map(match => match.relative) };
+    if( matches.length === 0 ) return { kind: "missing" };
+    return {
+        kind: "ok",
+        source: matches[0].source,
+        relative: matches[0].relative,
+        defaulted: matches[0].relative !== file
+    };
 }
 
-// A music/musics folder is a music location only when it sits inside audio or audios
-// (audio/music, audios/musics...). The same folder at the project root is not offered as music.
-function isMusicFolderAllowed(relativeDir) {
-    const segments = relativeDir.split(path.sep).filter(Boolean);
-    const musicIndex = segments.findIndex(segment => MUSIC_FOLDERS.indexOf(segment) !== -1);
-    if( musicIndex === -1 ) return true;
-    return segments.slice(0, musicIndex).some(segment => AUDIO_FOLDERS.indexOf(segment) !== -1);
+function resolveAudioFile(projectDir, name, kind) {
+    const resolved = resolveAudioReference(projectDir, name, kind);
+    return resolved.kind === "ok" ? resolved.source : null;
 }
 
-// The sound files the editor's list offers: only those inside the "audio" and "audios" folders and
-// their subfolders. Bare names are offered for the standard places (the folder itself and its
-// music, musics and sfx subfolders); any other subfolder is offered with its project-relative path.
-// A sound anywhere else in the project still works when its path is written by hand, it is just
-// not listed. A "music" list leaves out music/musics folders that are not inside audio or audios.
 function listUsableAudioFiles(projectDir, kind) {
-    const names = new Set();
     if( !projectDir ) return [];
-    const standardDirectories = new Set(AUDIO_FOLDERS.concat(
-        ...AUDIO_FOLDERS.map(folder => AUDIO_SUBFOLDERS.map(sub => path.join(folder, sub)))
-    ));
+    const bareCandidates = new Map();
+    const explicit = new Set();
+    const allowedRoots = AUDIO_FOLDERS;
+
+    const categoryFor = relativeDir => {
+        const parts = relativeDir.split(path.sep).filter(Boolean);
+        if( parts.length < 2 || allowedRoots.indexOf(parts[0]) === -1 ) return null;
+        const category = parts[1];
+        if( MUSIC_FOLDERS.indexOf(category) !== -1 ) return parts.length === 2 ? "music" : "music-nested";
+        if( category === SFX_FOLDER ) return parts.length === 2 ? "sound" : "sound-nested";
+        return "custom";
+    };
+
+    const addBare = (name, relative) => {
+        if( !bareCandidates.has(name) ) bareCandidates.set(name, []);
+        bareCandidates.get(name).push(relative);
+    };
+
     const scan = (absoluteDir, relativeDir) => {
         let entries;
         try { entries = fs.readdirSync(absoluteDir, { withFileTypes: true }); }
-        catch(e) { return; }
+        catch(error) { return; }
         entries.forEach(entry => {
             if( entry.name === ".git" || entry.name === "node_modules" || entry.name === ".DS_Store" || entry.isSymbolicLink() ) return;
             const relativePath = path.join(relativeDir, entry.name);
             if( entry.isDirectory() ) {
                 scan(path.join(absoluteDir, entry.name), relativePath);
-            } else if( entry.isFile() && isAudioFileName(entry.name) ) {
-                if( kind === "music" && !isMusicFolderAllowed(relativeDir) ) return;
-                names.add(standardDirectories.has(relativeDir) ? entry.name : relativePath.split(path.sep).join("/"));
+                return;
             }
+            if( !entry.isFile() || !isAudioFileName(entry.name) ) return;
+            const relativeDirPath = path.dirname(relativePath);
+            const category = categoryFor(relativeDirPath === "." ? "" : relativeDirPath);
+            if( (category === "music" || category === "music-nested") && kind === "sound" ) return;
+            if( (category === "sound" || category === "sound-nested") && kind === "music" ) return;
+            const isDirectGeneral = relativeDirPath === AUDIO_FOLDER || relativeDirPath === "audios";
+            const isDirectCategory = category === "music" || category === "sound";
+            if( isDirectGeneral || isDirectCategory ) addBare(entry.name, relativePath);
+            else explicit.add(relativePath.split(path.sep).join("/"));
         });
     };
-    AUDIO_FOLDERS.forEach(folder => scan(path.join(projectDir, folder), folder));
+
+    allowedRoots.forEach(folder => scan(path.join(projectDir, folder), folder));
+
+    const names = new Set(explicit);
+    bareCandidates.forEach((locations, name) => {
+        if( locations.length === 1 ) names.add(name);
+        else locations.forEach(relative => names.add(relative.split(path.sep).join("/")));
+    });
     return Array.from(names).sort((a, b) => a.localeCompare(b));
 }
 
@@ -172,4 +235,17 @@ module.exports = {
     isSoundTag,
     isAudioFileName,
     resolveAudioFile,
-    listUsableAudioFiles, AUDIO_EXTENSIONS, AUDIO_FOLDER, AUDIO_FOLDERS, safeAudioFile, safeAudioReference, parseAudioTag, collectAudioFromStory };
+    resolveAudioReference,
+    listUsableAudioFiles,
+    AUDIO_EXTENSIONS,
+    AUDIO_FOLDER,
+    AUDIO_MUSIC_FOLDER,
+    AUDIO_SFX_FOLDER,
+    AUDIO_FOLDERS,
+    LEGACY_AUDIO_FOLDERS,
+    safeAudioFile,
+    safeAudioReference,
+    parseAudioTag,
+    collectAudioFromStory,
+    audioTagKey
+};

@@ -1,5 +1,6 @@
 const assert = require("assert");
 const { JSDOM } = require("jsdom");
+const { loadExportHelpers } = require("./helpers/export-player.js");
 const { attach, lastSentenceEnd } = require("../renderer/pager.js");
 
 describe("pager cutting", function () {
@@ -263,6 +264,7 @@ describe("pagination in the Preview and in the export", function () {
             Story: function () {
                 return {
                     globalTags: [], currentTags: [],
+                    ResetState() {},
                     state: { toJson: () => "{}", LoadJson: () => {} },
                     get currentChoices() { return turns[turn].choices; },
                     get canContinue() { return turns[turn].lines.length > 0; },
@@ -272,6 +274,7 @@ describe("pagination in the Preview and in the export", function () {
             }
         };
         window.storyContent = {};
+        loadExportHelpers(window);
         window.eval(pagerSource);
         window.eval(template);
         try {

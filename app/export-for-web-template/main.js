@@ -1,5 +1,17 @@
 (function(storyContent) {
 
+    var ChoiceText = window.InkyChoiceText;
+    if( !ChoiceText ) throw new Error("The choice-text helper is missing from this export.");
+    var ScreenMode = window.InkyScreenMode;
+    if( !ScreenMode ) throw new Error("The Screen Mode helper is missing from this export.");
+    var presentation = document.body.getAttribute("data-presentation") || "traditional";
+    var EndingMarker = window.InkyEndingMarker;
+    if( !EndingMarker ) throw new Error("The ending-marker helper is missing from this export.");
+    var endingEnabled = document.body.getAttribute("data-ending-show") !== "off";
+    var endingText = document.body.getAttribute("data-ending-text") || EndingMarker.DEFAULT_TEXT;
+    var playAgainEnabled = document.body.getAttribute("data-play-again-show") !== "off";
+    var playAgainText = document.body.getAttribute("data-play-again-text") || EndingMarker.REPLAY_LABEL;
+
     function storyFingerprint(content) {
         var serialized = JSON.stringify(content);
         var first = 2166136261;
@@ -110,6 +122,7 @@
 
         function tick() {
             var fading = false;
+            var trackCount = tracks.length;
             tracks = tracks.filter(function(track) {
                 if( track.fade < track.target ) track.fade = Math.min(track.target, track.fade + 0.06);
                 else if( track.fade > track.target ) track.fade = Math.max(track.target, track.fade - 0.06);
@@ -123,6 +136,7 @@
                 if( track.fade !== track.target ) fading = true;
                 return true;
             });
+            if( trackCount !== tracks.length ) refreshControl();
             if( !fading && ticker ) { clearInterval(ticker); ticker = null; }
         }
         function ensureTicker() { if( !ticker ) ticker = setInterval(tick, 40); }
@@ -136,28 +150,44 @@
             if( url && music && music.url === url ) return;   // already playing it
             if( music ) { music.target = 0; ensureTicker(); }
             music = null;
-            if( !url ) return;
+            if( !url ) { refreshControl(); return; }
             var el = new Audio(url);
             el.loop = true;
             el.volume = 0;
-            el.addEventListener("error", function() { console.warn("Sound file not found or not playable:", url); });
             var track = { el: el, url: url, fade: 0, target: 1 };
+            el.addEventListener("error", function() {
+                console.warn("Sound file not found or not playable:", url);
+                track.target = 0;
+                track.fade = 0;
+                if( music === track ) music = null;
+                // Stop tracking a file the player cannot play.
+                var index = tracks.indexOf(track);
+                if( index !== -1 ) tracks.splice(index, 1);
+                refreshControl();
+            });
             tracks.push(track);
             music = track;
+            refreshControl();
             tryPlay(track);
             ensureTicker();
         }
 
         function playSoundUrl(url) {
-            if( !url || level("sfx") === 0 ) return;
+            // Play even when the reader has muted the volume. The effect remains
+            // active (silently), so its volume control can restore the sound.
+            if( !url ) return;
             var el = new Audio(url);
             var effect = { el: el };
             el.volume = level("sfx");
             var removeEffect = function() {
                 var index = effects.indexOf(effect);
-                if( index !== -1 ) effects.splice(index, 1);
+                if( index !== -1 ) {
+                    effects.splice(index, 1);
+                    refreshControl();
+                }
             };
             effects.push(effect);
+            refreshControl();
             el.addEventListener("ended", removeEffect);
             el.addEventListener("error", function() {
                 console.warn("Sound file not found or not playable:", url);
@@ -174,6 +204,7 @@
                 effect.el.load();
             });
             effects = [];
+            refreshControl();
         }
 
         function onGesture() {
@@ -192,6 +223,14 @@
 
         function refreshControl() {
             var control = document.getElementById("audio-control");
+            var anchor = document.getElementById("audio-settings-anchor");
+            var controls = document.getElementById("controls");
+            // The export may contain sound files that have not played yet. They must not
+            // expose an inert slider until a real sound or music track is active.
+            var active = enabled && (tracks.length > 0 || effects.length > 0);
+            if( anchor ) anchor.hidden = !active;
+            if( control ) control.hidden = !active;
+            if( controls ) controls.classList.toggle("has-audio", active);
             if( !control ) return;
             var silent = muted || volume === 0;
             control.classList.toggle("muted", silent);
@@ -203,11 +242,7 @@
 
         if( enabled ) {
             var control = document.getElementById("audio-control");
-            var controls = document.getElementById("controls");
-            var audioSettingsAnchor = document.getElementById("audio-settings-anchor");
-            if( control ) control.hidden = false;
-            if( controls ) controls.classList.add("has-audio");
-            if( audioSettingsAnchor ) audioSettingsAnchor.hidden = false;
+            // Visibility is driven by the playback lifecycle, not by the presence of tags.
             var slider = document.getElementById("audio-volume");
             var toggle = document.getElementById("audio-toggle");
             if( slider ) slider.addEventListener("input", function() {
@@ -247,17 +282,14 @@
             else {
                 var musicUrl = audioUrlForFile(splitTag.val);
                 if( musicUrl ) audioEngine.setMusicUrl(musicUrl);
-                else console.warn("Not a sound file name:", splitTag.val);
+                else if( splitTag.val ) console.warn("Not a sound file name:", splitTag.val);
             }
         } else if( property == "SOUND" ) {
             if( /^stop$/i.test(splitTag.val) ) audioEngine.stopSoundEffects();
             else {
                 var soundUrl = audioUrlForFile(splitTag.val);
                 if( soundUrl ) audioEngine.playSoundUrl(soundUrl);
-                else {
-                    audioEngine.stopSoundEffects();
-                    console.warn("Not a sound file name:", splitTag.val);
-                }
+                else if( splitTag.val ) console.warn("Not a sound file name:", splitTag.val);
             }
         } else {
             return false;
@@ -267,9 +299,11 @@
 
     // What the saved game remembers: the music that was playing when the save point was taken.
     var savePointMusic = "";
+    var savePointChoiceText = null;
     function markSavePoint() {
         savePoint = story.state.toJson();
         savePointMusic = audioEngine.currentMusic();
+        savePointChoiceText = selectedChoiceText;
     }
 
     function restoreSavedMusic() {
@@ -371,19 +405,27 @@
     // Page features setup. The page uses the colors from game.yaml; when the writer allowed it,
     // the story menu also lets the player switch between the light and the dark look.
     var hasSave = loadSavePoint();
+    // A stored save enables Load, but Start always begins a fresh playthrough.
+    story.ResetState();
+    selectedChoiceText = null;
+    savePointChoiceText = null;
     setupButtons(hasSave);
     setupLookToggle();
 
-    // The story does not run under the title screen. "Iniciar" is the only place where it starts, so
+    // The story does not run under the title screen. "Start" is the only place where it starts, so
     // the browser sees the first passage, and the sounds in it, as a result of the player's own click.
     var titleScreen = document.getElementById("title-screen");
     var storyStarted = false;
     var startsFromBeginning = false;
 
-    // A reset brings the title screen back: the story stays reset behind it, and "Iniciar" is the
+    // A reset brings the title screen back: the story stays reset behind it, and "Start" is the
     // only way in again, as on a freshly opened page.
     function showTitleScreen() {
+        // A scene background belongs to the story passage, never to the title screen.
+        clearStoryBackground();
         storyStarted = false;
+        selectedChoiceText = null;
+        savePointChoiceText = null;
         startsFromBeginning = true;
         if( titleScreen ) titleScreen.hidden = false;
         storyFrame.classList.add("title-screen-active");
@@ -391,8 +433,28 @@
         clearChoices();
     }
 
-    function startStory() {
+    function startStory(loadFromSave) {
         if( storyStarted ) return;
+        if( loadFromSave === true ) {
+            try {
+                var state = window.localStorage.getItem(saveKey);
+                if( !state ) return;
+                story.state.LoadJson(state);
+                selectedChoiceText = ChoiceText.loadSelectedChoiceText(window.localStorage, saveKey);
+                savePointChoiceText = selectedChoiceText;
+            } catch(e) {
+                console.warn("Discarding an incompatible story save", e);
+                discardSavePoint();
+                hasSave = false;
+                var load = document.getElementById("title-load");
+                if( load ) load.disabled = true;
+                return;
+            }
+        } else {
+            story.ResetState();
+            selectedChoiceText = null;
+            savePointChoiceText = null;
+        }
         storyStarted = true;
         if( titleScreen ) titleScreen.hidden = true;
         storyFrame.classList.remove("title-screen-active");
@@ -401,8 +463,8 @@
 
         // A saved game goes on from where it was saved, with its music. After a reset the story
         // starts from its beginning instead.
-        if( startsFromBeginning ) startsFromBeginning = false;
-        else if( hasSave ) restoreSavedMusic();
+        startsFromBeginning = false;
+        if( loadFromSave === true ) restoreSavedMusic();
 
         // Set initial save point
         markSavePoint();
@@ -412,8 +474,15 @@
     }
 
     var startButton = titleScreen && titleScreen.querySelector(".choice-button");
-    if( startButton ) startButton.addEventListener("click", startStory);
-    else startStory();
+    if( startButton ) startButton.addEventListener("click", function() { startStory(false); });
+    else startStory(false);
+    var titleLoad = document.getElementById("title-load");
+    if( titleLoad ) {
+        titleLoad.disabled = !hasSave;
+        titleLoad.addEventListener("click", function() {
+            if( !titleLoad.disabled ) startStory(true);
+        });
+    }
 
     // Main story processing function. Each time this is called it generates
     // all the next content up as far as the next set of choices.
@@ -426,13 +495,19 @@
 
             // Get ink to generate the next paragraph
             var paragraphText = story.Continue();
-            if( selectedChoiceText !== null ) {
-                if( paragraphText.indexOf(selectedChoiceText) === 0 )
-                    paragraphText = paragraphText.substring(selectedChoiceText.length).replace(/^\s+/, "");
-                selectedChoiceText = null;
-            }
+            var choiceTextResult = ChoiceText.stripSelectedChoiceText(paragraphText, selectedChoiceText);
+            paragraphText = choiceTextResult.text;
+            if( choiceTextResult.consumed ) selectedChoiceText = null;
             var tags = story.currentTags || [];
+            // Screen Mode does not affect inkjs execution. It only replaces the
+            // visible page before rendering the incoming paragraph and its tags.
+            if( ScreenMode.startsScreen(presentation, tags) ) {
+                if( storyContainer.querySelector("p, .scene-title, img") )
+                    console.warn("Screen Mode: text before # screen in the same turn is not shown. Move it to the destination screen or add a choice.");
+                clearScene();
+            }
             var sceneTitle = null;
+            var pendingImages = [];
 
             // Any special tags included with this line
             var customClasses = [];
@@ -441,7 +516,7 @@
                 var tag = tags[i];
                 processAudioTag(tag);
 
-                // Detect tags of the form "X: Y". Currently used for image and class but could be
+                // Detect tags of the form "X: Y". Currently used for image, bg and class but could be
                 // customised to be used for other things too.
                 var splitTag = splitPropertyTag(tag);
                 if( splitTag ) splitTag.property = splitTag.property.trim().replace(/^#\s*/, "").toUpperCase();
@@ -459,18 +534,8 @@
                 // image: src (matched case-insensitively)
                 if( splitTag && splitTag.property == "IMAGE" ) {
                     var imageUrl = safeStoryUrl(splitTag.val, false);
-                    if( !imageUrl ) {
-                        console.warn("Blocked unsupported image URL", splitTag.val);
-                        continue;
-                    }
-                    var imageElement = document.createElement('img');
-                    imageElement.alt = "";
-                    imageElement.src = imageUrl;
-                    if( !showSceneImage(imageElement) )
-                        storyContainer.appendChild(imageElement);
-
-                    showAfter(delay, imageElement);
-                    delay += 200.0;
+                    if( imageUrl ) pendingImages.push(imageUrl);
+                    else if( splitTag.val ) console.warn("Blocked unsupported image URL", splitTag.val);
                 }
 
                 // LINK: url
@@ -487,8 +552,8 @@
                     else console.warn("Blocked unsupported story link", splitTag.val);
                 }
 
-                // BACKGROUND: src
-                else if( splitTag && splitTag.property == "BACKGROUND" ) {
+                // bg: src. The image is painted on the frame, behind its picture and passage.
+                else if( splitTag && splitTag.property == "BG" ) {
                     var backgroundUrl = safeStoryUrl(splitTag.val, false);
                     if( backgroundUrl ) {
                         if( storyFrame ) {
@@ -496,7 +561,7 @@
                             storyFrame.classList.add("has-background");
                         }
                     }
-                    else console.warn("Blocked unsupported background URL", splitTag.val);
+                    else console.warn("Blocked unsupported background image", splitTag.val);
                 }
 
                 // CLASS: className
@@ -534,10 +599,25 @@
                 showAfter(delay, sceneTitleElement);
                 delay += 200.0;
             }
-		
+
+            // Preview flushes the paragraph before processing its #image tags.
+            // Keep that ordering here: title, paragraph, additional inline
+            // images. The first image always goes in the frame's top panel.
+            function appendPendingImages() {
+                pendingImages.forEach(function(imageUrl) {
+                    var imageElement = document.createElement('img');
+                    imageElement.alt = "";
+                    imageElement.src = imageUrl;
+                    if( !showSceneImage(imageElement) ) storyContainer.appendChild(imageElement);
+                    showAfter(delay, imageElement);
+                    delay += 200.0;
+                });
+            }
+
 		// Check if paragraphText is empty
 		if (paragraphText.trim().length == 0) {
-                continue; // Skip empty paragraphs
+                appendPendingImages();
+                continue; // A tag-only line can still display images.
 		}
 
             // The story title and the author line follow the first paragraph below them.
@@ -549,6 +629,7 @@
             paragraphElement.appendChild(storyTextNode(paragraphText));
             if( effectiveAlign ) paragraphElement.classList.add("align" + effectiveAlign);
             storyContainer.appendChild(paragraphElement);
+            appendPendingImages();
 
             // Add any custom classes derived from ink tags
             addSafeClasses(paragraphElement, customClasses);
@@ -560,7 +641,9 @@
                 return !globalTagSet.has(String(tag))
                     && property !== "TITLE"
                     && property !== "IMAGE"
+                    && property !== "BG"
                     && property !== "ALIGN"
+                    && !ScreenMode.isScreenTag(normalized)
                     && property !== "MUSIC"
                     && property !== "SOUND";
             });
@@ -599,8 +682,9 @@
                     customClasses.push(splitTag.val);
                 }
 
-                // Sound tags drive the sound player; they are never shown.
-                if( splitTag && (splitTag.property == "MUSIC" || splitTag.property == "SOUND") ) continue;
+                // Media tags belong to the selected branch, not the choice label.
+                if( splitTag && (splitTag.property == "MUSIC" || splitTag.property == "SOUND"
+                    || splitTag.property == "IMAGE" || splitTag.property == "BG") ) continue;
 
                 visibleChoiceTags.push(choiceTag);
 
@@ -660,6 +744,26 @@
             }
         });
 
+        // No more content and no choices: the Ink story has ended.
+        // This does not interfere with tunnels or live threads: they keep the
+        // engine continuing until it reaches a genuine terminal state.
+        if( !story.canContinue && story.currentChoices.length === 0 ) {
+            if( endingEnabled ) {
+                const marker = EndingMarker.create(document, endingText);
+                storyContainer.appendChild(marker);
+                showAfter(delay, marker);
+            }
+            // Reader-owned replay is not an Ink choice; it must never suppress the ending.
+            if (playAgainEnabled) {
+                const replay = EndingMarker.createReplayChoice(document, playAgainText);
+                replay.querySelector("button").addEventListener("click", returnToTitleScreen);
+                choicesContainer.appendChild(replay);
+                choicesContainer.hidden = false;
+                storyFrame.classList.add("has-choices");
+                showAfter(delay, replay);
+            }
+        }
+
         // A passage divided into pages starts at its first page: nothing scrolls.
         if( pager ) pager.refresh();
         if( !storyFrame.classList.contains("is-paged") ) scrollToNewContent();
@@ -668,7 +772,10 @@
 
     function restart() {
         sceneAlign = null;
+        selectedChoiceText = null;
+        savePointChoiceText = null;
         audioEngine.stopSoundEffects();
+        clearScene();
         story.ResetState();
 
         setVisible(".header", true);
@@ -702,7 +809,7 @@
         }
     }
 
-    // Clear the story content while preserving the page header and background.
+    // Clear the story content and scene-specific background while preserving the page header.
     // The incoming line or selected branch is rendered after this call.
     // The header (story title + author) takes the alignment of the first paragraph
     // below it, or the story alignment when that paragraph has no "# align:" tag.
@@ -732,10 +839,17 @@
         storyFrame.classList.remove("has-visual");
     }
 
+    function clearStoryBackground() {
+        if( !storyFrame ) return;
+        storyFrame.style.backgroundImage = "";
+        storyFrame.classList.remove("has-background");
+    }
+
     function clearChoices() {
         if( choicesContainer ) {
             choicesContainer.textContent = "";
             choicesContainer.hidden = true;
+            choicesContainer.scrollTop = 0;
         }
         storyFrame.classList.remove("has-choices");
     }
@@ -747,10 +861,12 @@
         resetScrollFill();
         removeAll("p");
         removeAll(".scene-title");
+        removeAll(".story-ending");
         removeAll("img");
         removeAll("hr");
         clearChoices();
         clearStoryImage();
+        clearStoryBackground();
     }
 
     // Remove all elements that match the given selector. Used for removing choices after
@@ -844,6 +960,8 @@
             let savedState = window.localStorage.getItem(saveKey);
             if (savedState) {
                 story.state.LoadJson(savedState);
+                selectedChoiceText = ChoiceText.loadSelectedChoiceText(window.localStorage, saveKey);
+                savePointChoiceText = selectedChoiceText;
                 return true;
             }
         } catch (e) {
@@ -858,6 +976,7 @@
         try {
             window.localStorage.removeItem(saveKey);
             window.localStorage.removeItem(saveKey + ":music");
+            ChoiceText.removeSelectedChoiceText(window.localStorage, saveKey);
         } catch(e) {
             console.warn("Couldn't remove the incompatible story save", e);
         }
@@ -903,6 +1022,28 @@
     }
 
     // Used to hook up the functionality for global functionality buttons
+    function returnToTitleScreen() {
+        if( !storyStarted ) return;
+        sceneAlign = null;
+        setHeaderAlignment(null);
+        removeAll("p");
+        removeAll(".scene-title");
+        removeAll(".story-ending");
+        removeAll("img");
+        removeAll("hr");
+        clearChoices();
+        clearStoryImage();
+        storyContainer.scrollTop = 0;
+        resetScrollFill();
+        setVisible(".header", true);
+        selectedChoiceText = null;
+        savePointChoiceText = null;
+        audioEngine.setMusicUrl(null);
+        audioEngine.stopSoundEffects();
+        story.ResetState();
+        showTitleScreen();
+    }
+
     function setupButtons(hasSave) {
         let popovers = [
             {
@@ -949,22 +1090,7 @@
         let rewindEl = document.getElementById("rewind");
         if (rewindEl) rewindEl.addEventListener("click", function(event) {
             closePopovers();
-            if( !storyStarted ) return;
-            sceneAlign = null;
-            setHeaderAlignment(null);
-            removeAll("p");
-            removeAll(".scene-title");
-            removeAll("img");
-            removeAll("hr");
-            clearChoices();
-            clearStoryImage();
-            storyContainer.scrollTop = 0;
-            resetScrollFill();
-            setVisible(".header", true);
-            audioEngine.setMusicUrl(null);
-            audioEngine.stopSoundEffects();
-            story.ResetState();
-            showTitleScreen();
+            returnToTitleScreen();
         });
 
         let saveEl = document.getElementById("save");
@@ -974,44 +1100,16 @@
             try {
                 window.localStorage.setItem(saveKey, savePoint);
                 window.localStorage.setItem(saveKey + ":music", savePointMusic);
-                document.getElementById("reload").removeAttribute("disabled");
+                ChoiceText.saveSelectedChoiceText(window.localStorage, saveKey, savePointChoiceText);
+                hasSave = true;
+                var titleLoad = document.getElementById("title-load");
+                if( titleLoad ) titleLoad.disabled = false;
             } catch (e) {
                 console.warn("Couldn't save state");
             }
 
         });
 
-        let reloadEl = document.getElementById("reload");
-        if (reloadEl && !hasSave) {
-            reloadEl.setAttribute("disabled", "disabled");
-        }
-        if (reloadEl) reloadEl.addEventListener("click", function(event) {
-            if (reloadEl.getAttribute("disabled"))
-                return;
-
-            closePopovers();
-            if( !storyStarted ) return;
-            storyContainer.scrollTop = 0;
-            resetScrollFill();
-            sceneAlign = null;
-            setHeaderAlignment(null);
-            removeAll("p");
-            removeAll(".scene-title");
-            removeAll("img");
-            removeAll("hr");
-            clearChoices();
-            clearStoryImage();
-            try {
-                let savedState = window.localStorage.getItem(saveKey);
-                if (savedState) story.state.LoadJson(savedState);
-            } catch (e) {
-                console.warn("Discarding an incompatible story save", e);
-                discardSavePoint();
-                reloadEl.setAttribute("disabled", "disabled");
-            }
-            restoreSavedMusic();
-            continueStory();
-        });
 
     }
 

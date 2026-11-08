@@ -6,7 +6,7 @@
     else root.InkRichText = factory();
 })(typeof self !== "undefined" ? self : this, function () {
     var MARKER = /\u27e6(\/?)([^\u27e6\u27e7]{0,8})\u27e7/g;
-    var ELEMENTS = { b: "strong", i: "em" };
+    var ELEMENTS = { b: "strong", i: "em", br: "br" };
 
     function tokenize(text) {
         var tokens = [];
@@ -28,6 +28,8 @@
         var open = [];
         tokens.forEach(function (token, index) {
             if( !token.marker || !token.tag ) return;
+            // A line break is a single marker, not a paired style.
+            if( token.tag === "br" ) { token.paired = true; return; }
             if( !token.closing ) { open.push(index); return; }
             for( var i = open.length - 1; i >= 0; i-- ) {
                 if( tokens[open[i]].tag === token.tag ) {
@@ -65,6 +67,7 @@
                 return;
             }
             if( !token.paired ) return;
+            if( token.tag === "br" ) { parent.appendChild(doc.createElement("br")); return; }
             if( !token.closing ) { enter(token.tag); return; }
             var depth = -1;
             for( var i = stack.length - 1; i >= 0; i-- ) {
@@ -80,7 +83,9 @@
     }
 
     function plainText(text) {
-        return String(text == null ? "" : text).replace(MARKER, "");
+        return String(text == null ? "" : text).replace(MARKER, function (whole, slash, tag) {
+            return !slash && tag === "br" ? "\n" : "";
+        });
     }
 
     return { toNodes: toNodes, plainText: plainText };

@@ -205,7 +205,7 @@ describe("file references (#image:, #music:, #sound:)", function () {
             editor.moveCursorTo(1, 16);
             await press(BACKSPACE);
             assert.strictEqual(editor.getValue(), "#music: #align: left\n#image: ");
-            assert.deepStrictEqual(listValues(), ["capa.jpg"]);
+            assert.deepStrictEqual(listValues(), ["images/capa.jpg"]);
         });
 
         it("still lets whole lines and selections that cover a reference be deleted, and undo and redo work", async function () {
@@ -311,9 +311,9 @@ describe("file references (#image:, #music:, #sound:)", function () {
                 assert.ok(!listOpen(), item.text + " list is hidden");
                 assert.strictEqual(editor.getValue(), item.text);
             }
-            await start("texto normal");
+            await start("words normal");
             await press(ESC);
-            assert.strictEqual(editor.getValue(), "texto normal");
+            assert.strictEqual(editor.getValue(), "words normal");
             assert.ok(!listOpen());
         });
 
@@ -402,18 +402,18 @@ describe("file references (#image:, #music:, #sound:)", function () {
             await press(BACKSPACE, 1);
             assert.strictEqual(editor.getValue(), "#align: ceer");
 
-            await start("Capítulo #1");
+            await start("Chapter #1");
             await press(BACKSPACE);
-            assert.strictEqual(editor.getValue(), "Capítulo #");
+            assert.strictEqual(editor.getValue(), "Chapter #");
 
-            await start("texto palavra");
+            await start("words phrase");
             await press(BACKSPACE, 1);
-            assert.strictEqual(editor.getValue(), "texto ");
+            assert.strictEqual(editor.getValue(), "words ");
 
-            await start("#\nPróxima linha");
+            await start("#\nNext line");
             editor.moveCursorTo(0, 1);
             await press(BACKSPACE);
-            assert.strictEqual(editor.getValue(), "\nPróxima linha");
+            assert.strictEqual(editor.getValue(), "\nNext line");
         });
     });
 });

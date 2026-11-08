@@ -24,7 +24,7 @@ zip -r ReleaseUpload/Inky_linux.zip Inky-linux-x64
 mkdir -p AppImage/opt/inky
 mkdir -p AppImage/usr/share/pixmaps
 
-cp resources/AppRun AppImage/
+install -m 755 resources/AppRun AppImage/AppRun
 cp resources/com.inkle.inky.desktop AppImage/
 cp app/renderer/about/icon-round.png AppImage/inky.png
 cp app/renderer/about/icon-round.png AppImage/usr/share/pixmaps/inky.png

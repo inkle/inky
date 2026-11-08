@@ -1,28 +1,41 @@
 "use strict";
 
-// Pictures in a story:
-//   # image: hero.png          a picture in the project's "images" (or "image") folder; no path needed
-//   # image: chapter1/hero.png the same, in a subfolder of "images" (or "image")
-//   # image: scenes/room.png   a picture at that path from the project folder
-//   # image: https://…         a remote picture, loaded by the page and never copied
-// A name is looked for at that path from the project folder first, then in "images", then in "image".
-// The tag follows the paragraph it belongs to. Local pictures must stay inside the
-// project folder, the same rule the Preview uses.
+// Story pictures:
+//   # image: hero.png          looks in the project's "image" folder
+//   # bg: forest.jpg           looks in "image/background"
+// A path in the tag is resolved from the project folder. A bare filename is searched in
+// its tag's conventional folder (and at the project root for compatibility). The old "images"
+// folder is a read-only fallback for existing projects; new imports use "image".
 
 const fs = require("fs");
 const path = require("path");
-const { isImageFileName, IMAGE_SEARCH_FOLDERS } = require("./imageTypes.js");
+const {
+    isImageFileName,
+    IMAGE_FOLDER,
+    IMAGE_BACKGROUND_FOLDER,
+    LEGACY_IMAGE_SEARCH_FOLDERS
+} = require("./imageTypes.js");
 
-// "image: x.jpg" -> { reference: "x.jpg" }. Case-insensitive ("IMAGE:" still works), like the exported page.
 function parseImageTag(tag) {
     const match = /^\s*#?\s*image\s*:\s*(.*?)\s*$/i.exec(String(tag == null ? "" : tag));
-    return match ? { reference: match[1].trim() } : null;
+    return match ? { kind: "image", reference: match[1].trim() } : null;
 }
 
-// Every picture named by an "# image:" tag in the compiled story JSON, without duplicates.
-// In compiled ink a tag is "#", its text pieces (each starting with "^"), then "/#".
+function parseBackgroundTag(tag) {
+    const match = /^\s*#?\s*bg\s*:\s*(.*?)\s*$/i.exec(String(tag == null ? "" : tag));
+    return match ? { kind: "background", reference: match[1].trim() } : null;
+}
+
+function parseStoryPictureTag(tag) {
+    return parseImageTag(tag) || parseBackgroundTag(tag);
+}
+
+function imageTagKey(kind, reference) {
+    return String(kind || "image") + "\u0000" + String(reference || "");
+}
+
 function collectImagesFromStory(storyJson) {
-    const references = new Set();
+    const references = new Map();
     const visit = node => {
         if( Array.isArray(node) ) {
             let tagText = null;
@@ -40,75 +53,131 @@ function collectImagesFromStory(storyJson) {
         }
     };
     const check = text => {
-        const tag = parseImageTag(text);
-        if( tag && tag.reference ) references.add(tag.reference);
+        const tag = parseStoryPictureTag(text);
+        if( tag && tag.reference ) references.set(imageTagKey(tag.kind, tag.reference), tag);
     };
     visit(storyJson);
-    return { files: Array.from(references).sort() };
+    const found = Array.from(references.values()).sort((a, b) =>
+        a.kind.localeCompare(b.kind) || a.reference.localeCompare(b.reference));
+    return {
+        files: Array.from(new Set(found.map(item => item.reference))).sort(),
+        references: found
+    };
 }
 
-// How the exported page will load one reference, and where the file is on disk:
-//   remote  - an http(s) picture, loaded from the web and never copied
-//   invalid - a path that is not a plain picture inside the project
-//   missing - a valid project path with no file there
-//   ok      - source plus relative, the path the exported page loads (it differs from the tag
-//             when the picture was found in "images" or "image": defaulted is then true)
-function resolveImageReference(projectDir, reference) {
+function insideProject(root, candidate) {
+    const relative = path.relative(root, candidate);
+    return !!relative && relative !== ".." && !relative.startsWith(".." + path.sep) && !path.isAbsolute(relative);
+}
+
+function existingFile(candidate) {
+    try { return fs.statSync(candidate).isFile(); }
+    catch(error) { return false; }
+}
+
+function resolveImageReference(projectDir, reference, kind) {
     const value = String(reference == null ? "" : reference).trim().replace(/\\/g, "/");
     if( !value ) return { kind: "invalid" };
     if( /^https?:\/\//i.test(value) ) return { kind: "remote" };
     if( value.startsWith("//") ) return { kind: "invalid" };
     if( /^[a-z][a-z0-9+.-]*:/i.test(value) || path.posix.isAbsolute(value) ) return { kind: "invalid" };
     if( !isImageFileName(value) ) return { kind: "invalid" };
+    const hasExplicitPrefix = /^\.\//.test(value) || /^(?:image|images)\//i.test(value);
     const relative = path.posix.normalize(value);
     if( relative === "." || relative === ".." || relative.startsWith("../") ) return { kind: "invalid" };
     if( !projectDir ) return { kind: "missing" };
+
     const root = path.resolve(projectDir);
-    const source = path.resolve(root, relative.split("/").join(path.sep));
-    const inside = path.relative(root, source);
-    if( !inside || inside === ".." || inside.startsWith(".." + path.sep) || path.isAbsolute(inside) )
-        return { kind: "invalid" };
-    // At the path written, then in the default picture folders.
-    const candidates = [relative].concat(IMAGE_SEARCH_FOLDERS.map(folder => folder + "/" + relative));
-    for( const candidate of candidates ) {
-        const candidateSource = path.resolve(root, candidate.split("/").join(path.sep));
-        try {
-            if( fs.statSync(candidateSource).isFile() )
-                return { kind: "ok", source: candidateSource, relative: candidate, defaulted: candidate !== relative };
-        } catch(error) { /* not there */ }
+    // Resolve the real project directory before trusting any image path. A symlink
+    // inside image/ must not make an outside file available to Preview or export.
+    let realRoot;
+    try { realRoot = fs.realpathSync(root); }
+    catch(error) { return { kind: "missing" }; }
+    const defaultFolder = kind === "background" ? IMAGE_BACKGROUND_FOLDER : IMAGE_FOLDER;
+    // A bare filename is resolved in its tag's conventional folder. Explicit image/ or ./ paths
+    // are rooted at the project; other nested paths retain the older lookup behavior for existing
+    // projects. The old plural "images" folder remains a read-only fallback.
+    const candidates = [relative];
+    if( !hasExplicitPrefix ) {
+        candidates.push(defaultFolder + "/" + relative);
+        if( kind === "background" ) candidates.push("images/backgrounds/" + relative);
+        candidates.push("images/" + relative);
     }
-    return { kind: "missing" };
+    const matches = [];
+    candidates.forEach(candidate => {
+        const source = path.resolve(root, candidate.split("/").join(path.sep));
+        if( !insideProject(root, source) || !existingFile(source) ) return;
+        let realSource;
+        try { realSource = fs.realpathSync(source); }
+        catch(error) { return; }
+        if( !insideProject(realRoot, realSource) ) return;
+        if( !matches.some(match => match.source === source) ) matches.push({ source, relative: candidate });
+    });
+
+    if( matches.length > 1 ) {
+        return { kind: "ambiguous", candidates: matches.map(match => match.relative) };
+    }
+    if( matches.length === 0 ) return { kind: "missing" };
+    const match = matches[0];
+    return {
+        kind: "ok",
+        source: match.source,
+        relative: match.relative,
+        defaulted: match.relative !== relative
+    };
 }
 
-// The pictures the editor's list offers: only those inside the "images" and "image" folders (and
-// their subfolders), by the name the bare tag finds them. Pictures anywhere else in the project
-// still work when their path is written by hand, they are just not listed.
-function listUsableImageFiles(projectDir) {
-    const names = new Set();
-    if( !projectDir ) return [];
+function walkImageFiles(projectDir, relativeRoot) {
+    const absoluteRoot = path.join(projectDir, relativeRoot);
+    const results = [];
     const scan = (absoluteDir, relativeDir) => {
         let entries;
         try { entries = fs.readdirSync(absoluteDir, { withFileTypes: true }); }
-        catch(e) { return; }
+        catch(error) { return; }
         entries.forEach(entry => {
             if( entry.name === ".git" || entry.name === "node_modules" || entry.name === ".DS_Store" || entry.isSymbolicLink() ) return;
             const relativePath = relativeDir ? relativeDir + "/" + entry.name : entry.name;
             if( entry.isDirectory() ) scan(path.join(absoluteDir, entry.name), relativePath);
-            else if( entry.isFile() && isImageFileName(entry.name) ) names.add(relativePath);
+            else if( entry.isFile() && isImageFileName(entry.name) ) results.push(relativePath);
         });
     };
-    IMAGE_SEARCH_FOLDERS.forEach(folder => scan(path.join(projectDir, folder), ""));
+    scan(absoluteRoot, "");
+    return results;
+}
+
+// Autocomplete values are filename-only for files directly inside the conventional folder.
+// Files in nested/custom folders keep an explicit project-relative path, so the resolver never
+// has to guess which subfolder the writer intended.
+function listUsableImageFiles(projectDir, kind) {
+    if( !projectDir ) return [];
+    const names = new Set();
+    if( kind === "background" ) {
+        walkImageFiles(projectDir, IMAGE_BACKGROUND_FOLDER).forEach(relative => {
+            names.add(relative.indexOf("/") === -1 ? relative : IMAGE_BACKGROUND_FOLDER + "/" + relative);
+        });
+        // Old projects may still keep backgrounds in images/backgrounds.
+        walkImageFiles(projectDir, "images/backgrounds").forEach(relative => names.add("images/backgrounds/" + relative));
+    } else {
+        walkImageFiles(projectDir, IMAGE_FOLDER).forEach(relative => {
+            names.add(relative.indexOf("/") === -1 ? relative : IMAGE_FOLDER + "/" + relative);
+        });
+        // Keep legacy assets discoverable without using the old folder for new imports.
+        walkImageFiles(projectDir, "images").forEach(relative => names.add("images/" + relative));
+    }
     return Array.from(names).sort((a, b) => a.localeCompare(b));
 }
 
-// Rewrites "# image:" tags of the compiled story so each name points at the path the exported
-// page loads (replacements: Map of the name written in the tag -> the exported relative path).
 function rewriteImageReferences(story, replacements) {
     const rewriteTag = text => {
-        const match = /^(\s*#?\s*image\s*:\s*)(.*?)(\s*)$/i.exec(text);
-        if( !match ) return text;
-        const replacement = replacements.get(match[2].trim());
-        return replacement ? match[1] + replacement + match[3] : text;
+        const parsed = parseStoryPictureTag(text);
+        if( !parsed ) return text;
+        const typedKey = imageTagKey(parsed.kind, parsed.reference);
+        const replacement = replacements.has(typedKey) ? replacements.get(typedKey) : replacements.get(parsed.reference);
+        // An empty replacement deliberately turns a failed reference into an inert
+        // tag (image: or bg:). It must not create a broken image in the browser.
+        if( replacement === undefined || replacement === null ) return text;
+        return String(text).replace(/^((?:\s*#?\s*(?:image|bg)\s*:\s*))(.*?)(\s*)$/i,
+            (_, prefix, value, suffix) => prefix + replacement + suffix);
     };
     const visit = node => {
         if( Array.isArray(node) ) {
@@ -145,8 +214,10 @@ function rewriteImageReferences(story, replacements) {
 
 module.exports = {
     parseImageTag,
+    parseBackgroundTag,
     collectImagesFromStory,
     resolveImageReference,
     listUsableImageFiles,
-    rewriteImageReferences
+    rewriteImageReferences,
+    imageTagKey
 };

@@ -7,9 +7,9 @@
 //   - Enter writes the selected tag ("#music: ").
 // "#" is reserved for these tags: after it, a character that cannot lead to one of them is never
 // typed, with or without the list (so "#aaa" cannot be written).
-// A tag whose value is a file of the project (#image, #music, #sound) shows its whole list as soon
-// as the writer stops after "#tag: "; no first letter is needed to see the files.
-// Tab right after "#image:", "#music:" or "#sound:" (the space is optional) opens that same list,
+// A tag whose value is a file of the project (#bg, #image, #music, #sound) shows the matching
+// category list as soon as the writer stops after "#tag: "; no first letter is needed to see the files.
+// Tab right after "#bg:", "#image:", "#music:" or "#sound:" (the space is optional) opens that same list,
 // for a tag written by hand.
 // The Ace autocomplete draws the list; this module only decides when it opens and which keys count.
 
@@ -22,9 +22,11 @@ const { IMAGE_EXTENSIONS } = require("./imageTypes.js");
 const TAG_REGISTRY = {
     align: { kind: "fixed", values: ["left", "center", "right"] },
     "choice-align": { kind: "fixed", values: ["left", "center", "right"] },
+    bg: { kind: "image", values: [] },
     image: { kind: "image", values: [] },
-    music: { kind: "audio", values: ["stop"], label: "parar música" },
+    music: { kind: "audio", values: ["stop"], label: "stop music" },
     sound: { kind: "audio", values: ["stop"], label: "parar efeitos" },
+    screen: { kind: "flag", values: [] },
     title: { kind: "text", values: [] }
 };
 const TAG_NAMES = Object.keys(TAG_REGISTRY).sort();
@@ -34,9 +36,9 @@ function valuesForTag(tag, projectDir) {
     const definition = TAG_REGISTRY[String(tag || "").toLowerCase()];
     if( !definition ) return [];
     if( definition.kind === "fixed" ) return definition.values.slice();
-    if( definition.kind === "image" ) return projectDir ? listUsableImageFiles(projectDir) : [];
+    if( definition.kind === "image" ) return projectDir ? listUsableImageFiles(projectDir, tag === "bg" ? "background" : "image") : [];
     if( definition.kind === "audio" ) {
-        const files = projectDir ? listUsableAudioFiles(projectDir, tag === "music" ? "music" : undefined) : [];
+        const files = projectDir ? listUsableAudioFiles(projectDir, tag === "music" ? "music" : "sound") : [];
         return definition.values.concat(files);
     }
     return [];
@@ -129,7 +131,7 @@ function fileTagAwaitingValue(line, column) {
 // The same, for Tab: the cursor sits right after "#tag:" with or without the space that follows it.
 const FILE_TAG_BEFORE_TAB = new RegExp("(?:^|\\s)#(" + FILE_VALUE_TAGS.join("|") + "):( ?)$", "i");
 
-// "image", "music" or "sound" (and whether the space is already there) when the cursor sits right
+// "bg", "image", "music" or "sound" (and whether the space is already there) when the cursor sits right
 // after such a tag; otherwise null.
 function fileTagBeforeTab(line, column) {
     const match = FILE_TAG_BEFORE_TAB.exec(line.slice(0, column));
@@ -292,6 +294,21 @@ function install(editor, completer) {
                     closeList();
                     release();
                     return null;
+                }
+                // Flag tags (such as #screen) have no colon or value. Treat the whole
+                // name as atomic just like a completed "#tag: " name, retaining "#"
+                // and reopening tag-name completion after one Backspace.
+                if( keyString === "backspace" && tag.exact && !tag.hasColon &&
+                    TAG_REGISTRY[tag.name].kind === "flag" ) {
+                    const cursor = editor.getCursorPosition();
+                    const line = editor.session.getLine(tag.row);
+                    const flagEnd = tag.hash + /^#\s*[\w-]*/.exec(line.slice(tag.hash))[0].length;
+                    if( cursor.column > tag.hash + 1 && cursor.column <= flagEnd ) {
+                        return { command: { name: "removeFlagTagName", exec: () => {
+                            removeRange(tag.row, tag.hash + 1, flagEnd);
+                            openTagList();
+                        } } };
+                    }
                 }
             }
 

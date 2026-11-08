@@ -663,11 +663,6 @@ html.dark .style-mode-tab.active, body.dark .style-mode-tab.active { background:
   font-family: Monaco, 'Courier New', monospace;
 }
 
-#player.altKey .innerText p span:hover {
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 #player .hiddenBuffer {
   opacity: 0;
   pointer-events: none;
@@ -830,7 +825,7 @@ html.dark .style-mode-tab.active, body.dark .style-mode-tab.active { background:
   line-height: var(--game-line-height, 1.5);
 }
 
-/* Story choices only: the title screen's "Iniciar" keeps the shared titleScreen.css spacing. */
+/* Story choices only: the title screen's "Start" keeps the shared titleScreen.css spacing. */
 #main #player .story-passage :not(.choice) + p.choice {
   margin-top: 1.25em;
 }
@@ -885,7 +880,7 @@ html.dark .style-mode-tab.active, body.dark .style-mode-tab.active { background:
   line-height: 1.12;
   letter-spacing: -0.01em;
   font-family: var(--game-scene-title-family, Georgia, "Times New Roman", "Noto Serif", serif);
-  font-size: var(--game-scene-title-size, 1.85em);
+  font-size: var(--game-scene-title-size, 33.3px);
   font-style: normal;
   font-weight: 600;
   text-wrap: balance;

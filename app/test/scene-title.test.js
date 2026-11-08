@@ -151,6 +151,7 @@ describe("scene titles", function () {
             playerView.addTextSection("C1");
             playerView.addTags(["align: right"]);
             playerView.addTextSection("C2");
+            playerView.addTags([]);
 
             // Scene One is centered as a whole; scene Two goes back to the story alignment;
             // a plain align tag only affects its own paragraph.
@@ -166,6 +167,7 @@ describe("scene titles", function () {
             playerView.addTextSection("E1");
             playerView.addTags(["title: Five"]);
             playerView.addTextSection("E2");
+            playerView.addTags([]);
             assert.deepStrictEqual(
                 paragraphs().slice(-4).map(alignOf),
                 [["alignCenter"], ["alignCenter"], [], []]

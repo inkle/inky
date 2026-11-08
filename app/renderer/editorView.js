@@ -172,6 +172,11 @@ editor.on("beforeEndOperation", function() {
 });
 
 exports.EditorView = {
+    canFormatCode: () => !!(currentInkFile && currentInkFile.isInkFile && !editor.getReadOnly()),
+    formatCode: () => {
+        if (!currentInkFile || !currentInkFile.isInkFile || editor.getReadOnly()) return false;
+        return require("./codeFormat.js").formatEditor(editor, Range);
+    },
     clearErrors: clearErrors,
     setEvents: (e) => { events = e; },
     getValue: () => { return editor.getValue(); },

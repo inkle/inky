@@ -68,7 +68,8 @@
   padding: 0;
   color: inherit;
   font-family: inherit;
-  font-size: clamp(1.75rem, 12cqmin, 4.5rem);
+  /* A real pixel value, matching the Size range + numeric input in Story Information. */
+  font-size: var(--title-screen-title-size, 56px);
   font-style: normal;
   font-weight: 600;
   line-height: 1.1;
@@ -85,7 +86,16 @@
   overflow-wrap: anywhere;
 }
 
-/* "Iniciar" is a story choice: the choice component and its colors, centered */
+/* The action cluster has its own spacing, independent of the title and author. */
+:is(#main #player, #story) .title-screen-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0px, 0.5cqmin, 5px);
+  width: 100%;
+}
+
+/* "Start" is a story choice: the choice component and its colors, centered */
 :is(#main #player, #story) .title-screen .choice {
   display: flex;
   justify-content: center;
@@ -102,4 +112,21 @@
   max-width: 100%;
   padding-left: 1.5em;
   text-align: center;
+}
+
+/* Action spacing is shared across Preview and Web, regardless of game choice margins. */
+:is(#main #player, #story) .title-screen .title-screen-actions .choice {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+:is(#main #player, #story) .title-screen .title-screen-actions .choice .choice-button {
+  padding-block: clamp(0.18em, 0.5cqmin, 0.4em);
+  min-height: 40px;
+}
+/* Load shares the Start appearance, but is inert until saved. */
+:is(#main #player, #story) .title-screen #title-load:disabled {
+  opacity: .45;
+  cursor: default;
+  pointer-events: none;
 }

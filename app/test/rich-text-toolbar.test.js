@@ -83,7 +83,7 @@ describe("floating bold and italic toolbar", function () {
         });
 
         it("appears over selected story text and goes away when the selection does", async function () {
-            await setText("A maré subiu antes da hora.");
+            await setText("A tide rises before sunrise.");
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();
             assert.ok(visible());
@@ -93,14 +93,14 @@ describe("floating bold and italic toolbar", function () {
         });
 
         it("does not appear over choices, gathers, tags or logic", async function () {
-            const lines = ["* escolha [texto]", "- gather", "#music: dark.mp3", "~ x = 1"];
+            const lines = ["* choice [text]", "- gather", "#music: dark.mp3", "~ x = 1"];
             for( const line of lines ) {
                 await setText(line);
                 editor.selection.setRange(new Range(0, 2, 0, line.length));
                 await settle();
                 assert.ok(!visible(), line);
             }
-            await setText("A maré subiu.");
+            await setText("A tide rises.");
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();
             assert.ok(visible());
@@ -108,14 +108,14 @@ describe("floating bold and italic toolbar", function () {
         });
 
         it("formats the selection with one click, keeps it selected and shows what is applied", async function () {
-            await setText("A maré subiu antes da hora.");
+            await setText("A tide rises before sunrise.");
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();
 
             button("b").click();
             await tick();
-            assert.strictEqual(editor.getValue(), "A ⟦b⟧maré⟦/b⟧ subiu antes da hora.");
-            assert.strictEqual(editor.getSelectedText(), "maré");
+            assert.strictEqual(editor.getValue(), "A ⟦b⟧tide⟦/b⟧ rises before sunrise.");
+            assert.strictEqual(editor.getSelectedText(), "tide");
             assert.ok(visible(), "the toolbar stays for the next click");
             assert.strictEqual(button("b").getAttribute("aria-pressed"), "true");
             assert.ok(button("b").classList.contains("is-active"));
@@ -123,23 +123,23 @@ describe("floating bold and italic toolbar", function () {
 
             button("i").click();
             await tick();
-            assert.strictEqual(editor.getValue(), "A ⟦b⟧⟦i⟧maré⟦/i⟧⟦/b⟧ subiu antes da hora.");
+            assert.strictEqual(editor.getValue(), "A ⟦b⟧⟦i⟧tide⟦/i⟧⟦/b⟧ rises before sunrise.");
             assert.strictEqual(button("i").getAttribute("aria-pressed"), "true");
 
             button("b").click();
             await tick();
-            assert.strictEqual(editor.getValue(), "A ⟦i⟧maré⟦/i⟧ subiu antes da hora.");
+            assert.strictEqual(editor.getValue(), "A ⟦i⟧tide⟦/i⟧ rises before sunrise.");
             assert.strictEqual(button("b").getAttribute("aria-pressed"), "false");
             assert.strictEqual(button("i").getAttribute("aria-pressed"), "true");
 
             button("i").click();
             await tick();
-            assert.strictEqual(editor.getValue(), "A maré subiu antes da hora.");
-            assert.strictEqual(editor.getSelectedText(), "maré");
+            assert.strictEqual(editor.getValue(), "A tide rises before sunrise.");
+            assert.strictEqual(editor.getSelectedText(), "tide");
         });
 
         it("makes each click one step of Undo", async function () {
-            await setText("A maré subiu.");
+            await setText("A tide rises.");
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();
             button("b").click();
@@ -148,25 +148,25 @@ describe("floating bold and italic toolbar", function () {
             await tick();
             editor.undo();
             await tick();
-            assert.strictEqual(editor.getValue(), "A ⟦b⟧maré⟦/b⟧ subiu.");
+            assert.strictEqual(editor.getValue(), "A ⟦b⟧tide⟦/b⟧ rises.");
             editor.undo();
             await tick();
-            assert.strictEqual(editor.getValue(), "A maré subiu.");
+            assert.strictEqual(editor.getValue(), "A tide rises.");
         });
 
         it("formats a selection over several lines, line by line", async function () {
-            await setText("Primeira linha\nSegunda linha");
+            await setText("Opening line\nAnother line");
             editor.selection.setRange(new Range(0, 0, 1, 7));
             await settle();
             assert.ok(visible());
             button("i").click();
             await tick();
-            assert.strictEqual(editor.getValue(), "⟦i⟧Primeira linha⟦/i⟧\n⟦i⟧Segunda⟦/i⟧ linha");
+            assert.strictEqual(editor.getValue(), "⟦i⟧Opening line⟦/i⟧\n⟦i⟧Another⟦/i⟧ line");
             assert.strictEqual(button("i").getAttribute("aria-pressed"), "true");
         });
 
         it("does not take the focus or the selection away from the editor", async function () {
-            await setText("A maré subiu.");
+            await setText("A tide rises.");
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();
             const down = new window.MouseEvent("mousedown", { bubbles: true, cancelable: true });
@@ -175,11 +175,11 @@ describe("floating bold and italic toolbar", function () {
             button("b").click();
             await tick();
             assert.ok(editor.isFocused());
-            assert.strictEqual(editor.getSelectedText(), "maré");
+            assert.strictEqual(editor.getSelectedText(), "tide");
         });
 
         it("waits for the mouse button to be released before it appears", async function () {
-            await setText("A maré subiu.");
+            await setText("A tide rises.");
             editor.container.dispatchEvent(new window.MouseEvent("mousedown", { bubbles: true }));
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();
@@ -190,7 +190,7 @@ describe("floating bold and italic toolbar", function () {
         });
 
         it("goes away when the editor loses the focus", async function () {
-            await setText("A maré subiu.");
+            await setText("A tide rises.");
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();
             assert.ok(visible());
@@ -201,7 +201,7 @@ describe("floating bold and italic toolbar", function () {
         });
 
         it("sits above the line, or below it when the selection is at the top of the editor", async function () {
-            await setText("A maré subiu.");
+            await setText("A tide rises.");
             editor.renderer.textToScreenCoordinates = () => ({ pageX: 300, pageY: 300 });
             editor.selection.setRange(new Range(0, 2, 0, 6));
             await settle();

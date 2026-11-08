@@ -23,7 +23,6 @@ function hudHtml() {
         '<div id="story-menu" class="toolbar-popover" hidden>' +
         '<button type="button" id="rewind" title="Restart story" aria-label="Restart story">' + REWIND_ICON + '<span>Restart story</span></button>' +
         '<button type="button" id="save" title="Save progress" aria-label="Save progress">' + SAVE_ICON + '<span>Save progress</span></button>' +
-        '<button type="button" id="reload" title="Reload from save point" aria-label="Load saved progress">' + REWIND_ICON + '<span>Load saved progress</span></button>' +
         '<button type="button" id="theme-toggle" title="Change theme" aria-label="Change theme" hidden>' + THEME_ICON + '<span>Dark theme</span></button>' +
         '<div id="audio-settings-anchor" hidden>' +
         '<span id="audio-control" class="audio-control" hidden>' +
@@ -176,10 +175,14 @@ function sync(player) {
     if( !cue ) cue = createScrollCue(frame);
     if( cue.parentElement !== frame ) frame.appendChild(cue);
 
-    player.classList.toggle("game-controls-hidden", player.dataset.controlsShow === "0");
+    const themeOnly = player.dataset.controlsShow === "0" && player.dataset.themeToggle === "1";
+    player.classList.toggle("game-controls-hidden", player.dataset.controlsShow === "0" && !themeOnly);
+    player.classList.toggle("game-theme-only", themeOnly);
 
-    const reload = hud.querySelector("#reload");
-    if( reload ) reload.disabled = !hasSaved(actions.hasSave);
+    const available = hasSaved(actions.hasSave);
+    player.dataset.titleSaveAvailable = available ? "1" : "0";
+    const titleLoad = player.querySelector("#title-load");
+    if( titleLoad ) titleLoad.disabled = !available;
     applyThemeToggle(player, hud);
     applyAudio(hud);
 
@@ -219,8 +222,15 @@ function setup(player, hostActions) {
         if( target.closest("#audio-toggle") ) { if( actions.onToggleMute ) actions.onToggleMute(); return; }
         if( target.closest("#rewind") ) { closeMenu(player); if( actions.onRestart ) actions.onRestart(); return; }
         if( target.closest("#save") ) { closeMenu(player); if( actions.onSave ) actions.onSave(); return; }
-        if( target.closest("#reload") ) { closeMenu(player); if( actions.onLoad ) actions.onLoad(); return; }
-        if( target.closest("#theme-toggle") ) { closeMenu(player); if( actions.onToggleTheme ) actions.onToggleTheme(); return; }
+        if( target.closest("#title-load") ) {
+            if( !target.closest("#title-load").disabled && actions.onLoad ) actions.onLoad();
+            return;
+        }
+        if( target.closest("#theme-toggle") ) {
+            closeMenu(player);
+            if( player.dataset.themeToggle === "1" && actions.onToggleTheme ) actions.onToggleTheme();
+            return;
+        }
         if( target.closest("#story-menu > button") ) closeMenu(player);
     });
 

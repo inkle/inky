@@ -154,6 +154,11 @@ describe("light and dark theme switch", function () {
             assert.strictEqual(r.style.alternate.theme, "dark");
             assert.strictEqual(r.style.alternate.colors.background, GameStyle.PALETTES.dark.background);
             assert.strictEqual(r.style.alternate.font.family, GameStyle.FONT_STACKS.serif);
+            const dark = GameStyle.parseText("theme: dark\nfont:\n  family: mono\ncontrols:\n  theme_toggle: true\n");
+            assert.strictEqual(dark.style.alternate.theme, "light");
+            assert.strictEqual(dark.style.alternate.font.family, GameStyle.FONT_STACKS.mono);
+            const explicit = GameStyle.parseText("theme_mode: dual\nfont:\n  family: serif\nthemes:\n  dark:\n    font: mono\n");
+            assert.strictEqual(explicit.style.alternate.font.family, GameStyle.FONT_STACKS.mono);
         });
 
         it("needs the story menu, so it is off while the buttons are hidden", function () {
@@ -385,59 +390,62 @@ describe("light and dark theme switch", function () {
         });
     });
     describe("settings form", function () {
-        it("offers the four presets and keeps the switch off by default", async function () {
+        it("offers single and dual mode without a hidden export checkbox", async function () {
             const window = await openForm("theme: light\n");
             try {
                 const chips = Array.from(window.document.querySelectorAll("#presets .chip"), chip => chip.dataset.preset);
                 assert.deepStrictEqual(chips, ["classic", "night", "sepia", "terminal"]);
-                assert.strictEqual(window.document.getElementById("controls-theme-toggle").checked, false);
-                assert.strictEqual(window.document.getElementById("theme-toggle-hint").textContent, "");
-                assert.doesNotMatch(window.flushSettingsForAdvanced(), /theme_family/);
-            } finally {
-                window.close();
-            }
+                assert.strictEqual(window.document.querySelector('input[name="theme-mode"][value="single"]').checked, true);
+                assert.strictEqual(window.document.getElementById("controls-theme-toggle"), null);
+                assert.strictEqual(window.document.getElementById("dual-appearance").hidden, true);
+            } finally { window.close(); }
         });
 
-        it("writes the family of the chosen preset and the player's switch, and names the look it leads to", async function () {
+        it("saves independently selected themes and makes the switch automatic", async function () {
             const window = await openForm("theme: light\n");
             try {
                 window.document.querySelector('#presets .chip[data-preset="sepia"]').click();
-                change(window, "controls-theme-toggle", true);
-                const yaml = window.flushSettingsForAdvanced();
-                assert.match(yaml, /^theme_family: sepia-terminal$/m);
-                assert.match(yaml, /^  theme_toggle: true$/m);
-                const hint = window.document.getElementById("theme-toggle-hint").textContent;
-                assert.match(hint, /dark look: Terminal/);
-
-                window.document.querySelector('#presets .chip[data-preset="night"]').click();
-                assert.match(window.document.getElementById("theme-toggle-hint").textContent, /light look: Classic/);
-                assert.match(window.flushSettingsForAdvanced(), /^theme_family: classic-night$/m);
-            } finally {
-                window.close();
-            }
+                const dual = window.document.querySelector('input[name="theme-mode"][value="dual"]');
+                dual.checked = true;
+                dual.dispatchEvent(new window.Event("change", { bubbles: true }));
+                assert.strictEqual(window.document.getElementById("dual-appearance").hidden, false);
+                assert.strictEqual(window.document.getElementById("light-preset").value, "sepia");
+                assert.strictEqual(window.document.getElementById("dark-preset").value, "terminal");
+                let yaml = window.flushSettingsForAdvanced();
+                assert.match(yaml, /^theme_mode: dual$/m);
+                assert.match(yaml, /^  dark:$/m);
+                assert.doesNotMatch(yaml, /^  theme_toggle: true$/m);
+                const select = window.document.getElementById("dark-preset");
+                select.value = "night";
+                select.dispatchEvent(new window.Event("change", { bubbles: true }));
+                yaml = window.flushSettingsForAdvanced();
+                assert.match(yaml, /^  dark:$/m);
+                const parsed = GameStyle.parseText(yaml);
+                assert.strictEqual(parsed.model.themes.dark.colors.background, "#282828");
+                assert.strictEqual(parsed.model.themes.light.colors.background, "#f4ecd8");
+                assert.strictEqual(parsed.style.controls.themeToggle, true);
+            } finally { window.close(); }
         });
 
-        it("needs the story menu buttons, and says so", async function () {
+        it("retains the theme switch even when save and restart buttons are disabled", async function () {
             const window = await openForm("controls:\n  show: false\n");
             try {
-                const box = window.document.getElementById("controls-theme-toggle");
-                assert.strictEqual(box.disabled, true);
-                assert.match(window.document.getElementById("theme-toggle-hint").textContent, /Turn on the buttons/);
-                change(window, "controls-show", true);
-                assert.strictEqual(box.disabled, false);
-            } finally {
-                window.close();
-            }
+                const dual = window.document.querySelector('input[name="theme-mode"][value="dual"]');
+                dual.checked = true;
+                dual.dispatchEvent(new window.Event("change", { bubbles: true }));
+                const parsed = GameStyle.parseText(window.flushSettingsForAdvanced());
+                assert.strictEqual(parsed.style.controls.show, false);
+                assert.strictEqual(parsed.style.controls.themeToggle, true);
+            } finally { window.close(); }
         });
 
-        it("loads a file that already allows the switch", async function () {
+        it("migrates existing theme-toggle YAML to the two-theme editor", async function () {
             const window = await openForm("theme: dark\ntheme_family: classic-night\ncontrols:\n  show: true\n  theme_toggle: true\n");
             try {
-                assert.strictEqual(window.document.getElementById("controls-theme-toggle").checked, true);
-                assert.match(window.document.getElementById("theme-toggle-hint").textContent, /light look: Classic/);
-            } finally {
-                window.close();
-            }
+                assert.strictEqual(window.document.querySelector('input[name="theme-mode"][value="dual"]').checked, true);
+                assert.strictEqual(window.document.getElementById("dark-preset").value, "night");
+                assert.strictEqual(window.document.getElementById("light-preset").value, "classic");
+            } finally { window.close(); }
         });
     });
 });

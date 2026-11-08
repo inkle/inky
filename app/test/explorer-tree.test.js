@@ -23,7 +23,7 @@ describe("Explorer tree data", function () {
         return ExplorerTree.buildExplorerNodes(Object.assign({
             mainInk: main,
             allFiles: [main, document("scenes/a.ink"), document("scenes/sub/b.ink"), document("game.yaml")],
-            projectDir: "/work/Maré de Vidro",
+            projectDir: "/work/Glass Tide",
             folders: ["audio", "empty", "scenes", "scenes/sub"],
             audioFiles: ["audio/dark.mp3"],
             imageFiles: ["hero.jpg"],
@@ -47,7 +47,7 @@ describe("Explorer tree data", function () {
         const nodesById = byId(nodes);
         assert.strictEqual(nodesById.get("root").parent, "#");
         assert.strictEqual(nodesById.get("root").data.root, true);
-        assert.match(nodesById.get("root").text, />Maré de Vidro</);
+        assert.match(nodesById.get("root").text, />Glass Tide</);
         assert.strictEqual(nodesById.get("d:scenes/sub").parent, "d:scenes");
         assert.strictEqual(nodesById.get("f:scenes/a.ink").parent, "d:scenes");
         assert.strictEqual(nodesById.get("f:main.ink").parent, "root");

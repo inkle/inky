@@ -156,39 +156,26 @@ input[type="number"] {
 .text-button:disabled { color: var(--muted); cursor: default; }
 .inline { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12px; }
 
-/* The cover thumbnail: the same frame and crop the title screen uses (titleScreen.css),
-   so the writer sees which part of the picture survives the chosen display format. */
-.cover-thumb {
-    position: relative;
-    flex: 0 0 auto;
-    height: 78px;
-    width: auto;
-    max-width: 142px;
-    aspect-ratio: var(--cover-ratio, 1 / 1);
-    overflow: hidden;
+/* Cover matches the available width of the Title and Author fields.
+   The path and Choose button are separate sibling controls inside a flex
+   group; Clear remains the last element of the row, aligned with the
+   clear buttons above. No thumbnail or overlapping button is needed. */
+.row > .cover-input-field {
     display: flex;
     align-items: center;
-    justify-content: center;
-    border: 1px dashed var(--border);
-    border-radius: 6px;
-    background: var(--panel);
+    gap: 12px;
+    flex: 1 1 150px;
+    min-width: 0;
 }
-.cover-thumb-image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    object-fit: cover;
-    object-position: center;
+.row .cover-input-field > input[type="text"] {
+    flex: 1 1 150px;
+    width: auto;
+    min-width: 0;
 }
-.cover-thumb-message { padding: 3px; font-size: 11px; color: var(--muted); text-align: center; }
-.cover-thumb[data-state="ready"] { border-style: solid; }
-.cover-thumb[data-state="ready"] .cover-thumb-message { display: none; }
-.cover-thumb:not([data-state="ready"]) .cover-thumb-image { display: none; }
-/* Without a picture the box carries a sentence, so it keeps a readable shape
-   instead of the format's proportion. */
-.cover-thumb:not([data-state="ready"]) { width: 118px; aspect-ratio: auto; }
+.cover-input-field > #choose-story-cover {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
 .segmented { display: flex; flex-wrap: nowrap; max-width: 100%; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 6px; background: var(--border); }
 #theme { width: min(100%, 460px); }
 #theme label { flex: 1 1 0; text-align: center; }

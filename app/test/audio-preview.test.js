@@ -136,14 +136,14 @@ describe("Audio preview", function () {
         assert.strictEqual(AudioPreview.getState().music, "music.mp3");
     });
 
-    it("stops active effects when the sound tag has an incomplete extension", function () {
+    it("does not interrupt effects for incomplete audio references", function () {
         AudioPreview.handleTags(["sound: branch.ogg"], true, 1);
         const effect = players[0];
 
-        AudioPreview.handleTags(["sound: fire.mp"], true, 2);
+        AudioPreview.handleTags(["sound: fire.mp", "sound:"], true, 2);
 
-        assert.strictEqual(effect.paused, true);
-        assert.strictEqual(effect.src, "");
+        assert.strictEqual(effect.paused, false);
+        assert.notStrictEqual(effect.src, "");
     });
 
     it("replays choice music tags without replaying one-shot effects", function () {
@@ -209,44 +209,78 @@ describe("Audio preview", function () {
             assert.strictEqual(states.length, 0);
         });
 
-        it("shows them for music only, for sound effects only, and for both", function () {
+        it("shows them for music only, for sound effects only, and for both", async function () {
             AudioPreview.handleTags(["music: music.mp3"], true, 1);
             assert.strictEqual(AudioPreview.getControlState().available, true);
 
             AudioPreview.beginPlaythrough();
             AudioPreview.noteTags([]);
             AudioPreview.endReplay();
-            assert.strictEqual(AudioPreview.getControlState().available, false, "the tags are gone, so are the controls");
+            assert.strictEqual(AudioPreview.getControlState().available, true, "the fading music still needs the controls");
+            await new Promise(resolve => setTimeout(resolve, 650));
+            assert.strictEqual(AudioPreview.getControlState().available, false, "the controls disappear when the fade finishes");
 
             AudioPreview.handleTags(["sound: branch.ogg"], true, 1);
             assert.strictEqual(AudioPreview.getControlState().available, true);
+            players[players.length - 1].listeners.ended();
+            assert.strictEqual(AudioPreview.getControlState().available, false, "effect finished");
 
             AudioPreview.handleTags(["music: music.mp3"], true, 2);
             assert.strictEqual(AudioPreview.getControlState().available, true);
         });
 
-        it("recognizes a music stop and a name that is not a sound file, not the retired tags", function () {
-            ["music: stop", "sound: stop", "music: ../x"].forEach(tag => {
+        it("ignores stop commands, invalid tags and missing or ambiguous sound files", function () {
+            ["music: stop", "sound: stop", "music: ../x", "music: missing.mp3", "sound: missing.wav"].forEach(tag => {
                 AudioPreview.beginPlaythrough();
                 AudioPreview.endReplay();
-                assert.strictEqual(AudioPreview.getControlState().available, false, tag + " (reset)");
                 AudioPreview.noteTags([tag]);
-                assert.strictEqual(AudioPreview.getControlState().available, true, tag);
+                assert.strictEqual(AudioPreview.getControlState().available, false, tag);
             });
+            fs.mkdirSync(path.join(projectDir, "audio", "music"));
+            fs.writeFileSync(path.join(projectDir, "audio", "music", "music.mp3"), "");
+            AudioPreview.noteTags(["music: music.mp3"]);
+            assert.strictEqual(AudioPreview.getControlState().available, false, "ambiguous basename");
             AudioPreview.beginPlaythrough();
             AudioPreview.endReplay();
             AudioPreview.noteTags(["audio: effects/branch.ogg", "audioloop: audio/music.mp3"]);
             assert.strictEqual(AudioPreview.getControlState().available, false);
         });
 
+        it("updates the control when the referenced sound file is added or removed", function () {
+            AudioPreview.handleTags(["music: newly-created.mp3"], true, 2);
+            assert.strictEqual(AudioPreview.getControlState().available, false);
+            fs.writeFileSync(path.join(projectDir, "audio", "newly-created.mp3"), "audio bytes");
+            AudioPreview.refreshAvailability();
+            assert.strictEqual(AudioPreview.getControlState().available, true);
+            fs.unlinkSync(path.join(projectDir, "audio", "newly-created.mp3"));
+            AudioPreview.refreshAvailability();
+            assert.strictEqual(AudioPreview.getControlState().available, false);
+        });
+
+        it("accepts explicit project-relative audio paths and respects music/sfx categories", function () {
+            AudioPreview.handleTags(["sound: effects/branch.ogg"], true, 3);
+            assert.strictEqual(AudioPreview.getControlState().available, true);
+            AudioPreview.beginPlaythrough();
+            AudioPreview.endReplay();
+            players[players.length - 1].listeners.ended();
+            assert.strictEqual(AudioPreview.getControlState().available, false);
+            fs.mkdirSync(path.join(projectDir, "audio", "sfx"));
+            fs.mkdirSync(path.join(projectDir, "audio", "music"));
+            fs.writeFileSync(path.join(projectDir, "audio", "music", "unique.mp3"), "music bytes");
+            AudioPreview.noteTags(["sound: unique.mp3"]);
+            assert.strictEqual(AudioPreview.getControlState().available, false, "SFX tag must not resolve in music directory");
+            AudioPreview.handleTags(["music: unique.mp3"], true, 4);
+            assert.strictEqual(AudioPreview.getControlState().available, true, "Music tag resolves in music directory and begins playback");
+        });
+
         it("appears when a later passage reaches sound and does not flicker while the story replays", function () {
-            AudioPreview.noteTags(["music: music.mp3"]);
+            AudioPreview.handleTags(["music: music.mp3"], true, 5);
             AudioPreview.endReplay();
             const before = states.length;
 
             AudioPreview.beginPlaythrough();            // the writer typed: recompile and replay
             assert.strictEqual(AudioPreview.getControlState().available, true, "still shown during the replay");
-            AudioPreview.noteTags(["music: music.mp3"]);
+            AudioPreview.handleTags(["music: music.mp3"], false, 5);
             AudioPreview.endReplay();
             assert.strictEqual(states.length, before, "no hide/show notifications");
             assert.strictEqual(AudioPreview.getControlState().available, true);
@@ -349,7 +383,9 @@ describe("Audio preview", function () {
         });
 
         it("tells the menu about every change", function () {
-            AudioPreview.noteTags(["sound: branch.ogg"]);
+            // As of revision 90 a mere reference does not activate the volume menu:
+            // the sound must actually have started playing.
+            AudioPreview.handleTags(["sound: branch.ogg"], true, 987);
             AudioPreview.setLevel(70);
             AudioPreview.toggleMute();
             assert.deepStrictEqual(states.map(state => [state.available, state.level, state.silent]), [

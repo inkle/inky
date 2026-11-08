@@ -52,24 +52,24 @@ describe("rich text formatting in the Ink editor", function () {
     });
 
     it("hides balanced markers and keeps malformed markers visible", async function () {
-        await setText("Um ⟦b⟧negrito⟦/b⟧ e ⟦i⟧itálico⟦/i⟧.\n⟦/b⟧ sem par");
-        assert.strictEqual(editor.session.getDisplayLine(0), "Um negrito e itálico.");
-        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ sem par");
+        await setText("An ⟦b⟧boldest⟦/b⟧ and ⟦i⟧italic⟦/i⟧.\n⟦/b⟧ unpaired");
+        assert.strictEqual(editor.session.getDisplayLine(0), "An boldest and italic.");
+        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ unpaired");
         assert.strictEqual(editor.session.getAllFolds().length, 4);
 
         editor.insert("!");
         await tick();
-        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ sem par!");
+        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ unpaired!");
         editor.undo();
         await tick();
-        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ sem par");
+        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ unpaired");
         editor.redo();
         await tick();
-        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ sem par!");
+        assert.strictEqual(editor.session.getDisplayLine(1), "⟦/b⟧ unpaired!");
     });
 
     it("wraps long formatted lines at spaces, never inside a word", async function () {
-        const words = ["ferro", "queimado", "cheira", "estranho", "quando", "chove", "forte"];
+        const words = ["metal", "scorched", "smells", "unusual", "during", "rains", "brave"];
         const build = format => {
             let line = "";
             for (let i = 0; i < 40; i++) {
@@ -114,7 +114,7 @@ describe("rich text formatting in the Ink editor", function () {
     });
 
     it("keeps cursor positions outside hidden marker folds", async function () {
-        await setText("a⟦b⟧forte⟦/b⟧z");
+        await setText("a⟦b⟧brave⟦/b⟧z");
         const folds = editor.session.$richTextFolds;
         const assertOutsideFolds = () => {
             const column = editor.getCursorPosition().column;
@@ -136,122 +136,122 @@ describe("rich text formatting in the Ink editor", function () {
     });
 
     it("applies selection formatting and undoes it in one step", async function () {
-        await setText("texto selecionado");
+        await setText("words selected");
         editor.moveCursorTo(0, 0);
         editor.selection.selectTo(0, 5);
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "⟦b⟧texto⟦/b⟧ selecionado");
+        assert.strictEqual(editor.getValue(), "⟦b⟧words⟦/b⟧ selected");
         editor.undo();
         await tick();
-        assert.strictEqual(editor.getValue(), "texto selecionado");
+        assert.strictEqual(editor.getValue(), "words selected");
     });
 
     it("formats each selected line separately and removes formatting when fully selected", async function () {
-        await setText("primeira\nsegunda");
+        await setText("original\nanother");
         editor.moveCursorTo(0, 0);
         editor.selection.selectTo(1, 7);
         editor.execCommand("toggleRichTextItalic");
         await tick();
-        assert.strictEqual(editor.getValue(), "⟦i⟧primeira⟦/i⟧\n⟦i⟧segunda⟦/i⟧");
+        assert.strictEqual(editor.getValue(), "⟦i⟧original⟦/i⟧\n⟦i⟧another⟦/i⟧");
 
         editor.selection.setRange(new Range(0, 3, 0, 12));
         editor.execCommand("toggleRichTextItalic");
         await tick();
-        assert.strictEqual(editor.getValue(), "primeira\n⟦i⟧segunda⟦/i⟧");
+        assert.strictEqual(editor.getValue(), "original\n⟦i⟧another⟦/i⟧");
     });
 
     it("formats and removes visible selections that cross existing hidden markers", async function () {
-        await setText("antes ⟦b⟧forte⟦/b⟧ depois");
+        await setText("prior ⟦b⟧brave⟦/b⟧ later");
         editor.selection.setRange(new Range(0, 0, 0, editor.session.getLine(0).length));
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.session.getDisplayLine(0), "antes forte depois");
-        assert.strictEqual(editor.getValue(), "⟦b⟧antes ⟦b⟧forte⟦/b⟧ depois⟦/b⟧");
+        assert.strictEqual(editor.session.getDisplayLine(0), "prior brave later");
+        assert.strictEqual(editor.getValue(), "⟦b⟧prior ⟦b⟧brave⟦/b⟧ later⟦/b⟧");
 
         editor.selection.setRange(new Range(0, 0, 0, editor.session.getLine(0).length));
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "antes forte depois");
+        assert.strictEqual(editor.getValue(), "prior brave later");
     });
 
     it("starts and stops formatting at the caret and safely deletes formatted text", async function () {
-        await setText("texto");
+        await setText("words");
         editor.moveCursorTo(0, 5);
         editor.execCommand("toggleRichTextBold");
-        editor.insert("forte");
+        editor.insert("brave");
         await tick();
-        assert.strictEqual(editor.session.getDisplayLine(0), "textoforte");
+        assert.strictEqual(editor.session.getDisplayLine(0), "wordsbrave");
 
         editor.execCommand("toggleRichTextBold");
         editor.insert(" normal");
         await tick();
-        assert.strictEqual(editor.session.getDisplayLine(0), "textoforte normal");
+        assert.strictEqual(editor.session.getDisplayLine(0), "wordsbrave normal");
         assert.strictEqual(editor.session.getAllFolds().length, 2);
 
         editor.moveCursorTo(0, 13);
         for( let i = 0; i < 5; i++ ) editor.remove("left");
         await tick();
         assert.ok(!editor.getValue().includes("⟦/b⟧"));
-        assert.strictEqual(editor.session.getDisplayLine(0), "texto normal");
+        assert.strictEqual(editor.session.getDisplayLine(0), "words normal");
     });
 
     it("toggles an empty format off without leaving hidden markers", async function () {
-        await setText("texto");
+        await setText("words");
         editor.moveCursorTo(0, 5);
         editor.execCommand("toggleRichTextBold");
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "texto");
+        assert.strictEqual(editor.getValue(), "words");
         editor.undo();
         await tick();
-        assert.strictEqual(editor.getValue(), "texto");
+        assert.strictEqual(editor.getValue(), "words");
     });
 
     it("keeps no-selection formatting pending until text is entered", async function () {
-        await setText("texto");
+        await setText("words");
         editor.moveCursorTo(0, 5);
         editor.execCommand("toggleRichTextBold");
-        assert.strictEqual(editor.getValue(), "texto");
+        assert.strictEqual(editor.getValue(), "words");
         editor.insert("a");
         editor.insert("b");
         await tick();
-        assert.strictEqual(editor.getValue(), "texto⟦b⟧ab⟦/b⟧");
+        assert.strictEqual(editor.getValue(), "words⟦b⟧ab⟦/b⟧");
         editor.execCommand("toggleRichTextBold");
         editor.insert(" normal");
         await tick();
-        assert.strictEqual(editor.getValue(), "texto⟦b⟧ab⟦/b⟧ normal");
+        assert.strictEqual(editor.getValue(), "words⟦b⟧ab⟦/b⟧ normal");
     });
 
     it("cancels pending formatting with Escape or cursor movement", async function () {
-        await setText("texto");
+        await setText("words");
         editor.moveCursorTo(0, 5);
         editor.execCommand("toggleRichTextBold");
         editor.execCommand("cancelRichTextPendingFormat");
         editor.insert("!");
         await tick();
-        assert.strictEqual(editor.getValue(), "texto!");
+        assert.strictEqual(editor.getValue(), "words!");
 
-        await setText("texto");
+        await setText("words");
         editor.moveCursorTo(0, 5);
         editor.execCommand("toggleRichTextBold");
         editor.moveCursorTo(0, 0);
         editor.insert("!");
         await tick();
-        assert.strictEqual(editor.getValue(), "!texto");
+        assert.strictEqual(editor.getValue(), "!words");
     });
 
     it("cleans empty pairs when text is entered or the cursor leaves them", async function () {
-        await setText("texto ⟦b⟧⟦/b⟧");
+        await setText("words ⟦b⟧⟦/b⟧");
         editor.moveCursorTo(0, 0);
         await tick();
-        assert.strictEqual(editor.getValue(), "texto ");
+        assert.strictEqual(editor.getValue(), "words ");
 
-        await setText("texto ⟦i⟧⟦/i⟧");
+        await setText("words ⟦i⟧⟦/i⟧");
         editor.moveCursorTo(0, 0);
         editor.insert("!");
         await tick();
-        assert.strictEqual(editor.getValue(), "!texto ");
+        assert.strictEqual(editor.getValue(), "!words ");
     });
 
     it("keeps markers intact at fold edges and removes empty formatting with one Undo", async function () {
@@ -267,35 +267,35 @@ describe("rich text formatting in the Ink editor", function () {
     });
 
     it("keeps active formatting paired separately on each line", async function () {
-        await setText("texto");
+        await setText("words");
         editor.moveCursorTo(0, 5);
         editor.execCommand("toggleRichTextItalic");
-        editor.insert("um\ndois");
+        editor.insert("one\ntwo");
         await tick();
-        assert.strictEqual(editor.getValue(), "texto⟦i⟧um⟦/i⟧\n⟦i⟧dois⟦/i⟧");
-        assert.strictEqual(editor.session.getDisplayLine(0), "textoum");
-        assert.strictEqual(editor.session.getDisplayLine(1), "dois");
+        assert.strictEqual(editor.getValue(), "words⟦i⟧one⟦/i⟧\n⟦i⟧two⟦/i⟧");
+        assert.strictEqual(editor.session.getDisplayLine(0), "wordsone");
+        assert.strictEqual(editor.session.getDisplayLine(1), "two");
         editor.undo();
         await tick();
-        assert.strictEqual(editor.getValue(), "texto");
+        assert.strictEqual(editor.getValue(), "words");
     });
 
     it("protects markers on Delete and removes empty pairs after word deletion", async function () {
-        await setText("⟦b⟧forte⟦/b⟧ próximo");
+        await setText("⟦b⟧brave⟦/b⟧ forward");
         editor.moveCursorTo(0, 3);
         editor.remove("right");
         await tick();
-        assert.strictEqual(editor.getValue(), "⟦b⟧orte⟦/b⟧ próximo");
+        assert.strictEqual(editor.getValue(), "⟦b⟧rave⟦/b⟧ forward");
 
-        await setText("⟦b⟧orte⟦/b⟧ próximo");
+        await setText("⟦b⟧rave⟦/b⟧ forward");
         editor.moveCursorTo(0, 7);
         editor.session.markUndoGroup();
         editor.removeWordLeft();
         await tick();
-        assert.strictEqual(editor.getValue(), " próximo");
+        assert.strictEqual(editor.getValue(), " forward");
         editor.undo();
         await tick();
-        assert.strictEqual(editor.getValue(), "⟦b⟧orte⟦/b⟧ próximo");
+        assert.strictEqual(editor.getValue(), "⟦b⟧rave⟦/b⟧ forward");
     });
 
     it("does not format a tag line or logic token", async function () {
@@ -309,7 +309,7 @@ describe("rich text formatting in the Ink editor", function () {
     });
 
     it("keeps choices plain: no formatting on any kind of choice line", async function () {
-        const lines = ["* escolha [texto] resposta", "+ escolha fixa [texto]", "* * escolha aninhada", "   + recuada [texto]"];
+        const lines = ["* choice [words] response", "+ choice fixa [words]", "* * choice aninhada", "   + indented [words]"];
         for( const line of lines ) {
             await setText(line);
             editor.selection.setRange(new Range(0, 0, 0, line.length));
@@ -318,22 +318,22 @@ describe("rich text formatting in the Ink editor", function () {
             assert.strictEqual(editor.getValue(), line, line);
         }
         // Without a selection nothing is left pending either
-        await setText("* escolha");
+        await setText("* choice");
         editor.selection.moveCursorTo(0, 9);
         editor.execCommand("toggleRichTextBold");
         editor.insert(" x");
         await tick();
-        assert.strictEqual(editor.getValue(), "* escolha x");
+        assert.strictEqual(editor.getValue(), "* choice x");
     });
 
     it("leaves markers already written in a choice visible, so the writer can remove them", async function () {
-        await setText("* ⟦b⟧Abrir⟦/b⟧ a porta [⟦i⟧ou não⟦/i⟧]");
-        assert.strictEqual(editor.session.getDisplayLine(0), "* ⟦b⟧Abrir⟦/b⟧ a porta [⟦i⟧ou não⟦/i⟧]");
+        await setText("* ⟦b⟧Open⟦/b⟧ the door [⟦i⟧or not⟦/i⟧]");
+        assert.strictEqual(editor.session.getDisplayLine(0), "* ⟦b⟧Open⟦/b⟧ the door [⟦i⟧or not⟦/i⟧]");
         assert.strictEqual(editor.session.getAllFolds().length, 0);
     });
 
     it("keeps gathers plain too: only the plain story text is formatted", async function () {
-        for( const line of ["- Texto do gather", "- (rotulo) texto", "   - - nested gather"] ) {
+        for( const line of ["- Gather text", "- (label) words", "   - - nested gather"] ) {
             await setText(line);
             editor.selection.setRange(new Range(0, 0, 0, line.length));
             editor.execCommand("toggleRichTextBold");
@@ -341,49 +341,49 @@ describe("rich text formatting in the Ink editor", function () {
             assert.strictEqual(editor.getValue(), line, line);
         }
         // A divert starts with "-" but it is not a gather; it is not story text either
-        await setText("-> fim");
+        await setText("-> end");
         editor.selection.setRange(new Range(0, 0, 0, 6));
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "-> fim");
-        await setText("Texto normal -> fim");
+        assert.strictEqual(editor.getValue(), "-> end");
+        await setText("Normal text -> end");
         editor.selection.setRange(new Range(0, 0, 0, 5));
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "⟦b⟧Texto⟦/b⟧ normal -> fim");
+        assert.strictEqual(editor.getValue(), "⟦b⟧Norma⟦/b⟧l text -> end");
     });
 
     it("keeps the selection on the same text after formatting, so bold and italic can be combined", async function () {
-        await setText("A maré subiu");
+        await setText("A tide rises");
         editor.selection.setRange(new Range(0, 2, 0, 6));
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "A ⟦b⟧maré⟦/b⟧ subiu");
-        assert.strictEqual(editor.getSelectedText(), "maré");
+        assert.strictEqual(editor.getValue(), "A ⟦b⟧tide⟦/b⟧ rises");
+        assert.strictEqual(editor.getSelectedText(), "tide");
         editor.execCommand("toggleRichTextItalic");
         await tick();
-        assert.strictEqual(editor.getValue(), "A ⟦b⟧⟦i⟧maré⟦/i⟧⟦/b⟧ subiu");
-        assert.strictEqual(editor.getSelectedText(), "maré");
+        assert.strictEqual(editor.getValue(), "A ⟦b⟧⟦i⟧tide⟦/i⟧⟦/b⟧ rises");
+        assert.strictEqual(editor.getSelectedText(), "tide");
         editor.execCommand("toggleRichTextBold");
         await tick();
-        assert.strictEqual(editor.getValue(), "A ⟦i⟧maré⟦/i⟧ subiu");
-        assert.strictEqual(editor.getSelectedText(), "maré");
+        assert.strictEqual(editor.getValue(), "A ⟦i⟧tide⟦/i⟧ rises");
+        assert.strictEqual(editor.getSelectedText(), "tide");
     });
 
     it("keeps a selection that covers several lines", async function () {
-        await setText("Primeira linha\nSegunda linha");
+        await setText("Original line\nAnother line");
         editor.selection.setRange(new Range(0, 0, 1, 7));
         editor.execCommand("toggleRichTextItalic");
         await tick();
-        assert.strictEqual(editor.getValue(), "⟦i⟧Primeira linha⟦/i⟧\n⟦i⟧Segunda⟦/i⟧ linha");
-        // The visible text stays selected, from its first letter to the end of "Segunda"
+        assert.strictEqual(editor.getValue(), "⟦i⟧Original line⟦/i⟧\n⟦i⟧Another⟦/i⟧ line");
+        // The visible text stays selected, from its first letter to the end of "Another"
         const kept = editor.getSelectionRange();
         assert.deepStrictEqual([kept.start.row, kept.start.column, kept.end.row, kept.end.column], [0, 3, 1, 10]);
     });
 
     it("tells the toolbar what the selection allows and what it already has", async function () {
         const state = () => richText.selectionState(editor);
-        await setText("A maré subiu\n* escolha\n#tag: x\n- gather");
+        await setText("A tide rises\n* choice\n#tag: x\n- gather");
         assert.deepStrictEqual(state(), { enabled: false, bold: false, italic: false }, "empty selection");
         editor.selection.setRange(new Range(0, 2, 0, 6));
         assert.deepStrictEqual(state(), { enabled: true, bold: false, italic: false });
@@ -408,14 +408,14 @@ describe("rich text formatting in the Ink editor", function () {
     it("reapplies marker folds when a story session is loaded", async function () {
         const EditSession = window.ace.require("ace/edit_session").EditSession;
         const loadedSession = new EditSession(
-            "Texto⟦b⟧⟦i⟧⟦/i⟧⟦/b⟧ ⟦b⟧novo⟦/b⟧⟦b⟧⟦/b⟧"
+            "Words⟦b⟧⟦i⟧⟦/i⟧⟦/b⟧ ⟦b⟧new⟦/b⟧⟦b⟧⟦/b⟧"
         );
         loadedSession.setMode(new window.exports.InkMode());
         editor.setSession(loadedSession);
         await tick();
-        assert.strictEqual(editor.session.getDisplayLine(0), "Texto novo");
+        assert.strictEqual(editor.session.getDisplayLine(0), "Words new");
         assert.strictEqual(editor.session.getAllFolds().length, 2);
-        assert.strictEqual(editor.getValue(), "Texto ⟦b⟧novo⟦/b⟧");
+        assert.strictEqual(editor.getValue(), "Words ⟦b⟧new⟦/b⟧");
         editor.setSession(primarySession);
         await tick();
     });

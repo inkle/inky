@@ -73,6 +73,12 @@
 
     <section>
         <h2>Story information</h2>
+        <div class="row range-row"><label for="story-title-size">Size</label>
+            <div class="range-control">
+                <input type="range" id="story-title-size" min="16" max="100" step="1">
+                <input type="number" id="story-title-size-number" min="16" max="100" step="1" aria-label="Title screen font size">
+                <span class="unit">px</span>
+            </div></div>
         <div class="row"><label for="story-title">Title</label>
             <input type="text" id="story-title" placeholder="add a title">
             <button type="button" class="clear-text-button" id="clear-story-title" aria-label="Clear title" title="Clear title">×</button></div>
@@ -80,13 +86,11 @@
             <input type="text" id="story-author" placeholder="author name">
             <button type="button" class="clear-text-button" id="clear-story-author" aria-label="Clear author" title="Clear author">×</button></div>
         <div class="row"><label for="story-cover">Cover</label>
-            <input type="text" id="story-cover" placeholder="images/cover.jpg" spellcheck="false">
-            <button type="button" class="text-button" id="choose-story-cover" title="Choose an image; a picture from outside the project is copied into its images folder">Choose…</button>
-            <button type="button" class="clear-text-button" id="clear-story-cover" aria-label="Clear cover" title="Clear cover">×</button>
-            <div class="cover-thumb" id="story-cover-thumb" data-state="empty" title="How the cover fills the title screen">
-                <img class="cover-thumb-image" id="story-cover-thumb-image" alt="">
-                <span class="cover-thumb-message" id="story-cover-thumb-note">No cover yet</span>
-            </div></div>
+            <div class="cover-input-field">
+                <input type="text" id="story-cover" placeholder="image/cover.jpg" spellcheck="false">
+                <button type="button" class="text-button" id="choose-story-cover" title="Choose an image; a picture from outside the project is copied into its image folder">Choose…</button>
+            </div>
+            <button type="button" class="clear-text-button" id="clear-story-cover" aria-label="Clear cover" title="Clear cover">×</button></div>
     </section>
 
     <section>
@@ -156,7 +160,7 @@
 
     <section>
         <h2>Exported page</h2>
-        <div class="row"><label class="inline"><input type="checkbox" id="controls-show"> Show the restart, save, load and theme buttons</label></div>
+        <div class="row"><label class="inline"><input type="checkbox" id="controls-show"> Show the restart and save buttons</label></div>
     </section>
 
     </main>

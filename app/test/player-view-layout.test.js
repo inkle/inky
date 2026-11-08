@@ -25,6 +25,7 @@ describe("preview page layout", function () {
             playerView.setAnimationEnabled(false);
             playerView.addTextSection("First line");
             playerView.addTextSection("Second line");
+            playerView.addTags([]);
 
             const paragraphs = document.querySelectorAll(".innerText.active p.storyText");
             assert.strictEqual(paragraphs.length, 2);
@@ -346,6 +347,65 @@ describe("preview page layout", function () {
     });
 
     describe("story pictures", function () {
+        it("places #bg behind the scene image and clears it when the next scene starts", function () {
+            const dom = new JSDOM(
+                '<div id="player"><div class="scrollContainer">' +
+                '<div class="innerText active"></div></div></div>'
+            );
+            const previousWindow = global.window;
+            const previousDocument = global.document;
+            const previousDOMParser = global.DOMParser;
+            const previousNodeFilter = global.NodeFilter;
+            const playerViewPath = require.resolve("../renderer/playerView.js");
+            const jqueryPath = require.resolve("../renderer/jquery-2.2.3.min.js");
+            global.window = dom.window;
+            global.document = dom.window.document;
+            global.DOMParser = dom.window.DOMParser;
+            global.NodeFilter = dom.window.NodeFilter;
+            delete require.cache[jqueryPath];
+            delete require.cache[playerViewPath];
+
+            try {
+                const playerView = require("../renderer/playerView.js").PlayerView;
+                playerView.setAnimationEnabled(false);
+                playerView.setImageResolver(value => ({
+                    "images/forest-bg.jpg": "file:///story/forest-bg.jpg",
+                    "images/forest-scene.jpg": "file:///story/forest-scene.jpg"
+                })[value] || null);
+                document.getElementById("player").dataset.titleStarted = "1";
+                playerView.addTextSection("The forest opens before you.");
+                playerView.addTags(["bg: images/forest-bg.jpg", "image: images/forest-scene.jpg"]);
+
+                const frame = document.querySelector(".innerText.active");
+                const visual = frame.querySelector(".story-visual");
+                assert.strictEqual(frame.classList.contains("has-background"), true);
+                assert.match(frame.style.backgroundImage, /forest-bg\.jpg/);
+                assert.strictEqual(visual.hidden, false);
+                assert.strictEqual(visual.querySelector("img").getAttribute("src"), "file:///story/forest-scene.jpg");
+                assert.strictEqual(frame.querySelector(".story-passage p.tags"), null, "the #bg tag is not shown to the reader");
+
+                playerView.addChoice({ choice: { text: "Continue", tags: [] } }, () => {});
+                frame.querySelector(".choice-button").click();
+
+                assert.strictEqual(frame.classList.contains("has-background"), false);
+                assert.strictEqual(frame.style.backgroundImage, "");
+                assert.strictEqual(visual.hidden, true);
+                assert.strictEqual(visual.querySelector("img"), null);
+            } finally {
+                delete require.cache[playerViewPath];
+                delete require.cache[jqueryPath];
+                if( previousWindow === undefined ) delete global.window;
+                else global.window = previousWindow;
+                if( previousDocument === undefined ) delete global.document;
+                else global.document = previousDocument;
+                if( previousDOMParser === undefined ) delete global.DOMParser;
+                else global.DOMParser = previousDOMParser;
+                if( previousNodeFilter === undefined ) delete global.NodeFilter;
+                else global.NodeFilter = previousNodeFilter;
+                dom.window.close();
+            }
+        });
+
         it("puts the first picture of a turn in the frame band and keeps later ones in the text", function () {
             const dom = new JSDOM(
                 '<div id="player"><div class="scrollContainer">' +
@@ -622,6 +682,7 @@ describe("preview page layout", function () {
                 // The compiler prepares the new turn in the hidden buffer, then asks for it.
                 playerView.prepareForNewPlaythrough("session-1");
                 playerView.addTextSection("First line");
+                playerView.addTags([]);
                 playerView.showSessionView("session-1");
 
                 const activeFrame = document.querySelector(".innerText.active");
@@ -705,16 +766,14 @@ describe("preview page layout", function () {
     describe("scene title placement", function () {
         const stylesheet = (file) => fs.readFileSync(path.join(__dirname, "..", file), "utf8");
 
-        // A short turn under a picture is centred in the white space. A scene title is the
-        // heading of the beat, so it sits right under the picture at a fixed 15px gap.
-        it("keeps a titled scene close to the picture above it, in both", function () {
+        it("keeps a scene close to the picture above it, in both", function () {
             assert.match(
                 stylesheet("renderer/gameChrome.css"),
-                /#main #player \.innerText\.has-visual \.story-passage:has\(> \.scene-title\) \{\s*padding-top: 15px;\s*justify-content: flex-start;/
+                /#main #player \.innerText\.has-visual \.story-passage \{\s*padding-top: 15px;\s*justify-content: flex-start;/
             );
             assert.match(
                 stylesheet("export-for-web-template/style.css"),
-                /\.container\.has-visual \.story-passage:has\(> \.scene-title\) \{\s*padding-top: 15px;\s*justify-content: flex-start;/
+                /\.container\.has-visual \.story-passage \{\s*padding-top: 15px;\s*justify-content: flex-start;/
             );
         });
 
@@ -755,11 +814,11 @@ describe("preview page layout", function () {
         it("keeps the same ceiling on the choices footer in the Preview and the export", function () {
             assert.match(
                 stylesheet("renderer/gameChrome.css"),
-                /#main #player \.story-choices \{[^}]*flex: 0 0 auto;\s*max-height: 44%;/
+                /#main #player \.story-choices \{[^}]*flex: 0 0 auto;\s*max-height: 52%;/
             );
             assert.match(
                 stylesheet("export-for-web-template/style.css"),
-                /\.story-choices \{[^}]*flex: 0 0 auto;\s*max-height: 44%;/
+                /\.story-choices \{[^}]*flex: 0 0 auto;\s*max-height: 52%;/
             );
         });
     });

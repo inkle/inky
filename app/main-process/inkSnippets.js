@@ -295,19 +295,24 @@ exports.snippets = [
         snippets: [
             {
                 name: i18n._('Crime Scene (from Writing with Ink)'),
-                ink: loadLongerSnippet("murder_scene.ink")
+                originalStory: "crime-scene"
             },
             {
                 name: i18n._('Swindlestones (from Sorcery!)'),
-                ink: loadLongerSnippet("swindlestones.ink")
+                originalStory: "swindlestones"
             },  
             {
                 name: i18n._('Pontoon Game (from Overboard!)'),
-                ink: loadLongerSnippet("pontoon_example.ink")
+                originalStory: "pontoon-game"
             },
             {
                 name: i18n._('The Intercept'),
-                ink: loadLongerSnippet("theintercept.ink")
+                originalStory: "the-intercept"
+            },
+            {separator: true},
+            {
+                name: "Before Dawn",
+                projectTemplate: "before-dawn"
             }
         ]
     }

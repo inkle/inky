@@ -2,6 +2,7 @@ const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
 const { JSDOM } = require("jsdom");
+const { loadExportHelpers } = require("./helpers/export-player.js");
 
 const template = fs.readFileSync(
     path.join(__dirname, "../export-for-web-template/main.js"),
@@ -17,6 +18,7 @@ function makeStory(turns) {
         state: { toJson: () => "{}", LoadJson: () => {} },
         currentTags: [],
         currentChoices: turn().choices,
+        ResetState() { current = 0; },
         get canContinue() { return turn().lines.length > 0; },
         Continue() {
             const line = turn().lines.shift();
@@ -69,6 +71,7 @@ function render(story, geometry) {
     window.storyContent = {};
 
     try {
+        loadExportHelpers(window);
         window.eval(template);
         return {
             window,
@@ -103,9 +106,11 @@ describe("export story history", function () {
             clickChoice(storyView);
 
             assert.deepStrictEqual(paragraphs(storyView), ["The tide rises."]);
-            assert.strictEqual(storyView.querySelectorAll(".choice").length, 0);
+            assert.strictEqual(storyView.querySelectorAll(".story-choices .choice").length, 1);
+            assert.strictEqual(storyView.querySelector(".story-choices .choice button").textContent, "Play Again");
             assert.strictEqual(storyView.querySelector("hr"), null);
-            assert.strictEqual(passage.lastElementChild.textContent, "The tide rises.");
+            assert.strictEqual(passage.querySelector("p:not(.choice):not(.tags)").textContent, "The tide rises.");
+            assert.strictEqual(passage.querySelector(".story-ending").textContent, "The End");
         } finally {
             dom.window.close();
         }
@@ -129,9 +134,10 @@ describe("export choices footer", function () {
             assert.strictEqual(storyView.classList.contains("has-choices"), true);
 
             storyView.querySelector(".choice button").click();
-            assert.strictEqual(footer.hidden, true);
-            assert.strictEqual(footer.querySelectorAll(".choice").length, 0);
-            assert.strictEqual(storyView.classList.contains("has-choices"), false);
+            assert.strictEqual(footer.hidden, false);
+            assert.strictEqual(footer.querySelectorAll(".choice").length, 1);
+            assert.strictEqual(footer.querySelector(".choice button").textContent, "Play Again");
+            assert.strictEqual(storyView.classList.contains("has-choices"), true);
         } finally {
             dom.window.close();
         }

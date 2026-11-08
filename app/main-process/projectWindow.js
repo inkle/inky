@@ -1,6 +1,7 @@
 const electron = require('electron');
 const ipc = electron.ipcMain;
 const dialog = electron.dialog;
+const inkyFileDialog = require("./inkyFileDialog.js");
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 const fs = require("fs");
@@ -290,26 +291,46 @@ function addRecentFile(filePath) {
     }
 }
 
+// Opening a GTK file chooser must never block the Electron main process.
+// The previous synchronous spawnSync() call prevented X11/GTK from processing
+// its parent window while the chooser was open. Use the same non-blocking path
+// that already works for Export for Web. Direct-path opens remain synchronous.
+let openMainInkDialogPending = false;
 ProjectWindow.open = function(filePath) {
-    if( !filePath ) {
-        var multiSelectPaths = dialog.showOpenDialogSync({
+    if (!filePath) {
+        // Prevent two overlapping dialogs if File > Open is triggered twice.
+        if (openMainInkDialogPending) return Promise.resolve();
+        const openOptions = {
             title: i18n._("Open main ink file"),
             properties: ['openFile'],
             filters: [
                 { name: i18n._('Ink files'), extensions: ['ink'] }
             ]
-        });
-        if( multiSelectPaths && multiSelectPaths.length > 0 )
-            filePath = multiSelectPaths[0];
+        };
+        const focusedProject = ProjectWindow.focused();
+        const parent = (focusedProject && focusedProject.browserWindow) ||
+            windows.map(project => project.browserWindow).find(win =>
+                win && !win.isDestroyed() && win.isVisible());
+        openMainInkDialogPending = true;
+        return inkyFileDialog.showOpenDialog(parent, openOptions)
+            .then(result => {
+                if (result && !result.canceled && Array.isArray(result.filePaths) &&
+                    typeof result.filePaths[0] === "string" && result.filePaths[0]) {
+                    return ProjectWindow.open(result.filePaths[0]);
+                }
+                return undefined;
+            })
+            .catch(error => {
+                console.error("Could not open main Ink file:", error);
+                return undefined;
+            })
+            .finally(() => { openMainInkDialogPending = false; });
     }
 
-    // TODO: Could check whether the filepath is relative to any of our
-    // existing open projects, and switch to that window?
-    console.log("Testing!")
-    if( filePath) {
-        addRecentFile(filePath);
-        return new ProjectWindow(filePath);
-    }
+    // Direct paths from Recent Files, the CLI and drag-and-drop still open
+    // without waiting on a dialog or changing their return behavior.
+    addRecentFile(filePath);
+    return new ProjectWindow(filePath);
 }
 
 ProjectWindow.getViewSettings = function() {

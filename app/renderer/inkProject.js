@@ -51,8 +51,8 @@ function InkProject(mainInkFilePath) {
         // The starter story (see InkFile) ships with its own title and author.
         styleFile.setValue(GameStyle.templateYaml() + [
             "titles:",
-            '  story: "Glass Tide"',
-            '  author: "Helena Marques"',
+            '  story: "The Borrowed Star"',
+            '  author: "Elias Wren"',
             ""
         ].join("\n"));
     } else if( this.mainInk.projectDir ) {
@@ -603,6 +603,7 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
         inkRuntimePath: path.join(__dirname, "../node_modules/inkjs/dist/ink.js"),
         javascriptFilename: this.jsFilename(),
         storyTitle: storyTitle,
+        storyTitleSize: gameStyle.style.titles.storySize,
         storyAuthor: gameStyle.style.titles.author,
         projectDirectory: this.mainInk.projectDir || null,
         coverFilePath: coverFilePath,
@@ -612,6 +613,8 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
             music: gameStyle.style.audio.music,
             sfx: gameStyle.style.audio.sfx
         },
+        presentation: gameStyle.style.presentation,
+        ending: gameStyle.style.ending,
         themeToggle: !!gameStyle.style.alternate,
         themeInitial: gameStyle.style.theme,
         themeAlternate: gameStyle.style.alternate ? gameStyle.style.alternate.theme : "",
@@ -620,13 +623,22 @@ InkProject.prototype.buildForWeb = function(jsonFilePath, targetDirectory) {
 
     buildWebExport(options).then(result => {
         console.log("Web export completed:", result.targetDirectory, result.files);
-        let message = `Web export completed successfully.\n\nOpen this file in your browser:\n${path.join(result.targetDirectory, "index.html")}`;
+        let message = `Open this file in your browser:\n${path.join(result.targetDirectory, "index.html")}`;
         const audio = result.audio || { copied: [], missing: [], invalid: [] };
         if( audio.copied.length ) message += `\n\nSound files copied (${audio.copied.length}): ${audio.copied.join(", ")}`;
-        if( audio.missing.length ) message += `\n\nNOT FOUND in the "audio" or "audios" folder or next to your main story, so the game will be silent there: ${audio.missing.join(", ")}`;
-        if( audio.invalid.length ) message += `\n\nNot valid sound file names (use a plain file name such as forest.mp3): ${audio.invalid.join(", ")}`;
+        if( audio.missing.length ) message += `\n\nNOT FOUND in audio/music, audio/sfx, audio, or at the main story folder. Use an explicit project-relative path for custom folders: ${audio.missing.join(", ")}`;
+        if( audio.ambiguous && audio.ambiguous.length ) message += `\n\nAMBIGUOUS audio filenames. Use an explicit path to select one: ${audio.ambiguous.map(item => item.file + " (" + item.candidates.join(" or ") + ")").join(", ")}`;
+        if( audio.invalid.length ) message += `\n\nNot valid sound file names (use a supported audio file such as forest.mp3): ${audio.invalid.join(", ")}`;
+        const images = result.images || { missing: [], invalid: [], ambiguous: [] };
+        if( images.missing.length ) message += `\n\nIMAGE FILES NOT FOUND. Check image/, image/background/, or the explicit path in the tag: ${images.missing.join(", ")}`;
+        if( images.ambiguous && images.ambiguous.length ) message += `\n\nAMBIGUOUS image filenames. Use an explicit path to select one: ${images.ambiguous.map(item => item.reference + " (" + item.candidates.join(" or ") + ")").join(", ")}`;
+        if( images.invalid.length ) message += `\n\nINVALID image references: ${images.invalid.join(", ")}`;
         if( coverReference && !coverFilePath ) message += `\n\nThe cover image "${coverReference}" was not found in the project folder, so the title screen has no cover.`;
-        alert(message);
+        return ipcRenderer.invoke("show-export-success", message).catch(dialogError => {
+            console.error("Could not show export success dialog", dialogError);
+            // Only fall back to the original alert when the native dialog is unavailable.
+            alert(`Web export completed successfully.\n\n${message}`);
+        });
     }).catch(error => {
         console.error("Web export failed", error);
         alert(`Could not export for web.\n\n${error.message || error}`);

@@ -79,7 +79,11 @@ function refresh() {
             } else {
                 return {
                     label: i18n._(snippet.name),
-                    click: (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, snippet.ink)
+                    click: (item, focussedWindow) => {
+                        if (snippet.projectTemplate) callbacks.openShowcaseProject(focussedWindow);
+                        else if (snippet.originalStory) callbacks.openOriginalStoryProject(focussedWindow, snippet.originalStory);
+                        else callbacks.insertSnippet(focussedWindow, snippet.ink);
+                    }
                 }
             }
             

@@ -68,8 +68,8 @@ describe("visual settings form", function () {
             );
             assert.strictEqual(window.document.querySelectorAll("#settings-scroll .note").length, 0);
             assert.deepStrictEqual(
-                Array.from(window.document.querySelectorAll('input[name="theme"]'), radio => radio.value),
-                ["light", "dark"]
+                Array.from(window.document.querySelectorAll('input[name="theme-mode"]'), radio => radio.value),
+                ["single", "dual"]
             );
             assert.strictEqual(window.document.getElementById("story-title").placeholder, "add a title");
             assert.strictEqual(window.document.getElementById("story-author").placeholder, "author name");
@@ -77,7 +77,7 @@ describe("visual settings form", function () {
             assert.strictEqual(window.document.querySelector("#line-height + #line-height-number + .unit").textContent, "×");
             assert.strictEqual(window.document.querySelector("#line-height").parentElement.querySelector(".unit").textContent, "×");
             const rangeInputs = Array.from(window.document.querySelectorAll('input[type="range"]'));
-            assert.strictEqual(rangeInputs.length, 7);
+            assert.strictEqual(rangeInputs.length, 8);
             rangeInputs.forEach(range => {
                 const number = window.document.getElementById(range.id + "-number");
                 assert.strictEqual(number.type, "number");
@@ -99,7 +99,8 @@ describe("visual settings form", function () {
                 "Atkinson Hyperlegible"
             );
             assert.strictEqual(window.document.getElementById("story-author").value, "A. Writer");
-            assert.strictEqual(window.document.getElementById("story-title-size"), null);
+            assert.strictEqual(window.document.getElementById("story-title-size").value, "56");
+            assert.strictEqual(window.document.getElementById("story-title-size-number").value, "56");
             assert.strictEqual(window.document.getElementById("author-title-size"), null);
             assert.strictEqual(window.document.getElementById("scene-title-size").value, "24");
             assert.strictEqual(window.document.getElementById("scene-title-size-number").value, "24");
@@ -252,11 +253,11 @@ describe("visual settings form", function () {
             const root = fs.mkdtempSync(path.join(os.tmpdir(), "inky-cover-settings-"));
             const outside = fs.mkdtempSync(path.join(os.tmpdir(), "inky-cover-outside-"));
             try {
-                fs.mkdirSync(path.join(root, "images"));
+                fs.mkdirSync(path.join(root, "image"));
                 const yamlPath = path.join(root, "game.yaml");
                 fs.writeFileSync(yamlPath, 'titles:\n  story: "O Farol"\n');
                 fs.writeFileSync(path.join(outside, "capa.jpg"), "jpg-bytes");
-                let picked = path.join(root, "images", "capa.png");
+                let picked = path.join(root, "image", "capa.png");
                 let confirmed = true;
                 const requests = [];
                 const window = openSettings("file:///gameSettings.html?path=" + encodeURIComponent(yamlPath), (channel, options) => {
@@ -271,28 +272,28 @@ describe("visual settings form", function () {
                     await new Promise(resolve => setImmediate(resolve));
                     assert.strictEqual(requests[0].defaultPath, root);
                     assert.strictEqual(requests[0].filters[0].extensions.join(","), "jpg,jpeg,png,webp,gif,svg");
-                    assert.strictEqual($("story-cover").value, "images/capa.png");
-                    assert.strictEqual(GameStyle.parseText(window.flushSettingsForAdvanced()).model.titles.cover, "images/capa.png");
-                    assert.match(fs.readFileSync(yamlPath, "utf8"), /cover: "images\/capa\.png"/);
+                    assert.strictEqual($("story-cover").value, "image/capa.png");
+                    assert.strictEqual(GameStyle.parseText(window.flushSettingsForAdvanced()).model.titles.cover, "image/capa.png");
+                    assert.match(fs.readFileSync(yamlPath, "utf8"), /cover: "image\/capa\.png"/);
 
                     // outside the project: copied into the project's images folder, not refused
                     picked = path.join(outside, "capa.jpg");
                     $("choose-story-cover").click();
                     await new Promise(resolve => setImmediate(resolve));
-                    assert.strictEqual($("story-cover").value, "images/capa.jpg");
-                    assert.strictEqual(fs.readFileSync(path.join(root, "images", "capa.jpg"), "utf8"), "jpg-bytes");
+                    assert.strictEqual($("story-cover").value, "image/capa.jpg");
+                    assert.strictEqual(fs.readFileSync(path.join(root, "image", "capa.jpg"), "utf8"), "jpg-bytes");
                     assert.strictEqual(window.alerted, undefined, "a picture from outside is imported, not refused");
 
                     // a name that already exists asks first; refusing keeps the current cover
                     confirmed = false;
                     $("choose-story-cover").click();
                     await new Promise(resolve => setImmediate(resolve));
-                    assert.match(window.confirmed, /images\/capa\.jpg already exists/);
-                    assert.strictEqual($("story-cover").value, "images/capa.jpg");
+                    assert.match(window.confirmed, /image\/capa\.jpg already exists/);
+                    assert.strictEqual($("story-cover").value, "image/capa.jpg");
                     confirmed = true;
                     $("choose-story-cover").click();
                     await new Promise(resolve => setImmediate(resolve));
-                    assert.strictEqual(fs.readFileSync(path.join(root, "images", "capa.jpg"), "utf8"), "jpg-bytes");
+                    assert.strictEqual(fs.readFileSync(path.join(root, "image", "capa.jpg"), "utf8"), "jpg-bytes");
 
                     // not a picture at all: refused, with the reason
                     fs.writeFileSync(path.join(outside, "notes.txt"), "x");
@@ -300,8 +301,8 @@ describe("visual settings form", function () {
                     $("choose-story-cover").click();
                     await new Promise(resolve => setImmediate(resolve));
                     assert.match(window.alerted, /cover image/);
-                    assert.strictEqual(fs.existsSync(path.join(root, "images", "notes.txt")), false);
-                    assert.strictEqual($("story-cover").value, "images/capa.jpg");
+                    assert.strictEqual(fs.existsSync(path.join(root, "image", "notes.txt")), false);
+                    assert.strictEqual($("story-cover").value, "image/capa.jpg");
                 } finally {
                     window.close();
                 }
@@ -311,41 +312,27 @@ describe("visual settings form", function () {
             }
         });
 
-        it("shows the cover cropped to the 9:16 frame, next to the field", async function () {
+        it("keeps the cover in the field without a thumbnail", async function () {
             const root = fs.mkdtempSync(path.join(os.tmpdir(), "inky-cover-thumb-"));
             try {
-                fs.mkdirSync(path.join(root, "images"));
-                fs.writeFileSync(path.join(root, "images", "capa.png"), "png");
+                fs.mkdirSync(path.join(root, "image"));
+                fs.writeFileSync(path.join(root, "image", "capa.png"), "png");
                 const yamlPath = path.join(root, "game.yaml");
-                fs.writeFileSync(yamlPath, 'titles:\n  story: "O Farol"\n  cover: "images/capa.png"\n');
+                fs.writeFileSync(yamlPath, 'titles:\n  story: "O Farol"\n  cover: "image/capa.png"\n');
                 const window = openSettings("file:///gameSettings.html?path=" + encodeURIComponent(yamlPath), () => Promise.resolve([]));
                 const $ = id => window.document.getElementById(id);
-                const thumb = () => $("story-cover-thumb");
                 const settingsCss = fs.readFileSync(path.join(__dirname, "../renderer/gameSettings/gameSettings.css"), "utf8");
                 try {
-                    assert.match(settingsCss, /\.cover-thumb \{[^}]*aspect-ratio: 9 \/ 16;/);
-                    assert.strictEqual(thumb().dataset.state, "loading");
-                    assert.strictEqual(thumb().querySelector(".cover-thumb-image").getAttribute("src"),
-                        require("url").pathToFileURL(path.join(root, "images", "capa.png")).href);
-
-                    // a cover that is gone shows an empty state, never an error
-                    $("story-cover").value = "images/outra.png";
+                    assert.doesNotMatch(settingsCss, /\.cover-thumb/);
+                    assert.strictEqual($("story-cover-thumb"), null);
+                    assert.strictEqual($("story-cover").value, "image/capa.png");
+                    $("story-cover").value = "image/outra.png";
                     $("story-cover").dispatchEvent(new window.Event("change", { bubbles: true }));
-                    assert.strictEqual(thumb().dataset.state, "empty");
-                    assert.strictEqual($("story-cover-thumb-note").textContent, "The cover image is not in the project folder");
-                    assert.strictEqual(thumb().querySelector(".cover-thumb-image").getAttribute("src"), null);
-
-                    // and back to a real cover
-                    $("story-cover").value = "images/capa.png";
+                    assert.strictEqual(GameStyle.parseText(window.flushSettingsForAdvanced()).model.titles.cover, "image/outra.png");
+                    $("story-cover").value = "image/capa.png";
                     $("story-cover").dispatchEvent(new window.Event("change", { bubbles: true }));
-                    assert.strictEqual(thumb().dataset.state, "loading");
-
-                    // the thumbnail only reads as ready once the picture is there
-                    $("story-cover-thumb-image").dispatchEvent(new window.Event("load"));
-                    assert.strictEqual(thumb().dataset.state, "ready");
-                    $("story-cover-thumb-image").dispatchEvent(new window.Event("error"));
-                    assert.strictEqual(thumb().dataset.state, "empty");
-                    assert.strictEqual($("story-cover-thumb-note").textContent, "The cover image could not be read");
+                    assert.strictEqual(GameStyle.parseText(window.flushSettingsForAdvanced()).model.titles.cover, "image/capa.png");
+                    await new Promise(resolve => setImmediate(resolve));
                 } finally {
                     window.close();
                 }

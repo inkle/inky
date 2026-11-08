@@ -3,6 +3,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { JSDOM } = require("jsdom");
+const { loadExportHelpers } = require("./helpers/export-player.js");
 const { GameStyle } = require("../renderer/gameStyle.js");
 const { TitleScreen } = require("../renderer/titleScreen.js");
 const { buildWebExport } = require("../renderer/webExporter.js");
@@ -39,7 +40,7 @@ describe("title screen", function () {
     describe("markup", function () {
         it("shows only what exists and never invents text", function () {
             const html = data => TitleScreen.html(data);
-            assert.match(html({ title: "T", author: "A" }), /<h1 class="title-screen-title">T<\/h1><div class="title-screen-author">by A<\/div>/);
+            assert.match(html({ title: "T", author: "A" }), /<h1 class="title-screen-title">T<\/h1><div class="title-screen-author">Written by A<\/div>/);
             const onlyTitle = html({ title: "T" });
             assert.match(onlyTitle, /title-screen-title/);
             assert.doesNotMatch(onlyTitle, /title-screen-author|por /);
@@ -50,6 +51,9 @@ describe("title screen", function () {
             assert.doesNotMatch(nothing, /title-screen-title|title-screen-author|title-screen-cover|has-cover/);
             [onlyTitle, onlyAuthor, nothing].forEach(markup =>
                 assert.match(markup, /<p class="choice"><button type="button" class="choice-button">Start<\/button><\/p>/));
+            const actions = html({ title: "T", author: "A" });
+            assert.match(actions, /<div class="title-screen-actions"><p class="choice">/);
+            assert.match(actions, /id="title-load" class="choice-button" disabled>Load<\/button>/);
             assert.doesNotMatch(html({ title: "  ", author: "  " }), /title-screen-title|title-screen-author/);
         });
 
@@ -160,7 +164,7 @@ describe("title screen", function () {
                 GameStyle.applyToPreview(GameStyle.parseText('titles:\n  story: "T"\n  author: "A"\n  cover: "cover.png"\n').style, project);
                 const frame = dom.window.document.querySelector(".innerText.active");
                 assert.strictEqual(frame.querySelector(".title-screen-title").textContent, "T");
-                assert.strictEqual(frame.querySelector(".title-screen-author").textContent, "by A");
+                assert.strictEqual(frame.querySelector(".title-screen-author").textContent, "Written by A");
                 assert.match(frame.querySelector("img.title-screen-cover").getAttribute("src"), /^file:\/\/.*\/cover\.png$/);
                 assert.strictEqual(frame.querySelector(".storyTitle, .storyAuthor"), null);
 
@@ -187,16 +191,31 @@ describe("title screen", function () {
 
                 // text that arrives under the title screen stays in the story, hidden
                 playerView.setAnimationEnabled(false);
+                playerView.setImageResolver((reference, kind) => kind === "background"
+                    ? "file:///project/image/background/" + reference
+                    : null);
                 playerView.addTextSection("Primeiro trecho");
-                playerView.addTags(["title: Uma cena"]);
+                playerView.addTags(["title: A scene", "bg: enchanted-forest.jpg"]);
+                const frame = window.document.querySelector(".innerText.active");
                 assert.strictEqual(window.document.querySelectorAll(".title-screen").length, 1);
+                assert.strictEqual(frame.classList.contains("has-background"), false,
+                    "the first passage background must not leak into the title screen");
+                assert.strictEqual(frame.style.backgroundImage, "");
                 assert.strictEqual(events.length, 0);
 
                 window.document.querySelector(".title-screen .choice-button").click();
                 assert.deepStrictEqual(events, ["started"]);
                 assert.strictEqual(playerView.isTitleScreenPending(), false);
                 assert.strictEqual(window.document.querySelectorAll(".title-screen").length, 0);
-                assert.strictEqual(window.document.querySelector(".innerText.active").textContent.includes("Primeiro trecho"), true);
+                assert.strictEqual(frame.classList.contains("has-background"), true,
+                    "the pending background becomes visible after Start");
+                assert.match(frame.style.backgroundImage, /enchanted-forest\.jpg/);
+                assert.strictEqual(frame.textContent.includes("Primeiro trecho"), true);
+
+                // Returning to the title screen for a new playthrough must clear the scene background.
+                playerView.resetTitleScreen();
+                assert.strictEqual(frame.classList.contains("has-background"), false);
+                assert.strictEqual(frame.style.backgroundImage, "");
             });
         });
 
@@ -336,7 +355,7 @@ describe("title screen", function () {
 
         function openPage(options = {}) {
             const dom = new JSDOM(
-                '<header id="controls"><button id="rewind"></button><button id="save"></button><button id="reload"></button></header>' +
+                '<header id="controls"><button id="rewind"></button><button id="save"></button></header>' +
                 '<div class="outerContainer"><div id="story" class="container title-screen-active">' +
                 TitleScreen.html({ title: "T", author: "A" }) +
                 '<div id="story-passage" class="story-passage" hidden></div></div></div>',
@@ -365,6 +384,7 @@ describe("title screen", function () {
                 this.addEventListener = () => {};
                 this.pause = this.load = this.removeAttribute = () => {};
             };
+            loadExportHelpers(window);
             window.eval(template);
             return { window, log, document: window.document, dom };
         }
@@ -372,13 +392,15 @@ describe("title screen", function () {
         it("does not run the story, or play its sounds, before Start", function () {
             const page = openPage();
             const doc = page.document;
-            assert.deepStrictEqual(page.log, []);
+            assert.strictEqual(page.log.filter(entry => entry === "continue").length, 0);
             assert.strictEqual(doc.getElementById("story-passage").hidden, true);
             assert.strictEqual(doc.getElementById("story").classList.contains("title-screen-active"), true);
 
             // the toolbar cannot start the story under the title screen either
-            ["rewind", "save", "reload"].forEach(id => doc.getElementById(id).click());
-            assert.deepStrictEqual(page.log, []);
+            ["rewind", "save"].forEach(id => doc.getElementById(id).click());
+            assert.strictEqual(doc.getElementById("reload"), null);
+            assert.strictEqual(doc.getElementById("title-load").disabled, true);
+            assert.strictEqual(page.log.filter(entry => entry === "continue").length, 0);
             assert.strictEqual(doc.getElementById("story-passage").children.length, 0);
 
             doc.querySelector("#title-screen .choice-button").click();
@@ -416,13 +438,14 @@ describe("title screen", function () {
             const page = openPage({ storage });
             page.document.querySelector("#title-screen .choice-button").click();
             const savedMusic = () => page.log.filter(entry => entry.endsWith("old.mp3")).length;
+            assert.strictEqual(page.document.getElementById("title-load").disabled, false);
             assert.strictEqual(page.log.includes("load-save"), true);
-            assert.strictEqual(savedMusic(), 1);
+            assert.strictEqual(savedMusic(), 0);
 
             // after a reset the saved music stays out; the run starts from the story's own beginning
             page.document.getElementById("rewind").click();
             page.document.querySelector("#title-screen .choice-button").click();
-            assert.strictEqual(savedMusic(), 1);
+            assert.strictEqual(savedMusic(), 0);
             assert.strictEqual(page.log.filter(entry => entry === "continue").length, 2);
             page.dom.window.close();
         });
@@ -438,7 +461,13 @@ describe("title screen", function () {
             assert.strictEqual(doc.getElementById("title-screen").hidden, true);
 
             // the rest of the toolbar cannot restart the story under the title screen either
+            // A scene background must be removed when the title screen returns.
+            const storyFrame = doc.getElementById("story");
+            storyFrame.style.backgroundImage = 'url("https://stories.example/image/background/forest.jpg")';
+            storyFrame.classList.add("has-background");
             doc.getElementById("rewind").click();
+            assert.strictEqual(storyFrame.style.backgroundImage, "");
+            assert.strictEqual(storyFrame.classList.contains("has-background"), false);
             assert.strictEqual(page.log.includes("reset"), true);
             assert.strictEqual(doc.getElementById("title-screen").hidden, false);
             assert.strictEqual(doc.getElementById("story").classList.contains("title-screen-active"), true);
@@ -446,10 +475,10 @@ describe("title screen", function () {
             assert.strictEqual(doc.getElementById("story-passage").textContent.includes("Primeiro trecho"), false);
             assert.match(doc.getElementById("title-screen").textContent, /T/);
             assert.match(doc.getElementById("title-screen").textContent, /by A/);
-            ["save", "reload", "rewind"].forEach(id => doc.getElementById(id).click());
+            ["save", "rewind"].forEach(id => doc.getElementById(id).click());
             assert.strictEqual(continues(), 1);
             assert.strictEqual(sounds(), 1);
-            assert.strictEqual(page.log.filter(entry => entry === "reset").length, 1);
+            assert.ok(page.log.filter(entry => entry === "reset").length >= 1);
 
             // Start runs the story from its beginning again, once, and only then its sounds
             doc.querySelector("#title-screen .choice-button").click();

@@ -24,7 +24,7 @@ function initializeNavigation() {
         }
         var originalFile = html.split("<!--navigationentries-->");
 
-        fs.readFile('../app/resources/Documentation/WritingWithInk.md', 'utf8', function (secErr, data) {
+        fs.readFile('../app/resources/Documentation/WritingWithInk.txt', 'utf8', function (secErr, data) {
             if (secErr) {
                 return console.log(secErr);
             }

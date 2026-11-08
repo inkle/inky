@@ -32,12 +32,15 @@ describe("web export", function () {
 
             const outputFiles = fs.readdirSync(targetDirectory).sort();
             assert.deepStrictEqual(result.files.sort(), [
+                "choice-text.js",
+                "ending-marker.js",
                 "favicon.ico",
                 "index.html",
                 "ink.js",
                 "main.js",
                 "pager.js",
                 "richtext.js",
+                "screen-mode.js",
                 "story.js",
                 "style.css"
             ]);
@@ -54,6 +57,8 @@ describe("web export", function () {
             assert.ok(mainJs.includes("choiceTags.forEach(processAudioTag);"));
             const outputCss = fs.readFileSync(path.join(targetDirectory, "style.css"), "utf8");
             const outputHtml = fs.readFileSync(path.join(targetDirectory, "index.html"), "utf8");
+            assert.ok(outputHtml.includes('src="screen-mode.js"'));
+            assert.ok(fs.existsSync(path.join(targetDirectory, "screen-mode.js")));
             assert.match(
                 outputCss,
                 /--bg: #282828; --text: #faf1c6;/
@@ -72,11 +77,11 @@ describe("web export", function () {
             assert.match(outputCss, /--line-height: 1\.7;/);
             assert.doesNotMatch(outputCss, /body\.dark|\.dark\s/);
             assert.doesNotMatch(outputCss, /@import/);
-            assert.match(outputCss, /body \{\n    margin: 0;[\s\S]*?background: color-mix\(in srgb, var\(--bg, #ffffff\) 3%, #f5f3ef\);/);
+            assert.match(outputCss, /body \{\n    margin: 0;[\s\S]*?background: var\(--reader-outer-bg, #eeeeec\);/);
             assert.match(outputCss, /--frame-radius: clamp\(10px, 2vmin, 20px\)/);
-            assert.match(outputCss, /\.container \{[^}]*box-shadow: 0 18px 54px/);
+            assert.match(outputCss, /\.container \{[^}]*box-shadow:\s*0 26px 58px -13px var\(--reader-shadow-deep/);
             assert.match(outputCss, /\.story-visual \{[^}]*flex: 0 0 27\.169%;/);
-            assert.match(outputCss, /\.story-choices \{[^}]*flex: 0 0 auto;[^}]*max-height: 44%;/);
+            assert.match(outputCss, /\.story-choices \{[^}]*flex: 0 0 auto;[^}]*max-height: 52%;/);
             assert.match(outputCss, /\.container\.has-choices \.story-passage \{[\s\S]*?margin-bottom: 0;/);
             assert.match(outputCss, /\.scroll-cue/);
             assert.match(outputCss, /\.container p\.choice \{[^}]*border-bottom: 1px solid color-mix\(in srgb, var\(--text, #000000\) 14%/);
@@ -86,7 +91,7 @@ describe("web export", function () {
             assert.doesNotMatch(outputCss, /data-choices/);
             assert.match(outputCss, /\.container > p\.storyText \{ margin: 0; \}/);
             assert.match(outputCss, /\.container p \{[^}]*font-weight: normal;[^}]*line-height: var\(--line-height, 1\.7\);/);
-            assert.match(outputHtml, /<body data-story-format="vertical" data-audio="off" data-volume="37" data-master-volume="50" data-music-volume="11" data-sfx-volume="18" data-theme-toggle="off" data-theme-initial="light" data-theme-alternate="light">/);
+            assert.match(outputHtml, /<body data-story-format="vertical" data-presentation="traditional" data-ending-show="on" data-ending-text="The End" data-play-again-show="on" data-play-again-text="Play Again" data-audio="off" data-volume="37" data-master-volume="50" data-music-volume="11" data-sfx-volume="18" data-theme-toggle="off" data-theme-initial="light" data-theme-alternate="light">/);
             assert.doesNotMatch(outputHtml, /data-layout=/);
             assert.match(outputHtml, /id="menu-toggle" class="toolbar-icon-button" aria-label="Story menu" aria-expanded="false" aria-controls="story-menu"/);
             assert.match(outputHtml, /<div id="story-menu" class="toolbar-popover" hidden>/);
@@ -110,10 +115,10 @@ describe("web export", function () {
             );
             // The title and the author appear on the title screen only, not again in the play HUD
             assert.doesNotMatch(outputHtml, /story-identity/);
-            assert.strictEqual((outputHtml.match(/by A &lt;Writer&gt; &amp; Co/g) || []).length, 1);
+            assert.strictEqual((outputHtml.match(/Written by A &lt;Writer&gt; &amp; Co/g) || []).length, 1);
             assert.match(outputHtml, /<title>A Web Story<\/title>/);
             assert.doesNotMatch(outputHtml, /story-brand-title|story-brand-author|story-brand-copy/);
-            assert.match(outputHtml, /<div id="story" class="container title-screen-active">\s*<header id="controls" class="story-hud">[\s\S]*?<\/header>\s*<div class="title-screen" id="title-screen"><div class="title-screen-body"><h1 class="title-screen-title">A Web Story<\/h1><div class="title-screen-author">by A &lt;Writer&gt; &amp; Co<\/div><p class="choice"><button type="button" class="choice-button">Start<\/button><\/p><\/div><\/div>\s*<div id="story-visual"/);
+            assert.match(outputHtml, /<div id="story" class="container title-screen-active">\s*<header id="controls" class="story-hud">[\s\S]*?<\/header>\s*<div class="title-screen" id="title-screen"><div class="title-screen-body"><h1 class="title-screen-title">A Web Story<\/h1><div class="title-screen-author">Written by A &lt;Writer&gt; &amp; Co<\/div><div class="title-screen-actions"><p class="choice"><button type="button" class="choice-button">Start<\/button><\/p><p class="choice title-screen-load-choice"><button type="button" id="title-load" class="choice-button" disabled>Load<\/button><\/p><\/div><\/div><\/div>\s*<div id="story-visual"/);
             assert.doesNotMatch(outputHtml, /<div class="header"/);
             assert.doesNotMatch(
                 outputHtml,
@@ -143,8 +148,8 @@ describe("web export", function () {
 
             const html = fs.readFileSync(path.join(targetDirectory, "index.html"), "utf8");
             const css = fs.readFileSync(path.join(targetDirectory, "style.css"), "utf8");
-            assert.match(html, /<body data-story-format="vertical" data-audio="off" data-volume="50" data-master-volume="100" data-music-volume="100" data-sfx-volume="100" data-theme-toggle="off" data-theme-initial="light" data-theme-alternate="light">/);
-            assert.match(css, /\.container \{[^}]*border-radius: var\(--frame-radius\);[^}]*box-shadow: 0 18px 54px/);
+            assert.match(html, /<body data-story-format="vertical" data-presentation="traditional" data-ending-show="on" data-ending-text="The End" data-play-again-show="on" data-play-again-text="Play Again" data-audio="off" data-volume="50" data-master-volume="100" data-music-volume="100" data-sfx-volume="100" data-theme-toggle="off" data-theme-initial="light" data-theme-alternate="light">/);
+            assert.match(css, /\.container \{[^}]*border-radius: var\(--frame-radius\);[^}]*box-shadow:\s*0 26px 58px -13px var\(--reader-shadow-deep/);
             assert.match(css, /\.story-passage \{[^}]*overflow-y: auto;/);
             assert.match(css, /\.container p\.choice \{[^}]*border: 0;[^}]*background: transparent;/);
             assert.doesNotMatch(html, /data-choices|##CHOICE-STYLE##/);
@@ -294,7 +299,7 @@ describe("web export", function () {
         }
     });
 
-    it("exports standard-folder audio and rewrites explicit audio paths safely", async function () {
+    it("exports project audio and neutralizes paths outside the project", async function () {
         const root = fs.mkdtempSync(path.join(os.tmpdir(), "inky-web-audio-paths-"));
         const projectDirectory = path.join(root, "project");
         const targetDirectory = path.join(root, "web");
@@ -323,15 +328,16 @@ describe("web export", function () {
             });
             const exportedStory = JSON.parse(fs.readFileSync(path.join(targetDirectory, "story.js"), "utf8").replace(/^var storyContent = |;\s*$/g, ""));
             const musicPath = exportedStory.root[0][1].slice(1).replace(/^music: /, "");
-            const soundPath = exportedStory.root[0][4].slice(1).replace(/^sound: /, "");
+            const soundTag = exportedStory.root[0][4].slice(1);
             assert.strictEqual(musicPath, "custom/loop.mp3");
-            assert.match(soundPath, /^__external\/[a-f0-9]{12}-absolute\.mp3$/);
+            assert.strictEqual(soundTag, "sound:");
             assert.strictEqual(fs.readFileSync(path.join(targetDirectory, "audio", musicPath), "utf8"), "relative audio");
-            assert.strictEqual(fs.readFileSync(path.join(targetDirectory, "audio", soundPath), "utf8"), "absolute audio");
+            assert.ok(!result.files.some(file => file.includes("absolute.mp3")));
             const exportedMain = fs.readFileSync(path.join(targetDirectory, "main.js"), "utf8");
             assert.match(exportedMain, /parts\.map\(encodeURIComponent\)/);
             assert.ok(result.audio.copied.includes("custom/loop.mp3"));
-            assert.ok(result.audio.copied.includes(absoluteAudioPath));
+            assert.ok(result.audio.missing.includes(absoluteAudioPath));
+            assert.ok(!result.audio.copied.includes(absoluteAudioPath));
         } finally {
             fs.rmSync(root, { recursive: true, force: true });
         }

@@ -13,7 +13,7 @@
 
 </head>
 
-<body data-story-format="vertical" data-audio="##AUDIO##" data-volume="##VOLUME##" data-master-volume="##MASTER-VOLUME##" data-music-volume="##MUSIC-VOLUME##" data-sfx-volume="##SFX-VOLUME##" data-theme-toggle="##THEME-TOGGLE##" data-theme-initial="##THEME-INITIAL##" data-theme-alternate="##THEME-ALTERNATE##">
+<body data-story-format="vertical" data-presentation="##PRESENTATION##" data-ending-show="##ENDING-SHOW##" data-ending-text="##ENDING-TEXT##" data-play-again-show="##PLAY-AGAIN-SHOW##" data-play-again-text="##PLAY-AGAIN-TEXT##" data-audio="##AUDIO##" data-volume="##VOLUME##" data-master-volume="##MASTER-VOLUME##" data-music-volume="##MUSIC-VOLUME##" data-sfx-volume="##SFX-VOLUME##" data-theme-toggle="##THEME-TOGGLE##" data-theme-initial="##THEME-INITIAL##" data-theme-alternate="##THEME-ALTERNATE##">
 
     <div class="outerContainer">
         <div id="story" class="container title-screen-active">
@@ -32,10 +32,6 @@
                     <button type="button" id="save" title="Save progress" aria-label="Save progress">
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.75h12a1 1 0 0 1 1 1v15.5l-7-4.25-7 4.25V4.75a1 1 0 0 1 1-1Z"/></svg>
                       <span>Save progress</span>
-                    </button>
-                    <button type="button" id="reload" title="Reload from save point" aria-label="Load saved progress">
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 11a7.5 7.5 0 1 1 .8 4.7M4.5 5.5V11H10"/></svg>
-                      <span>Load saved progress</span>
                     </button>
                     <button type="button" id="theme-toggle" title="Change theme" aria-label="Change theme" hidden>
                       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg>
@@ -67,6 +63,9 @@
     <script src="##JAVASCRIPT FILENAME##"></script>
     <script src="richtext.js"></script>
     <script src="pager.js"></script>
+    <script src="choice-text.js"></script>
+    <script src="screen-mode.js"></script>
+    <script src="ending-marker.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

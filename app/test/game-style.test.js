@@ -179,7 +179,7 @@ describe("game style title settings", function () {
             assert.strictEqual(buffer.querySelector(".storyTitle"), null);
             assert.strictEqual(buffer.querySelector(".storyAuthor"), null);
             assert.strictEqual(buffer.querySelector(".title-screen-title"), null);
-            assert.strictEqual(buffer.querySelector(".title-screen-author").textContent, "by GUI Author");
+            assert.strictEqual(buffer.querySelector(".title-screen-author").textContent, "Written by GUI Author");
             assert.strictEqual(buffer.firstElementChild.id, "controls");
             assert.ok(buffer.querySelector(".title-screen"));
             assert.strictEqual(player.classList.contains("game-preview-panel"), true);
@@ -204,7 +204,7 @@ describe("game style title settings", function () {
 
         // The frame, its page, the passage and the menu are shared with the exported page.
         assert.match(chrome, /#main #player \.scrollContainer \{[^}]*display: grid;[^}]*place-items: center;[^}]*overflow: hidden;[^}]*container-type: size;/);
-        assert.match(chrome, /#main #player \.innerText\.container \{[^}]*display: flex;[^}]*border-radius: var\(--frame-radius\);[^}]*box-shadow: 0 18px 54px/);
+        assert.match(chrome, /#main #player \.innerText\.container \{[^}]*display: flex;[^}]*border-radius: var\(--frame-radius\);[^}]*box-shadow:\s*0 26px 58px -13px var\(--reader-shadow-deep/);
         assert.match(chrome, /#main #player \.story-hud \{[^}]*position: absolute;[^}]*inset: 0 0 auto;/);
         assert.match(chrome, /#main #player #story-menu > button \{[^}]*display: flex;/);
         assert.match(chrome, /#main #player \.story-passage \{[^}]*overflow-y: auto;[^}]*scrollbar-width: none;[^}]*justify-content: safe center;/);
@@ -212,6 +212,13 @@ describe("game style title settings", function () {
         assert.match(chrome, /#main #player \.story-passage \{[^}]*mask-image: linear-gradient\(to bottom, transparent 0, transparent var\(--story-top-cover, 0px\), #000 var\(--story-top-cover, 0px\)\);/);
         assert.match(chrome, /#main #player \.story-passage::after \{[^}]*height: var\(--story-scroll-fill, 0px\);/);
         assert.match(chrome, /#main #player \.innerText\.container::after \{[^}]*position: absolute;[^}]*background: linear-gradient\(to bottom, transparent, var\(--game-bg, #ffffff\)\);[^}]*opacity: 0;[^}]*pointer-events: none;/);
+        assert.match(chrome, /#main #player \.innerText\.container\.has-background \{[^}]*background-size: cover;[^}]*background-repeat: no-repeat;/);
+        assert.match(chrome, /#main #player \.innerText\.container\.has-background \.story-visual \{\s*background: transparent;/);
+        assert.match(chrome, /#main #player \.innerText\.container\.has-background \.story-choices \{\s*background: transparent;/);
+        const exportedChrome = fs.readFileSync(path.join(__dirname, "../export-for-web-template/style.css"), "utf8");
+        assert.match(exportedChrome, /\.container\.has-background \{[^}]*background-size: cover;[^}]*background-repeat: no-repeat;/);
+        assert.match(exportedChrome, /\.container\.has-background \.story-visual \{\s*background: transparent;/);
+        assert.match(exportedChrome, /\.container\.has-background \.story-choices \{\s*background: transparent;/);
         assert.match(chrome, /#main #player \.innerText\.container\.has-more-below::after \{\s*opacity: 0\.85;/);
         assert.match(chrome, /#main #player\[data-story-format="vertical"\] \.innerText\.container \{/);
         assert.match(css, /#main #player p\.storyText \{[^}]*margin: 0;[^}]*line-height: var\(--game-line-height/);

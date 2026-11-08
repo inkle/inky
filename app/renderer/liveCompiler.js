@@ -2,6 +2,7 @@ const ipc = require("electron").ipcRenderer;
 const _ = require("lodash");
 const randomstring = require("randomstring");
 const i18n = require('./i18n.js');
+const ChoiceText = require('./choiceText.js');
 
 var namespace = null;
 var sessionIdx = 0;
@@ -316,7 +317,8 @@ ipc.on("play-generated-choice", (event, choice, fromSessionId) => {
     // If there's one choice, that means there are two turns/chunks
     var turnCount = choiceSequence.length+1;
     var isLatestTurn = currentTurnIdx >= turnCount-1;
-    events.choiceAdded(choice, isLatestTurn);
+    var isReplayChoice = ChoiceText.isReplayChoice(replaying, choiceSequence, currentTurnIdx, choice.number);
+    events.choiceAdded(choice, isLatestTurn, isReplayChoice);
 });
 
 ipc.on("play-requires-input", (event, fromSessionId) => {

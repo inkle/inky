@@ -2,15 +2,16 @@
 
 const path = require("path");
 
-// The picture formats a project may hold. A favicon is a picture too, but only in
-// these three formats; a cover accepts the usual photo formats, but never .ico.
+// Image files imported into a project live in "image". Backgrounds and character art have
+// conventional subfolders, but writers may keep assets elsewhere and reference explicit paths.
 const FAVICON_EXTENSIONS = [".ico", ".png", ".svg"];
 const COVER_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"];
 const IMAGE_EXTENSIONS = Array.from(new Set(FAVICON_EXTENSIONS.concat(COVER_EXTENSIONS)));
-// Imported pictures that are not the project's favicon live here, as audio lives in "audio".
-const IMAGE_FOLDER = "images";
-// Where a bare "# image: hero.png" is looked for when it is not at the project root: "images", then "image".
-const IMAGE_SEARCH_FOLDERS = [IMAGE_FOLDER, "image"];
+const IMAGE_FOLDER = "image";
+const IMAGE_BACKGROUND_FOLDER = "image/background";
+const IMAGE_CHARACTER_FOLDER = "image/character";
+// Read-only fallback for projects created before the canonical singular "image" folder.
+const LEGACY_IMAGE_SEARCH_FOLDERS = ["images"];
 // Bigger pictures are imported as they are, but the writer is told about them.
 const LARGE_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -54,7 +55,9 @@ module.exports = {
     FAVICON_EXTENSIONS,
     COVER_EXTENSIONS,
     IMAGE_FOLDER,
-    IMAGE_SEARCH_FOLDERS,
+    IMAGE_BACKGROUND_FOLDER,
+    IMAGE_CHARACTER_FOLDER,
+    LEGACY_IMAGE_SEARCH_FOLDERS,
     LARGE_IMAGE_BYTES,
     isImageFileName,
     isFaviconFileName,

@@ -1,0 +1,41 @@
+# Rivermere reader design: scenic image at top; translucent texture over theme color.
+# Before Dawn — presentation settings for the Inky showcase.
+theme: dark
+theme_mode: dual
+presentation: screen
+themes:
+  light:
+    colors:
+      background: "#f6efdf"
+      text: "#30291f"
+      choice: "#35536e"
+    font: serif
+    size: 18
+  dark:
+    colors:
+      background: "#111c2b"
+      text: "#f5e7ce"
+      choice: "#a9cdf6"
+    font: serif
+    size: 18
+layout:
+  line_height: 1.65
+  width: 42
+  align: left
+  choice_align: left
+controls:
+  show: true
+  theme_toggle: true
+ending:
+  show: true
+  text: "The End"
+  play_again_show: true
+  play_again_text: "Play Again"
+audio:
+  master: 80
+  music: 38
+  sfx: 60
+titles:
+  story: "Before Dawn"
+  author: "Elias Wren"
+  cover: "image/cover.jpg"

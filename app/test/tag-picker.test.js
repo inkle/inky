@@ -1,10 +1,13 @@
 const assert = require("assert");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const { TagPicker } = require("../renderer/tagPicker.js");
 const { inkCompleter } = require("../renderer/inkCompleter.js");
 
 describe("tag picker (# + Tab)", function () {
     it("lists the working tags in alphabetical order", function () {
-        assert.deepStrictEqual(TagPicker.TAG_NAMES, ["align", "choice-align", "image", "music", "sound", "title"]);
+        assert.deepStrictEqual(TagPicker.TAG_NAMES, ["align", "bg", "choice-align", "image", "music", "screen", "sound", "title"]);
     });
 
     it("only offers tag names while picking, each inserting 'name: ', plus the two stop lines", function () {
@@ -17,14 +20,33 @@ describe("tag picker (# + Tab)", function () {
             inkCompleter.tagPicking = false;
         }
         assert.ok(results.some(r => r.value === "choice-align: "));
+        assert.ok(results.some(r => r.value === "bg: "));
         assert.ok(results.some(r => r.value === "align: left"));
         assert.ok(results.some(r => r.value === "music: stop"));
         assert.ok(results.some(r => r.value === "sound: stop"));
         assert.ok(results.some(r => r.value === "title: "));
+        assert.ok(results.some(r => r.value === "screen"));
+        assert.ok(!results.some(r => r.value === "screen: "));
         const label = value => results.find(r => r.value === value).meta;
-        assert.strictEqual(label("music: stop"), "parar música");
+        assert.strictEqual(label("music: stop"), "stop music");
         assert.strictEqual(label("sound: stop"), "parar efeitos");
         assert.strictEqual(label("music: "), "Ink Tag");
+    });
+
+    it("offers project images as values for #bg", function () {
+        const project = fs.mkdtempSync(path.join(os.tmpdir(), "inky-bg-picker-"));
+        try {
+            fs.mkdirSync(path.join(project, "image", "background"), { recursive: true });
+            fs.writeFileSync(path.join(project, "image", "background", "forest.jpg"), "image");
+            fs.writeFileSync(path.join(project, "image", "background", "night.png"), "image");
+            fs.writeFileSync(path.join(project, "image", "hero.png"), "image");
+            fs.writeFileSync(path.join(project, "image", "background", "notes.txt"), "not an image");
+            assert.deepStrictEqual(TagPicker.valuesForTag("bg", project), ["forest.jpg", "night.png"]);
+            assert.deepStrictEqual(TagPicker.valuesForTag("image", project), ["hero.png", "image/background/forest.jpg", "image/background/night.png"]);
+            assert.strictEqual(TagPicker.isAtomicValue("bg", "forest.jpg", project), true);
+        } finally {
+            fs.rmSync(project, { recursive: true, force: true });
+        }
     });
 
     it("only reacts right after a tag's #", function () {
@@ -37,7 +59,7 @@ describe("tag picker (# + Tab)", function () {
     });
 });
 
-describe("file tags open their whole list (#image, #music, #sound)", function () {
+describe("file tags open their whole list (#bg, #image, #music, #sound)", function () {
     const wait = () => new Promise(resolve => setImmediate(resolve));
 
     function editorWith(line, column, options) {
@@ -79,8 +101,9 @@ describe("file tags open their whole list (#image, #music, #sound)", function ()
         assert.strictEqual(TagPicker.fileTagAwaitingValue("#title: ", 8), null, "a scene title is not a file");
         assert.strictEqual(TagPicker.fileTagAwaitingValue("#align: ", 8), null);
         assert.strictEqual(TagPicker.fileTagAwaitingValue("#music:", 7), null, "the space of the canonical form is needed");
-        assert.strictEqual(TagPicker.fileTagAwaitingValue("#music: floresta.mp3", 20), null, "a file is already being written");
+        assert.strictEqual(TagPicker.fileTagAwaitingValue("#music: forest.mp3", 20), null, "a file is already being written");
         assert.strictEqual(TagPicker.fileTagAwaitingValue("Texto #image: ", 14), "image");
+        assert.strictEqual(TagPicker.fileTagAwaitingValue("Texto #bg: ", 11), "bg");
         assert.strictEqual(TagPicker.fileTagAwaitingValue("Musica#music: ", 14), null, "a tag starts a line or follows a space");
     });
 
@@ -120,7 +143,7 @@ describe("file tags open their whole list (#image, #music, #sound)", function ()
     });
 });
 
-describe("Tab after a file tag written by hand (#image:, #music:, #sound:)", function () {
+describe("Tab after a file tag written by hand (#bg:, #image:, #music:, #sound:)", function () {
     function editorWith(line, column, options) {
         const settings = Object.assign({ autoComplete: true, popupOpen: false }, options);
         const editor = {
@@ -151,9 +174,10 @@ describe("Tab after a file tag written by hand (#image:, #music:, #sound:)", fun
     it("knows when the cursor sits right after a file tag, with or without the space", function () {
         assert.deepStrictEqual(TagPicker.fileTagBeforeTab("#music:", 7), { tag: "music", hasSpace: false });
         assert.deepStrictEqual(TagPicker.fileTagBeforeTab("#image: ", 8), { tag: "image", hasSpace: true });
+        assert.deepStrictEqual(TagPicker.fileTagBeforeTab("#bg:", 4), { tag: "bg", hasSpace: false });
         assert.deepStrictEqual(TagPicker.fileTagBeforeTab("Texto #sound:", 13), { tag: "sound", hasSpace: false });
         assert.strictEqual(TagPicker.fileTagBeforeTab("#title:", 7), null);
-        assert.strictEqual(TagPicker.fileTagBeforeTab("#music: floresta.mp3", 20), null);
+        assert.strictEqual(TagPicker.fileTagBeforeTab("#music: forest.mp3", 20), null);
         assert.strictEqual(TagPicker.fileTagBeforeTab("Musica#music:", 13), null);
     });
 

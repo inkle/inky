@@ -152,8 +152,8 @@ async function buildPackageForPlatform(targetPlatform) {
         asar: {
             unpackDir: 'main-process/ink'
         },
-        // Sample story shipped beside app.asar so it can be opened with File > Open.
-        extraResource: [path.join(__dirname, "../examples/mare-de-vidro")]
+        // Bundled example projects are kept in source; the interactive showcase ships in app/resources.
+        extraResource: []
     };
 
     if( targetPlatform == "mac" ) {

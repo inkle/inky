@@ -234,7 +234,7 @@ LIST WindowKnowledge = steam_on_glass, fingerprints_on_glass, fingerprints_on_gl
 
         - -     -> window_opts
 
-    *   {top >= 5} [Leave the room]
+    *   {top >= 3} [Leave the room]
         I'd seen enough. I {bedroomLightState ? on:switched off the lamp, then} turned and left the room.
         -> joe_in_hall
 

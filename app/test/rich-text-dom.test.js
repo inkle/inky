@@ -13,7 +13,7 @@ describe("rich text in the player and export", function () {
     };
 
     it("turns markers into strong and em", function () {
-        assert.strictEqual(render("a ⟦b⟧hora⟦/b⟧ e ⟦i⟧lá⟦/i⟧"), "a <strong>hora</strong> e <em>lá</em>");
+        assert.strictEqual(render("a ⟦b⟧time⟦/b⟧ and ⟦i⟧yes⟦/i⟧"), "a <strong>time</strong> and <em>yes</em>");
     });
     it("nests and crosses formats", function () {
         assert.strictEqual(render("⟦b⟧x ⟦i⟧y⟦/i⟧⟦/b⟧"), "<strong>x <em>y</em></strong>");
@@ -25,6 +25,10 @@ describe("rich text in the player and export", function () {
     });
     it("keeps writer HTML as text", function () {
         assert.strictEqual(render("⟦b⟧<img src=x onerror=1>⟦/b⟧"), "<strong>&lt;img src=x onerror=1&gt;</strong>");
+    });
+    it("renders the native legacy line-break marker without exposing markup", function () {
+        assert.strictEqual(render("a⟦br⟧b"), "a<br>b");
+        assert.strictEqual(InkRichText.plainText("a⟦br⟧b"), "a\nb");
     });
     it("plainText drops the markers", function () {
         assert.strictEqual(InkRichText.plainText("⟦b⟧a⟦/b⟧ ⟦/i⟧b"), "a b");
