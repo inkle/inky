@@ -1,178 +1,194 @@
 <div align="center">
 
-<img src="resources/icon-small.jpg" alt="Inky icon" width="112">
+<img src="resources/icon-small.jpg" alt="Inky application icon" width="80">
 
-# Inky enhanced community fork
+<h1>Inky</h1>
 
-**Create and play ink-powered games without leaving your IDE [ink](https://github.com/inkle/ink).**
+<p><strong>Write with ink. Bring your stories to life.</strong></p>
 
-A feature-rich continuation of [inkle's Inky](https://github.com/inkle/inky), with a project Explorer, visual game settings, media support, and a web player.
+<p>An independent community fork of <a href="https://github.com/inkle/inky">inkle's Inky</a>, extending the desktop editor for <a href="https://github.com/inkle/ink">ink</a> with visual story presentation, a live player, multimedia scenes, and web export.</p>
 
-[![Fork of inkle/inky](https://img.shields.io/badge/fork-inkle%2Finky-blue)](https://github.com/inkle/inky)
-![Based on Inky 0.15.2](https://img.shields.io/badge/based%20on-Inky%200.15.2-informational)
-![Electron 30](https://img.shields.io/badge/Electron-30.0.4-47848F)
-![MIT License](https://img.shields.io/badge/license-MIT-green)
+<p>
+  <a href="https://github.com/inkle/inky"><img src="https://img.shields.io/badge/upstream-Inky%200.15.2-4764ac" alt="Based on Inky 0.15.2"></a>
+  <img src="https://img.shields.io/badge/community_revision-r109-30876c" alt="Community revision r109">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
+</p>
 
-<img src="docs/screenshots/welcome.png" alt="Inky editor and the story title screen" width="760">
+<a href="docs/screenshots/default-first-open.png">
+  <img src="docs/screenshots/default-first-open.png" alt="Inky's default project, The Borrowed Star, in the editor beside its title screen" width="1000">
+</a>
+
+<p><em>The first-open experience: <strong>The Borrowed Star</strong>, ready to read, explore, and edit.</em></p>
 
 </div>
 
-> **Independent community fork.** This project is not affiliated with, endorsed by, or officially maintained by inkle Ltd. Inky and ink remain credited to their original creators.
+> **An independent fork.** Inky and the ink language were created by [inkle](https://www.inklestudios.com/ink/). This project builds on their work; it is not affiliated with or endorsed by inkle Ltd. Original Ink syntax and branching logic remain at its core.
 
----
+## Write a story. See it come alive.
 
-## What is Inky?
+Write in Ink on the left. Follow the story on the right. As you revise dialogue, add branches, or change presentation settings, the live Preview helps you understand what the reader will experience.
 
-Inky is a desktop editor for **ink**, inkle's scripting language for interactive narrative. Write a story in plain-text `.ink` files, compile as you work, and play through choices in the built-in preview.
+<a href="docs/screenshots/live-preview-basic-passage.png">
+  <img src="docs/screenshots/live-preview-basic-passage.png" alt="Inky's Visual settings beside a live passage with title, narrative text and interactive choices" width="1000">
+</a>
 
-This fork builds on Inky **0.15.2** with expanded authoring tools and a web export designed to carry your story's presentation and media with it.
+*A passage with a title, narrative text, and choices, shown alongside the Visual settings that shape its appearance.*
 
-## Features
+Inky keeps the writing workflow familiar: syntax highlighting, autocomplete, reusable snippets, issue reporting, a project Explorer, and interactive story navigation. This fork adds control over the way that writing reaches the screen.
 
-### Write and test in one place
+## Shape the reader's experience
 
-- Syntax highlighting, ink snippets, tag autocomplete, and jump-to-definition.
-- Live compilation with errors, warnings, and TODOs linked to their source locations.
-- A playable preview that keeps your place as the story recompiles.
-- Bold and italic formatting for narrative text with **Ctrl/Cmd+B** and **Ctrl/Cmd+I**.
-- Light, dark, focus, and contrast editor themes.
+The **Visual** tab makes presentation adjustable without requiring custom CSS. Settings are stored with the project in `game.yaml`; **Advanced** provides access to the underlying configuration.
 
-### Organize complete story projects
+| Presentation | Reader experience |
+| :-- | :-- |
+| **Classic, Night, Sepia, and Terminal** themes | Distinct looks, with optional light/dark switching |
+| **Fonts, sizes, spacing, and alignment** | Readable layouts in a portrait **9:16** frame |
+| **Title Screen** | Cover image, title, author, and a title-size control in pixels |
+| **Sound controls** | Adjustable master, music, and effects volume |
+| **Story endings** | Optional **The End** marker and **Play Again** button |
 
-- A project Explorer for scenes, folders, style files, images, and audio.
-- Create and import project files, rename or delete them, and select multiple items for batch actions.
-- Include-aware projects: Inky follows `INCLUDE` statements and helps create included scenes.
-- A file watcher that reflects changes made outside Inky.
-- Preview image and audio files directly from the Explorer.
+The Title Screen and the reading passages are separate: a scene background does not overwrite the cover. Stories can be kept minimal or given a more illustrated identity.
 
-### Shape the reader experience
+### Two ways to present Ink
 
-Use the **Visual** settings panel to configure the story without hand-editing YAML. Changes update the preview and are stored in the project's `game.yaml`; the **Advanced** tab remains available for direct YAML editing.
+**Traditional Mode** retains the continuous reading style of the original Inky. **Screen Mode** presents individual passages as clean, self-contained screens while leaving Ink variables, choices, and diverts intact.
 
-- Preset looks, light/dark palettes, custom colors, fonts, font size, line height, and text width.
-- Story text and choice alignment can be set independently.
-- Reading layouts: automatic, portrait (9:16), landscape (16:9), square (1:1), or a custom aspect ratio.
-- Story title, author, cover art, and a dedicated title screen with a **Start** button.
-- Scene-title typography and alignment, with per-scene alignment overrides.
-- Optional reader controls, including a light/dark appearance toggle.
-
-### Add sound and images
-
-Use ink tags to add media to passages:
+Screen Mode is optional. Enable it under **Visual → Story presentation** and introduce a screen with `#screen`:
 
 ```ink
-=== station ===
+=== bridge ===
+#screen
+#title: Voices in the Snow
 
-#title: The Station
-#image: station.jpg
-#sound: train.mp3
+The old bridge groans beneath the weight of winter.
 
-The last train pulls in.
-Its brakes shriek in the night.
++ [Climb toward the star.] -> hill
 ```
 
-**Sound tags**
+### Images, backgrounds, music, and sound
 
-- `#music: filename.mp3` starts or changes looping music.
-- `#music: stop` stops the music.
-- `#sound: filename.mp3` plays a sound effect once.
-- `#sound: stop` stops active sound effects.
+Scene tags let a writer give each passage its own look and atmosphere:
 
-Audio files can be organized in `audio/` (including `music/`, `musics/`, and `sfx/` subfolders). Supported formats include MP3, OGG, WAV, M4A, AAC, FLAC, Opus, and WebM. The Visual settings provide separate master, music, and sound-effect levels.
+```ink
+=== bridge ===
+#screen
+#bg: image/background/reading-texture.png
+#image: image/scene/bridge-bell.jpg
+#music: audio/music/bridge-mist.mp3
+#sound: audio/sfx/bell.wav
+#title: Voices in the Snow
 
-Use `#image: filename.png` to show a picture in the story. Local pictures are collected into the web export; remote HTTP(S) images remain remote. Import images into the project or use the Explorer to inspect them. A project favicon can also be included in the exported page.
+The old bridge groans beneath the weight of winter.
 
-## What this fork changes
++ [Climb toward the star.] -> hill
+```
 
-| Area | Inky 0.15.2 | This fork |
-|---|---|---|
-| Story line breaks | Standard paragraph spacing | Consecutive lines can stay compact; a blank line creates a visible break. |
-| Choices | Original choice styling | Blue choices with independent left, center, or right alignment. |
-| Story alignment | Story-wide alignment | `#align:` can override alignment for a scene or paragraph. |
-| Authoring settings | Edit presentation in project files | Configure appearance through Visual settings or edit `game.yaml` directly. |
-| Media | Basic story editing | Preview and manage audio and images; export referenced story assets. |
-| Publishing | Standard web export | Export a styled, playable web version with the title screen and reader controls. |
+`#image` places artwork above the passage; `#bg` sets an image behind the scene content. `#title` introduces the passage title, while `#music` and `#sound` control audio. Resource folders are conventions rather than restrictions: project-relative paths are supported.
 
-### Alignment tags
+## Meet Before Dawn
 
-`#align: left`, `#align: center`, or `#align: right` changes text alignment. On a scene's opening line alongside `#title:`, it applies to that scene; on another paragraph, it applies only to that paragraph.
+**Before Dawn** is this fork's official showcase: a short fantasy adventure designed to demonstrate what an Ink story can become when writing, artwork, sound, and reader presentation work together.
 
-### Web export
+It is a **real, editable project**, included with the source. Open it through **Ink → Full stories** to explore its branching narrative, scene assets, choices, and three endings.
 
-**File → Export for web** creates a complete player folder with the compiled story, the inkjs runtime, styles, and the assets referenced by the story, including audio, local images, cover art, and favicon when present. Remote images remain online references. The exported player includes a title screen, reader controls, and save/load support.
+<a href="docs/screenshots/showcase-editor-before-dawn.png">
+  <img src="docs/screenshots/showcase-editor-before-dawn.png" alt="The Before Dawn project open in Inky: Ink source, audio files, images, and illustrated Title Screen" width="1000">
+</a>
 
-## Screenshots
+*A single Before Dawn project in the Explorer, with its Ink source, original assets, and live Title Screen in the Preview.*
 
-**Title screen**
+### Start with a cover
 
-![Story title screen with cover art, author, and Start button](docs/screenshots/title-screen.png)
+<div align="center">
 
-**Live story preview**
+<a href="docs/screenshots/showcase-title-screen.png">
+  <img src="docs/screenshots/showcase-title-screen.png" alt="Before Dawn's illustrated Title Screen with the story title, author credit, Start and Load" width="390">
+</a>
 
-![Rendered passage and interactive choices in Inky's preview](docs/screenshots/live-preview.png)
+<p><em>The actual Title Screen in the Inky Preview: cover, title, author credit, Start, and Load.</em></p>
 
-## Compatibility notes
+</div>
 
-The main target is the Inky editor and its web export. Some presentation features are specific to this fork. In particular, blank-line formatting is represented as literal `<br>` text in compiled story content; other game runtimes may show `<br>` literally unless they handle it.
+### Give each passage its own atmosphere
 
-## Get started
+A scene can combine **top artwork**, **background texture**, **scene title**, **narrative text**, and **choices**. The illustration can change between passages while the reading frame remains consistent.
 
-### Requirements
+<div align="center">
 
-- [Node.js](https://nodejs.org/) and npm
-- Git
+<a href="docs/screenshots/showcase-scene-old-forge.png"><img src="docs/screenshots/showcase-scene-old-forge.png" alt="The Old Forge captured in Inky: a passage with top illustration, dark textured background, title, narrative and branching choices" width="46%"></a>
+<a href="docs/screenshots/showcase-scene-voices-in-the-snow.png"><img src="docs/screenshots/showcase-scene-voices-in-the-snow.png" alt="Voices in the Snow captured in Inky: another illustrated passage with its own image, title, story text and interactive choices" width="46%"></a>
 
-### Install and run from source
+<p><em>The Old Forge</em> · <em>Voices in the Snow</em> — two actual passages captured from <strong>Before Dawn</strong> in the Inky Preview.</p>
+
+</div>
+
+Music and sound effects can accompany the scenes without being written into the narrative itself. The showcase includes both, alongside its cover, scene images, and alternate outcomes.
+
+Explore the [story source](app/resources/showcase/before-dawn/Before%20Dawn.ink) and [project settings](app/resources/showcase/before-dawn/game.yaml) to see how the pieces fit together. **Elias Wren** is a fictional author credit for the showcase.
+
+## Built on the original Inky
+
+The original editor's full-story examples remain available as a tribute to the work that came before this fork:
+
+- **Crime Scene** — from *Writing with Ink*
+- **Swindlestones** — from *Sorcery!*
+- **Pontoon Game** — from *Overboard!*
+- **The Intercept**
+
+In **Ink → Full stories**, these appear together **above a divider**, with **Before Dawn** displayed separately beneath it. Opening a story creates an editable project, with compatibility adjustments for this fork's reader where needed.
+
+**The Borrowed Star**, meanwhile, is the starter story presented when Inky is opened without an existing project. It is not part of the original Inky collection or the illustrated showcase.
+
+## Take your story to the web
+
+Use **File → Export for web** to produce a browser-playable story with its Ink content, reader interface, styles, and referenced local assets. The export supports scene presentation, Title Screens, and reader controls, including save/load and configurable endings.
+
+Preview and Web Export are developed to behave consistently. Before publishing, test the exported `index.html` and its assets in a browser.
+
+## Download and run
+
+The community **r109** build targets **Linux x86-64**. Download the `.deb` or AppImage from the project's [GitHub Releases](https://github.com/glassflare/inky/releases) when this revision is published.
+
+**Debian / Ubuntu**
 
 ```bash
-git clone https://github.com/ytriosa/inky.git
+sudo apt install ./inky-r109-upgrade-compatible.deb
+```
+
+**AppImage**
+
+```bash
+chmod +x Inky-0.15.2-109-x86_64.AppImage
+./Inky-0.15.2-109-x86_64.AppImage
+```
+
+Some Linux distributions may require FUSE compatibility libraries for AppImage. The source tree also includes scripts for other platforms; these downloads are Linux builds.
+
+### Build from source
+
+You'll need Node.js, npm, Git, and the system libraries required by Electron.
+
+```bash
+git clone https://github.com/glassflare/inky.git
 cd inky/app
-npm install
+npm ci
 npm start
 ```
 
-### Run tests
-
-From `inky/app/`:
+To run the project's tests from `app/`:
 
 ```bash
 npm test
-```
-
-To run the web-export smoke tests only:
-
-```bash
 npm run test:web-export
 ```
 
-### Build packages
+The underlying application version remains **0.15.2**; **r109** identifies this fork's community revision.
 
-From `inky/app/`, build for Linux, macOS, Windows 32-bit, or Windows 64-bit:
+## Contribute
 
-```bash
-npm run build-package -- linux
-```
-
-Add `-zip` to produce a distributable archive:
-
-```bash
-npm run build-package -- linux -zip
-```
-
-macOS builds must run on macOS. The root-level `BUILD_FOR_LINUX.sh` builds the Linux x64 application bundle, AppImage, and Debian package. Consult the build scripts for platform-specific tools and requirements.
-
-## Downloads
-
-Check [GitHub Releases](https://github.com/ytriosa/inky/releases) for downloadable packages when they are published.
-
-## Contributing
-
-Bug reports, suggestions, and contributions are welcome. Please open an [issue](https://github.com/ytriosa/inky/issues) with a description and steps to reproduce the behavior, if applicable.
+Issues and improvements are welcome through [GitHub Issues](https://github.com/glassflare/inky/issues). When reporting a problem, include your operating system, build revision, steps to reproduce it, and whether it occurs in Preview, Web Export, or both.
 
 ## Credits and license
 
-- **Inky and ink** are projects by [inkle Ltd](https://github.com/inkle). The original Inky project is distributed under the MIT License.
-- This fork's changes and the applicable copyright notices are documented in [`LICENSE`](LICENSE).
-- Electron, Chromium, inkjs, and other dependencies are distributed under their respective licenses; see the included third-party notices.
-
-*Inky is named after a black cat based in Cambridge, UK.*
+The original [Inky](https://github.com/inkle/inky) editor and [ink](https://github.com/inkle/ink) language are by **inkle Ltd**. This independent fork preserves the original story examples with their historical credits. Distributed under the [MIT License](LICENSE), subject to applicable upstream and third-party notices.
