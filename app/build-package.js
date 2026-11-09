@@ -151,7 +151,9 @@ async function buildPackageForPlatform(targetPlatform) {
         prune: true,
         asar: {
             unpackDir: 'main-process/ink'
-        }
+        },
+        // Bundled example projects are kept in source; the interactive showcase ships in app/resources.
+        extraResource: []
     };
 
     if( targetPlatform == "mac" ) {

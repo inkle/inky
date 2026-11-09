@@ -1,6 +1,8 @@
 #!/bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"
 export LD_LIBRARY_PATH=${HERE}/opt/inky/:$LD_LIBRARY_PATH
+# Resolve relative file arguments from the directory where Inky was launched.
+export OWD="${OWD:-$PWD}"
 cd "${HERE}/opt/inky"
 "${HERE}/opt/inky/Inky" "$@"
 exit $?

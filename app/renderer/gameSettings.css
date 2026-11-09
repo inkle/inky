@@ -1,0 +1,235 @@
+:root {
+    --bg: #f6f6f6;
+    --panel: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6b6b70;
+    --border: #d9d9de;
+    --accent: #0066CC;
+    --danger: #c0392b;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #232326;
+        --panel: #2d2d31;
+        --text: #ececee;
+        --muted: #a0a0a8;
+        --border: #424248;
+        --accent: #66B2FF;
+        --danger: #ff7b6b;
+    }
+}
+
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+body {
+    margin: 0;
+    /* The form lives inside Inky's editor pane; provide breathing room on all
+       sides so the first/last preset and focus outlines are never clipped. */
+    padding: 14px 18px 10px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+header { min-width: 0; }
+#settings-scroll {
+    display: block;
+    min-height: 0;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: auto;
+    scrollbar-color: var(--muted) transparent;
+    padding: 8px 5px 16px;
+}
+#settings-scroll::-webkit-scrollbar { width: 10px; }
+#settings-scroll::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border: 3px solid transparent;
+    border-radius: 8px;
+    background-clip: padding-box;
+}
+#settings-scroll::-webkit-scrollbar-track { background: transparent; }
+
+header h1 { font-size: 20px; margin: 2px 0 4px 0; }
+.hint, .note { color: var(--muted); font-size: 12.5px; margin: 4px 0 8px 0; }
+code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.95em; }
+
+h2 {
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 22px 0 8px 0;
+}
+
+section { margin: 0 0 12px; width: 100%; }
+[hidden] { display: none !important; }
+
+/* Core layout for the Visual settings form. The same pane is used by both
+   tabs and can be wider than the old form, so let fields use the space rather
+   than leaving controls bunched together on the left. */
+.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 36px;
+    margin: 8px 0;
+}
+.row > label:first-child:not(.inline) {
+    flex: 0 0 clamp(118px, 19%, 164px);
+    color: var(--text);
+}
+.row input[type="text"] {
+    flex: 1 1 150px;
+    width: auto;
+    min-width: 0;
+    padding: 5px 8px;
+}
+.row select {
+    flex: 1 1 220px;
+    width: auto;
+    min-width: 0;
+}
+.row input[type="color"] { flex: 0 0 36px; width: 36px; }
+.row > label.inline { flex: 0 0 auto; }
+.row > label.inline:only-child { flex: 1 1 auto; white-space: normal; }
+.row > .segmented { flex: 1 1 280px; width: auto; }
+.row > .segmented label { flex: 1 1 0; text-align: center; }
+.range-row {
+    display: grid;
+    grid-template-columns: clamp(118px, 19%, 164px) minmax(0, 1fr) 64px 32px auto;
+    column-gap: 12px;
+}
+.range-row > label:first-child:not(.inline) { grid-column: 1; }
+.range-control { display: contents; }
+.range-control input[type="range"] { grid-column: 2; }
+.range-control input[type="number"] { grid-column: 3; }
+.range-control .unit { grid-column: 4; }
+.range-row > .inline { grid-column: 5; }
+input, select, button { font: inherit; }
+input[type="text"], input[type="number"], select {
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    min-height: 28px;
+}
+input[type="color"] {
+    width: 32px;
+    height: 28px;
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--panel);
+}
+input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+input[type="number"] {
+    width: 100%;
+    min-width: 0;
+    padding: 3px 5px;
+}
+.range-control .unit { width: 32px; color: var(--muted); font-size: 12px; text-align: center; }
+.clear-text-button {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    background: var(--panel);
+    line-height: 1;
+    cursor: pointer;
+}
+.clear-text-button:hover, .clear-text-button:focus-visible {
+    border-color: var(--accent);
+    color: var(--text);
+}
+.text-button { flex: 0 0 auto; padding: 4px 9px; border: 1px solid var(--border); border-radius: 4px; color: var(--text); background: var(--panel); cursor: pointer; }
+.text-button:hover:not(:disabled), .text-button:focus-visible { border-color: var(--accent); }
+.text-button:disabled { color: var(--muted); cursor: default; }
+.inline { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12px; }
+
+/* Cover matches the available width of the Title and Author fields.
+   The path and Choose button are separate sibling controls inside a flex
+   group; Clear remains the last element of the row, aligned with the
+   clear buttons above. No thumbnail or overlapping button is needed. */
+.row > .cover-input-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1 1 150px;
+    min-width: 0;
+}
+.row .cover-input-field > input[type="text"] {
+    flex: 1 1 150px;
+    width: auto;
+    min-width: 0;
+}
+.cover-input-field > #choose-story-cover {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+.segmented { display: flex; flex-wrap: nowrap; max-width: 100%; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 6px; background: var(--border); }
+#theme { width: min(100%, 460px); }
+#theme label { flex: 1 1 0; text-align: center; }
+.segmented label { position: relative; margin: 0; cursor: pointer; }
+.segmented input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+.segmented span { display: block; padding: 5px 12px; background: var(--panel); color: var(--text); white-space: nowrap; }
+.segmented span { border-radius: 4px; }
+.segmented input:checked + span { background: var(--accent); color: #fff; }
+.segmented input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
+.chips { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; width: 100%; padding: 3px; margin: 0 -3px; }
+.chip { display: flex; flex: 1 1 calc(20% - 10px); flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 74px; max-width: 190px; min-height: 62px; margin: 1px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; color: var(--text); }
+.chip b { font-size: 19px; line-height: 1.1; }
+.chip small { font-size: 11px; }
+.chip.active { outline: 2px solid var(--accent); outline-offset: 1px; }
+footer { display: flex; gap: 10px; min-width: 0; padding: 12px 0 2px; border-top: 1px solid var(--border); background: var(--bg); }
+footer button { padding: 6px 10px; border: 1px solid var(--border); border-radius: 5px; color: var(--text); background: var(--panel); cursor: pointer; }
+footer button:hover { border-color: var(--accent); }
+.invalid { border-color: var(--danger) !important; }
+input:disabled, select:disabled { opacity: .55; }
+
+.warnings {
+    margin: 12px 0 0 0;
+    padding: 10px 12px;
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    color: var(--danger);
+    font-size: 12.5px;
+}
+.warnings ul { margin: 4px 0 0 0; padding-left: 18px; }
+
+
+/* Narrow or short editor panes: keep every control reachable and avoid
+   turning the settings page into a blank clipped viewport. */
+@media (max-width: 620px) {
+    body { padding-left: 12px; padding-right: 12px; }
+    .row { flex-wrap: wrap; gap: 6px; }
+    .row > label:first-child:not(.inline) { flex: 0 0 92px; }
+    .row input[type="text"], .row select { flex: 1 1 125px; width: auto; }
+    .range-row {
+        grid-template-columns: 92px minmax(0, 1fr) 60px 32px auto;
+        column-gap: 6px;
+    }
+    .range-row > label:first-child:not(.inline) { flex: initial; }
+    .row input[type="number"] { width: 100%; }
+    .row > .segmented { flex: 1 1 180px; }
+    input[type="range"] { min-width: 90px; }
+    .segmented span { padding-left: 9px; padding-right: 9px; }
+    footer { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
+}

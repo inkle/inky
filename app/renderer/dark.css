@@ -94,7 +94,7 @@
     border-top-color: #444;
 }
 
-.window.dark #player p.choice a:hover {
+.window.dark #player p.choice .choice-button:hover {
     color: #999;
 }
 

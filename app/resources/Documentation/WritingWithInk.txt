@@ -105,6 +105,63 @@ Text content from the game will appear 'as is' when the engine runs. However, it
 
 These don't show up in the main text flow, but can be read off by the game and used as you see fit. See [Running Your Ink](RunningYourInk.md#marking-up-your-ink-content-with-tags) for more information.
 
+Add `#title: Scene name` to a line to display a title for that scene. Set the story title and author under **Visual → Story information**; customize their typography and alignment, along with scene titles, under **Text styling**.
+
+Text alignment is set once for the whole story under **Visual → Alignment**; choices have their own alignment setting. To give one scene a different alignment (a letter, a dream, a poem), put `#align: left|center|right` together with `#title:` on the scene's first line: it applies to every paragraph of that scene, and the next scene goes back to the story alignment. On any other line, `#align:` only affects that single paragraph.
+
+### Scene pictures and backgrounds
+
+Put picture files in the `image` folder next to the main story. Backgrounds can go in `image/background`, and character artwork can go in `image/character`. These are convenient default locations, not requirements: you can use other project folders and reference them with explicit relative paths. For a filename without a path, `#image:` looks in `image`, while `#bg:` looks in `image/background`. Existing projects using `images` are still searched as a legacy fallback. HTTP(S) image URLs are also accepted. Local images must stay inside the project folder. Inky's autocomplete lists scene images and backgrounds separately.
+
+Resource tags are easiest to read when each one has its own line, in this order: background, scene picture, music, sound effect, then narrative text and choices. For example:
+
+```ink
+# bg: enchanted-forest.jpg
+# image: forest.png
+# music: forest-theme.ogg
+# sound: birds.wav
+
+The trees part, revealing the valley below.
+
+* Cross the old bridge
+    You leave the forest behind.
+```
+
+* `#image:` shows a picture for the current scene. The first picture is placed in the picture area at the top of the reader; additional pictures in the same passage appear in the narrative text.
+* `#bg:` sets the background image of the whole 9:16 story frame. The scene picture (`#image:`) is drawn above it, and the narrative and choices remain in front of it. The choice area keeps a light theme tint for readability. Both tags can be used together in the same scene.
+
+When the player chooses an option and the next scene begins, the previous scene's picture and background are cleared. Add another `#bg:` tag in the new scene to choose a different background. Web export copies local files referenced by either tag into the exported game and reports any files that are missing.
+
+### Sound
+
+Put sound files in the `audio` folder next to your main story. The recommended locations are `audio/music` for music and `audio/sfx` for sound effects. These folders are optional: you can keep general-purpose files directly in `audio` or organize assets in other project folders. For a bare filename, `#music:` searches `audio/music` and `#sound:` searches `audio/sfx`; both tags can also find general-purpose files directly in `audio`. If the same filename exists in more than one location searched by a tag, Inky reports the ambiguity instead of silently choosing one. Use an explicit project-relative path for files in custom folders. Existing projects using `audios` or `audio/musics` remain discoverable as legacy fallbacks. The Explorer lists sound files with a speaker icon: click one to listen, click again to stop. Drag audio files in the Explorer into any project folder to move them. The autocomplete separates music and SFX suggestions and shows explicit paths for nested/custom folders. To bring files in, use the import button at the top of the Explorer (or **Import Files...** in its right-click menu, or just drag the files onto the Explorer): only sound files, `.ink` scenes and `.yaml` files can be imported. Imported audio goes into `audio`; you can move it into `audio/music` or `audio/sfx` when you know its role. Then, in the story:
+
+* `#music: forest.mp3` plays the file in a loop until another `#music:` tag; `#music: stop` ends it. The music that is already playing is not restarted when a scene asks for the same file again.
+* `#sound: branch.mp3` plays the file once, for a footstep, a door, a snapped branch.
+* `#sound: stop` stops all currently playing sound effects without stopping music.
+
+The preview plays them (sound effects play only on the turn you are on, so they do not repeat while you type). Under **Visual → Sound**, **Master**, **Music** and **SFX** set author-side mix levels. The actual level is the reader's overall volume multiplied by Master and by the matching category level. Omitted mix levels default to 100%, so stories without audio settings remain valid.
+
+The existing `audio.volume` YAML value remains the starting value for the exported game's overall volume control (default 50%) and the preview's base level. It is retained for older `game.yaml` files and can still be edited in YAML; the three Visual controls are the author-side mix levels. In the exported game, restart and save are in the top toolbar, with load and audio settings in their respective popovers; the player's saved volume choice takes precedence over `audio.volume` on later visits and is not reset by the author-side levels.
+
+The exported story is shown in a centered, bounded reading panel. When the player chooses an option, the previous passage, scene picture and background are replaced by the next scene, keeping the page focused and uncluttered. Long passages scroll inside the panel, and the previous scene is cleared automatically.
+
+For example:
+
+```yaml
+audio:
+  volume: 50
+  master: 100
+  music: 100
+  sfx: 100
+```
+
+"Export for web" copies the files the story uses into the game's own `audio` folder and tells you about any that are missing. Browsers only allow sound after the player clicks or presses a key, so the first music starts on the first click.
+
+To set a story favicon, use **Import Files** in the Explorer and choose an `.ico`, `.png` or `.svg` image. Inky saves it in the project root as `favicon.<extension>`, lists it in the Explorer and lets you preview it by clicking the file. Importing another favicon asks before replacing the current one. Web export copies the project's favicon into the exported folder's root; if no favicon is present, it uses Inky's default icon.
+
+In **Visual → Text**, you can choose from the fonts installed on your system. The selected font is saved in `game.yaml`, so it is shared by the preview and export.
+
 
 ## 2) Choices
 

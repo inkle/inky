@@ -1,3 +1,6 @@
+const TagPicker = require("./tagPicker.js").TagPicker;
+const TAG_NAMES = TagPicker.TAG_NAMES;
+
 function union(sets) {
     const u = new Set();
     for (const set of sets) {
@@ -67,6 +70,8 @@ function getAllVocabSuggestions(inkFiles) {
 
 exports.inkCompleter = {
     inkFiles: [],
+    getProjectDir: () => null,
+    tagPicking: false,
 
     getCompletions(editor, session, pos, prefix, callback) {
         // There are three possible ways we may want to suggest completions:
@@ -77,6 +82,41 @@ exports.inkCompleter = {
         //    targets, (because they can be used as variables) and vocab words.
         //    (because logic can output text)
         // 3) If we are not in either, we should only suggest vocab words.
+
+        // Offer built-in control and alignment tags only while editing a tag.
+        const lineToCursor = session.getLine(pos.row).slice(0, pos.column);
+        const tagContext = lineToCursor.match(/(?:^|\s)#\s*([^\n]*)$/);
+        if( tagContext ) {
+            const tagText = tagContext[1];
+            // "#" + Tab: only the tag names, in alphabetical order.
+            const valueTag = tagText.match(/^([\w-]+)\s*:\s*(.*)$/i);
+            if( valueTag && TagPicker.TAG_REGISTRY[valueTag[1].toLowerCase()] ) {
+                const name = valueTag[1].toLowerCase();
+                const definition = TagPicker.TAG_REGISTRY[name];
+                callback(null, TagPicker.valuesForTag(name, this.getProjectDir()).map(value => ({
+                    caption: value,
+                    value,
+                    meta: definition.kind === "audio" && value === "stop" ? definition.label : undefined
+                })));
+                return;
+            }
+            if( this.tagPicking || /^[\w-]*$/.test(tagText) ) {
+                const suggestions = [];
+                TAG_NAMES.forEach(name => {
+                    const definition = TagPicker.TAG_REGISTRY[name];
+                    suggestions.push({caption: "#" + name, value: name + (definition.kind === "flag" ? "" : ": "), meta: "Ink Tag"});
+                    TagPicker.valuesForTag(name, this.getProjectDir()).forEach(value => suggestions.push({
+                        caption: "#" + name + ": " + value,
+                        value: name + ": " + value,
+                        meta: definition.kind === "audio" && value === "stop" ? definition.label : "Ink Tag"
+                    }));
+                });
+                callback(null, suggestions.sort((a, b) => a.value < b.value ? -1 : a.value > b.value ? 1 : 0));
+                return;
+            }
+            callback(null, TAG_NAMES.map(name => ({caption: "#" + name, value: name + (definition.kind === "flag" ? "" : ": "), meta: "Ink Tag"})));
+            return;
+        }
 
         const cursorToken = session.getTokenAt(pos.row, pos.column);
         const isCursorInDivert = (cursorToken.type.indexOf("divert") != -1);

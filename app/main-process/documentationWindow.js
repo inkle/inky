@@ -8,6 +8,7 @@ const electronWindowOptions = {
   minWidth: 700,
   minHeight: 300,
   title: "Documentation",
+  icon: path.join(__dirname, '..', 'renderer', 'about', 'icon-round.png'),
   autoHideMenuBar: true
 };
 

@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inky</title><style>
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{outline:none;background:#303030;color:#f4f4f4;font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{height:100%;display:flex;flex-direction:column}section{display:flex;align-items:flex-start;gap:12px;min-height:0;flex:1;padding:17px 18px 12px;overflow:auto}
+#status{display:none;flex:0 0 35px;width:35px;height:35px}body.export #status{display:block}
+#content{min-width:0;flex:1}#message{margin:0 0 10px;font-size:14px;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}
+#detail{color:#d4d4d4;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;user-select:text}
+footer{display:flex;flex:0 0 auto;border-top:1px solid #171717}button{background:transparent;color:#ededed;flex:1;border:0;border-right:1px solid #1a1a1a;min-height:42px;cursor:pointer;font:inherit;padding:8px 12px}
+button:last-child{border-right:0}button:hover{background:#414141}button:focus-visible{outline:2px solid #85bfff;outline-offset:-3px}button:active{background:#535353}
+</style></head><body><main><section><img id="status" src="./icons/export-success.png" alt=""><div id="content"><p id="message"></p><div id="detail"></div></div></section><footer id="buttons"></footer></main>
+<script src="./inkyDialogRenderer.js"></script></body></html>

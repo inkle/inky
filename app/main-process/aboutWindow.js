@@ -11,6 +11,7 @@ const electronWindowOptions = {
     height: 270,
     resizable: false,
     show: false,
+    icon: path.join(__dirname, '..', 'renderer', 'about', 'icon-round.png'),
     autoHideMenuBar: true,
     webPreferences: {
         preload: path.join(__dirname, '..', 'renderer', 'preload.js'),

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -7,32 +7,65 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="icon" href="##FAVICON-FILENAME##" type="##FAVICON-TYPE##">
     <link rel="stylesheet" href="style.css">
+    <script>try{if(localStorage.getItem("inky-look:"+location.pathname)==="alternate")document.documentElement.setAttribute("data-look","alternate")}catch(e){}</script>
 
 </head>
 
-<body>
+<body data-story-format="vertical" data-presentation="##PRESENTATION##" data-ending-show="##ENDING-SHOW##" data-ending-text="##ENDING-TEXT##" data-play-again-show="##PLAY-AGAIN-SHOW##" data-play-again-text="##PLAY-AGAIN-TEXT##" data-audio="##AUDIO##" data-volume="##VOLUME##" data-master-volume="##MASTER-VOLUME##" data-music-volume="##MUSIC-VOLUME##" data-sfx-volume="##SFX-VOLUME##" data-theme-toggle="##THEME-TOGGLE##" data-theme-initial="##THEME-INITIAL##" data-theme-alternate="##THEME-ALTERNATE##">
 
     <div class="outerContainer">
-        <h3 class="written-in-ink"><a href="https://www.inklestudios.com/ink">WRITTEN IN INK</a></h3>
+        <div id="story" class="container title-screen-active">
 
-        <div id="controls" class="buttons">
-          <a id="rewind" title="Restart story from beginning">restart</a>
-          <a id="save" title="Save progress">save</a>
-          <a id="reload" title="Reload from save point">load</a>
-          <a id="theme-switch" title="Switch theme">theme</a>
-        </div>
+            <header id="controls" class="story-hud">
+              <div class="story-actions">
+                <div class="toolbar-popover-anchor">
+                  <button type="button" id="menu-toggle" class="toolbar-icon-button" aria-label="Story menu" aria-expanded="false" aria-controls="story-menu" title="Story menu">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+                  </button>
+                  <div id="story-menu" class="toolbar-popover" hidden>
+                    <button type="button" id="rewind" title="Restart story" aria-label="Restart story">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 11a7.5 7.5 0 1 1 .8 4.7M4.5 5.5V11H10"/></svg>
+                      <span>Restart story</span>
+                    </button>
+                    <button type="button" id="save" title="Save progress" aria-label="Save progress">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.75h12a1 1 0 0 1 1 1v15.5l-7-4.25-7 4.25V4.75a1 1 0 0 1 1-1Z"/></svg>
+                      <span>Save progress</span>
+                    </button>
+                    <button type="button" id="theme-toggle" title="Change theme" aria-label="Change theme" hidden>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg>
+                      <span>Dark theme</span>
+                    </button>
+                    <div id="audio-settings-anchor" hidden>
+                      <span id="audio-control" class="audio-control" hidden>
+                        <button type="button" id="audio-toggle" title="Sound on/off" aria-label="Sound on/off">
+                          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" fill="currentColor"/><path class="wave" d="M10.3 5.7a3.3 3.3 0 0 1 0 4.6"/><path class="wave" d="M12 4a5.6 5.6 0 0 1 0 8"/><path class="slash" d="M10.5 6l4 4M14.5 6l-4 4"/></svg>
+                        </button>
+                        <input type="range" id="audio-volume" min="0" max="100" step="1" value="50" aria-label="Volume">
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </header>
 
-        <div id="story" class="container">
-            <div class="header">
-                <h1>##STORY TITLE##</h1>
-                <h2 class="byline"></h2>
-            </div>
+            ##TITLE-SCREEN##
+            <div id="story-visual" class="story-visual" hidden></div>
+            <div id="story-passage" class="story-passage" hidden></div>
+            <div id="story-pager" class="story-pager" hidden></div>
+            <div id="story-choices" class="story-choices" hidden></div>
+            <div class="scroll-cue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9.5 12 15l6-5.5"/></svg></div>
         </div>
     </div>
 
     <script src="ink.js"></script>
     <script src="##JAVASCRIPT FILENAME##"></script>
+    <script src="richtext.js"></script>
+    <script src="pager.js"></script>
+    <script src="choice-text.js"></script>
+    <script src="screen-mode.js"></script>
+    <script src="ending-marker.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
