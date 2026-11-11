@@ -626,6 +626,8 @@
 
             // Create paragraph element (initially hidden)
             var paragraphElement = document.createElement('p');
+            if( tags.some(function(tag) { return String(tag).trim() === '__inky_paragraph_gap__'; }) )
+                paragraphElement.classList.add('inky-paragraph-gap');
             paragraphElement.appendChild(storyTextNode(paragraphText));
             if( effectiveAlign ) paragraphElement.classList.add("align" + effectiveAlign);
             storyContainer.appendChild(paragraphElement);
@@ -645,7 +647,8 @@
                     && property !== "ALIGN"
                     && !ScreenMode.isScreenTag(normalized)
                     && property !== "MUSIC"
-                    && property !== "SOUND";
+                    && property !== "SOUND"
+                    && normalized !== "__inky_paragraph_gap__";
             });
             if( visibleTags.length ) {
                 var tagsElement = document.createElement('p');

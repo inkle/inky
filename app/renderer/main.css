@@ -807,14 +807,15 @@ html.dark .style-mode-tab.active, body.dark .style-mode-tab.active { background:
   padding: 0;
 }
 
-/* Story lines sit exactly where the editor puts them: one under the other, the
-   way a text editor lays out the same source. The breath between them is the
-   writer's, and line-height (game.yaml) is the only dial for it - ink throws
-   away the difference between a single Enter and a blank line, so a margin here
-   would be a gap the story never asked for. */
+/* Preserve a reader-visible gap only when the author leaves a blank
+   narrative line. Ordinary adjacent lines retain their existing spacing. */
 #main #player p.storyText {
   margin: 0;
   line-height: var(--game-line-height, 1.7);
+}
+
+#main #player p.storyText.inky-paragraph-gap {
+  margin-top: 0.9em;
 }
 
 #main #player p.choice {

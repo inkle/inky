@@ -6,6 +6,7 @@ const electron = require('electron');
 const ipc = electron.ipcMain;
 const mkdirp = require('mkdirp');
 const TagFormat = require('../renderer/tagFormat.js').TagFormat;
+const ParagraphSpacing = require('../renderer/paragraphSpacing.js');
 
 // inklecate is packaged outside of the main asar bundle since it's executable
 const inklecateNames = {
@@ -54,7 +55,7 @@ function compile(compileInstruction, requester) {
         // The compiler only ever sees tags in their one accepted shape (#tag: value,
         // flush left), whatever the text looked like when it arrived.
         if( path.extname(relativePath).toLowerCase() === ".ink" )
-            inkFileContent = TagFormat.normalizeText(inkFileContent);
+            inkFileContent = ParagraphSpacing.annotate(TagFormat.normalizeText(inkFileContent));
 
         if( path.dirname(relativePath) != "." ) {
             var fullDir = path.dirname(fullInkPath);

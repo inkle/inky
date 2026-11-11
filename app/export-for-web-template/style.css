@@ -524,11 +524,13 @@ img {
     border-radius: calc(var(--frame-radius) / 2);
 }
 
-/* One line per source line, the way the editor stacks them: the writer's only dial
-   for the breath between lines is line-height, because ink cannot tell a single
-   Enter from a blank line. Choices keep their own spacing in the generated CSS. */
+/* Only an annotated blank narrative line produces a paragraph gap. */
 .story-passage p {
     margin: 0;
+}
+
+.story-passage p.inky-paragraph-gap {
+    margin-top: 0.9em;
 }
 
 .story-passage > .scene-title:not(:first-child) {

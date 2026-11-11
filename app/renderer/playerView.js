@@ -9,6 +9,7 @@ const ChoiceText = require("./choiceText.js");
 const InkyPager = require("./pager.js");
 const ScreenMode = require("./screenMode.js");
 const EndingMarker = require("./endingMarker.js");
+const ParagraphSpacing = require("./paragraphSpacing.js");
 
 var events = {};
 var lastFadeTime = 0;
@@ -488,6 +489,8 @@ function addTags(tags)
     const alignmentTag = tags.map(alignmentFromTag).find(align => align !== null && align !== undefined);
     const titleTag = tags.map(sceneTitleFromTag).find(title => title !== null && title !== undefined);
     var $lastStoryParagraph = $textBuffer.children(".storyText").last();
+    if( tags.some(tag => String(tag).trim() === ParagraphSpacing.MARKER) )
+        $lastStoryParagraph.addClass("inky-paragraph-gap");
 
     // A scene starts with a "# title:" tag. Its "# align:" tag, if any,
     // is the scene's alignment; without one the scene goes back to the story alignment.
@@ -518,7 +521,8 @@ function addTags(tags)
         !globalTags.has(String(tag)) && !isSoundTag(tag)
             && sceneTitleFromTag(tag) === null && alignmentFromTag(tag) === null
             && imageFromTag(tag) === null && backgroundFromTag(tag) === null
-            && !ScreenMode.isScreenTag(tag));
+            && !ScreenMode.isScreenTag(tag)
+            && String(tag).trim() !== ParagraphSpacing.MARKER);
     if( visibleTags.length === 0 ) {
         contentReady();
         return;
