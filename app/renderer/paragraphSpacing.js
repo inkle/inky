@@ -5,6 +5,16 @@
 // keeps diagnostics and source navigation aligned with the original file.
 const MARKER = "__inky_paragraph_gap__";
 const MARKER_LINE = "# " + MARKER;
+// The private tag stores the exact number of blank source lines. Preserve
+// compatibility with the old unnumbered prototype marker.
+function gapCount(tag) {
+    const match = String(tag == null ? "" : tag).trim()
+        .match(/^__inky_paragraph_gap__(?::\s*([0-9]+))?$/);
+    if( !match ) return 0;
+    if( !match[1] ) return 1;
+    const count = Number(match[1]);
+    return Number.isSafeInteger(count) && count > 0 ? count : 0;
+}
 const NOT_NARRATIVE = /^(?:\/\/|\/\*|\*\/|\*|\+|\-|->|<-|=|#|~|\{|\}|\[|<>|VAR\b|CONST\b|LIST\b|EXTERNAL\b|INCLUDE\b|TODO\b|END\b|DONE\b)/i;
 
 function narrative(line, inComment) {
@@ -47,9 +57,9 @@ function annotate(text) {
             comments.slice(firstBlank, next).some(Boolean) ) continue;
         const indentation = line => (line.match(/^[ \t]*/) || [""])[0];
         if( indentation(lines[previous]) !== indentation(lines[next]) ) continue;
-        parts[i * 2] = indentation(lines[next]) + MARKER_LINE;
+        parts[firstBlank * 2] = indentation(lines[next]) + MARKER_LINE + ": " + (next - firstBlank);
     }
     return parts.join("");
 }
 
-module.exports = { MARKER, annotate };
+module.exports = { MARKER, gapCount, annotate };
