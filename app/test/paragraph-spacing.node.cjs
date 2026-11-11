@@ -87,9 +87,10 @@ test("Preview and browser rendering hide the tag and give identical spacing",()=
   const chrome = read("../renderer/gameChrome.css");
   assert.match(chrome, /#main #player \.story-passage p\.storyText\.inky-paragraph-gap\s*\{\s*margin-top:\s*0\.9em/);
   assert.ok(chrome.indexOf("p.storyText.inky-paragraph-gap") > chrome.indexOf(".story-passage p.storyText {"), "gap override must follow the baseline margin reset");
-  assert.match(read("../renderer/playerView.js"),/blankLines \+ "lh"/);
+  assert.match(read("../renderer/playerView.js"),/\$lastStoryParagraph\[0\]\.style\.setProperty\("--inky-paragraph-gap", blankLines \+ "lh"\)/);
   assert.match(read("../export-for-web-template/main.js"),/blankLines \+ 'lh'/);
   assert.match(read("../renderer/gameChrome.css"),/flex-shrink:\s*0/);
+  assert.match(read("../renderer/pager.js"),/total - intentionalGap <= available/);
   assert.match(read("../renderer/gameChrome.css"),/p\.storyText\.inky-paragraph-gap\s*\{\s*margin-top:\s*var\(--inky-paragraph-gap, 1lh\)/);
   assert.match(read("../export-for-web-template/style.css"),/p\.inky-paragraph-gap\s*\{\s*margin-top:\s*var\(--inky-paragraph-gap, 1lh\)/);
 });
