@@ -476,6 +476,12 @@
   margin: 0;
 }
 
+/* This stylesheet loads after main.css. Keep the author's blank-line gap
+   more specific than the baseline paragraph margin reset above. */
+#main #player .story-passage p.storyText.inky-paragraph-gap {
+  margin-top: 0.9em;
+}
+
 #main #player .story-passage > .sceneTitle:not(:first-child),
 #main #player .story-passage > .scene-title:not(:first-child) {
   margin-top: 1.3em;
