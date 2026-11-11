@@ -161,7 +161,12 @@ function scrollFrameToNewContent() {
     passage.style.setProperty("--story-top-cover", paddingTop + "px");
 
     var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if( animationEnabled && !reducedMotion ) $textBuffer.animate({ scrollTop: target }, 350, "swing");
+    // Avoid scheduling zero-distance scroll animations for every live text line.
+    // They can repaint an already-animating paragraph on some Linux renderers.
+    if( Math.abs(passage.scrollTop - target) < 1 ) {
+        $textBuffer.stop(true);
+        passage.scrollTop = target;
+    } else if( animationEnabled && !reducedMotion ) $textBuffer.animate({ scrollTop: target }, 350, "swing");
     else passage.scrollTop = target;
 }
 
@@ -263,14 +268,14 @@ function addTextSection(text) {
     pendingStoryText = String(text == null ? "" : text);
 }
 
-function flushPendingStoryText() {
-    if( pendingStoryText === null ) return;
+function flushPendingStoryText(animateOnInsert = true) {
+    if( pendingStoryText === null ) return null;
     const text = pendingStoryText;
     pendingStoryText = null;
-    renderTextSection(text);
+    return renderTextSection(text, animateOnInsert);
 }
 
-function renderTextSection(text)
+function renderTextSection(text, animateOnInsert = true)
 {
     text = String(text == null ? "" : text);
     var choiceTextResult = ChoiceText.stripSelectedChoiceText(text, selectedChoiceText);
@@ -333,8 +338,9 @@ function renderTextSection(text)
         }
     });
 
-    if( animationEnabled && shouldAnimate() )
+    if( animateOnInsert && animationEnabled && shouldAnimate() )
         fadeIn($paragraph);
+    return $paragraph;
 }
 
 // ---- Story image -----------------------------------------------------------
@@ -482,7 +488,9 @@ function addTags(tags)
         clearScene();
         pendingStoryText = followingText;
     }
-    flushPendingStoryText();
+    // Configure the incoming paragraph before animating it, so title insertion
+    // and paragraph-gap margins never move text mid-fade in the Linux Preview.
+    const $newParagraph = flushPendingStoryText(false);
 
     // Alignment is resolved first: the scene title (and, for the first paragraph,
     // the story title and author) follow the paragraph they sit above.
@@ -517,6 +525,10 @@ function addTags(tags)
     tags.forEach(addBackgroundTag);
     // image: src follows the paragraph it belongs to, as in the exported page.
     tags.forEach(addImageTag);
+
+    // All layout-affecting tags have been applied; only now begin the fade.
+    if( $newParagraph && $newParagraph.length && animationEnabled && shouldAnimate() )
+        fadeIn($newParagraph);
 
     // Control tags, alignment, scene titles and pictures are not visible tags.
     var globalTags = new Set(JSON.parse($("#player").attr("data-global-tags") || "[]"));
