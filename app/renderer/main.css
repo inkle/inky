@@ -815,7 +815,7 @@ html.dark .style-mode-tab.active, body.dark .style-mode-tab.active { background:
 }
 
 #main #player p.storyText.inky-paragraph-gap {
-  margin-top: 0.9em;
+  margin-top: var(--inky-paragraph-gap, 1lh);
 }
 
 #main #player p.choice {
