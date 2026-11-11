@@ -489,8 +489,11 @@ function addTags(tags)
     const alignmentTag = tags.map(alignmentFromTag).find(align => align !== null && align !== undefined);
     const titleTag = tags.map(sceneTitleFromTag).find(title => title !== null && title !== undefined);
     var $lastStoryParagraph = $textBuffer.children(".storyText").last();
-    if( tags.some(tag => String(tag).trim() === ParagraphSpacing.MARKER) )
+    const blankLines = tags.reduce((count, tag) => Math.max(count, ParagraphSpacing.gapCount(tag)), 0);
+    if( blankLines && $lastStoryParagraph.length ) {
         $lastStoryParagraph.addClass("inky-paragraph-gap");
+        $lastStoryParagraph.css("--inky-paragraph-gap", blankLines + "lh");
+    }
 
     // A scene starts with a "# title:" tag. Its "# align:" tag, if any,
     // is the scene's alignment; without one the scene goes back to the story alignment.
@@ -522,7 +525,7 @@ function addTags(tags)
             && sceneTitleFromTag(tag) === null && alignmentFromTag(tag) === null
             && imageFromTag(tag) === null && backgroundFromTag(tag) === null
             && !ScreenMode.isScreenTag(tag)
-            && String(tag).trim() !== ParagraphSpacing.MARKER);
+            && ParagraphSpacing.gapCount(tag) === 0);
     if( visibleTags.length === 0 ) {
         contentReady();
         return;
