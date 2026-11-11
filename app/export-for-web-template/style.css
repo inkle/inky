@@ -527,10 +527,11 @@ img {
 /* Only an annotated blank narrative line produces a paragraph gap. */
 .story-passage p {
     margin: 0;
+    flex-shrink: 0; /* Preserve line boxes even when passage must scroll. */
 }
 
 .story-passage p.inky-paragraph-gap {
-    margin-top: 0.9em;
+    margin-top: var(--inky-paragraph-gap, 1lh);
 }
 
 .story-passage > .scene-title:not(:first-child) {
