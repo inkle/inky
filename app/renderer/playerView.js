@@ -492,7 +492,7 @@ function addTags(tags)
     const blankLines = tags.reduce((count, tag) => Math.max(count, ParagraphSpacing.gapCount(tag)), 0);
     if( blankLines && $lastStoryParagraph.length ) {
         $lastStoryParagraph.addClass("inky-paragraph-gap");
-        $lastStoryParagraph.css("--inky-paragraph-gap", blankLines + "lh");
+        $lastStoryParagraph[0].style.setProperty("--inky-paragraph-gap", blankLines + "lh");
     }
 
     // A scene starts with a "# title:" tag. Its "# align:" tag, if any,
