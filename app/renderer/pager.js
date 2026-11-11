@@ -305,6 +305,25 @@
                     return;
                 }
                 var total = measureBlocks(blocks).reduce(function (sum, height) { return sum + height; }, 0);
+                // If intentional blank lines are what pushes the story past the
+                // frame, scroll continuously rather than creating an empty page
+                // or hiding the next paragraph below a large top margin.
+                // Ordinary text-heavy stories keep the existing pagination.
+                var intentionalGap = 0;
+                var largestGap = 0;
+                blocks.forEach(function (block) {
+                    if( !block.classList.contains("inky-paragraph-gap") ) return;
+                    var gap = styleNumber(win, block, "marginTop");
+                    intentionalGap += gap;
+                    largestGap = Math.max(largestGap, gap);
+                });
+                if( total > available + 1 && intentionalGap > 0 &&
+                    (total - intentionalGap <= available + 1 || largestGap >= available) ) {
+                    state.pages = [blocks];
+                    state.index = 0;
+                    renderNav();
+                    return;
+                }
                 if( total <= available + 1 ) {
                     state.pages = [blocks];
                     state.index = 0;
