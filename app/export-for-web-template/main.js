@@ -484,6 +484,15 @@
         });
     }
 
+    function paragraphGapCount(tag) {
+        var match = String(tag == null ? "" : tag).trim()
+            .match(/^__inky_paragraph_gap__(?::\s*([0-9]+))?$/);
+        if( !match ) return 0;
+        if( !match[1] ) return 1;
+        var count = Number(match[1]);
+        return Number.isSafeInteger(count) && count > 0 ? count : 0;
+    }
+
     // Main story processing function. Each time this is called it generates
     // all the next content up as far as the next set of choices.
     function continueStory() {
@@ -626,8 +635,13 @@
 
             // Create paragraph element (initially hidden)
             var paragraphElement = document.createElement('p');
-            if( tags.some(function(tag) { return String(tag).trim() === '__inky_paragraph_gap__'; }) )
+            var blankLines = tags.reduce(function(count, tag) {
+                return Math.max(count, paragraphGapCount(tag));
+            }, 0);
+            if( blankLines ) {
                 paragraphElement.classList.add('inky-paragraph-gap');
+                paragraphElement.style.setProperty('--inky-paragraph-gap', blankLines + 'lh');
+            }
             paragraphElement.appendChild(storyTextNode(paragraphText));
             if( effectiveAlign ) paragraphElement.classList.add("align" + effectiveAlign);
             storyContainer.appendChild(paragraphElement);
@@ -648,7 +662,7 @@
                     && !ScreenMode.isScreenTag(normalized)
                     && property !== "MUSIC"
                     && property !== "SOUND"
-                    && normalized !== "__inky_paragraph_gap__";
+                    && paragraphGapCount(normalized) === 0;
             });
             if( visibleTags.length ) {
                 var tagsElement = document.createElement('p');
