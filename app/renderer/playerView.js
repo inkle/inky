@@ -291,11 +291,10 @@ function renderTextSection(text, animateOnInsert = true)
         $paragraph.addClass("customInstruction");
     }
 
-    // Story text is plain text: markup is shown as written, never interpreted.
-    // Keep word spans only to preserve the author's Alt-click jump-to-source;
-    // ordinary reading and hovering must not change narrative text styling.
+    // Render contiguous text nodes, just like Web Export. Per-word spans can
+    // leave stale glyphs in Chromium/Linux when live Preview swaps buffers.
+    // Alt-click source navigation remains available without word wrappers.
     $paragraph[0].appendChild(InkRichText.toNodes(text, document));
-    SafeHtml.wrapWords($paragraph[0]);
     if( sceneAlignment ) $paragraph.addClass(alignClassName(sceneAlignment));
 
     // Keep track of the offset of each word into the content,
@@ -313,29 +312,19 @@ function renderTextSection(text, animateOnInsert = true)
     // Append the actual content
     $textBuffer.append($paragraph);
 
-    // Find the offset of each word in the content, for clickability
-    var searchFrom = 0;
-    $paragraph.find("span.inky-word").each((i, element) => {
-        var $span = $(element);
-        var word = $span.text();
-        var at = word.length > 0 ? text.indexOf(word, searchFrom) : -1;
-        if( at === -1 ) return;
-        $span.data("range", {start: previousContentLength + at, length: word.length});
-        searchFrom = at + word.length;
-    });
-
-    // Alt-click handler to jump to source
-    $paragraph.find("span.inky-word").click(function(e) {
-        if( e.altKey ) {
-
-            var range = $(this).data("range");
-            if( range ) {
-                var midOffset = Math.floor(range.start + range.length/2);
-                events.jumpToSource(midOffset);
-            }
-
-            e.preventDefault();
-        }
+    // Keep Alt-click source lookup, using the caret position within the
+    // paragraph instead of wrapping each word in a separate DOM element.
+    $paragraph.on("click", function(e) {
+        if( !e.altKey ) return;
+        var caret = document.caretRangeFromPoint && document.caretRangeFromPoint(e.clientX, e.clientY);
+        if( !caret || !this.contains(caret.startContainer) ) return;
+        var prefix = document.createRange();
+        prefix.selectNodeContents(this);
+        prefix.setEnd(caret.startContainer, caret.startOffset);
+        var sourceOffset = SafeHtml.wordSourceOffset(text, this.textContent, prefix.toString().length);
+        if( sourceOffset !== null && typeof events.jumpToSource === "function" )
+            events.jumpToSource(previousContentLength + sourceOffset);
+        e.preventDefault();
     });
 
     if( animateOnInsert && animationEnabled && shouldAnimate() )
