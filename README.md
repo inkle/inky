@@ -116,17 +116,10 @@ Combine **top artwork**, **background textures**, **scene titles**, **narrative 
 
 <div align="center">
 
-<a href="docs/screenshots/showcase-scene-old-forge.png">
-  <img src="docs/screenshots/showcase-scene-old-forge.png" alt="Before Dawn — The Old Forge, shown in the Inky Preview with its illustrated scene, story and choices" width="480">
-</a>
+<a href="docs/screenshots/showcase-scene-old-forge.png"><img src="docs/screenshots/showcase-scene-old-forge.png" alt="The Old Forge captured in Inky: a passage with top illustration, dark textured background, title, narrative and branching choices" width="46%"></a>
+<a href="docs/screenshots/showcase-scene-voices-in-the-snow.png"><img src="docs/screenshots/showcase-scene-voices-in-the-snow.png" alt="Voices in the Snow captured in Inky: another illustrated passage with its own image, title, story text and interactive choices" width="46%"></a>
 
-<p><em>The Old Forge</em></p>
-
-<a href="docs/screenshots/showcase-scene-voices-in-the-snow.png">
-  <img src="docs/screenshots/showcase-scene-voices-in-the-snow.png" alt="Before Dawn — Voices in the Snow, shown in the Inky Preview with its illustrated scene, story and choices" width="480">
-</a>
-
-<p><em>Voices in the Snow</em></p>
+<p><em>The Old Forge</em> · <em>Voices in the Snow</em> — two actual passages captured from <strong>Before Dawn</strong> in the Inky Preview.</p>
 
 </div>
 

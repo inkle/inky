@@ -45,15 +45,9 @@ There may not be enough light for everyone.
 #music: audio/music/forge-embers.mp3
 #sound: audio/sfx/forge.wav
 #title: The Old Forge
-The forge is almost dark. Its last embers glow beneath a blanket of ash.
+The forge is almost dark. Its last embers glow beneath the ash. Mara takes an old lantern from a shelf. The glass is scratched, and the handle is blackened by years of use.
 
-Mara takes an old lantern from a shelf. The glass is scratched, and the handle is blackened by years of use.
-
-"My father made this," she says. "He believed a light given freely could become more than it was."
-
-She hesitates.
-
-"I never knew what he meant."
+"My father made this," she says. "He believed a light given freely could become more than it was." She hesitates. "I never knew what he meant."
 
 Outside, the star pulses faintly, as if listening.
 
@@ -77,17 +71,11 @@ Outside, the star pulses faintly, as if listening.
 #sound: audio/sfx/bell.wav
 #title: Voices in the Snow
 ~ heard_caravan = true
-The old bridge groans beneath the weight of winter.
+The old bridge groans beneath the weight of winter. Beyond it lies the mountain pass. The wind carries something through the darkness.
 
-Beyond it lies the mountain pass. The wind carries something through the darkness.
+A bell. Then a voice, distant and frightened. The caravan is still moving, but it is heading toward the ravine.
 
-A bell. Then a voice, distant and frightened.
-
-The caravan is still moving, but it is heading toward the ravine.
-
-They are closer than Mara feared.
-
-And the star is growing dimmer.
+They are closer than Mara feared. And the star is growing dimmer.
 
 + [Climb toward the star.] -> hill
 + {not has_lantern} [Return to Mara's forge.] -> forge
