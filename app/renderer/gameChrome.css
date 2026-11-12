@@ -316,9 +316,10 @@
   scrollbar-width: none;
   justify-content: safe center;
   font-size: calc(var(--game-font-size, 18px) * var(--player-zoom, 1));
-  /* The top padding covers the scrolled history (see playerView.js). */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent var(--story-top-cover, 0px), #000 var(--story-top-cover, 0px));
-  mask-image: linear-gradient(to bottom, transparent 0, transparent var(--story-top-cover, 0px), #000 var(--story-top-cover, 0px));
+  /* Keep the same hard top edge over scrolled history (see playerView.js).
+     An alpha mask over this scrolling text leaves stale glyph fragments with
+     Linux/Chromium GPU rasterization. A rectangular clip needs no alpha mask. */
+  clip-path: inset(var(--story-top-cover, 0px) 0 0);
 }
 
 #main #player .story-passage::-webkit-scrollbar {

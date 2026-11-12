@@ -459,7 +459,6 @@ ToolbarView.setEvents({
     navigateBack: () => NavHistory.back(),
     navigateForward: () => NavHistory.forward(),
     selectIssue: gotoIssue,
-    refreshPreview: () => PlayerView.refreshPreview(),
     stepBack: () => {
         AudioPreview.stopSoundEffects();
         LiveCompiler.stepBack();

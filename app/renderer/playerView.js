@@ -24,19 +24,6 @@ var selectedChoiceText = null;
 // Inklecate sends paragraph text before its tags. Buffer it to apply # screen
 // before painting that paragraph (not after).
 var pendingStoryText = null;
-var refreshPending = false;
-
-function refreshPreview() {
-    var player = document.getElementById("player");
-    if( !player || refreshPending ) return;
-    refreshPending = true;
-    player.classList.add("preview-refreshing");
-    // Keep the layer through a rendered frame before restoring the original composition.
-    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-        player.classList.remove("preview-refreshing");
-        refreshPending = false;
-    }));
-}
 
 // The frame (.innerText) holds the picture band and the scrolling passage; the story text lives
 // in the passage. Older markup without those children is upgraded in place.
@@ -732,7 +719,6 @@ function setAnimationEnabled(animEnabled) {
 }
 
 exports.PlayerView = {
-    refreshPreview: refreshPreview,
     startStoryFromTitle: startStory,
     setEvents: (e) => { events = e; },
     contentReady: contentReady,
@@ -753,4 +739,4 @@ exports.PlayerView = {
     setImageResolver: resolver => { imageResolver = typeof resolver === "function" ? resolver : () => null; },
     setSelectedChoiceText: text => { selectedChoiceText = text == null ? null : String(text); },
     setAnimationEnabled: setAnimationEnabled
-};  
+};

@@ -188,20 +188,11 @@ img.issue-icon.warning {
   font-size: 16pt;
   color: gray;
 }
-#toolbar button.refresh-preview {
-  padding: 0;
-  vertical-align: top;
-}
 #toolbar .button:hover .icon {
   color: dimgray;
 }
 #toolbar .button.selected .icon {
   color: black;
-}
-
-/* Temporarily promote the preview to a new compositing layer to invalidate its paint. */
-#main #player.preview-refreshing {
-  transform: translateZ(0);
 }
 
 #toolbar .button.nav-back {

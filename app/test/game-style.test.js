@@ -209,7 +209,7 @@ describe("game style title settings", function () {
         assert.match(chrome, /#main #player #story-menu > button \{[^}]*display: flex;/);
         assert.match(chrome, /#main #player \.story-passage \{[^}]*overflow-y: auto;[^}]*scrollbar-width: none;[^}]*justify-content: safe center;/);
         assert.match(chrome, /#main #player \.innerText:not\(\.has-visual\) \.story-passage \{[^}]*justify-content: flex-start;/);
-        assert.match(chrome, /#main #player \.story-passage \{[^}]*mask-image: linear-gradient\(to bottom, transparent 0, transparent var\(--story-top-cover, 0px\), #000 var\(--story-top-cover, 0px\)\);/);
+        assert.match(chrome, /#main #player \.story-passage \{[^}]*clip-path: inset\(var\(--story-top-cover, 0px\) 0 0\);/);
         assert.match(chrome, /#main #player \.story-passage::after \{[^}]*height: var\(--story-scroll-fill, 0px\);/);
         assert.match(chrome, /#main #player \.innerText\.container::after \{[^}]*position: absolute;[^}]*background: linear-gradient\(to bottom, transparent, var\(--game-bg, #ffffff\)\);[^}]*opacity: 0;[^}]*pointer-events: none;/);
         assert.match(chrome, /#main #player \.innerText\.container\.has-background \{[^}]*background-size: cover;[^}]*background-repeat: no-repeat;/);

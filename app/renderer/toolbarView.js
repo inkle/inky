@@ -6,7 +6,6 @@ const i18n = require("./i18n.js");
 var events = {
     rewind:   () => {},
     stepBack: () => {},
-    refreshPreview: () => {},
     selectIssue: () => {},
     didSetTitle: () => {}
 };
@@ -138,11 +137,6 @@ $(document).ready(function() {
 
     $("#toolbar .step-back.button").on("click", function(event) {
         events.stepBack();
-        event.preventDefault();
-    });
-
-    $("#toolbar .refresh-preview.button").on("click", function(event) {
-        events.refreshPreview();
         event.preventDefault();
     });
 
