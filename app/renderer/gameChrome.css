@@ -474,6 +474,13 @@
    writer spaces them with line-height. */
 #main #player .story-passage p.storyText {
   margin: 0;
+  flex-shrink: 0; /* Prevent compressing line boxes when blank lines add height. */
+}
+
+/* This stylesheet loads after main.css. Keep the author's blank-line gap
+   more specific than the baseline paragraph margin reset above. */
+#main #player .story-passage p.storyText.inky-paragraph-gap {
+  margin-top: var(--inky-paragraph-gap, 1lh);
 }
 
 #main #player .story-passage > .sceneTitle:not(:first-child),

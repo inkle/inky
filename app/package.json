@@ -12,7 +12,7 @@
     "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.txt -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html",
     "start": "electron main-process/main.js",
     "test": "npm run test:node && mocha --timeout 10000 --exit --ignore \"test/*.node.cjs\"",
-    "test:node": "node --test test/audio-active-menu.node.cjs test/audio-consistency-93.node.cjs test/audio-no-immediate-cut.node.cjs test/audio-volume-availability.node.cjs",
+    "test:node": "node --test test/audio-active-menu.node.cjs test/audio-consistency-93.node.cjs test/audio-no-immediate-cut.node.cjs test/audio-volume-availability.node.cjs test/paragraph-spacing.node.cjs",
     "test:web-export": "mocha test/web-export-only-smoke.js",
     "generate-locale": "node ../build/generateLocale.js",
     "build-package": "node build-package.js"

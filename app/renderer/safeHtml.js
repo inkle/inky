@@ -33,4 +33,23 @@ function wrapWords(root) {
     });
 }
 
-exports.SafeHtml = { escapeHtml, wrapWords };
+// Return the source midpoint of a visible word hit with Alt-click. Text stays
+// in contiguous DOM nodes (no per-word paint layers in the Preview).
+function wordSourceOffset(sourceText, visibleText, caretOffset) {
+    sourceText = String(sourceText == null ? "" : sourceText);
+    visibleText = String(visibleText == null ? "" : visibleText);
+    if( !Number.isFinite(caretOffset) || caretOffset < 0 ) return null;
+    const re = /\S+/g;
+    let match, searchFrom = 0;
+    while( (match = re.exec(visibleText)) !== null ) {
+        const at = sourceText.indexOf(match[0], searchFrom);
+        if( at < 0 ) continue;
+        const end = match.index + match[0].length;
+        if( caretOffset >= match.index && caretOffset <= end )
+            return at + Math.floor(match[0].length / 2);
+        searchFrom = at + match[0].length;
+    }
+    return null;
+}
+
+exports.SafeHtml = { escapeHtml, wrapWords, wordSourceOffset };

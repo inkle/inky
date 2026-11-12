@@ -16,9 +16,10 @@ assert(!css.match(/#player\.altKey\s*\{/), "No global altKey styling");
 
 // Do not break author navigation: holding Alt and clicking a word should still
 // find its source, but *without* a fake hyperlink visual treatment.
-assert(player.includes("SafeHtml.wrapWords($paragraph[0])"), "Preserves individual word ranges");
-assert(player.includes('if( e.altKey )'), "Preserves Alt-click to source");
-assert(player.includes("events.jumpToSource(midOffset)"), "Preserves source navigation");
+assert(!player.includes("SafeHtml.wrapWords($paragraph[0])"), "Preview uses contiguous text nodes for stable rendering");
+assert(player.includes('data("sourceOffsets")'), "Preserves exact Alt-click source navigation without spans");
+assert(player.includes('if( !e.altKey ) return;'), "Preserves Alt-click to source");
+assert(player.includes("events.jumpToSource(offset,"), "Preserves source navigation");
 assert(safe.includes('span.className = "inky-word"'), "Word mapping still exists");
 
 // Reader's true interactive controls must keep their hover feedback.

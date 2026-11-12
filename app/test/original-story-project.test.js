@@ -150,9 +150,9 @@ test('legacy bold, italic and breaks render using the safe native reader in Prev
     // editor's existing plain-choice policy is intentionally unchanged.
     const preview = fs.readFileSync(path.join(__dirname, '../renderer/playerView.js'), 'utf8');
     const web = fs.readFileSync(path.join(__dirname, '../export-for-web-template/main.js'), 'utf8');
-    assert(preview.includes('InkRichText.toNodes(text, document)'));
+    assert(preview.includes('InkRichText.toNodes(text, document,'));
     assert(web.includes('paragraphElement.appendChild(storyTextNode(paragraphText))'));
-    assert(preview.includes('InkRichText.plainText(choice.choice.text)'));
+    assert(preview.includes('InkRichText.plainText(choiceText)'));
     assert(web.includes('choiceButton.appendChild(document.createTextNode(plainStoryText(choice.text)))'));
 });
 

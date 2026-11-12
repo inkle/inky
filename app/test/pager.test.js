@@ -84,6 +84,27 @@ describe("pager in a frame", function () {
         }
     });
 
+    it("measures a many-paragraph passage with a linear number of layout reads", function () {
+        const paragraphs = Array.from({ length: 80 }, (_, i) => String(i).padStart(30, "x"));
+        build(paragraphs, 100);
+        const proto = window.HTMLElement.prototype;
+        let reads = 0;
+        for( const name of ["offsetTop", "offsetHeight"] ) {
+            const descriptor = Object.getOwnPropertyDescriptor(proto, name);
+            Object.defineProperty(proto, name, {
+                configurable: true,
+                get() { reads++; return descriptor.get.call(this); }
+            });
+        }
+        pager.refresh();
+        assert.strictEqual(Array.from(passage.children, p => p.textContent).join(""), paragraphs.join(""));
+        for( let i = 0; i < pager.getState().count; i++ ) {
+            pager.goTo(i);
+            assert.ok(visibleText().length > 0, "page must not be empty");
+        }
+        assert.ok(reads <= 8 * paragraphs.length + 10, `${reads} layout reads for ${paragraphs.length} paragraphs`);
+    });
+
     it("fills each page as far as it goes, cutting the next paragraph at a sentence", function () {
         // Room for 5 lines (100px). The first paragraph takes 2 lines; the second has two sentences
         // of 2 lines each: the first one fits in what is left (3 lines), the second goes on.
@@ -187,6 +208,157 @@ describe("pager in a frame", function () {
             const shown = Array.from(passage.children).filter(c => !c.classList.contains("page-out"));
             assert.notStrictEqual(shown[shown.length - 1], title, "a title is never the last block of a page");
         }
+    });
+
+    it("splits a paragraph with a blank-line margin without repeating the cut", function () {
+        const first = "a".repeat(90);
+        const second = Array.from({ length: 24 }, (_, i) => "word" + i).join(" ");
+        build([first, second], 130);
+        const paragraph = passage.children[1];
+        paragraph.classList.add("inky-paragraph-gap");
+        const style = window.document.createElement("style");
+        style.textContent = ".inky-paragraph-gap { margin-top: 20px; }";
+        window.document.head.appendChild(style);
+        const proto = window.HTMLElement.prototype;
+        const height = el => el.classList.contains("page-out") ? 0 :
+            el.tagName === "P" ? Math.max(1, Math.ceil(el.textContent.length / 30)) * 20 : 20;
+        const margin = el => el.classList.contains("inky-paragraph-gap") ? 20 : 0;
+        let measurements = 0;
+        Object.defineProperty(proto, "offsetTop", {
+            configurable: true,
+            get() {
+                assert.ok(++measurements < 300, "pagination must make progress");
+                let top = margin(this);
+                for( let sibling = this.previousElementSibling; sibling; sibling = sibling.previousElementSibling )
+                    top += height(sibling) + margin(sibling);
+                return top;
+            }
+        });
+        pager.refresh();
+        assert.ok(pager.getState().count > 1);
+        assert.strictEqual(Array.from(passage.children).map(p => p.textContent).join(""), first + second);
+        assert.strictEqual(passage.querySelectorAll(".inky-paragraph-gap").length, 1);
+        Object.defineProperty(passage, "clientHeight", { configurable: true, get: () => 1000 });
+        pager.refresh();
+        assert.strictEqual(passage.children.length, 2);
+        assert.strictEqual(passage.children[1].textContent, second);
+        assert.ok(passage.children[1].classList.contains("inky-paragraph-gap"));
+    });
+
+    it("does not leave an empty fragment when a cut consumes the whole paragraph", function () {
+        build(["a".repeat(90), "word ".repeat(9), "last"], 130);
+        passage.children[1].classList.add("inky-paragraph-gap");
+        passage.children[2].classList.add("inky-paragraph-gap");
+        const proto = window.HTMLElement.prototype;
+        const height = el => el.classList.contains("page-out") ? 0 :
+            el.tagName === "P" ? Math.max(1, Math.ceil(el.textContent.trimEnd().length / 30)) * 20 : 20;
+        const margin = el => el.classList.contains("inky-paragraph-gap") ? 20 : 0;
+        Object.defineProperty(proto, "offsetHeight", { configurable: true, get() { return height(this); } });
+        Object.defineProperty(proto, "offsetTop", {
+            configurable: true,
+            get() {
+                let top = margin(this);
+                for( let sibling = this.previousElementSibling; sibling; sibling = sibling.previousElementSibling )
+                    top += height(sibling) + margin(sibling);
+                return top;
+            }
+        });
+        pager.refresh();
+        assert.ok(Array.from(passage.children).every(p => p.textContent.trim() !== ""));
+    });
+
+    it("keeps a title with an indivisible oversized paragraph without empty pages", function () {
+        const text = line(6);
+        build([text], 80);
+        const title = window.document.createElement("h2");
+        title.className = "scene-title";
+        title.textContent = "Title";
+        passage.insertBefore(title, passage.firstChild);
+        pager.refresh();
+        assert.deepStrictEqual(pager.getState(), { index: 0, count: 1 });
+        assert.deepStrictEqual(visibleText(), ["Title", text]);
+        assert.ok(passage.classList.contains("page-overflow"));
+    });
+
+    it("preserves order and choices with titles, margins, splits and an indivisible block", function () {
+        const paragraphs = [
+            "a".repeat(60),
+            "First sentence fits here. Another sentence follows. Third sentence stays in order.",
+            "z".repeat(180),
+            "Last paragraph."
+        ];
+        build(paragraphs, 100);
+        const title = window.document.createElement("h2");
+        title.className = "scene-title";
+        title.textContent = "Scene title";
+        passage.insertBefore(title, passage.children[1]);
+        passage.children[3].classList.add("inky-paragraph-gap");
+        const proto = window.HTMLElement.prototype;
+        const height = el => el.classList.contains("page-out") ? 0 :
+            el.tagName === "P" ? Math.max(1, Math.ceil(el.textContent.length / 30)) * 20 : 20;
+        const margin = el => el.classList.contains("inky-paragraph-gap") ? 20 : 0;
+        Object.defineProperty(proto, "offsetHeight", { configurable: true, get() { return height(this); } });
+        Object.defineProperty(proto, "offsetTop", {
+            configurable: true,
+            get() {
+                let top = margin(this);
+                for( let sibling = this.previousElementSibling; sibling; sibling = sibling.previousElementSibling )
+                    top += height(sibling) + margin(sibling);
+                return top;
+            }
+        });
+        pager.refresh();
+        const reconstructed = [];
+        for( let i = 0; i < pager.getState().count; i++ ) {
+            pager.goTo(i);
+            const shown = Array.from(passage.children).filter(el => !el.classList.contains("page-out"));
+            assert.ok(shown.length, `page ${i} is not empty`);
+            assert.notStrictEqual(shown[shown.length - 1], title);
+            const pageHeight = shown.reduce((sum, el) => sum + height(el) + margin(el), 0);
+            if( pageHeight > 101 ) {
+                assert.ok(shown.some(el => el.textContent === paragraphs[2]), "only the indivisible paragraph may overflow");
+                assert.ok(passage.classList.contains("page-overflow"));
+            }
+            assert.strictEqual(choices.querySelector("button").disabled, i < pager.getState().count - 1);
+            reconstructed.push(...shown.map(el => el.textContent));
+        }
+        assert.strictEqual(reconstructed.join(""), paragraphs[0] + title.textContent + paragraphs.slice(1).join(""));
+    });
+
+    it("finishes safely if a freshly split fragment no longer fits after measurement", function () {
+        const text = Array.from({ length: 60 }, (_, i) => `word${i}.`).join(" ");
+        build([text], 100);
+        const proto = window.HTMLElement.prototype;
+        const originalTop = Object.getOwnPropertyDescriptor(proto, "offsetTop").get;
+        const reads = new WeakMap();
+        let measurements = 0, warnings = 0;
+        Object.defineProperty(proto, "offsetTop", {
+            configurable: true,
+            get() {
+                assert.ok(++measurements < 5000, "pagination must make progress");
+                const top = originalTop.call(this);
+                if( !this.hasAttribute("data-page-split") ) return top;
+                const count = (reads.get(this) || 0) + 1;
+                reads.set(this, count);
+                return count === 1 ? top : top - 1000;
+            }
+        });
+        const warn = console.warn;
+        try {
+            console.warn = () => { warnings++; };
+            pager.refresh();
+        } finally {
+            console.warn = warn;
+        }
+        assert.ok(warnings > 0, "unstable split must be reported");
+        const seen = [];
+        for( let i = 0; i < pager.getState().count; i++ ) {
+            pager.goTo(i);
+            const visible = visibleText();
+            assert.ok(visible.length);
+            seen.push(...visible);
+        }
+        assert.strictEqual(seen.join(""), text);
     });
 
     it("keeps the page when only the size changes, and starts over when the text changes", function () {

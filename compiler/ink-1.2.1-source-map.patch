@@ -1,0 +1,127 @@
+diff --git a/inklecate/CommandLinePlayer.cs b/inklecate/CommandLinePlayer.cs
+index a073dbc..2ff8baa 100644
+--- a/inklecate/CommandLinePlayer.cs
++++ b/inklecate/CommandLinePlayer.cs
+@@ -6,6 +6,8 @@ namespace Ink
+ {
+ 	public class CommandLinePlayer
+ 	{
++        int _sourceStreamOffset;
++        int _sourceMapSequence;
+ 		public Story story { get; protected set; }
+ 		public bool autoPlay { get; set; }
+         public bool keepOpenAfterStoryFinish { get; set; }
+@@ -22,6 +24,9 @@ namespace Ink
+ 
+ 		public void Begin()
+ 		{
++            if (_jsonOutput && _compiler != null) {
++                Console.WriteLine("{\"sourceMapProtocol\":{\"version\":1,\"unit\":\"utf16\",\"compiler\":\"ink-1.2.1\"}}");
++            }
+             EvaluateStory ();
+ 
+ 			var rand = new Random ();
+@@ -177,12 +182,98 @@ namespace Ink
+                     var writer = new Runtime.SimpleJson.Writer();
+                     writer.WriteObjectStart();
+                     writer.WriteProperty("text", story.currentText);
++                    if (_compiler != null) {
++                        var offsets = SourceOffsets();
++                        var sequence = _sourceMapSequence++;
++                        writer.WritePropertyStart("sourceMap");
++                        writer.WriteObjectStart();
++                        writer.WriteProperty("version", 1);
++                        writer.WriteProperty("unit", "utf16");
++                        writer.WriteProperty("sequence", sequence);
++                        writer.WriteProperty("streamEnd", _sourceStreamOffset);
++                        writer.WritePropertyStart("offsets");
++                        writer.WriteArrayStart();
++                        foreach (var offset in offsets)
++                            writer.Write(offset);
++                        writer.WriteArrayEnd();
++                        writer.WritePropertyEnd();
++                        writer.WriteProperty("checksum", SourceMapChecksum(story.currentText, sequence, _sourceStreamOffset, offsets));
++                        writer.WriteObjectEnd();
++                        writer.WritePropertyEnd();
++                    }
+                     writer.WriteObjectEnd();
+                     Console.WriteLine (writer.ToString());
+                 } else {
+                     Console.Write (story.currentText);
+                 }
+ 
++                List<int> SourceOffsets()
++                {
++                    var raw = new System.Text.StringBuilder();
++                    var rawOffsets = new List<int>();
++                    bool inTag = false;
++                    foreach (var obj in story.state.outputStream) {
++                        var text = obj as StringValue;
++                        if (text != null) {
++                            if (!inTag) {
++                                for (int i = 0; i < text.value.Length; i++) {
++                                    raw.Append(text.value[i]);
++                                    rawOffsets.Add(_sourceStreamOffset + i);
++                                }
++                            }
++                            _sourceStreamOffset += text.value.Length;
++                        } else {
++                            var command = obj as ControlCommand;
++                            if (command != null) {
++                                if (command.commandType == ControlCommand.CommandType.BeginTag) inTag = true;
++                                if (command.commandType == ControlCommand.CommandType.EndTag) inTag = false;
++                            }
++                        }
++                    }
++
++                    var visible = new System.Text.StringBuilder();
++                    var offsets = new List<int>();
++                    int whitespaceStart = -1;
++                    int lineStart = 0;
++                    for (int i = 0; i < raw.Length; i++) {
++                        char c = raw[i];
++                        bool whitespace = c == ' ' || c == '\t';
++                        if (whitespace && whitespaceStart == -1) whitespaceStart = i;
++                        if (!whitespace) {
++                            if (c != '\n' && whitespaceStart > 0 && whitespaceStart != lineStart) {
++                                visible.Append(' ');
++                                offsets.Add(rawOffsets[whitespaceStart]);
++                            }
++                            whitespaceStart = -1;
++                        }
++                        if (c == '\n') lineStart = i + 1;
++                        if (!whitespace) {
++                            visible.Append(c);
++                            offsets.Add(rawOffsets[i]);
++                        }
++                    }
++                    if (visible.ToString() != story.currentText)
++                        throw new InvalidOperationException("Source map diverged from currentText");
++                    return offsets;
++                }
++
++                string SourceMapChecksum(string text, int sequence, int streamEnd, List<int> offsets)
++                {
++                    using (var buffer = new System.IO.MemoryStream())
++                    using (var binary = new System.IO.BinaryWriter(buffer)) {
++                        binary.Write(sequence);
++                        binary.Write(streamEnd);
++                        binary.Write(text.Length);
++                        foreach (var character in text)
++                            binary.Write((ushort)character);
++                        foreach (var offset in offsets)
++                            binary.Write(offset);
++                        binary.Flush();
++                        using (var hash = System.Security.Cryptography.SHA256.Create())
++                            return BitConverter.ToString(hash.ComputeHash(buffer.GetBuffer(), 0, (int)buffer.Length)).Replace("-", "").ToLowerInvariant();
++                    }
++                }
++
+                 var tags = story.currentTags;
+                 if (tags.Count > 0) {
+                     if( _jsonOutput ) {
+@@ -314,4 +405,3 @@ namespace Ink
+ 
+ 
+ }
+-

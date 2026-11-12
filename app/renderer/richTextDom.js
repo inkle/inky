@@ -14,11 +14,11 @@
         var match;
         MARKER.lastIndex = 0;
         while( (match = MARKER.exec(text)) !== null ) {
-            if( match.index > last ) tokens.push({ text: text.slice(last, match.index) });
+            if( match.index > last ) tokens.push({ text: text.slice(last, match.index), start: last });
             tokens.push({ marker: true, closing: match[1] === "/", tag: ELEMENTS[match[2]] ? match[2] : null });
             last = match.index + match[0].length;
         }
-        if( last < text.length ) tokens.push({ text: text.slice(last) });
+        if( last < text.length ) tokens.push({ text: text.slice(last), start: last });
         return tokens;
     }
 
@@ -42,7 +42,7 @@
         });
     }
 
-    function toNodes(text, doc) {
+    function toNodes(text, doc, sourceOffsets, visibleOffsets) {
         doc = doc || document;
         var fragment = doc.createDocumentFragment();
         var tokens = tokenize(String(text == null ? "" : text));
@@ -63,7 +63,12 @@
 
         tokens.forEach(function (token) {
             if( !token.marker ) {
-                if( token.text ) parent.appendChild(doc.createTextNode(token.text));
+                if( token.text ) {
+                    parent.appendChild(doc.createTextNode(token.text));
+                    if( visibleOffsets )
+                        for( var i = 0; i < token.text.length; i++ )
+                            visibleOffsets.push(sourceOffsets[token.start + i]);
+                }
                 return;
             }
             if( !token.paired ) return;

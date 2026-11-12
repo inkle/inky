@@ -6,6 +6,8 @@ const electron = require('electron');
 const ipc = electron.ipcMain;
 const mkdirp = require('mkdirp');
 const TagFormat = require('../renderer/tagFormat.js').TagFormat;
+const ParagraphSpacing = require('../renderer/paragraphSpacing.js');
+const { SourceMapProtocol } = require('./sourceMapProtocol.js');
 
 // inklecate is packaged outside of the main asar bundle since it's executable
 const inklecateNames = {
@@ -54,7 +56,7 @@ function compile(compileInstruction, requester) {
         // The compiler only ever sees tags in their one accepted shape (#tag: value,
         // flush left), whatever the text looked like when it arrived.
         if( path.extname(relativePath).toLowerCase() === ".ink" )
-            inkFileContent = TagFormat.normalizeText(inkFileContent);
+            inkFileContent = ParagraphSpacing.annotate(TagFormat.normalizeText(inkFileContent));
 
         if( path.dirname(relativePath) != "." ) {
             var fullDir = path.dirname(fullInkPath);
@@ -85,6 +87,13 @@ function compile(compileInstruction, requester) {
     inklecateOptions.push(mainInkPath);
 
     var inklecatePathToUse = inklecatePath;
+    if( compileInstruction.play && process.env.INKY_EXPERIMENTAL_INKLECATE ) {
+        inklecatePathToUse = process.env.INKY_EXPERIMENTAL_INKLECATE;
+        if( !path.isAbsolute(inklecatePathToUse) ) {
+            requester.send('play-story-unexpected-error', "INKY_EXPERIMENTAL_INKLECATE must be an absolute path", sessionId);
+            return;
+        }
+    }
     if( compileInstruction.inkJsCompatible ) {
         var inklecateName = path.basename(inklecatePath);
         var inklecateFolderName = path.dirname(inklecatePath);
@@ -105,7 +114,8 @@ function compile(compileInstruction, requester) {
         stopped: false,
         ended: false,
         evaluatingExpression: false,
-        justRequestedDebugSource: false
+        justRequestedDebugSource: false,
+        sourceMapProtocol: new SourceMapProtocol()
     };
     var session = sessions[sessionId];
 
@@ -192,7 +202,13 @@ function compile(compileInstruction, requester) {
             }
 
             // Issues
-            if( jsonResponse.issues !== undefined ) {
+            if( jsonResponse.sourceMapProtocol !== undefined ) {
+                if( !session.sourceMapProtocol.handshake(jsonResponse.sourceMapProtocol) ) {
+                    console.warn("Unsupported or duplicate Ink source-map handshake; Alt-click navigation is unavailable for this session.");
+                    session.warnedMissingSourceMap = true;
+                }
+            }
+            else if( jsonResponse.issues !== undefined ) {
                 for(let issue of jsonResponse.issues) {
                     let issueMatches = issue.match(issueRegex);
                     if(issueMatches === null){ //falback if regexp fails
@@ -269,7 +285,12 @@ function compile(compileInstruction, requester) {
             
             // Story text
             else if( jsonResponse.text !== undefined ) {
-                requester.send('play-generated-text', jsonResponse.text, sessionId);
+                const sourceMap = session.sourceMapProtocol.acceptText(jsonResponse.text, jsonResponse.sourceMap);
+                if( !sourceMap && !session.warnedMissingSourceMap ) {
+                    session.warnedMissingSourceMap = true;
+                    console.warn("Missing or invalid Ink source-map protocol; Alt-click navigation is unavailable for this session.");
+                }
+                requester.send('play-generated-text', jsonResponse.text, sessionId, sourceMap);
             }
             
             // End of story, but keep process running for debug source lookups

@@ -219,8 +219,8 @@ LiveCompiler.setEvents({
         ToolbarView.clearIssueSummary();
     },
     selectIssue: gotoIssue,
-    textAdded: (text) => {
-        PlayerView.addTextSection(text);
+    textAdded: (text, sourceMap) => {
+        PlayerView.addTextSection(text, sourceMap);
     },
     tagsAdded: (tags) => {
         PlayerView.addTags(tags);
@@ -397,13 +397,13 @@ PlayerView.setEvents({
         heldSounds = [];
         held.forEach(play => play());
     },
-    "jumpToSource": (outputTextOffset) => {
+    "jumpToSource": (outputTextOffset, sourceSessionId) => {
         LiveCompiler.getLocationInSource(outputTextOffset, (result) => {
             if( result && result.filename && result.lineNumber ) {
                 InkProject.currentProject.showInkFile(result.filename);
                 EditorView.gotoLine(result.lineNumber);
             }
-        });
+        }, sourceSessionId);
     }
 });
 
@@ -459,6 +459,7 @@ ToolbarView.setEvents({
     navigateBack: () => NavHistory.back(),
     navigateForward: () => NavHistory.forward(),
     selectIssue: gotoIssue,
+    refreshPreview: () => PlayerView.refreshPreview(),
     stepBack: () => {
         AudioPreview.stopSoundEffects();
         LiveCompiler.stepBack();

@@ -27,6 +27,15 @@ describe("safe story HTML", function () {
         assert.strictEqual(SafeHtml.escapeHtml(`<script a="b">&'`), "&lt;script a=&quot;b&quot;&gt;&amp;&#39;");
     });
 
+    it("maps Alt-clicks in contiguous text back to source positions", function () {
+        assert.strictEqual(SafeHtml.wordSourceOffset("Primeira linha.\n", "Primeira linha.\n", 2), 4);
+        assert.strictEqual(SafeHtml.wordSourceOffset("Primeira linha.\n", "Primeira linha.\n", 10), 12);
+        assert.strictEqual(SafeHtml.wordSourceOffset("Quarta linha.", "Quarta linha.", 2), 3);
+        assert.strictEqual(SafeHtml.wordSourceOffset("Quinta linha.", "Quinta linha.", 2), 3);
+        assert.strictEqual(SafeHtml.wordSourceOffset("a a a", "a a a", 4), 4);
+        assert.strictEqual(SafeHtml.wordSourceOffset("a b", "a b", -1), null);
+    });
+
     it("wraps words without splitting them and keeps markup literal", function () {
         const root = document.createElement("div");
         root.textContent = "<em>Hello</em> world";

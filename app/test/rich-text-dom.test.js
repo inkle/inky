@@ -42,7 +42,7 @@ describe("rich text in the player and export", function () {
         // Only the story text is formatted: choices and scene titles go through plainText
         assert(read("export-for-web-template/main.js").includes("plainStoryText(choice.text)"));
         assert(read("export-for-web-template/main.js").includes("plainStoryText(sceneTitle)"));
-        assert(read("renderer/playerView.js").includes("InkRichText.plainText(choice.choice.text)"));
+        assert(read("renderer/playerView.js").includes("InkRichText.plainText(choiceText)"));
         assert(read("renderer/playerView.js").includes("InkRichText.plainText(titleTag)"));
         assert(!read("renderer/playerView.js").includes("InkRichText.toNodes(choice"));
     });

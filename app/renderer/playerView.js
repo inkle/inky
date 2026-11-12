@@ -1,6 +1,5 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const i18n = require('./i18n.js');
-const { SafeHtml } = require('./safeHtml.js');
 const InkRichText = require('./richTextDom.js');
 const { isSoundTag } = require("./audioTags.js");
 const { TitleScreen } = require("./titleScreen.js");
@@ -9,6 +8,7 @@ const ChoiceText = require("./choiceText.js");
 const InkyPager = require("./pager.js");
 const ScreenMode = require("./screenMode.js");
 const EndingMarker = require("./endingMarker.js");
+const ParagraphSpacing = require("./paragraphSpacing.js");
 
 var events = {};
 var lastFadeTime = 0;
@@ -24,6 +24,19 @@ var selectedChoiceText = null;
 // Inklecate sends paragraph text before its tags. Buffer it to apply # screen
 // before painting that paragraph (not after).
 var pendingStoryText = null;
+var refreshPending = false;
+
+function refreshPreview() {
+    var player = document.getElementById("player");
+    if( !player || refreshPending ) return;
+    refreshPending = true;
+    player.classList.add("preview-refreshing");
+    // Keep the layer through a rendered frame before restoring the original composition.
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+        player.classList.remove("preview-refreshing");
+        refreshPending = false;
+    }));
+}
 
 // The frame (.innerText) holds the picture band and the scrolling passage; the story text lives
 // in the passage. Older markup without those children is upgraded in place.
@@ -160,7 +173,12 @@ function scrollFrameToNewContent() {
     passage.style.setProperty("--story-top-cover", paddingTop + "px");
 
     var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if( animationEnabled && !reducedMotion ) $textBuffer.animate({ scrollTop: target }, 350, "swing");
+    // Avoid scheduling zero-distance scroll animations for every live text line.
+    // They can repaint an already-animating paragraph on some Linux renderers.
+    if( Math.abs(passage.scrollTop - target) < 1 ) {
+        $textBuffer.stop(true);
+        passage.scrollTop = target;
+    } else if( animationEnabled && !reducedMotion ) $textBuffer.animate({ scrollTop: target }, 350, "swing");
     else passage.scrollTop = target;
 }
 
@@ -257,22 +275,23 @@ function prepareForNewPlaythrough(sessionId) {
     sceneAlignment = null;
 }
 
-function addTextSection(text) {
+function addTextSection(text, sourceMap) {
     flushPendingStoryText();
-    pendingStoryText = String(text == null ? "" : text);
+    pendingStoryText = { text: String(text == null ? "" : text), sourceMap: sourceMap };
 }
 
-function flushPendingStoryText() {
-    if( pendingStoryText === null ) return;
-    const text = pendingStoryText;
+function flushPendingStoryText(animateOnInsert = true) {
+    if( pendingStoryText === null ) return null;
+    const section = pendingStoryText;
     pendingStoryText = null;
-    renderTextSection(text);
+    return renderTextSection(section.text, section.sourceMap, animateOnInsert);
 }
 
-function renderTextSection(text)
+function renderTextSection(text, sourceMap, animateOnInsert = true)
 {
     text = String(text == null ? "" : text);
     var choiceTextResult = ChoiceText.stripSelectedChoiceText(text, selectedChoiceText);
+    var removedLength = text.length - choiceTextResult.text.length;
     text = choiceTextResult.text;
     if( choiceTextResult.consumed ) selectedChoiceText = null;
     // A selected option is navigation, not narrative content in the next screen.
@@ -285,56 +304,71 @@ function renderTextSection(text)
         $paragraph.addClass("customInstruction");
     }
 
-    // Story text is plain text: markup is shown as written, never interpreted.
-    // Keep word spans only to preserve the author's Alt-click jump-to-source;
-    // ordinary reading and hovering must not change narrative text styling.
-    $paragraph[0].appendChild(InkRichText.toNodes(text, document));
-    SafeHtml.wrapWords($paragraph[0]);
+    // Render contiguous text nodes, just like Web Export. Per-word spans can
+    // leave stale glyphs in Chromium/Linux when live Preview swaps buffers.
+    // Alt-click source navigation remains available without word wrappers.
+    var validMap = sourceMap && sourceMap.version === 1 && sourceMap.unit === "utf16" &&
+        Array.isArray(sourceMap.offsets) && sourceMap.offsets.length === text.length + removedLength &&
+        sourceMap.offsets.every(offset => Number.isSafeInteger(offset) && offset >= 0);
+    if( sourceMap && !validMap )
+        console.warn("Ink source map is invalid or unsupported; Alt-click navigation is unavailable for this text.");
+    var visibleOffsets = validMap ? [] : null;
+    $paragraph[0].appendChild(InkRichText.toNodes(text, document,
+        validMap ? sourceMap.offsets.slice(removedLength) : null, visibleOffsets));
     if( sceneAlignment ) $paragraph.addClass(alignClassName(sceneAlignment));
-
-    // Keep track of the offset of each word into the content,
-    // starting from the end of the last choice (it's global in the current play session)
-    var previousContentLength = 0;
-    var $existingLastContent = $textBuffer.children(".storyText").last();
-    if( $existingLastContent ) {
-        var range = $existingLastContent.data("range");
-        if( range ) {
-            previousContentLength = range.start + range.length + 1; // + 1 for newline
-        }
-    }
-    $paragraph.data("range", {start: previousContentLength, length: text.length});
+    $paragraph.data("sourceOffsets", visibleOffsets);
+    $paragraph.data("sourceSessionId", bufferFrame().data("sessionId"));
 
     // Append the actual content
     $textBuffer.append($paragraph);
 
-    // Find the offset of each word in the content, for clickability
-    var searchFrom = 0;
-    $paragraph.find("span.inky-word").each((i, element) => {
-        var $span = $(element);
-        var word = $span.text();
-        var at = word.length > 0 ? text.indexOf(word, searchFrom) : -1;
-        if( at === -1 ) return;
-        $span.data("range", {start: previousContentLength + at, length: word.length});
-        searchFrom = at + word.length;
-    });
-
-    // Alt-click handler to jump to source
-    $paragraph.find("span.inky-word").click(function(e) {
-        if( e.altKey ) {
-
-            var range = $(this).data("range");
-            if( range ) {
-                var midOffset = Math.floor(range.start + range.length/2);
-                events.jumpToSource(midOffset);
-            }
-
-            e.preventDefault();
-        }
-    });
-
-    if( animationEnabled && shouldAnimate() )
+    if( animateOnInsert && animationEnabled && shouldAnimate() )
         fadeIn($paragraph);
+    return $paragraph;
 }
+
+// Split heads are cloned by the pager, so look up the original paragraph and
+// include all of its fragments when mapping the caret back to the source.
+$("#player").on("click", ".story-passage p.storyText", function(e) {
+    if( !e.altKey ) return;
+    var caret = document.caretRangeFromPoint && document.caretRangeFromPoint(e.clientX, e.clientY);
+    if( !caret || !this.contains(caret.startContainer) ) return;
+    var caretNode = caret.startContainer;
+    if( caretNode.nodeType !== 3 ) return;
+    var hitOffset = [caret.startOffset - 1, caret.startOffset].find(function(offset) {
+        if( offset < 0 || offset >= caretNode.length || /\s/.test(caretNode.data[offset]) ) return false;
+        var charRange = document.createRange();
+        charRange.setStart(caretNode, offset);
+        charRange.setEnd(caretNode, offset + 1);
+        return Array.prototype.some.call(charRange.getClientRects(), function(rect) {
+            return e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom;
+        });
+    });
+    if( hitOffset === undefined ) return;
+    var first = this;
+    while( first.previousElementSibling && first.previousElementSibling.hasAttribute("data-page-split") )
+        first = first.previousElementSibling;
+    var fragments = [], fragment = first;
+    while( fragment ) {
+        fragments.push(fragment);
+        if( !fragment.hasAttribute("data-page-split") ) break;
+        fragment = fragment.nextElementSibling;
+    }
+    if( !fragment ) return;
+    var offsets = $(fragment).data("sourceOffsets");
+    if( !Array.isArray(offsets) ) return;
+    var prefix = document.createRange();
+    prefix.selectNodeContents(this);
+    prefix.setEnd(caret.startContainer, hitOffset);
+    var before = 0;
+    for( var i = 0; i < fragments.length && fragments[i] !== this; ++i )
+        before += fragments[i].textContent.length;
+    var offset = offsets[before + prefix.toString().length];
+    if( Number.isSafeInteger(offset) && typeof events.jumpToSource === "function" )
+        events.jumpToSource(offset, $(fragment).data("sourceSessionId"));
+    e.preventDefault();
+});
 
 // ---- Story image -----------------------------------------------------------
 
@@ -481,13 +515,20 @@ function addTags(tags)
         clearScene();
         pendingStoryText = followingText;
     }
-    flushPendingStoryText();
+    // Configure the incoming paragraph before animating it, so title insertion
+    // and paragraph-gap margins never move text mid-fade in the Linux Preview.
+    const $newParagraph = flushPendingStoryText(false);
 
     // Alignment is resolved first: the scene title (and, for the first paragraph,
     // the story title and author) follow the paragraph they sit above.
     const alignmentTag = tags.map(alignmentFromTag).find(align => align !== null && align !== undefined);
     const titleTag = tags.map(sceneTitleFromTag).find(title => title !== null && title !== undefined);
     var $lastStoryParagraph = $textBuffer.children(".storyText").last();
+    const blankLines = tags.reduce((count, tag) => Math.max(count, ParagraphSpacing.gapCount(tag)), 0);
+    if( blankLines && $lastStoryParagraph.length ) {
+        $lastStoryParagraph.addClass("inky-paragraph-gap");
+        $lastStoryParagraph[0].style.setProperty("--inky-paragraph-gap", blankLines + "lh");
+    }
 
     // A scene starts with a "# title:" tag. Its "# align:" tag, if any,
     // is the scene's alignment; without one the scene goes back to the story alignment.
@@ -512,13 +553,18 @@ function addTags(tags)
     // image: src follows the paragraph it belongs to, as in the exported page.
     tags.forEach(addImageTag);
 
+    // All layout-affecting tags have been applied; only now begin the fade.
+    if( $newParagraph && $newParagraph.length && animationEnabled && shouldAnimate() )
+        fadeIn($newParagraph);
+
     // Control tags, alignment, scene titles and pictures are not visible tags.
     var globalTags = new Set(JSON.parse($("#player").attr("data-global-tags") || "[]"));
     var visibleTags = tags.filter(tag =>
         !globalTags.has(String(tag)) && !isSoundTag(tag)
             && sceneTitleFromTag(tag) === null && alignmentFromTag(tag) === null
             && imageFromTag(tag) === null && backgroundFromTag(tag) === null
-            && !ScreenMode.isScreenTag(tag));
+            && !ScreenMode.isScreenTag(tag)
+            && ParagraphSpacing.gapCount(tag) === 0);
     if( visibleTags.length === 0 ) {
         contentReady();
         return;
@@ -561,10 +607,11 @@ function addChoice(choice, callback)
     //    },
     //    ... other stuff, e.g. choice number ...
     // }
+    var choiceText = choice.choice.text;
+    var choiceTags = (choice.choice.tags || []);
     var $choice = $("<button type='button' class='choice-button'></button>");
     // Choices are plain text: formatting markers, if any are left in the file, are dropped
-    $choice[0].appendChild(document.createTextNode(InkRichText.plainText(choice.choice.text)));
-    var choiceTags = (choice.choice.tags || []);
+    $choice[0].appendChild(document.createTextNode(InkRichText.plainText(choiceText)));
     // Picture tags on choices belong to the chosen branch, not to its label.
     var visibleChoiceTags = choiceTags.filter(tag => !isSoundTag(tag)
         && imageFromTag(tag) === null && backgroundFromTag(tag) === null);
@@ -685,6 +732,7 @@ function setAnimationEnabled(animEnabled) {
 }
 
 exports.PlayerView = {
+    refreshPreview: refreshPreview,
     startStoryFromTitle: startStory,
     setEvents: (e) => { events = e; },
     contentReady: contentReady,
