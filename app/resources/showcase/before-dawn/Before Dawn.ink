@@ -45,7 +45,7 @@ There may not be enough light for everyone.
 #music: audio/music/forge-embers.mp3
 #sound: audio/sfx/forge.wav
 #title: The Old Forge
-The forge is almost dark. Its last embers glow beneath a blanket of ash.
+The forge is almost dark. Its last embers glow beneath the ash.
 
 Mara takes an old lantern from a shelf. The glass is scratched, and the handle is blackened by years of use.
 
