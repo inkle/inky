@@ -10,7 +10,7 @@
 
 <p>
   <a href="https://github.com/inkle/inky"><img src="https://img.shields.io/badge/upstream-Inky%200.15.2-4764ac" alt="Based on Inky 0.15.2"></a>
-  <img src="https://img.shields.io/badge/community_revision-r109-30876c" alt="Community revision r109">
+  <img src="https://img.shields.io/badge/community_revision-r110-30876c" alt="Community revision r110">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
 </p>
 
@@ -27,6 +27,8 @@
 ## Write a story. See it come alive.
 
 Write Ink on the left. Experience the story on the right. As you revise passages, introduce choices, or adjust the presentation, the live Preview lets you see how your story reads and plays.
+
+Use **Refresh Preview** in the top toolbar to request a visual repaint without restarting or recompiling the story. It does not change the story's progress or stop its audio. This control is available in the editor, not in Web Export.
 
 <a href="docs/screenshots/live-preview-basic-passage.png">
   <img src="docs/screenshots/live-preview-basic-passage.png" alt="Inky's Visual settings beside a live passage with title, narrative text and interactive choices" width="1000">
@@ -148,21 +150,21 @@ Preview and Web Export are designed to behave consistently. Before sharing a sto
 
 ## Download and run
 
-**Inky Extended 0.15.2-109** is available for **Linux x86-64**. All four files are available in the [v0.15.2-109 release](https://github.com/glassflare/inky/releases/tag/v0.15.2-109).
+**Inky Extended 0.15.2-110** is available for **Linux x86-64**. All four files are available in the [v0.15.2-110 release](https://github.com/glassflare/inky/releases/tag/v0.15.2-110).
 
 | Download | File |
 | :-- | :-- |
-| **Debian / Ubuntu (amd64)** | [Inky-Extended-0.15.2-109-amd64.deb](https://github.com/glassflare/inky/releases/download/v0.15.2-109/Inky-Extended-0.15.2-109-amd64.deb) |
-| **AppImage (x86_64)** | [Inky-Extended-0.15.2-109-x86_64.AppImage](https://github.com/glassflare/inky/releases/download/v0.15.2-109/Inky-Extended-0.15.2-109-x86_64.AppImage) |
-| **Source archive** | [Inky-Extended-0.15.2-109-source.zip](https://github.com/glassflare/inky/releases/download/v0.15.2-109/Inky-Extended-0.15.2-109-source.zip) |
-| **SHA-256 checksums** | [SHA256SUMS.txt](https://github.com/glassflare/inky/releases/download/v0.15.2-109/SHA256SUMS.txt) |
+| **Debian / Ubuntu (amd64)** | [Inky-Extended-0.15.2-110-amd64.deb](https://github.com/glassflare/inky/releases/download/v0.15.2-110/Inky-Extended-0.15.2-110-amd64.deb) |
+| **AppImage (x86_64)** | [Inky-Extended-0.15.2-110-x86_64.AppImage](https://github.com/glassflare/inky/releases/download/v0.15.2-110/Inky-Extended-0.15.2-110-x86_64.AppImage) |
+| **Source archive** | [Inky-Extended-0.15.2-110-source.zip](https://github.com/glassflare/inky/releases/download/v0.15.2-110/Inky-Extended-0.15.2-110-source.zip) |
+| **SHA-256 checksums** | [SHA256SUMS.txt](https://github.com/glassflare/inky/releases/download/v0.15.2-110/SHA256SUMS.txt) |
 
 ### Debian / Ubuntu
 
 Download the `.deb`, then install it from the directory where you saved it:
 
 ```bash
-sudo apt install ./Inky-Extended-0.15.2-109-amd64.deb
+sudo apt install ./Inky-Extended-0.15.2-110-amd64.deb
 ```
 
 ### AppImage
@@ -170,8 +172,8 @@ sudo apt install ./Inky-Extended-0.15.2-109-amd64.deb
 Download the AppImage, make it executable, and run it:
 
 ```bash
-chmod +x Inky-Extended-0.15.2-109-x86_64.AppImage
-./Inky-Extended-0.15.2-109-x86_64.AppImage
+chmod +x Inky-Extended-0.15.2-110-x86_64.AppImage
+./Inky-Extended-0.15.2-110-x86_64.AppImage
 ```
 
 Some Linux distributions may require FUSE compatibility libraries to run AppImages. The repository also contains build scripts for other platforms; the prebuilt downloads listed above target Linux.
@@ -204,7 +206,9 @@ npm test
 npm run test:web-export
 ```
 
-The underlying app version remains **0.15.2**; **r109** is the community revision. **Inky Extended** identifies this fork's distribution, not a change to Ink syntax or the original Inky project's ownership.
+The packaged Linux build uses the compatible source-map compiler built by the reproducible pipeline described in [compiler/source-map-protocol.md](compiler/source-map-protocol.md). The compiler binaries tracked in Git LFS do not provide that protocol; build the compatible compiler to use accurate Alt+click navigation when running from source.
+
+The underlying app version remains **0.15.2**; **r110** is the community revision. **Inky Extended** identifies this fork's distribution, not a change to Ink syntax or the original Inky project's ownership.
 
 ## Contribute
 
