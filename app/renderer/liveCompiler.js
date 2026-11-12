@@ -26,6 +26,7 @@ var issues = [];
 var selectedIssueIdx = -1;
 
 var locationInSourceCallbackObj = null;
+var locationInSourceQueue = [];
 var expressionEvaluationObj = null;
 
 var project = null;
@@ -114,6 +115,8 @@ function reloadInklecateSession() {
 
     lastEditorChange = null;
     reloadPending = false;
+    locationInSourceCallbackObj = null;
+    locationInSourceQueue = [];
 
     if( currentPlaySessionId  )
         stopInklecateSession(currentPlaySessionId);
@@ -217,14 +220,27 @@ function loadChoiceSequence(sequence) {
     reloadInklecateSession();
 }
 
-function getLocationInSource(offset, callback) {
-    ipc.send("get-location-in-source", offset, currentPlaySessionId);
-    locationInSourceCallbackObj = { callback: callback, sessionId: currentPlaySessionId };
+function getLocationInSource(offset, callback, sourceSessionId) {
+    if( sourceSessionId !== currentPlaySessionId || lastEditorChange !== null || reloadPending ) {
+        console.warn("Ignoring Alt-click until the Preview matches the current source.");
+        return;
+    }
+    queueSourceLookup("get-location-in-source", offset, callback);
 }
 
 function getRuntimePathInSource(runtimePath, callback) {
-    ipc.send("get-runtime-path-in-source", runtimePath, currentPlaySessionId);
-    locationInSourceCallbackObj = { callback: callback, sessionId: currentPlaySessionId };
+    queueSourceLookup("get-runtime-path-in-source", runtimePath, callback);
+}
+
+function queueSourceLookup(channel, value, callback) {
+    locationInSourceQueue.push({ channel, value, callback, sessionId: currentPlaySessionId });
+    sendNextSourceLookup();
+}
+
+function sendNextSourceLookup() {
+    if( locationInSourceCallbackObj || locationInSourceQueue.length === 0 ) return;
+    locationInSourceCallbackObj = locationInSourceQueue.shift();
+    ipc.send(locationInSourceCallbackObj.channel, locationInSourceCallbackObj.value, locationInSourceCallbackObj.sessionId);
 }
 
 function evaluateExpression(expressionText, callback) {
@@ -272,14 +288,14 @@ ipc.on("compile-complete", (event, fromSessionId) => {
 });
 
 
-ipc.on("play-generated-text", (event, result, fromSessionId) => {
+ipc.on("play-generated-text", (event, result, fromSessionId, sourceMap) => {
 
     if( fromSessionId != currentPlaySessionId ) return;
 
     // May have just finished compiling, have text
     updateCompilerIsBusy(false);
 
-    events.textAdded(result);
+    events.textAdded(result, sourceMap);
 });
 
 ipc.on("play-generated-errors", (event, errors, fromSessionId) => {
@@ -417,10 +433,11 @@ ipc.on("play-story-stopped", (event, fromSessionId) => {
 });
 
 ipc.on("return-location-from-source", (event, fromSessionId, locationInfo) => {
-    if( fromSessionId == locationInSourceCallbackObj.sessionId ) {
+    if( locationInSourceCallbackObj && fromSessionId == currentPlaySessionId && fromSessionId == locationInSourceCallbackObj.sessionId ) {
         var callback = locationInSourceCallbackObj.callback;
         locationInSourceCallbackObj = null;
         callback(locationInfo);
+        sendNextSourceLookup();
     }
 });
 
@@ -459,7 +476,11 @@ exports.LiveCompiler = {
     reload: reloadInklecateSession,
     projectFilesChanged: projectFilesChanged,
     compileForWeb: compileForWeb,
-    setEdited: () => { lastEditorChange = Date.now(); },
+    setEdited: () => {
+        lastEditorChange = Date.now();
+        locationInSourceCallbackObj = null;
+        locationInSourceQueue = [];
+    },
     setEvents: (e) => { events = e; },
     getIssues: () => { return issues; },
     getIssuesForFilename: (filename) => _.filter(issues, i => i.filename == filename),

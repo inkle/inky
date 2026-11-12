@@ -114,6 +114,7 @@
                 var head = heads[i];
                 var rest = head.nextElementSibling;
                 if( rest ) {
+                    if( head.classList.contains("inky-paragraph-gap") ) rest.classList.add("inky-paragraph-gap");
                     var first = rest.firstChild;
                     while( head.firstChild ) rest.insertBefore(head.firstChild, first);
                 }
@@ -144,6 +145,8 @@
             var head = block.cloneNode(false);
             head.setAttribute("data-page-split", "1");
             passage.insertBefore(head, block);
+            var hasGap = block.classList.contains("inky-paragraph-gap");
+            if( hasGap ) block.classList.remove("inky-paragraph-gap");
 
             function moveFirst(count) {
                 while( head.childNodes.length > count ) block.insertBefore(head.lastChild, block.firstChild);
@@ -167,6 +170,7 @@
             while( count > 1 && nodes[count - 1].textContent.trim() === "" ) count--;
             if( count < 1 ) {
                 moveFirst(0);
+                if( hasGap ) block.classList.add("inky-paragraph-gap");
                 head.remove();
                 return false;
             }
@@ -175,6 +179,14 @@
             // together gives the same text.
             while( block.firstChild && block.firstChild.nodeType === 3 && block.firstChild.textContent.trim() === "" ) {
                 head.appendChild(block.firstChild);
+            }
+            if( (!head.textContent.trim() && !head.children.length) ||
+                (!block.textContent.trim() && !block.children.length) ||
+                measureBlocks([head, block])[0] > capacity + 1 ) {
+                moveFirst(0);
+                if( hasGap ) block.classList.add("inky-paragraph-gap");
+                head.remove();
+                return false;
             }
             return true;
         }
@@ -188,13 +200,16 @@
         function layoutPages(available) {
             var pages = [], current = [], used = 0;
             var index = 0;
-            for( var guard = 0; guard < 2000; ++guard ) {
-                var blocks = blocksOf();
-                if( index >= blocks.length ) break;
-                var heights = measureBlocks(blocks);
-                var block = blocks[index], height = heights[index];
+            var blocks = blocksOf();
+            // A freshly cut head must fit or finish the page, not be split again indefinitely.
+            var splitHead = null;
+            while( index < blocks.length ) {
+                var block = blocks[index];
+                var following = blocks[index + 1];
+                var height = following ? following.offsetTop - block.offsetTop : block.offsetHeight;
 
                 if( used + height <= available + 1 ) {
+                    splitHead = null;
                     current.push(block);
                     used += height;
                     index++;
@@ -207,7 +222,14 @@
                 // A cut at a word only when it saves a good part of the page, or when the page
                 // would hold nothing else.
                 var byWord = alone || left >= available * 0.35;
-                if( paragraph && left > 0 && cutFront(block, left, byWord) ) continue;
+                if( paragraph && left > 0 && block !== splitHead && cutFront(block, left, byWord) ) {
+                    blocks = blocksOf();
+                    splitHead = blocks[index];
+                    continue;
+                }
+                if( block === splitHead ) {
+                    console.warn("Pagination could not fit a freshly split fragment; falling back to page overflow if necessary.");
+                }
 
                 if( current.length === 0 ) {
                     // Nothing can be cut: the block takes a page of its own (and may scroll).
@@ -215,6 +237,11 @@
                     index++;
                 }
                 // A scene title never ends a page: it moves to the next one.
+                else if( current.length === 1 && isHeading(current[0]) ) {
+                    // An indivisible block must stay with its title, even if the page must scroll.
+                    current.push(block);
+                    index++;
+                }
                 else if( isHeading(current[current.length - 1]) ) {
                     current.pop();
                     index--;
@@ -222,6 +249,7 @@
                 pages.push(current);
                 current = [];
                 used = 0;
+                splitHead = null;
             }
             if( current.length ) pages.push(current);
             return pages;

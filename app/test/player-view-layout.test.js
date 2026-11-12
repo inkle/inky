@@ -47,6 +47,138 @@ describe("preview page layout", function () {
         }
     });
 
+    it("keeps compiler-provided source offsets across tags, gaps, and choice transitions", function () {
+        const dom = new JSDOM('<div id="player"><div class="innerText active"></div></div>');
+        const previousWindow = global.window;
+        const previousDocument = global.document;
+        const previousDOMParser = global.DOMParser;
+        const previousNodeFilter = global.NodeFilter;
+        const playerViewPath = require.resolve("../renderer/playerView.js");
+        const jqueryPath = require.resolve("../renderer/jquery-2.2.3.min.js");
+        global.window = dom.window;
+        global.document = dom.window.document;
+        global.DOMParser = dom.window.DOMParser;
+        global.NodeFilter = dom.window.NodeFilter;
+        delete require.cache[jqueryPath];
+        delete require.cache[playerViewPath];
+
+        try {
+            const playerView = require("../renderer/playerView.js").PlayerView;
+            playerView.setAnimationEnabled(false);
+
+            const marker = "__inky_paragraph_gap__: 1";
+            const firstScene = [
+                "Primeira linha.",
+                "Segunda linha.",
+                "Terceira linha.",
+                "Quarta linha.",
+                "Quinta linha."
+            ];
+            const addMapped = (text, start) => playerView.addTextSection(text, {
+                version: 1, unit: "utf16", offsets: Array.from({ length: text.length }, (_, i) => start + i)
+            });
+            addMapped(firstScene[0], 28);
+            playerView.addTags(["title: TEST", "align: left", "screen"]);
+            addMapped(firstScene[1], 44);
+            playerView.addTags([]);
+            addMapped(firstScene[2], 84);
+            playerView.addTags([marker]);
+            addMapped(firstScene[3], 100);
+            playerView.addTags([]);
+            addMapped(firstScene[4], 139);
+            playerView.addTags([marker]);
+
+            const firstSceneStarts = Array.from(document.querySelectorAll("p.storyText"))
+                .map(paragraph => window.jQuery(paragraph).data("sourceOffsets")[0]);
+            assert.deepStrictEqual(firstSceneStarts, [28, 44, 84, 100, 139]);
+
+            const choiceLabel = "Casos de espaçamento";
+            playerView.addChoice({ choice: { text: choiceLabel, tags: [] } }, () => {});
+            document.querySelector(".choice-button").click();
+
+            const nextScene = [
+                "Linhas consecutivas, sem margem adicional.",
+                "Esta linha deve ficar logo abaixo da anterior."
+            ];
+            addMapped(nextScene[0], 200);
+            playerView.addTags(["title: Espaçamento", "screen"]);
+            addMapped(nextScene[1], 250);
+            playerView.addTags([]);
+            addMapped("Uma linha vazia", 313);
+            playerView.addTags([marker]);
+
+            const finalParagraph = Array.from(document.querySelectorAll("p.storyText")).pop();
+            const finalStart = window.jQuery(finalParagraph).data("sourceOffsets")[0];
+            assert.strictEqual(finalStart, 313);
+            assert.strictEqual(finalStart + 1, 314);
+        } finally {
+            delete require.cache[playerViewPath];
+            delete require.cache[jqueryPath];
+            if( previousWindow === undefined ) delete global.window;
+            else global.window = previousWindow;
+            if( previousDocument === undefined ) delete global.document;
+            else global.document = previousDocument;
+            if( previousDOMParser === undefined ) delete global.DOMParser;
+            else global.DOMParser = previousDOMParser;
+            if( previousNodeFilter === undefined ) delete global.NodeFilter;
+            else global.NodeFilter = previousNodeFilter;
+            dom.window.close();
+        }
+    });
+
+    it("maps Alt-clicks in both halves of a paginated paragraph to the original source", function () {
+        const dom = new JSDOM('<div id="player"><div class="innerText active"></div></div>');
+        const previousWindow = global.window;
+        const previousDocument = global.document;
+        const previousDOMParser = global.DOMParser;
+        const previousNodeFilter = global.NodeFilter;
+        const playerViewPath = require.resolve("../renderer/playerView.js");
+        const jqueryPath = require.resolve("../renderer/jquery-2.2.3.min.js");
+        global.window = dom.window;
+        global.document = dom.window.document;
+        global.DOMParser = dom.window.DOMParser;
+        global.NodeFilter = dom.window.NodeFilter;
+        delete require.cache[jqueryPath];
+        delete require.cache[playerViewPath];
+
+        try {
+            const playerView = require("../renderer/playerView.js").PlayerView;
+            playerView.setAnimationEnabled(false);
+            const jumps = [];
+            playerView.setEvents({ jumpToSource: offset => jumps.push(offset) });
+            window.Range.prototype.getClientRects = () => [{ left: 0, right: 10, top: 0, bottom: 10 }];
+            const text = "First word First word";
+            playerView.addTextSection(text, { version: 1, unit: "utf16", offsets: Array.from({ length: text.length }, (_, i) => i) });
+            playerView.addTags([]);
+            const rest = document.querySelector("p.storyText");
+            const head = rest.cloneNode(false);
+            head.setAttribute("data-page-split", "1");
+            head.textContent = "First word ";
+            rest.textContent = "First word";
+            rest.before(head);
+            for( const node of [head, rest] ) {
+                document.caretRangeFromPoint = () => ({ startContainer: node.firstChild, startOffset: 2 });
+                node.dispatchEvent(new window.MouseEvent("click", { bubbles: true, altKey: true, clientX: 5, clientY: 5 }));
+            }
+            assert.deepStrictEqual(jumps, [1, 12]);
+            document.caretRangeFromPoint = () => ({ startContainer: rest.firstChild, startOffset: rest.firstChild.length });
+            rest.dispatchEvent(new window.MouseEvent("click", { bubbles: true, altKey: true, clientX: 50, clientY: 5 }));
+            assert.deepStrictEqual(jumps, [1, 12], "clicking past the text must not navigate");
+        } finally {
+            delete require.cache[playerViewPath];
+            delete require.cache[jqueryPath];
+            if( previousWindow === undefined ) delete global.window;
+            else global.window = previousWindow;
+            if( previousDocument === undefined ) delete global.document;
+            else global.document = previousDocument;
+            if( previousDOMParser === undefined ) delete global.DOMParser;
+            else global.DOMParser = previousDOMParser;
+            if( previousNodeFilter === undefined ) delete global.NodeFilter;
+            else global.NodeFilter = previousNodeFilter;
+            dom.window.close();
+        }
+    });
+
     it("renders story markup as plain text", function () {
         const dom = new JSDOM('<div id="player"><div class="innerText active"></div></div>');
         const previousWindow = global.window;
@@ -333,9 +465,10 @@ describe("preview page layout", function () {
             assert.strictEqual(result.cover, "40px");
         });
 
-        it("starts at the top when there is no earlier passage", function () {
+        it("does not animate when already at the top", function () {
             const result = runContentReady({ divider: false, startTop: 0, scrollHeight: 2000 });
-            assert.deepStrictEqual(result.animations, [{ target: 0, duration: 350 }]);
+            assert.deepStrictEqual(result.animations, []);
+            assert.deepStrictEqual(result.assigned, [0]);
             assert.strictEqual(result.fill, "0px");
         });
 

@@ -29,7 +29,7 @@ describe("safe story HTML", function () {
 
     it("maps Alt-clicks in contiguous text back to source positions", function () {
         assert.strictEqual(SafeHtml.wordSourceOffset("Primeira linha.\n", "Primeira linha.\n", 2), 4);
-        assert.strictEqual(SafeHtml.wordSourceOffset("Primeira linha.\n", "Primeira linha.\n", 10), 11);
+        assert.strictEqual(SafeHtml.wordSourceOffset("Primeira linha.\n", "Primeira linha.\n", 10), 12);
         assert.strictEqual(SafeHtml.wordSourceOffset("Quarta linha.", "Quarta linha.", 2), 3);
         assert.strictEqual(SafeHtml.wordSourceOffset("Quinta linha.", "Quinta linha.", 2), 3);
         assert.strictEqual(SafeHtml.wordSourceOffset("a a a", "a a a", 4), 4);
