@@ -290,7 +290,8 @@ LiveCompiler.setEvents({
         PlayerView.contentReady();
     },
     exitDueToError: () => {
-        // No need to do anything - errors themselves being displayed are enough
+        // Commit a buffered turn even when the runtime stops before a prompt.
+        PlayerView.contentReady();
     },
     unexpectedError: (error) => {
         if( error.indexOf("Unhandled Exception") != -1 ) {
@@ -308,6 +309,7 @@ LiveCompiler.setEvents({
             PlayerView.addTerminatingMessage(i18n._("Ink compiler had an unexpected error ☹"), "error");
             PlayerView.addLongMessage(error, "error");
         }
+        PlayerView.contentReady();
     },
     compilerBusyChanged: (busy) => {
         ToolbarView.setBusySpinnerVisible(busy);

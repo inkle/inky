@@ -45,6 +45,12 @@ class PreviewDriver {
         const driver = new PreviewDriver(app,output);
         try {
             await app.until(`!!document.querySelector('#title-screen .choice-button')`);
+            // Startup can briefly show the starter story before the command-line
+            // fixture finishes loading. Both have three paragraphs. Observe the
+            // requested source and its actual completed Preview, not that count.
+            await app.until(`ace.edit('editor').getValue()===${JSON.stringify(source)} &&
+                document.querySelectorAll('.innerText.active p.storyText').length===3 &&
+                [...document.querySelectorAll('.innerText.active p.storyText')].every(p=>p.textContent.trim()==='A'.repeat(25))`);
             const title = 'Inky graphical regression '+app.child.pid;
             await app.evaluate(`document.title=${JSON.stringify(title)}`);
             await sleep(80);

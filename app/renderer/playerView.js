@@ -11,7 +11,6 @@ const EndingMarker = require("./endingMarker.js");
 const ParagraphSpacing = require("./paragraphSpacing.js");
 
 var events = {};
-var lastFadeTime = 0;
 var $textBuffer = null;
 var instructionPrefix = null;
 var animationEnabled = true;
@@ -24,6 +23,18 @@ var selectedChoiceText = null;
 // Inklecate sends paragraph text before its tags. Buffer it to apply # screen
 // before painting that paragraph (not after).
 var pendingStoryText = null;
+// A native turn arrives through several IPC messages. Keep the current passage
+// intact until the prompt (or ending) arrives, then render the whole turn in one
+// task. Browsers cannot paint a half-built passage between those messages.
+var pendingTurn = null;
+var pendingChoiceText = null;
+
+function queueDuringTurn(render) {
+    return function(...args) {
+        if( pendingTurn !== null ) pendingTurn.push(() => render(...args));
+        else return render(...args);
+    };
+}
 
 // The frame (.innerText) holds the picture band and the scrolling passage; the story text lives
 // in the passage. Older markup without those children is upgraded in place.
@@ -76,7 +87,7 @@ function bufferFrame() {
 // Initial default: append to visible buffer
 $textBuffer = activePassage();
 
-function shouldAnimate() {
+function isActiveBuffer() {
     return bufferFrame().hasClass("active");
 }
 
@@ -106,24 +117,6 @@ function showSessionView(sessionId) {
         // The frame only has a real height once it is on screen: the pages are decided here.
         activePager().refresh();
     }
-}
-
-function fadeIn($jqueryElement) {
-
-    const minimumTimeSeparation = 80;
-    const animDuration = 450;
-
-    var currentTime = Date.now();
-    var timeSinceLastFade = currentTime - lastFadeTime;
-
-    var delay = 0;
-    if( timeSinceLastFade < minimumTimeSeparation )
-        delay = minimumTimeSeparation - timeSinceLastFade;
-
-    $jqueryElement.css("opacity", 0);
-    $jqueryElement.delay(delay).animate({opacity: 1.0}, animDuration);
-
-    lastFadeTime = currentTime + delay;
 }
 
 // A fixed-ratio frame scrolls by itself: a new turn starts at the top of the passage,
@@ -227,8 +220,18 @@ function resetTitleScreen() {
 }
 
 function contentReady() {
+    if( pendingTurn !== null ) {
+        const operations = pendingTurn;
+        const choiceText = pendingChoiceText;
+        pendingTurn = null;
+        pendingChoiceText = null;
+        clearScene();
+        selectedChoiceText = choiceText;
+        operations.forEach(render => render());
+        bufferFrame().removeAttr("aria-busy");
+    }
     flushPendingStoryText();
-    if( !shouldAnimate() ) {
+    if( !isActiveBuffer() ) {
         updateMoreBelow();
         return;
     }
@@ -240,6 +243,9 @@ function contentReady() {
 }
 
 function prepareForNewPlaythrough(sessionId) {
+    pendingTurn = null;
+    pendingChoiceText = null;
+    $("#player .innerText").removeAttr("aria-busy");
 
     pendingStoryText = null;
     selectedChoiceText = null;
@@ -267,14 +273,14 @@ function addTextSection(text, sourceMap) {
     pendingStoryText = { text: String(text == null ? "" : text), sourceMap: sourceMap };
 }
 
-function flushPendingStoryText(animateOnInsert = true) {
+function flushPendingStoryText() {
     if( pendingStoryText === null ) return null;
     const section = pendingStoryText;
     pendingStoryText = null;
-    return renderTextSection(section.text, section.sourceMap, animateOnInsert);
+    return renderTextSection(section.text, section.sourceMap);
 }
 
-function renderTextSection(text, sourceMap, animateOnInsert = true)
+function renderTextSection(text, sourceMap)
 {
     text = String(text == null ? "" : text);
     var choiceTextResult = ChoiceText.stripSelectedChoiceText(text, selectedChoiceText);
@@ -309,8 +315,6 @@ function renderTextSection(text, sourceMap, animateOnInsert = true)
     // Append the actual content
     $textBuffer.append($paragraph);
 
-    if( animateOnInsert && animationEnabled && shouldAnimate() )
-        fadeIn($paragraph);
     return $paragraph;
 }
 
@@ -502,9 +506,8 @@ function addTags(tags)
         clearScene();
         pendingStoryText = followingText;
     }
-    // Configure the incoming paragraph before animating it, so title insertion
-    // and paragraph-gap margins never move text mid-fade in the Linux Preview.
-    const $newParagraph = flushPendingStoryText(false);
+    // Apply all layout-affecting tags before the completed turn is paginated.
+    flushPendingStoryText();
 
     // Alignment is resolved first: the scene title (and, for the first paragraph,
     // the story title and author) follow the paragraph they sit above.
@@ -532,17 +535,12 @@ function addTags(tags)
         if( alignmentTag ) setAlignment($sceneTitle, alignmentTag);
         if( $lastStoryParagraph.length ) $lastStoryParagraph.before($sceneTitle);
         else $textBuffer.append($sceneTitle);
-        if( animationEnabled && shouldAnimate() ) fadeIn($sceneTitle);
     }
 
     // The frame background is applied first; the scene picture remains a child above it.
     tags.forEach(addBackgroundTag);
     // image: src follows the paragraph it belongs to, as in the exported page.
     tags.forEach(addImageTag);
-
-    // All layout-affecting tags have been applied; only now begin the fade.
-    if( $newParagraph && $newParagraph.length && animationEnabled && shouldAnimate() )
-        fadeIn($newParagraph);
 
     // Control tags, alignment, scene titles and pictures are not visible tags.
     var globalTags = new Set(JSON.parse($("#player").attr("data-global-tags") || "[]"));
@@ -552,18 +550,13 @@ function addTags(tags)
             && imageFromTag(tag) === null && backgroundFromTag(tag) === null
             && !ScreenMode.isScreenTag(tag)
             && ParagraphSpacing.gapCount(tag) === 0);
-    if( visibleTags.length === 0 ) {
-        contentReady();
-        return;
-    }
+    if( visibleTags.length === 0 ) return;
 
     var tagsStr = visibleTags.join(", ");
     var $tags = $("<p class='tags'></p>").text("# " + tagsStr);
 
     $textBuffer.append($tags);
 
-    if( animationEnabled && shouldAnimate() )
-        fadeIn($tags);
 }
 
 // Choices live in the frame's footer, not in the scrolling passage, so they stay put
@@ -618,14 +611,12 @@ function addChoice(choice, callback)
     $choices.prop("hidden", false);
     $frame.addClass("has-choices");
 
-    // Fade it in
-    if( animationEnabled && shouldAnimate() )
-        fadeIn($choicePara);
-
     // When this choice is clicked, the chosen branch replaces the passage on screen.
     $choice.on("click", () => {
-        clearScene();
-        selectedChoiceText = choice.choice.text;
+        if( pendingTurn !== null ) return;
+        pendingTurn = [];
+        pendingChoiceText = choice.choice.text;
+        bufferFrame().attr("aria-busy", "true");
         callback();
     });
 }
@@ -660,8 +651,6 @@ function addTerminatingMessage(message, cssClass)
     var $message = $("<p></p>").addClass(cssClass).text(message);
     $textBuffer.append($message);
 
-    if( animationEnabled && shouldAnimate() )
-        fadeIn($message);
 }
 
 function addLongMessage(message, cssClass)
@@ -670,8 +659,6 @@ function addLongMessage(message, cssClass)
     var $message = $("<pre></pre>").addClass(cssClass).text(message);
     $textBuffer.append($message);
 
-    if( animationEnabled && shouldAnimate() )
-        fadeIn($message);
 }
 
 function addLineError(error, callback)
@@ -725,15 +712,15 @@ exports.PlayerView = {
     isTitleScreenPending: isTitleScreenPending,
     resetTitleScreen: resetTitleScreen,
     prepareForNewPlaythrough: prepareForNewPlaythrough,
-    addTextSection: addTextSection,
-    addTags: addTags,
-    addChoice: addChoice,
-    addTerminatingMessage: addTerminatingMessage,
-    addEndingMarker: addEndingMarker,
-    addLongMessage: addLongMessage,
+    addTextSection: queueDuringTurn(addTextSection),
+    addTags: queueDuringTurn(addTags),
+    addChoice: queueDuringTurn(addChoice),
+    addTerminatingMessage: queueDuringTurn(addTerminatingMessage),
+    addEndingMarker: queueDuringTurn(addEndingMarker),
+    addLongMessage: queueDuringTurn(addLongMessage),
     clearScene: clearScene,
-    addLineError: addLineError,
-    addEvaluationResult: addEvaluationResult,
+    addLineError: queueDuringTurn(addLineError),
+    addEvaluationResult: queueDuringTurn(addEvaluationResult),
     showSessionView: showSessionView,
     setInstructionPrefix: setInstructionPrefix,
     setImageResolver: resolver => { imageResolver = typeof resolver === "function" ? resolver : () => null; },
