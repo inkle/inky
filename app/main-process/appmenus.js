@@ -79,7 +79,11 @@ function refresh() {
             } else {
                 return {
                     label: i18n._(snippet.name),
-                    click: (item, focussedWindow) => callbacks.insertSnippet(focussedWindow, snippet.ink)
+                    click: (item, focussedWindow) => {
+                        if (snippet.projectTemplate) callbacks.openShowcaseProject(focussedWindow);
+                        else if (snippet.originalStory) callbacks.openOriginalStoryProject(focussedWindow, snippet.originalStory);
+                        else callbacks.insertSnippet(focussedWindow, snippet.ink);
+                    }
                 }
             }
             
@@ -208,21 +212,9 @@ function refresh() {
                     type: 'separator'
                 },
                 {
-                    label: i18n._('Export to JSON...'),
-                    accelerator: 'CmdOrCtrl+Shift+S',
-                    enabled: callbacks.isFocusedWindow,
-                    click: callbacks.exportJson
-                },
-                {
                     label: i18n._('Export for web...'),
-                    enabled: callbacks.isFocusedWindow,
+                    accelerator: 'CmdOrCtrl+Shift+S',
                     click: callbacks.exportForWeb
-                },
-                {
-                    label: i18n._('Export story.js only...'),
-                    accelerator: 'CmdOrCtrl+Alt+S',
-                    enabled: callbacks.isFocusedWindow,
-                    click: callbacks.exportJSOnly
                 },
                 {
                     type: 'separator'
@@ -347,6 +339,7 @@ function refresh() {
                     checked: true,
                     click: callbacks.toggleTags
                 },
+
                 {
                         label: i18n._('Word count and more'),
                         accelerator: 'CmdOrCtrl+Shift+C',

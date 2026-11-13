@@ -1,4 +1,5 @@
 const {app, BrowserWindow, ipcMain, dialog, ipcRenderer, Menu} = require('electron')
+const path = require("path");
 const i18n = require("./i18n/i18n.js")
 const {ProjectWindow} = require("./projectWindow.js");
 const {DocumentationWindow} = require("./documentationWindow.js");
@@ -8,6 +9,21 @@ const {onForceQuit} = require('./forceQuitDetect');
 const {Inklecate} = require("./inklecate.js");
 const { fstat } = require('original-fs');
 const {fs} = require("fs");
+const { listSystemFonts } = require("./systemFonts.js");
+const { exportSuccessDialogOptions } = require("./exportSuccessDialog.js");
+const { showInkyDialog, INKY_DIALOG_ICON } = require("./inkyDialog.js");
+const inkyFileDialog = require("./inkyFileDialog.js");
+
+ipcMain.handle("list-system-fonts", () => listSystemFonts());
+
+// Use the native message box rather than window.alert, so the export-success
+// notification can show its own checkmark icon on desktop platforms.
+ipcMain.handle("show-export-success", (event, details) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    const options = exportSuccessDialogOptions(details);
+    if (process.platform === "linux") return showInkyDialog(window, "export", options);
+    return window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options);
+});
 
 
 function inkJSNeedsUpdating() {
@@ -26,7 +42,7 @@ let pendingPathToOpen = null;
 let hasFinishedLaunch = false;
 
 // main
-ipcMain.on('show-context-menu', (event) => {
+ipcMain.on('show-context-menu', (event, options) => {
     const template = [
         {
             label: 'Cut',
@@ -42,37 +58,42 @@ ipcMain.on('show-context-menu', (event) => {
         },
       { type: 'separator' },
     ]
+    if (options && options.formatCode === true) {
+        template.push({
+            label: 'Format Code',
+            click: () => event.sender.send('format-code')
+        });
+    }
     const menu = Menu.buildFromTemplate(template)
     menu.popup(BrowserWindow.fromWebContents(event.sender))
 })
 
 
-ipcMain.handle("showSaveDialog", async (event,saveOptions) => {
-    return dialog.showSaveDialog(saveOptions) 
-
+ipcMain.handle("showOpenDialog", async (event, openOptions) => {
+    return inkyFileDialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender), openOptions)
 })
 
-ipcMain.handle("try-close", async (event) =>{
-    return dialog.showMessageBox({
+ipcMain.handle("showSaveDialog", async (event, saveOptions) => {
+    // Keep native save pickers attached to their Inky owner as well, so the
+    // desktop window manager can associate them with the application's icon.
+    const parent = BrowserWindow.fromWebContents(event.sender);
+    return inkyFileDialog.showSaveDialog(parent, saveOptions);
+})
+
+ipcMain.handle("try-close", async (event) => {
+    const parent = BrowserWindow.fromWebContents(event.sender);
+    const options = {
         type: "warning",
+        title: "Inky — Save Changes",
         message: i18n._("Would you like to save changes before exiting?"),
         detail: i18n._("Your changes will be lost if you don't save."),
-        buttons: [
-            i18n._("Save"),
-            i18n._("Don't save"),
-            i18n._("Cancel")
-        ],
-        defaultId: 0
-    })
-    
-})
-
-app.on('will-finish-launching', function () {
-    app.on("open-file", function (event, path) {
-        ProjectWindow.open(path);
-        event.preventDefault();
-    });
-
+        buttons: [i18n._("Save"), i18n._("Don't save"), i18n._("Cancel")],
+        defaultId: 0,
+        cancelId: 2,
+        icon: INKY_DIALOG_ICON
+    };
+    if (process.platform === "linux") return showInkyDialog(parent, "save", options);
+    return parent ? dialog.showMessageBox(parent, options) : dialog.showMessageBox(options);
 });
 
 let isQuitting = false;
@@ -143,19 +164,10 @@ app.on('ready', function () {
             var win = ProjectWindow.focused();
             if (win) win.save();
         },
-        exportJson: () => {
-            var win = ProjectWindow.focused();
-            if (win) win.exportJson();
-        },
         exportForWeb: () => {
             if( inkJSNeedsUpdating() ) return;
             var win = ProjectWindow.focused();
             if (win) win.exportForWeb();
-        },
-        exportJSOnly: () => {
-            if( inkJSNeedsUpdating() ) return;
-            var win = ProjectWindow.focused();
-            if (win) win.exportJSOnly();
         },
         toggleTags: (item, focusedWindow, event) => {
             focusedWindow.webContents.send("set-tags-visible", item.checked);
@@ -229,6 +241,28 @@ app.on('ready', function () {
                 eachWindow.browserWindow.webContents.send("set-autocomplete-disabled", autoCompleteDisabled);
             }
         },
+        openShowcaseProject: (focussedWindow) => {
+            try {
+                const { createShowcaseProject } = require("./showcaseProject.js");
+                const entry = createShowcaseProject(path.join(app.getPath("documents"), "Inky Projects"));
+                ProjectWindow.open(entry);
+            } catch (error) {
+                const options = { type: "error", message: "Could not create the showcase project.", detail: error.message };
+                if (focussedWindow) dialog.showMessageBox(focussedWindow, options);
+                else dialog.showMessageBox(options);
+            }
+        },
+        openOriginalStoryProject: (focussedWindow, storyId) => {
+            try {
+                const { createOriginalStoryProject } = require("./originalStoryProject.js");
+                const entry = createOriginalStoryProject(path.join(app.getPath("documents"), "Inky Projects"), storyId);
+                ProjectWindow.open(entry);
+            } catch (error) {
+                const options = { type: "error", message: "Could not create the original Ink story project.", detail: error.message };
+                if (focussedWindow) dialog.showMessageBox(focussedWindow, options);
+                else dialog.showMessageBox(options);
+            }
+        },
         insertSnippet: (focussedWindow, snippet) => {
             if( focussedWindow )
             focussedWindow.webContents.send('insertSnippet', snippet);
@@ -267,25 +301,14 @@ app.on('ready', function () {
         }
     });
 
-    // Windows passed file to open on command line?
-    if (process.platform == "win32" && process.argv.length > 1 && !pendingPathToOpen) {
-        for (let i = 1; i < process.argv.length; i++) {
-            var arg = process.argv[i].toLowerCase();
-            if (arg.endsWith(".ink")) {
-                pendingPathToOpen = process.argv[1];
-                break;
-            }
-        }
-    }
-
-    // Opened Inky with specific file (e.g. drag and drop or windows command line)
-    if( pendingPathToOpen ) {
-        ProjectWindow.open(pendingPathToOpen);
-        pendingPathToOpen = null;
-    }
-    
-    // Otherwise, show new empty window
-    else {
+    // Explicit file requests take priority. Otherwise resume the latest saved
+    // project that is still readable; first launch keeps the starter story.
+    const startupPath = ProjectWindow.getStartupPath(
+        pendingPathToOpen, process.argv.slice(1), process.env.OWD || process.cwd());
+    pendingPathToOpen = null;
+    if( startupPath ) {
+        ProjectWindow.open(startupPath);
+    } else {
         ProjectWindow.createEmpty();
     }
 

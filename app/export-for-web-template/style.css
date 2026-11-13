@@ -1,10 +1,29 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,700|Quattrocento:700');
+/*
+  Exported story: the game frame, not a web page.
+  The story lives inside a single 9:16 frame. There is no toolbar: one small menu
+  button float over the frame, and the passage scrolls inside it.
+*/
+
+:root {
+    --frame-gap: clamp(10px, 2.4vmin, 36px);
+    --frame-radius: clamp(10px, 2vmin, 20px);
+    --frame-pad: clamp(16px, 2.6vmin, 26px);
+}
+
+html,
+body {
+    height: 100%;
+}
 
 body {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: lighter;
-    background: white;
+    margin: 0;
     overflow: hidden;
+    /* The game floats on a quiet surface; the story colors stay in the frame. */
+    /* Outside surface follows the active story look (including custom colors). */
+    background: var(--reader-outer-bg, #eeeeec);
+    color: var(--text, #000000);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
@@ -16,7 +35,7 @@ body {
 h1,
 h2 {
     text-align: center;
-    font-family: "Quattrocento", Georgia, 'Times New Roman', Times, serif;
+    font-family: Georgia, "Times New Roman", "Noto Serif", serif;
     margin: 0;
     padding: 0;
 }
@@ -34,109 +53,529 @@ h2 {
     color: #BBB;
 }
 
-.header {
-    padding-top: 3em;
-    padding-bottom: 3em;
-}
-
 /*
-  Built-in class:
-    # author: Name
-*/
-.byline {
-    font-style: italic;
-}
-
-.written-in-ink {
-    z-index: 3;
-    font-size: 9pt;
-    font-family: sans-serif;
-    text-align: center;
-    font-weight: 700;
-    position: fixed;
-    display: block;
-    width: 100%;
-    background: white;
-    margin: 0;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    height: 14px;
-    top: 0;
-}
-
-@media screen and (prefers-reduced-motion: no-preference) {
-    .written-in-ink {
-        transition: color 0.6s, background 0.6s;
-    }
-}
-
-/* 
   Enables <iframe> support work on itch.io when using mobile iOS
 */
 .outerContainer {
     position: absolute;
-    display: block;
+    inset: 0;
+    display: grid;
+    place-items: center;
     margin: 0;
     padding: 0;
+    overflow: hidden;
+    container-type: size;
     -webkit-overflow-scrolling: touch;
-    overflow: scroll;
-    overflow-x: hidden;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    left: 0;
-    margin-top: 24px;
+}
+
+/* The frame of the game. Its 9:16 proportion is set by the exporter. */
+.container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: min(calc(100cqw - 2 * var(--frame-gap)), var(--width, 42rem));
+    max-width: none;
+    max-height: calc(100cqh - 2 * var(--frame-gap));
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--reader-frame-border, color-mix(in srgb, var(--text, #000000) 20%, transparent));
+    border-radius: var(--frame-radius);
+    background: var(--bg, #ffffff);
+    color: var(--text, #000000);
+    box-shadow:
+        0 26px 58px -13px var(--reader-shadow-deep, rgba(0, 0, 0, 0.24)),
+        0 7px 23px -5px var(--reader-shadow-soft, rgba(0, 0, 0, 0.14)),
+        0 0 34px 2px var(--reader-shadow-halo, rgba(0, 0, 0, 0.07));
+    font-size: var(--font-size, 18px);
+    text-align: var(--story-align, left);
+}
+
+/* #bg paints the full 9:16 frame behind its picture, passage and choices. */
+.container.has-background {
+    background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
 }
 
-@media screen and (max-width: 980px) {
-    .outerContainer {
-        margin-top: 44px;
-        background-size: cover;
-        background-repeat: no-repeat;
-    }
+/* Let the frame background show through transparent parts of the scene picture and choices.
+   The choice surface keeps a translucent theme tint so its text remains readable. */
+.container.has-background .story-visual {
+    background: transparent;
 }
 
-.container {
-    display: block;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    padding-top: 4em;
-    background: white;
+.container.has-background .story-choices {
+    background: transparent;
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
     .switched .container {
-        transition: background-color 0.6s;
+        transition: background-color 0.6s, box-shadow 0.6s;
     }
 }
 
+/* ---- Small overlay: the story's single menu ---------------------------------- */
+
+.story-hud {
+    position: absolute;
+    z-index: 2;
+    inset: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 12px;
+    box-sizing: border-box;
+    padding: clamp(12px, 2.2vmin, 22px) var(--frame-pad);
+    color: var(--text, #000000);
+    user-select: none;
+    pointer-events: none;
+}
+
+.story-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    pointer-events: auto;
+}
+
+#story.has-visual .toolbar-icon-button {
+    color: #ffffff;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.5));
+}
+
+.toolbar-icon-button {
+    display: grid;
+    place-items: center;
+    width: clamp(32px, 4.4vmin, 42px);
+    height: clamp(32px, 4.4vmin, 42px);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.toolbar-icon-button:hover,
+.toolbar-icon-button[aria-expanded="true"] {
+    background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.toolbar-icon-button:focus-visible,
+.toolbar-popover button:focus-visible,
+.audio-control button:focus-visible {
+    outline: 2px solid var(--link, #0066cc);
+    outline-offset: 2px;
+}
+
+.toolbar-icon-button svg,
+.toolbar-popover button svg {
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.toolbar-icon-button:disabled {
+    opacity: 0.42;
+    cursor: default;
+}
+
+.toolbar-popover-anchor {
+    position: relative;
+}
+
+.toolbar-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 218px;
+    padding: 6px;
+    border: 1px solid color-mix(in srgb, var(--text, #000000) 14%, transparent);
+    border-radius: 12px;
+    background: var(--bg, #ffffff);
+    color: var(--text, #000000);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+    pointer-events: auto;
+}
+
+#story-menu > button[hidden] {
+    display: none;
+}
+
+.toolbar-popover[hidden] {
+    display: none;
+}
+
+#story-menu > button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 40px;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.92em;
+    line-height: normal;
+    text-align: left;
+    cursor: pointer;
+}
+
+#story-menu > button:hover:not(:disabled) {
+    background: color-mix(in srgb, currentColor 9%, transparent);
+}
+
+#story-menu > button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+#audio-settings-anchor {
+    margin-top: 4px;
+    padding: 9px 8px 6px;
+    border-top: 1px solid color-mix(in srgb, var(--text, #000000) 12%, transparent);
+}
+
+#audio-settings-anchor[hidden] {
+    display: none;
+}
+
+.audio-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.audio-control[hidden] {
+    display: none;
+}
+
+.audio-control button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 5px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.audio-control button:hover {
+    background: color-mix(in srgb, currentColor 9%, transparent);
+}
+
+.audio-control input[type="range"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    accent-color: var(--link, #0066cc);
+    cursor: pointer;
+}
+
+.audio-control.muted .wave {
+    display: none;
+}
+
+.audio-control:not(.muted) .slash {
+    display: none;
+}
+
+/* ---- Story image ----------------------------------------------------------- */
+
+.story-visual {
+    position: relative;
+    flex: 0 0 27.169%;
+    min-height: 0;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--bg, #ffffff) 80%, var(--text, #000000));
+}
+
+.story-visual[hidden] {
+    display: none;
+}
+
+.story-visual img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* ---- Narrative ------------------------------------------------------------- */
+
+.story-passage {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-bottom: var(--cue-strip, 44px);
+    padding: calc(var(--frame-pad) * 1.2) var(--frame-pad) var(--frame-pad);
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* The editor breaks a word that reaches its right edge, and the frame has to do the same:
+       `overflow: hidden` on the container would otherwise cut the rest of the word away.
+       Inherited by every line in the passage, so a wrapped row starts under the line above it. */
+    overflow-wrap: anywhere;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    /* Short passages sit in the middle of the space left below the picture.
+       "safe" keeps the beginning reachable once the text overflows. */
+    justify-content: safe center;
+    font-size: calc(var(--font-size, 18px));
+    /* The top padding covers the scrolled history (see main.js). */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent var(--story-top-cover, 0px), #000 var(--story-top-cover, 0px));
+    mask-image: linear-gradient(to bottom, transparent 0, transparent var(--story-top-cover, 0px), #000 var(--story-top-cover, 0px));
+}
+
+/* Scroll room so a short new turn can still start at the top (see main.js). */
+.story-passage::after {
+    content: "";
+    flex: 0 0 auto;
+    height: var(--story-scroll-fill, 0px);
+}
+
+/* ---- Choices footer -------------------------------------------------------- */
+
+/* Choices stay in a footer at the bottom of the frame: the narrative scrolls above
+   them, the choices never move. */
+.story-choices {
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    max-height: 52%;
+    padding: 0 var(--frame-pad) calc(var(--frame-pad) * 0.6);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text, #000000) 48%, transparent) transparent;
+    font-size: calc(var(--font-size, 18px));
+    background: var(--bg, #ffffff);
+}
+
+.story-choices::-webkit-scrollbar {
+    width: 6px;
+}
+
+.story-choices::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.story-choices::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text, #000000) 48%, transparent);
+    border-radius: 999px;
+}
+
+.story-choices[hidden] {
+    display: none;
+}
+
+/* An unobtrusive bottom fade shows when more choices are available below.
+   It is an overlay on the frame, not another row that steals passage height. */
+.container.choices-more-below::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  height: 22px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--bg, #ffffff) 83%, transparent));
+}
+
+/* The footer supplies its own separation from the text. */
+.container.has-choices .story-passage {
+    margin-bottom: 0;
+}
+
+.container.has-choices .scroll-cue {
+    display: none;
+}
+
+.story-choices .choice:first-child {
+    border-top: 1px solid color-mix(in srgb, var(--text, #000000) 14%, transparent);
+}
+
+/* A passage above the limit is the writer's mistake: say so in the frame. */
+.story-choices .choice-limit {
+    margin: 0;
+    padding: 0.7em 0.75em;
+    color: #b3261e;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+
+/* With #bg, the frame image remains visible below the narrative and the choices.
+   Each option is a separate frosted-glass surface, not an opaque footer strip. */
+.container.has-background .story-choices {
+    padding: clamp(8px, 1.8vmin, 15px) var(--frame-pad) clamp(10px, 2vmin, 16px);
+    border: 0;
+    background: transparent;
+}
+
+.container.has-background .story-choices .choice {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.container.has-background .story-choices .choice + .choice {
+    margin-top: clamp(6px, 1vmin, 9px);
+}
+
+.container.has-background .story-choices .choice:first-child {
+    border-top: 0;
+}
+
+.container.has-background .story-choices .choice .choice-button,
+.container.has-background .story-choices .choice .unclickable {
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--text, #000000) 20%, transparent);
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--bg, #ffffff) 84%, transparent);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    backdrop-filter: blur(14px) saturate(1.15);
+}
+
+.container.has-background .story-choices .choice .choice-button {
+    padding: 0.8em 2.5em 0.8em 0.95em;
+}
+
+.container.has-background .story-choices .choice .choice-button:hover,
+.container.has-background .story-choices .choice .choice-button:focus-visible,
+.container.has-background .story-choices .choice .choice-button:active {
+    border-color: color-mix(in srgb, var(--link-hover, #004c99) 52%, transparent);
+    background: color-mix(in srgb, var(--link-hover, #004c99) 14%, transparent);
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2), inset 3px 0 0 var(--link-hover, #004c99);
+    color: var(--link-hover, #004c99);
+}
+
+.container.has-background .story-choices .choice .unclickable {
+    display: block;
+    padding: 0.8em 0.95em;
+}
+
+.story-passage[hidden] {
+    display: none;
+}
+
+.story-passage::-webkit-scrollbar {
+    display: none;
+}
+
+/* The divider separates turns so the page can scroll to the new one; it is not drawn,
+   matching the Preview. */
+.story-passage hr {
+    display: none;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    .story-passage {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Without a picture there is no band: the text starts at the top and uses the whole frame. */
+.container:not(.has-visual) .story-passage {
+    padding-top: clamp(52px, 8vmin, 76px);
+    justify-content: flex-start;
+}
+
+/* With a picture, every passage starts just below it. A scene title is a normal
+   passage element, so its presence must not control the position of the body text. */
+.container.has-visual .story-passage {
+    padding-top: 15px;
+    justify-content: flex-start;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+.story-passage img {
+    margin: 0.5em 0;
+    border-radius: calc(var(--frame-radius) / 2);
+}
+
+/* Only an annotated blank narrative line produces a paragraph gap. */
+.story-passage p {
+    margin: 0;
+    flex-shrink: 0; /* Preserve line boxes even when passage must scroll. */
+}
+
+.story-passage p.inky-paragraph-gap {
+    margin-top: var(--inky-paragraph-gap, 1lh);
+}
+
+.story-passage > .scene-title:not(:first-child) {
+    margin-top: 1.3em;
+}
+
+.container .scene-title {
+    margin: 0 0 15px;
+    padding: 0;
+    color: var(--text, #000000);
+    font-family: Georgia, "Times New Roman", "Noto Serif", serif;
+    font-size: 33.3px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    text-align: var(--follow-align, left);
+    text-wrap: balance;
+}
+
 p {
-    font-size: 13pt;
-    color: #888;
-    line-height: 1.7em;
-    font-weight: lighter;
+    font-size: var(--font-size, 18px);
+    color: var(--text, #000000);
+    line-height: var(--line-height, 1.7);
+    font-weight: normal;
 }
 
 a {
     font-weight: 700;
-    color: #b97c2c;
+    color: var(--link, #b97c2c);
     font-family: sans-serif;
     text-decoration: none;
 }
 
 .unclickable {
     font-weight: 700;
-    color: #4f3411;
+    color: color-mix(in srgb, var(--text, #000000) 70%, transparent);
     font-family: sans-serif;
     text-decoration: none;
     cursor: not-allowed;
 }
 
 a:hover {
-    color: black;
+    color: var(--link-hover, #000000);
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
@@ -150,32 +589,16 @@ a:hover {
 }
 
 strong {
-    color: black;
+    color: var(--text, #000000);
     font-weight: bold;
-}
-
-img {
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-}
-
-.container .hide {
-    opacity: 0.0;
 }
 
 .container .invisible {
     display: none;
 }
 
-.container>* {
+.container > * {
     opacity: 1.0;
-}
-
-@media screen and (prefers-reduced-motion: no-preference) {
-    .container>* {
-        transition: opacity 1.0s;
-    }
 }
 
 /*
@@ -187,7 +610,7 @@ img {
     line-height: 1.7em;
 }
 
-/* 
+/*
   Class applied to first choice
 */
 :not(.choice)+.choice {
@@ -195,112 +618,250 @@ img {
 }
 
 /*
-  Class applied to choice links
+  Class applied to choice buttons and unclickable choices
 */
-.choice a, .choice span {
-    font-size: 15pt;
+.choice .choice-button, .choice .unclickable {
+    font-size: 1.1em;
 }
 
-/* 
+/*
   Built-in class:
     The End # CLASS: end
 */
 .end {
     text-align: center;
     font-weight: bold;
-    color: black;
+    color: var(--text, #000000);
     padding-top: 20px;
     padding-bottom: 20px;
 }
 
-#controls {
-    z-index: 4;
-    font-size: 9pt;
+
+/* ---- Scroll cue --------------------------------------------------------- */
+
+/* Only while the passage continues below the visible area; it never dims a
+   passage that ends inside the frame. */
+.container::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: auto 0 0;
+    height: 2.4em;
+    background: linear-gradient(to bottom, transparent, var(--bg, #ffffff));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.container.has-more-below::after {
+    opacity: 0.85;
+}
+
+.scroll-cue {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    bottom: clamp(6px, 1.2vmin, 12px);
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin-left: -16px;
+    color: var(--text, #000000);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+
+.scroll-cue svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.container.has-more-below .scroll-cue {
+    opacity: 0.8;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* The cue has its own strip under the text: it never covers a choice. */
+.container::after {
+    bottom: var(--cue-strip, 44px);
+}
+
+/* The title screen owns the whole frame; no gameplay overlay may show through. */
+.container.title-screen-active .story-hud,
+.container.title-screen-active .scroll-cue {
+    display: none;
+}
+
+.container.title-screen-active::after {
+    opacity: 0;
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+    .container::after,
+    .scroll-cue {
+        transition: none;
+    }
+}
+
+@media screen and (max-width: 520px) {
+    :root {
+        --frame-gap: 8px;
+    }
+
+    .story-hud {
+        padding: 10px 12px;
+    }
+
+    .story-passage {
+        padding: 16px 18px;
+    }
+
+    .container:not(.has-visual) .story-passage {
+        padding-top: 52px;
+    }
+}
+
+/* ---- Pages -----------------------------------------------------------------
+   A passage taller than the frame is divided into pages (see pager.js) instead of scrolling.
+   The navigation row sits between the text and the choices, which stay where they are. */
+
+.page-out {
+  display: none !important;
+}
+
+.story-pager {
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 0.3em var(--frame-pad) 0.5em;
+  background: var(--bg, #ffffff);
+}
+
+.story-pager[hidden] {
+  display: none;
+}
+
+.story-pager .pager-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text, #000000);
+  cursor: pointer;
+}
+
+.story-pager .pager-button svg {
+  width: 1.2em;
+  height: 1.2em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.story-pager .pager-button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.story-pager .pager-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  color: color-mix(in srgb, var(--text, #000000) 55%, transparent);
+  font-size: 0.8em;
+}
+
+.story-pager .pager-dot {
+  width: 0.5em;
+  height: 0.5em;
+  box-sizing: border-box;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.story-pager .pager-dot.current {
+  background: currentColor;
+}
+
+/* Until the last page the choices are shown but cannot be picked. */
+.story-choices.pages-locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Pages never scroll, and the text keeps the same place on every page. */
+.is-paged .story-passage {
+  overflow-y: hidden;
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+.is-paged .story-passage.page-overflow {
+  overflow-y: auto;
+}
+
+.is-paged .story-passage::after {
+  display: none;
+}
+
+.is-paged .scroll-cue {
+  display: none;
+}
+
+
+/* Inky story ending: quiet, theme-aware ornament and optional caption. */
+.story-passage .story-ending {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65em;
+    max-width: 100%;
+    margin: 2.2em auto 1em;
+    padding: 0.4em 0 0.2em;
+    color: inherit;
+    opacity: 0.82;
+    font: inherit;
     text-align: center;
-    padding-bottom: 6px;
-    position: fixed;
-    right: 14px;
-    top: 4px;
     user-select: none;
-    background: white;
 }
-
-@media screen and (prefers-reduced-motion: no-preference) {
-    #controls {
-        transition: color 0.6s, background 0.6s;
-    }
+.story-passage .story-ending[hidden] { display: none !important; }
+/* Draw actual paths instead of flex pseudo-elements: no collapsed rules. */
+.story-passage .story-ending .story-ending-ornament {
+    display: block;
+    flex: none;
+    width: min(12em, 78%);
+    height: auto;
+    overflow: visible;
+    color: inherit;
 }
-
-#controls [disabled] {
-    color: #ccc;
+.story-ending-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+    opacity: 0.72;
 }
-
-#controls>*:not(:last-child):after {
-    content: " | ";
+.story-ending-diamond {
+    fill: currentColor;
 }
-
-@media screen and (max-width: 980px) {
-    #controls {
-        z-index: 2;
-        padding-top: 24px;
-        top: 0;
-        left: 0;
-        right: 0;
-    }
-}
-
-/* 
-  Dark Theme (Added in Inky 0.10.0)
-    # theme: dark
-*/
-
-body.dark {
-    background: black;
-    color: white;
-}
-
-.dark h2 {
-    color: #666;
-}
-
-.dark .container {
-    background: black;
-}
-
-.dark .written-in-ink {
-    background: black;
-}
-
-.dark a {
-    color: #cc8f1a;
-}
-.dark .unclickable{
-    color: #c4af87;
-    cursor:not-allowed;
-}
-
-.dark a:hover {
-    color: white;
-}
-
-@media screen and (prefers-reduced-motion: no-preference) {
-    .dark a {
-        transition: color 0.6s;
-    }
-}
-
-.dark strong {
-    color: white;
-}
-
-.dark #controls [disabled] {
-    color: #444;
-}
-
-.dark .end {
-    color: white;
-}
-
-.dark #controls {
-    background: black;
-}
+.story-ending-label { font-size: 0.8em; line-height: 1.35; overflow-wrap: anywhere; }

@@ -38,6 +38,18 @@ div {
   cursor: col-resize;
 }
 
+/* The Explorer/sidebar has a deliberate fixed width. Keep its separator visible,
+   but disable the drag target; the editor/player splitter remains resizable. */
+#main > .split {
+  pointer-events: none;
+  cursor: default !important;
+}
+#main > .split .grip {
+  display: none !important;
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
 #toolbar {
   position: absolute;
   top: 0;
@@ -183,14 +195,12 @@ img.issue-icon.warning {
   color: black;
 }
 
-
 #toolbar .button.nav-back {
   margin-right: -3px;
 }
 #toolbar .button.nav-forward {
   margin-left: -3px;
 }
-
 
 #toolbar .issue-popup {
   position: absolute;
@@ -336,7 +346,7 @@ img.issue-icon.warning {
   left: 0;
   right: 0;
   overflow: auto;
-  padding-bottom: 40px; /* leave space for include adding UI */
+  padding-bottom: 0;
   border-left: 1px solid #DDD;
 }
 
@@ -372,131 +382,6 @@ img.issue-icon.warning {
   white-space: normal;
 }
 
-.sidebar .footer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 32px;
-  border-top: 1px solid #CCC;
-  background: #f5f5f4;
-  /*transition: height 0.2s;*/
-  /*transition: height 3s;*/
-}
-
-.sidebar .footer.showingForm {
-  height: 120px;
-  bottom: 0;
-  /*transition: height 3s;/*0.2s;*/
-}
-
-
-.sidebar .footer .add-include-button {
-  position: absolute;
-  top: 0;
-  left: 5px;
-  right: 5px;
-  width: auto;
-  line-height: 15px;
-  color: #CCC;
-  opacity: 1.0;
-  transition: opacity 0.2s;
-}
-
-.sidebar .footer.showingForm .add-include-button {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.sidebar .footer .add-include-button .icon {
-  position: relative;
-  top: 4px;
-  font-size: 18pt;
-  color: #AAA;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-.sidebar .footer .add-include-button:hover,
-.sidebar .footer .add-include-button:hover .icon {
-  color: #666;
-}
-
-.sidebar .footer:not(.showingForm) .new-include-form {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-
-}
-
-.sidebar .footer .new-include-form {
-  opacity: 1.0;
-  transition: opacity 0.2s;
-}
-
-.sidebar .footer:not(.showingForm) .new-include-form {
-  opacity: 0.0;
-  pointer-events: none;
-}
-
-.sidebar .footer h5 {
-  padding: 5px;
-  margin: 0;
-  font-size: 10pt;
-}
-
-.sidebar .footer .inputWrapper {
-  position: relative;
-  display: block;
-  margin-left: 5px;
-  margin-right: 5px;
-  width: auto;
-  height: 30px;
-}
-
-.sidebar .footer input[type="text"] {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
-
-.sidebar .footer input[type="text"].error {
-  outline-color: #feb3b3;
-  outline-style: solid;
-}
-
-.sidebar .footer .add-to-main-ink {
-  position: relative;
-  height: 20px;
-  margin-top: 3px;
-  margin-bottom: 5px;
-  min-width: 180px;
-  margin-left: 6px;
-}
-
-.sidebar .footer .add-to-main-ink input {
-  right: 6px;
-}
-
-.sidebar .footer .add-to-main-ink span {
-  float: right;
-  margin-right: 25px;
-}
-
-.sidebar .footer .form-buttons {
-  position: relative;
-  display: block;
-  height: 30px;
-  min-width: 180px;
-  margin-right: 3px;
-}
-
-.sidebar .footer .form-buttons .btn {
-  margin-left: 2px;
-  margin-right: 2px;
-  width: 80px;
-}
-
 .twopane {
   position: absolute;
   left: 0;
@@ -519,13 +404,171 @@ img.issue-icon.warning {
   top: 34px;
 }
 
+/* The editor pane is the left half of the work area. Keeping all of its
+   contents inside one pane means the center splitter resizes the editor,
+   mode bar and embedded form together instead of accidentally resizing the
+   button that happens to be the preceding DOM sibling. */
+#editor-pane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 50%;
+  min-width: 0;
+  overflow: hidden;
+}
+
 #editor {
   display: block;
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  right: 50%;
+  right: 0;
+}
+
+#image-viewer {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  background: var(--editor-background, #fff);
+  color: var(--editor-foreground, #222);
+}
+#image-viewer[hidden] { display: none; }
+.image-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(127,127,127,.3);
+}
+.image-viewer-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.image-viewer-canvas {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background-color: #f0f0f0;
+  background-image: linear-gradient(45deg, #ddd 25%, transparent 25%), linear-gradient(-45deg, #ddd 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ddd 75%), linear-gradient(-45deg, transparent 75%, #ddd 75%);
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+.image-viewer-image { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+.image-viewer-status { min-height: 24px; padding: 4px 10px; overflow-wrap: anywhere; font-size: 11px; opacity: .75; }
+.window.dark .image-viewer-canvas { background-color: #292929; background-image: linear-gradient(45deg, #383838 25%, transparent 25%), linear-gradient(-45deg, #383838 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #383838 75%), linear-gradient(-45deg, transparent 75%, #383838 75%); }
+
+#style-mode-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0 8px;
+  background: #f3f3f3;
+  border-bottom: 1px solid #dedede;
+  z-index: 7;
+}
+#style-mode-bar[hidden] { display: none; }
+.style-mode-tab {
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 88px;
+  width: 88px;
+  min-width: 88px;
+  padding: 0 8px;
+  margin: 0;
+  border: 0;
+  border-right: 1px solid #e5e5e5;
+  border-radius: 0;
+  background: transparent;
+  color: #616161;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+.style-mode-tab:hover:not(:disabled) { background: #e8e8e8; color: #252525; }
+.style-mode-tab.active {
+  background: #fff;
+  color: #222;
+  font-weight: 500;
+  box-shadow: inset 0 1px 0 #fff;
+}
+.style-mode-tab.active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #007acc;
+}
+.style-mode-tab:focus-visible { outline: 1px solid #007acc; outline-offset: -2px; }
+.style-mode-tab:disabled { opacity: .55; cursor: wait; }
+html.dark #style-mode-bar, body.dark #style-mode-bar {
+  background: #252526;
+  border-bottom-color: #333;
+}
+html.dark .style-mode-tab, body.dark .style-mode-tab { color: #aaa; border-right-color: #333; }
+html.dark .style-mode-tab:hover:not(:disabled), body.dark .style-mode-tab:hover:not(:disabled) { background: #2a2d2e; color: #eee; }
+html.dark .style-mode-tab.active, body.dark .style-mode-tab.active { background: #1e1e1e; color: #fff; box-shadow: none; }
+
+/* Inline Game settings use the editor pane, leaving the story preview visible.
+   The dedicated mode bar prevents the toggle from covering the form title or
+   the first lines of YAML. */
+#game-settings-inline {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  /* Iframes are replaced elements: with auto width/height, Chromium uses the
+     intrinsic 300x150 size even when left/right/top/bottom are specified.
+     Size it explicitly to the editor pane so the controls get the full area. */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: white;
+  z-index: 5;
+}
+#game-settings-inline[hidden] { display: none; }
+#main.style-mode-visible #editor { top: 36px; }
+#main.style-mode-visible #game-settings-inline {
+  top: 36px;
+  height: calc(100% - 36px);
+}
+
+/* Visual and Advanced are two views of the same left pane. Keep that pane
+   at exactly the same width in both modes and lock the splitter while the
+   tabs are visible, so switching tabs never changes the available workspace. */
+#main.style-mode-visible {
+  --game-settings-pane-width: min(50%, max(0px, calc(100% - 300px)));
+}
+#main.style-mode-visible #editor-pane {
+  right: auto !important;
+  width: var(--game-settings-pane-width) !important;
+}
+#main.style-mode-visible #player {
+  left: var(--game-settings-pane-width) !important;
+  background-color: var(--game-bg, #ffffff);
+}
+#main.style-mode-visible .twopane > .split {
+  left: var(--game-settings-pane-width) !important;
+  pointer-events: none;
+  cursor: default;
+}
+#main.style-mode-visible .twopane > .split .grip {
+  pointer-events: none;
+  cursor: default;
 }
 
 #editor .ace-error {
@@ -603,22 +646,21 @@ img.issue-icon.warning {
 
 #player .innerText {
   position: relative;
-  padding: 10px 0 50px 0;
-  margin: 0;
+  box-sizing: border-box;
+  width: calc(100% - 32px);
+  max-width: var(--game-width, 42rem);
+  padding: 10px 0 50px;
+  margin: 0 auto;
 }
 
 #player .innerText p {
-  padding: 0 40px 0 40px;
+  padding: 0;
+  margin: 0 0 1em;
 }
 
 #player .innerText p.customInstruction {
   color: rgb(179, 94, 94);
   font-family: Monaco, 'Courier New', monospace;
-}
-
-#player.altKey .innerText p span:hover {
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 #player .hiddenBuffer {
@@ -632,7 +674,6 @@ img.issue-icon.warning {
   overflow: scroll;
 }
 
-
 #player hr {
   border: 0;
   border-top: 1px solid #CCC;
@@ -640,19 +681,228 @@ img.issue-icon.warning {
   margin: 0 auto;
 }
 
-#player p.choice {
+#main #player p.choice {
+  text-align: var(--game-choice-align, left);
+}
+
+#main.choicesLeft #player p.choice,
+#main.choicesLeft #player p.choice .tags {
+  text-align: left;
+}
+
+#main.choicesCenter #player p.choice,
+#main.choicesCenter #player p.choice .tags {
   text-align: center;
 }
 
-#player p.choice a {
-  color: #BBB;
-  transition: color 0.2s;
-  text-decoration: none;
+#main.choicesRight #player p.choice,
+#main.choicesRight #player p.choice .tags {
+  text-align: right;
 }
 
-#player p.choice a:hover {
-  color: #555;
-  text-decoration: underline;
+/* Story-wide alignment comes directly from game.yaml. The class selectors
+   remain for Story-menu overrides; per-paragraph Ink tags have higher
+   specificity below and continue to override the global setting. */
+#main #player p.storyText {
+  text-align: var(--game-story-align, left);
+}
+
+#main.textLeft #player p.storyText {
+  text-align: left;
+}
+
+#main.textCenter #player p.storyText {
+  text-align: center;
+}
+
+#main.textRight #player p.storyText {
+  text-align: right;
+}
+
+/* One paragraph, from a "#align: ..." tag on its line. Must come after the story-wide rules above. */
+#main #player p.storyText.alignLeft {
+  text-align: left;
+}
+
+#main #player p.storyText.alignCenter {
+  text-align: center;
+}
+
+#main #player p.storyText.alignRight {
+  text-align: right;
+}
+
+/*
+  Titles follow the text below them.
+  --follow-align is the alignment of the story text; the Story menu override
+  (#main.textLeft/Center/Right) replaces it. A title (or the header) that sits
+  above a paragraph with its own "# align:" tag carries the same alignLeft/
+  alignCenter/alignRight class (see playerView.js) and so follows that paragraph.
+  An explicit "align" in game.yaml sets --game-*-title-align, which wins.
+*/
+#main #player {
+  --follow-align: var(--game-story-align, left);
+}
+
+#main.textLeft #player { --follow-align: left; }
+#main.textCenter #player { --follow-align: center; }
+#main.textRight #player { --follow-align: right; }
+
+#main #player .innerText .sceneTitle.alignLeft { --follow-align: left; }
+
+#main #player .innerText .sceneTitle.alignCenter { --follow-align: center; }
+
+#main #player .innerText .sceneTitle.alignRight { --follow-align: right; }
+
+/*
+  Game style: the story looks the same in the preview as in the exported page,
+  whatever the IDE theme. The --game-* values come from game.yaml (gameStyle.js);
+  the fallbacks are the default look. These rules need the "#main" to win over
+  the IDE themes (dark.css, focus.css, contrast.css).
+*/
+#main #player {
+  background: var(--game-bg, #ffffff);
+  color: var(--game-text, #000000);
+  font-family: var(--game-font, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif);
+  font-size: calc(var(--game-font-size, 18px) * var(--player-zoom, 1));
+  line-height: var(--game-line-height, 1.5);
+}
+
+/* Apply the story's background to the complete viewer surface, not only the
+   text element. This also covers the scroll viewport, gutters and expression
+   watch table, which otherwise retain Inky's default white background. */
+#main #player .hiddenBuffer,
+#main #player .expressionWatch,
+#main #player .expressionWatch td,
+#main #player td.expressionLabel,
+#main #player td.expressionInput {
+  background-color: var(--game-bg, #ffffff);
+}
+#main #player .scrollContainer::-webkit-scrollbar,
+#main #player .scrollContainer::-webkit-scrollbar-track,
+#main #player .scrollContainer::-webkit-scrollbar-corner {
+  background-color: var(--game-bg, #ffffff);
+}
+
+#main #player .scrollContainer,
+#main #player .hiddenBuffer {
+  background-color: var(--game-bg, #ffffff);
+}
+
+#main #player .innerText {
+  width: calc(100% - 32px);
+  box-sizing: border-box;
+  max-width: var(--game-width, 42rem);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* While the title screen covers the frame, the story under it stays hidden and the frame does not scroll.
+   The frame itself, its format and its fade are styled in gameChrome.css, shared with the export. */
+#main #player .innerText.title-screen-active {
+  overflow: hidden;
+}
+
+#main #player .innerText p {
+  padding: 0;
+}
+
+/* Preserve a reader-visible gap only when the author leaves a blank
+   narrative line. Ordinary adjacent lines retain their existing spacing. */
+#main #player p.storyText {
+  margin: 0;
+  line-height: var(--game-line-height, 1.7);
+}
+
+#main #player p.storyText.inky-paragraph-gap {
+  margin-top: var(--inky-paragraph-gap, 1lh);
+}
+
+#main #player p.choice {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--game-text, #000000) 14%, transparent);
+  line-height: var(--game-line-height, 1.5);
+}
+
+/* Story choices only: the title screen's "Start" keeps the shared titleScreen.css spacing. */
+#main #player .story-passage :not(.choice) + p.choice {
+  margin-top: 1.25em;
+}
+
+#main #player p.choice .choice-button {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.85em 2.5em 0.85em 0.75em;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-choice, #0066CC);
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  text-decoration: none;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+#main #player p.choice .choice-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 1em;
+  width: 0.45em;
+  height: 0.45em;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+#main #player p.choice .choice-button:hover,
+#main #player p.choice .choice-button:focus-visible,
+#main #player p.choice .choice-button:active {
+  background: color-mix(in srgb, var(--game-choice-hover, #004C99) 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--game-choice-hover, #004C99);
+  color: var(--game-choice-hover, #004C99);
+}
+
+#main #player .innerText .sceneTitle {
+  margin: 0 0 15px;
+  padding: 0;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  font-family: var(--game-scene-title-family, Georgia, "Times New Roman", "Noto Serif", serif);
+  font-size: var(--game-scene-title-size, 33.3px);
+  font-style: normal;
+  font-weight: 600;
+  text-wrap: balance;
+  text-align: var(--game-scene-title-align, var(--follow-align, left));
+  color: var(--game-scene-title-color, var(--game-text, #000000));
+}
+
+/* The export does not draw the divider the editor uses as a step-back marker. */
+#main #player .story-passage hr {
+  display: none;
+}
+
+#main #player hr {
+  border-top-color: color-mix(in srgb, var(--game-text, #000000) 20%, var(--game-bg, #ffffff));
+  margin: 1.5em 0;
+}
+
+#main #player p.tags,
+#main #player p.choice .tags {
+  color: color-mix(in srgb, var(--game-text, #000000) 45%, var(--game-bg, #ffffff));
+  font-size: 0.8em;
 }
 
 #player p.tags, #player p.choice .tags {
@@ -885,8 +1135,6 @@ img.issue-icon.warning {
   color: #AAA;
 }
 
-
-
 #goto-anything ul.results li.selected {
   background: #EEE;
   cursor: default;
@@ -928,3 +1176,98 @@ img.issue-icon.warning {
 .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
   background: #DDDDDD;
 }
+
+/* VS Code-inspired project explorer header and inline file creation. */
+#file-nav-wrapper .file-explorer-header {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  box-sizing: border-box;
+  height: 31px;
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px 0 10px;
+  background: #f5f5f4;
+  border-bottom: 1px solid #ddd;
+  color: #555;
+}
+#file-nav-wrapper .explorer-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  line-height: 30px;
+  user-select: none;
+}
+#file-nav-wrapper .explorer-header-actions { display: flex; align-items: center; gap: 2px; }
+#file-nav-wrapper .explorer-header-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 24px;
+  border: 0;
+  border-radius: 3px;
+  padding: 0;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+}
+#file-nav-wrapper .explorer-header-action:hover,
+#file-nav-wrapper .explorer-header-action:focus-visible { background: rgba(127,127,127,.17); color: #222; outline: none; }
+
+.window.dark #file-nav-wrapper .file-explorer-header { background: #252525; color: #ccc; border-bottom-color: #444; }
+.window.dark #file-nav-wrapper .explorer-header-action { color: #ccc; }
+.window.dark #file-nav-wrapper .explorer-header-action:hover,
+.window.dark #file-nav-wrapper .explorer-header-action:focus-visible { background: #3b3b3b; color: #fff; }
+
+/* Constrain the inline Rename editor to the Explorer column at its default width.
+   Each indentation level must consume available width, never enlarge the tree. */
+#file-nav-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0 !important;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Explorer: several selected items, and in-page dialogs (instead of native alert/confirm). */
+
+.explorer-dialog-backdrop {
+  position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.35);
+}
+.explorer-dialog {
+  box-sizing: border-box; min-width: 320px; max-width: 460px; max-height: 80vh; overflow: auto; padding: 16px 18px 14px;
+  background: #fff; color: #222; border: 1px solid #cfcfcf; border-radius: 6px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35); font-size: 13px; line-height: 1.45;
+}
+.explorer-dialog-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.explorer-dialog-message { margin-bottom: 8px; overflow-wrap: anywhere; }
+.explorer-dialog-details {
+  margin: 0 0 8px; padding: 6px 8px 6px 24px; max-height: 160px; overflow: auto;
+  background: rgba(127,127,127,.12); border-radius: 4px; font-size: 12px; overflow-wrap: anywhere;
+}
+.explorer-dialog-note { color: #777; font-size: 12px; margin-bottom: 4px; }
+.explorer-dialog-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.explorer-dialog-button {
+  min-width: 78px; padding: 5px 14px; border: 1px solid #bbb; border-radius: 4px;
+  background: #f3f3f3; color: inherit; font: inherit; cursor: pointer;
+}
+.explorer-dialog-button:hover { background: #e8e8e8; }
+.explorer-dialog-button.primary { background: #0066cc; border-color: #0066cc; color: #fff; }
+.explorer-dialog-button.primary:hover { background: #0058b0; }
+.explorer-dialog-button.danger { background: #c42b1c; border-color: #c42b1c; }
+.explorer-dialog-button.danger:hover { background: #a82317; }
+.explorer-dialog-button:focus-visible { outline: 2px solid #6aa9ee; outline-offset: 1px; }
+.window.dark .explorer-dialog { background: #2b2b2b; color: #ddd; border-color: #555; }
+.window.dark .explorer-dialog-note { color: #aaa; }
+.window.dark .explorer-dialog-button { background: #3a3a3a; border-color: #555; }
+.window.dark .explorer-dialog-button:hover { background: #454545; }
+.window.dark .explorer-dialog-button.primary { background: #0a64b8; border-color: #0a64b8; }
+.window.dark .explorer-dialog-button.danger { background: #c42b1c; border-color: #c42b1c; }
+
+/* Explorer: dragging files over it to import them */
+#file-nav-wrapper.drop-active { outline: 2px dashed #0066cc; outline-offset: -3px; background: rgba(0,102,204,.06); }
+.window.dark #file-nav-wrapper.drop-active { outline-color: #6ab0f3; background: rgba(106,176,243,.1); }

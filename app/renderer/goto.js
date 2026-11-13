@@ -2,6 +2,7 @@ const path = require("path");
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
 const _ = require("lodash");
+const crypto = require("crypto");
 const {filter, wrap, score} = require("fuzzaldrin-plus");
 
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
@@ -10,6 +11,8 @@ const InkProject = require("./inkProject.js").InkProject;
 const EditorView = require("./editorView.js").EditorView;
 
 const i18n = require("./i18n.js");
+const { SafeHtml } = require("./safeHtml.js");
+const escapeHtml = SafeHtml.escapeHtml;
 
 var $goto = null;
 var $gotoContainer = null;
@@ -254,10 +257,13 @@ function addResult(result, searchStr)
 {
     var resultContent = result.name || result.line;
 
-    var wrappedResult = wrap(resultContent, searchStr, { wrap: {
-        tagOpen: "<span class='goto-highlight'>",
-        tagClose: "</span>"
-    }});
+    var marker = "__INKY_GOTO_" + crypto.randomBytes(16).toString("hex") + "__";
+    while( resultContent.indexOf(marker) !== -1 ) marker = "__INKY_GOTO_" + crypto.randomBytes(16).toString("hex") + "__";
+    var wrappedResult = escapeHtml(wrap(resultContent, searchStr, { wrap: {
+        tagOpen: marker + "OPEN__",
+        tagClose: marker + "CLOSE__"
+    }})).replace(new RegExp(marker + "OPEN__", "g"), "<span class='goto-highlight'>")
+        .replace(new RegExp(marker + "CLOSE__", "g"), "</span>");
 
 
     var type = resultType(result);
@@ -268,16 +274,16 @@ function addResult(result, searchStr)
         var file = result.file;
         var dirName = path.dirname(file.relativePath());
         if( dirName != "." )
-            dirStr = `<span class='ancestor'>${dirName}/</span>`;
+            dirStr = `<span class='ancestor'>${escapeHtml(dirName)}/</span>`;
         $result = $(`<li class='file'>📄 ${dirStr}${wrappedResult}</li>`);
     }
 
     else if( type == "gotoLine" ) {
-        $result = $(`<li class='gotoLine'><p>➡︎ ${i18n._("Go to line")} ${result.line+1}</p><p class='meta'>${result.lineContent}</p></li>`);
+        $result = $(`<li class='gotoLine'><p>➡︎ ${i18n._("Go to line")} ${result.line+1}</p><p class='meta'>${escapeHtml(result.lineContent)}</p></li>`);
     }
 
     else if( type == "runtimePath" ) {
-        $result = $(`<li class='runtimePath'><p>🔎 ${result.lineContent}</p><p class='meta'>${result.file.filename()} - ${i18n._("line")} ${result.line+1} (${i18n._("looked up internal runtime path")} ${result.runtimePath})</p></li>`);
+        $result = $(`<li class='runtimePath'><p>🔎 ${escapeHtml(result.lineContent)}</p><p class='meta'>${escapeHtml(result.file.filename())} - ${i18n._("line")} ${result.line+1} (${i18n._("looked up internal runtime path")} ${escapeHtml(result.runtimePath)})</p></li>`);
     }
 
     else if( type == "symbol" ) {
@@ -288,17 +294,17 @@ function addResult(result, searchStr)
             ancestor = ancestor.parent;
         }
         if( ancestorStr )
-            ancestorStr = `<span class='ancestor'>${ancestorStr}</span>`;
+            ancestorStr = `<span class='ancestor'>${escapeHtml(ancestorStr)}</span>`;
 
         var filePath = result.inkFile.relativePath();
         var lineNo = result.row+1;
-        $result = $(`<li class='symbol'><p>✎ ${ancestorStr}${wrappedResult}</p><p class='meta'>${filePath} - ${i18n._("line")} ${lineNo}</p></li>`);
+        $result = $(`<li class='symbol'><p>✎ ${ancestorStr}${wrappedResult}</p><p class='meta'>${escapeHtml(filePath)} - ${i18n._("line")} ${lineNo}</p></li>`);
     }
 
     else if( type == "content" ) {
         var filePath = result.file.relativePath();
         var lineNo = result.row+1;
-        $result = $(`<li class='content'><p>${wrappedResult}</p><p class='meta'>${filePath} - ${i18n._("line")} ${lineNo}</p></li>`);
+        $result = $(`<li class='content'><p>${wrappedResult}</p><p class='meta'>${escapeHtml(filePath)} - ${i18n._("line")} ${lineNo}</p></li>`);
     }
 
     $result.data("result", result);

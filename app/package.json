@@ -2,18 +2,23 @@
   "name": "inky",
   "productName": "Inky",
   "version": "0.15.2",
+  "communityRevision": 116,
+  "distributionVersion": "0.15.2-116",
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inkle/inky.git"
+    "url": "git+https://github.com/glassflare/inky.git"
   },
   "scripts": {
-    "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.md -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html",
+    "postinstall": "node ../build/createDocumentnavigation.js && markdown-html resources/Documentation/WritingWithInk.txt -s resources/Documentation/documentation.css -o renderer/documentation/embedded.html",
     "start": "electron main-process/main.js",
-    "test": "./node_modules/mocha/bin/mocha",
+    "test": "npm run test:node && mocha --timeout 10000 --exit --ignore \"test/*.node.cjs\"",
+    "test:node": "node --test test/audio-active-menu.node.cjs test/audio-consistency-93.node.cjs test/audio-no-immediate-cut.node.cjs test/audio-volume-availability.node.cjs test/paragraph-spacing.node.cjs",
+    "test:web-export": "mocha test/web-export-only-smoke.js",
     "generate-locale": "node ../build/generateLocale.js",
-    "build-package": "node build-package.js"
+    "build-package": "node build-package.js",
+    "test:startup": "node test/helpers/startup-relaunch-check.cjs"
   },
   "keywords": [
     "ink",
@@ -23,7 +28,7 @@
   "author": "inkle Ltd",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/inkly/inky/issues"
+    "url": "https://github.com/glassflare/inky/issues"
   },
   "homepage": "http://www.inklestudios.com/ink",
   "dependencies": {
@@ -32,16 +37,17 @@
     "inkjs": "^2.2.3",
     "lodash": "^4.17.21",
     "mkdirp": "^3.0.1",
-    "randomstring": "^1.3.0"
+    "randomstring": "^1.3.0",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@electron/packager": "^18.3.2",
-    "chai": "^5.1.1",
-    "chai-as-promised": "^7.1.2",
     "electron": "^30.0.4",
+    "electron-chromedriver": "30.5.0",
     "jsdom": "^24.0.0",
     "markdown-html": "^0.0.8",
-    "mocha": "^10.4.0"
+    "mocha": "^10.4.0",
+    "webdriverio": "7.16.13"
   },
   "optionalDependencies": {
     "appdmg": "^0.6.6"

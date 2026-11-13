@@ -1,0 +1,756 @@
+/*
+  Preview game chrome: the frame, the menu, the picture band, the
+  scrolling passage, the bottom fade and the scroll cue.
+
+  This mirrors app/export-for-web-template/style.css rule by rule, so the writer sees the
+  same composition the player gets in the exported page. The exported stylesheet stays the
+  visual reference and is not modified; the selectors here are scoped to the Preview player
+  so the IDE's own chrome and themes keep working.
+*/
+
+#main #player {
+  /* The editor's chrome never determines the story's surrounding color. */
+  background: var(--reader-outer-bg, #eeeeec);
+}
+
+/* The viewer surface is the quiet page the frame floats on. The pane is the game's
+   viewport, so the spacing follows its container size, not the IDE window's. */
+#main #player .scrollContainer {
+  --frame-gap: clamp(10px, 2.4cqmin, 36px);
+  --frame-radius: clamp(10px, 2cqmin, 20px);
+  --frame-pad: clamp(16px, 2.6cqmin, 26px);
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  container-type: size;
+  background: transparent;
+}
+
+#main #player .scrollContainer::-webkit-scrollbar,
+#main #player .scrollContainer::-webkit-scrollbar-track,
+#main #player .scrollContainer::-webkit-scrollbar-corner {
+  display: none;
+}
+
+/* The frame of the game, always 9:16. */
+#main #player .innerText.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(calc(100cqw - 2 * var(--frame-gap)), var(--game-width, 42rem));
+  min-height: 0;
+  max-width: none;
+  max-height: calc(100cqh - 2 * var(--frame-gap));
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--reader-frame-border, color-mix(in srgb, var(--game-text, #000000) 20%, transparent));
+  border-radius: var(--frame-radius);
+  background: var(--game-bg, #ffffff);
+  color: var(--game-text, #000000);
+  /* Three restrained layers: depth, contact and a theme-tinted ambient rim. */
+  box-shadow:
+    0 26px 58px -13px var(--reader-shadow-deep, rgba(0, 0, 0, 0.24)),
+    0 7px 23px -5px var(--reader-shadow-soft, rgba(0, 0, 0, 0.14)),
+    0 0 34px 2px var(--reader-shadow-halo, rgba(0, 0, 0, 0.07));
+  font-family: var(--game-font, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif);
+  font-size: inherit;
+  text-align: var(--game-story-align, left);
+}
+
+/* #bg paints the full 9:16 frame behind its picture, passage and choices. */
+#main #player .innerText.container.has-background {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Let the frame background show through the scene picture's transparent pixels and choices.
+   The choice surface keeps a translucent theme tint so its text remains readable. */
+#main #player .innerText.container.has-background .story-visual {
+  background: transparent;
+}
+
+#main #player .innerText.container.has-background .story-choices {
+  background: transparent;
+}
+
+#main #player .hiddenBuffer .innerText.container {
+  width: min(calc(100cqw - 2 * var(--frame-gap)), var(--game-width, 42rem));
+  max-height: calc(100cqh - 2 * var(--frame-gap));
+}
+
+/* ---- Small overlay: the story's single menu ---------------------------------- */
+
+#main #player .story-hud {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+  box-sizing: border-box;
+  padding: clamp(12px, 2.2cqmin, 22px) var(--frame-pad);
+  color: var(--game-text, #000000);
+  user-select: none;
+  pointer-events: none;
+}
+
+#main #player .story-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  pointer-events: auto;
+}
+
+#main #player .innerText.has-visual .toolbar-icon-button {
+  color: #ffffff;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.5));
+}
+
+#main #player .toolbar-icon-button {
+  display: grid;
+  place-items: center;
+  width: clamp(32px, 4.4cqmin, 42px);
+  height: clamp(32px, 4.4cqmin, 42px);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#main #player .toolbar-icon-button:hover,
+#main #player .toolbar-icon-button[aria-expanded="true"] {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+#main #player .toolbar-icon-button:focus-visible,
+#main #player .toolbar-popover button:focus-visible,
+#main #player .audio-control button:focus-visible {
+  outline: 2px solid var(--game-choice, #0066cc);
+  outline-offset: 2px;
+}
+
+#main #player .toolbar-icon-button svg,
+#main #player .toolbar-popover button svg {
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#main #player .toolbar-icon-button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+#main #player .toolbar-popover-anchor {
+  position: relative;
+}
+
+#main #player .toolbar-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 218px;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--game-text, #000000) 14%, transparent);
+  border-radius: 12px;
+  background: var(--game-bg, #ffffff);
+  color: var(--game-text, #000000);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+  pointer-events: auto;
+}
+
+#main #player #story-menu > button[hidden] {
+  display: none;
+}
+
+#main #player .toolbar-popover[hidden] {
+  display: none;
+}
+
+#main #player #story-menu > button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.92em;
+  line-height: normal;
+  text-align: left;
+  cursor: pointer;
+}
+
+#main #player #story-menu > button:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 9%, transparent);
+}
+
+#main #player #story-menu > button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+#main #player #audio-settings-anchor {
+  margin-top: 4px;
+  padding: 9px 8px 6px;
+  border-top: 1px solid color-mix(in srgb, var(--game-text, #000000) 12%, transparent);
+}
+
+#main #player #audio-settings-anchor[hidden] {
+  display: none;
+}
+
+#main #player .audio-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#main #player .audio-control[hidden] {
+  display: none;
+}
+
+#main #player .audio-control button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 5px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+#main #player .audio-control button:hover {
+  background: color-mix(in srgb, currentColor 9%, transparent);
+}
+
+#main #player .audio-control input[type="range"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  accent-color: var(--game-choice, #0066cc);
+  cursor: pointer;
+}
+
+#main #player .audio-control.muted .wave {
+  display: none;
+}
+
+#main #player .audio-control:not(.muted) .slash {
+  display: none;
+}
+
+/* ---- Story image ----------------------------------------------------------- */
+
+#main #player .story-visual {
+  position: relative;
+  flex: 0 0 27.169%;
+  min-height: 0;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--game-bg, #ffffff) 80%, var(--game-text, #000000));
+}
+
+#main #player .story-visual[hidden] {
+  display: none;
+}
+
+#main #player .story-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ---- Narrative ------------------------------------------------------------- */
+
+#main #player .story-passage {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-bottom: var(--cue-strip, 44px);
+  padding: calc(var(--frame-pad) * 1.2) var(--frame-pad) var(--frame-pad);
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* The editor breaks a word that reaches its right edge, and the frame has to do the same:
+     `overflow: hidden` above would otherwise cut the rest of the word away. Inherited by every
+     line in the passage, so a wrapped row always starts under the line above it. */
+  overflow-wrap: anywhere;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  justify-content: safe center;
+  font-size: calc(var(--game-font-size, 18px) * var(--player-zoom, 1));
+  /* Keep the same hard top edge over scrolled history (see playerView.js).
+     An alpha mask over this scrolling text leaves stale glyph fragments with
+     Linux/Chromium GPU rasterization. A rectangular clip needs no alpha mask. */
+  clip-path: inset(var(--story-top-cover, 0px) 0 0);
+}
+
+#main #player .story-passage::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scroll room so a short new turn can still start at the top (see playerView.js). */
+#main #player .story-passage::after {
+  content: "";
+  flex: 0 0 auto;
+  height: var(--story-scroll-fill, 0px);
+}
+
+/* ---- Choices footer -------------------------------------------------------- */
+
+/* Choices stay in a footer at the bottom of the frame: the narrative scrolls above them,
+   the choices never move. */
+#main #player .story-choices {
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  max-height: 52%;
+  padding: 0 var(--frame-pad) calc(var(--frame-pad) * 0.6);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--game-text, #000000) 48%, transparent) transparent;
+  font-size: calc(var(--game-font-size, 18px) * var(--player-zoom, 1));
+  background: var(--game-bg, #ffffff);
+}
+
+#main #player .story-choices::-webkit-scrollbar {
+  width: 6px;
+}
+
+#main #player .story-choices::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#main #player .story-choices::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--game-text, #000000) 48%, transparent);
+  border-radius: 999px;
+}
+
+#main #player .story-choices[hidden] {
+  display: none;
+}
+
+/* An unobtrusive bottom fade shows when more choices are available below.
+   It is an overlay on the frame, not another row that steals passage height. */
+#main #player .innerText.container.choices-more-below::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  height: 22px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--game-bg, #ffffff) 83%, transparent));
+}
+
+/* The footer supplies its own separation from the text. */
+#main #player .innerText.container.has-choices .story-passage {
+  margin-bottom: 0;
+}
+
+#main #player .innerText.container.has-choices .scroll-cue {
+  display: none;
+}
+
+#main #player .story-choices .choice:first-child {
+  border-top: 1px solid color-mix(in srgb, var(--game-text, #000000) 14%, transparent);
+}
+
+/* A passage above the limit is the writer's mistake: say so in the frame. */
+#main #player .story-choices .choice-limit {
+  margin: 0;
+  padding: 0.7em 0.75em;
+  color: #b3261e;
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+/* When a scene has #bg, keep the image visible all the way behind the choices.
+   Each option becomes a separate frosted-glass surface instead of a white footer. */
+#main #player .innerText.container.has-background .story-choices {
+  padding: clamp(8px, 1.8cqmin, 15px) var(--frame-pad) clamp(10px, 2cqmin, 16px);
+  border: 0;
+}
+
+#main #player .innerText.container.has-background .story-choices .choice {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#main #player .innerText.container.has-background .story-choices .choice + .choice {
+  margin-top: clamp(6px, 1cqmin, 9px);
+}
+
+#main #player .innerText.container.has-background .story-choices .choice:first-child {
+  border-top: 0;
+}
+
+#main #player .innerText.container.has-background .story-choices .choice .choice-button,
+#main #player .innerText.container.has-background .story-choices .choice .unclickable {
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--game-text, #000000) 20%, transparent);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--game-bg, #ffffff) 84%, transparent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+}
+
+#main #player .innerText.container.has-background .story-choices .choice .choice-button {
+  padding: 0.8em 2.5em 0.8em 0.95em;
+}
+
+#main #player .innerText.container.has-background .story-choices .choice .choice-button:hover,
+#main #player .innerText.container.has-background .story-choices .choice .choice-button:focus-visible,
+#main #player .innerText.container.has-background .story-choices .choice .choice-button:active {
+  border-color: color-mix(in srgb, var(--game-choice-hover, #004c99) 52%, transparent);
+  background: color-mix(in srgb, var(--game-choice-hover, #004c99) 14%, transparent);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2), inset 3px 0 0 var(--game-choice-hover, #004c99);
+  color: var(--game-choice-hover, #004c99);
+}
+
+#main #player .innerText.container.has-background .story-choices .choice .unclickable {
+  display: block;
+  padding: 0.8em 0.95em;
+}
+
+/* Without a picture there is no band: the text starts at the top and uses the whole frame. */
+#main #player .innerText:not(.has-visual) .story-passage {
+  padding-top: clamp(52px, 8cqmin, 76px);
+  justify-content: flex-start;
+}
+
+/* With a picture, every passage starts just below it. A scene title is a normal
+   passage element, so its presence must not control the position of the body text. */
+#main #player .innerText.has-visual .story-passage {
+  padding-top: 15px;
+  justify-content: flex-start;
+}
+
+#main #player .story-passage img {
+  margin: 0.5em 0;
+  border-radius: calc(var(--frame-radius) / 2);
+}
+
+/* Choices carry their own spacing (main.css), as in the exported page. The narrative
+   lines themselves carry none: they stack the way the editor stacks them, and the
+   writer spaces them with line-height. */
+#main #player .story-passage p.storyText {
+  margin: 0;
+  flex-shrink: 0; /* Prevent compressing line boxes when blank lines add height. */
+}
+
+/* This stylesheet loads after main.css. Keep the author's blank-line gap
+   more specific than the baseline paragraph margin reset above. */
+#main #player .story-passage p.storyText.inky-paragraph-gap {
+  margin-top: var(--inky-paragraph-gap, 1lh);
+}
+
+#main #player .story-passage > .sceneTitle:not(:first-child),
+#main #player .story-passage > .scene-title:not(:first-child) {
+  margin-top: 1.3em;
+}
+
+/* Photon hides overflow on every heading. In the flex passage that makes the scene title
+   shrink below its own text (clipping it) instead of scrolling, as the exported page does. */
+#main #player .story-passage h1,
+#main #player .story-passage h2,
+#main #player .story-passage h3,
+#main #player .story-passage h4,
+#main #player .story-passage h5,
+#main #player .story-passage h6 {
+  overflow: visible;
+}
+
+/* ---- Format-driven composition --------------------------------------------- */
+
+#main #player[data-story-format="vertical"] .innerText.container {
+  width: min(
+    calc(100cqw - 2 * var(--frame-gap)),
+    var(--game-width, 42rem),
+    calc((100cqh - 2 * var(--frame-gap)) * var(--game-story-aspect-ratio-number, 1))
+  );
+  height: auto;
+  aspect-ratio: var(--game-story-aspect-ratio, 1 / 1);
+}
+
+/* ---- Scroll cue ------------------------------------------------------------ */
+
+#main #player .innerText.container::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: auto 0 0;
+  height: 2.4em;
+  background: linear-gradient(to bottom, transparent, var(--game-bg, #ffffff));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+#main #player .innerText.container.has-more-below::after {
+  opacity: 0.85;
+}
+
+#main #player .scroll-cue {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: clamp(6px, 1.2cqmin, 12px);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-left: -16px;
+  color: var(--game-text, #000000);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+#main #player .scroll-cue svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#main #player .innerText.container.has-more-below .scroll-cue {
+  opacity: 0.8;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* The cue has its own strip under the text: it never covers a choice. */
+#main #player .innerText.container::after {
+  bottom: var(--cue-strip, 44px);
+}
+
+/* The title screen owns the whole frame; no gameplay overlay may show through. */
+#main #player .innerText.container.title-screen-active .story-hud,
+#main #player .innerText.container.title-screen-active .scroll-cue {
+  display: none;
+}
+
+#main #player .innerText.container.title-screen-active::after {
+  opacity: 0;
+}
+
+/* The export keeps the passage hidden until "Start", so the frame takes the title
+   screen's own height instead of the story's. */
+#main #player .innerText.container.title-screen-active > :not(.title-screen) {
+  display: none;
+}
+
+/* "controls.show: false" hides the menu, as in the export. */
+#main #player.game-controls-hidden .story-hud {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main #player .innerText.container::after,
+  #main #player .scroll-cue {
+    transition: none;
+  }
+}
+
+@media (max-width: 520px) {
+  #main #player .scrollContainer {
+    --frame-gap: 8px;
+  }
+
+  #main #player .story-hud {
+    padding: 10px 12px;
+  }
+
+  #main #player .story-passage {
+    padding: 16px 18px;
+  }
+
+  #main #player .innerText:not(.has-visual) .story-passage {
+    padding-top: 52px;
+  }
+}
+
+/* ---- Pages -----------------------------------------------------------------
+   A passage taller than the frame is divided into pages (see pager.js) instead of scrolling.
+   The navigation row sits between the text and the choices, which stay where they are. */
+
+#main #player .page-out {
+  display: none !important;
+}
+
+#main #player .story-pager {
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 0.3em var(--frame-pad) 0.5em;
+  background: var(--game-bg, #ffffff);
+}
+
+#main #player .story-pager[hidden] {
+  display: none;
+}
+
+#main #player .story-pager .pager-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--game-text, #000000);
+  cursor: pointer;
+}
+
+#main #player .story-pager .pager-button svg {
+  width: 1.2em;
+  height: 1.2em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#main #player .story-pager .pager-button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+#main #player .story-pager .pager-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  color: color-mix(in srgb, var(--game-text, #000000) 55%, transparent);
+  font-size: 0.8em;
+}
+
+#main #player .story-pager .pager-dot {
+  width: 0.5em;
+  height: 0.5em;
+  box-sizing: border-box;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+#main #player .story-pager .pager-dot.current {
+  background: currentColor;
+}
+
+/* Until the last page the choices are shown but cannot be picked. */
+#main #player .story-choices.pages-locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Pages never scroll, and the text keeps the same place on every page. */
+#main #player .is-paged .story-passage {
+  overflow-y: hidden;
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+#main #player .is-paged .story-passage.page-overflow {
+  overflow-y: auto;
+}
+
+#main #player .is-paged .story-passage::after {
+  display: none;
+}
+
+#main #player .is-paged .scroll-cue {
+  display: none;
+}
+
+/* Keep the theme switch available when save/restart buttons are disabled. */
+#main #player.game-theme-only #story-menu #rewind,
+#main #player.game-theme-only #story-menu #save,
+#main #player.game-theme-only #story-menu #reload { display: none; }
+
+
+/* Inky story ending: quiet, theme-aware ornament and optional caption. */
+.story-passage .story-ending {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65em;
+    max-width: 100%;
+    margin: 2.2em auto 1em;
+    padding: 0.4em 0 0.2em;
+    color: inherit;
+    opacity: 0.82;
+    font: inherit;
+    text-align: center;
+    user-select: none;
+}
+.story-passage .story-ending[hidden] { display: none !important; }
+/* Draw actual paths instead of flex pseudo-elements: no collapsed rules. */
+.story-passage .story-ending .story-ending-ornament {
+    display: block;
+    flex: none;
+    width: min(12em, 78%);
+    height: auto;
+    overflow: visible;
+    color: inherit;
+}
+.story-ending-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+    opacity: 0.72;
+}
+.story-ending-diamond {
+    fill: currentColor;
+}
+.story-ending-label { font-size: 0.8em; line-height: 1.35; overflow-wrap: anywhere; }

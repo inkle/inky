@@ -15,7 +15,11 @@
     <link rel="stylesheet" href="photon/css/photon.css">
     <link rel="stylesheet" href="ink-icons/css/ink.css">
 
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="jstree/themes/default/style.min.css">
+    <link rel="stylesheet" href="main.css?v=0.15.2-44-preview-parity">
+    <link rel="stylesheet" href="explorerTree.css">
+    <link rel="stylesheet" href="gameChrome.css">
+    <link rel="stylesheet" href="titleScreen.css">
     <link rel="stylesheet" href="inkTheme.css">
     <link rel="stylesheet" href="dark.css">
     <link rel="stylesheet" href="contrast.css">
@@ -84,26 +88,7 @@
            <div class="sidebar hidden">
 
             
-            <div class="nav-wrapper hidden hasFooter" id="file-nav-wrapper">
-            </div>
-            <div class="footer">
-              <a class="add-include-button">
-                <span class="icon icon-plus"></span>
-                <span class="i18n">Add new include</span>
-              </a>
-              <div class="new-include-form">
-                <h5 class="i18n">Enter new ink filename:</h5>
-                <div class="inputWrapper">
-                  <input type="text" class="form-control i18n" placeholder="Folder/inkFileName.ink">
-                </div>
-                <div class="checkbox add-to-main-ink">
-                    <input type="checkbox" checked><span class="i18n">Add to main ink</span>
-                </div>
-                <div class="form-buttons">
-                  <button id="add-include" class="btn btn-primary pull-right i18n">Add</button>
-                  <button id="cancel-add-include" class="btn btn-default pull-right i18n">Cancel</button>
-                </div>
-              </div>
+            <div class="nav-wrapper hidden" id="file-nav-wrapper">
             </div>
             <div class="nav-wrapper hidden" id="knot-stitch-wrapper">
             </div>
@@ -115,11 +100,27 @@
           <div class="split hidden"></div>
 
           <div class="twopane">
-            <div id="editor"></div>
-            
+            <div id="editor-pane">
+              <div id="style-mode-bar" role="tablist" aria-label="Game appearance editor" hidden>
+                <button id="style-mode-form" class="style-mode-tab active" type="button" role="tab" aria-selected="true" tabindex="0">Visual</button>
+                <button id="style-mode-text" class="style-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1">Advanced</button>
+              </div>
+              <div id="editor"></div>
+              <section id="image-viewer" hidden aria-label="Image preview">
+                <header class="image-viewer-header">
+                  <span class="image-viewer-title"></span>
+                </header>
+                <div class="image-viewer-canvas">
+                  <img class="image-viewer-image" alt="">
+                </div>
+                <div class="image-viewer-status" role="status"></div>
+              </section>
+              <iframe id="game-settings-inline" title="Game settings" hidden></iframe>
+            </div>
+
             <div class="split"></div>
 
-            <div id="player">
+            <div id="player" data-story-format="vertical">
               
               <table class="expressionWatch">
                 <tbody>
@@ -127,10 +128,14 @@
               </table>
 
               <div class="scrollContainer">
-                <div class="innerText active">
+                <div class="innerText active container">
+                  <div class="story-visual" hidden></div>
+                  <div class="story-passage"></div>
                 </div>
                 <div class="hiddenBuffer">
-                  <div class="innerText">
+                  <div class="innerText container">
+                    <div class="story-visual" hidden></div>
+                    <div class="story-passage"></div>
                   </div>
                 </div>
               </div>
@@ -153,7 +158,7 @@
   </body>
 
   <script src="acesrc/ace.js" type="text/javascript" charset="utf-8"></script>
-  
+  <script src="acesrc/mode-yaml.js" type="text/javascript" charset="utf-8"></script>
   <script src="acesrc/ext-language_tools.js"></script>
 
   <!-- For some reason using the minified versions causes find-in-file to break -->

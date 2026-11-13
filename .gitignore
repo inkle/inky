@@ -13,3 +13,7 @@ app/renderer/documentation/
 *.AppImage
 AppImage
 .DS_Store
+/package-lock.json
+PROJECT_STATE.md
+SOURCE_MATCHING.md
+SOURCE_MATCHING.txt

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Game settings</title>
+    <link rel="stylesheet" href="gameSettings.css">
+</head>
+<body>
+    <header>
+        <h1>Game settings</h1>
+        <p class="hint">Changes update the preview right away and are stored in this project’s <code>game.yaml</code>.</p>
+    </header>
+
+    <main id="settings-scroll" tabindex="0">
+    <div id="warnings" class="warnings" hidden></div>
+
+    <section id="appearance">
+        <h2>Appearance</h2>
+        <p class="appearance-label">Theme mode</p>
+        <div class="segmented" id="theme-mode">
+            <label><input type="radio" name="theme-mode" value="single"><span>Single theme</span></label>
+            <label><input type="radio" name="theme-mode" value="dual"><span>Light + Dark</span></label>
+        </div>
+        <div id="single-appearance">
+            <p class="appearance-label">Preset</p>
+            <div id="presets" class="chips"></div>
+            <p class="hint">The story uses one theme. The player cannot switch it.</p>
+        </div>
+        <div id="dual-appearance" hidden>
+            <div class="theme-pair">
+                <label for="light-preset">Light theme
+                    <select id="light-preset" aria-label="Light theme preset">
+                        <option value="classic">Classic</option><option value="sepia">Sepia</option>
+                        <option value="custom" disabled>Custom colors</option>
+                    </select>
+                </label>
+                <label for="dark-preset">Dark theme
+                    <select id="dark-preset" aria-label="Dark theme preset">
+                        <option value="night">Night</option><option value="terminal">Terminal</option>
+                        <option value="custom" disabled>Custom colors</option>
+                    </select>
+                </label>
+            </div>
+            <p class="hint">Players can switch between these themes in the story menu automatically.</p>
+            <p class="appearance-label">Customize colors and typography</p>
+            <div class="segmented" id="edit-theme">
+                <label><input type="radio" name="edit-theme" value="light"><span>Edit light</span></label>
+                <label><input type="radio" name="edit-theme" value="dark"><span>Edit dark</span></label>
+            </div>
+        </div>
+        <div id="theme-sample" class="theme-sample" aria-label="Theme appearance sample">
+            <strong>Before Dawn</strong><p>The star can warm your village or guide the travelers home.</p>
+            <span>Return its light. Guide the travelers.</span>
+        </div>
+    </section>
+
+    <section id="presentation-settings">
+        <h2>Story presentation</h2>
+        <div class="segmented" id="presentation-mode" role="group" aria-label="Story presentation">
+            <label><input type="radio" name="presentation-mode" value="traditional"><span>Traditional</span></label>
+            <label><input type="radio" name="presentation-mode" value="screen"><span>Screen Mode</span></label>
+        </div>
+        <p class="hint">Screen Mode starts a clean page at each <code># screen</code> marker. Ink choices, variables and flow remain unchanged.</p>
+    </section>
+
+    <section id="ending-settings">
+        <h2>Story ending</h2>
+        <div class="row"><label class="inline"><input type="checkbox" id="ending-show"> Show ending marker</label></div>
+        <div class="row"><label for="ending-text">Marker text</label>
+            <input type="text" id="ending-text" maxlength="60" placeholder="The End" aria-label="Ending marker text"></div>
+        <p class="hint">The marker is shown after the final passage when the Ink story reaches END.</p>
+        <div class="row"><label class="inline"><input type="checkbox" id="ending-play-again-show"> Show Play Again button</label></div>
+        <div class="row"><label for="ending-play-again-text">Button text</label>
+            <input type="text" id="ending-play-again-text" maxlength="60" placeholder="Play Again" aria-label="Play Again button text"></div>
+        <p class="hint">Play Again restarts from the Title Screen. Both options work independently in Preview and Web Export; neither changes the Ink narrative.</p>
+    </section>
+
+    <section>
+        <h2>Colors <span id="editing-look-label" class="editing-look-label"></span></h2>
+        <div class="row"><label for="hex-background">Background</label>
+            <input type="color" id="pick-background"><input type="text" id="hex-background" spellcheck="false"></div>
+        <div class="row"><label for="hex-text">Text</label>
+            <input type="color" id="pick-text"><input type="text" id="hex-text" spellcheck="false"></div>
+        <div class="row"><label for="hex-choice">Choices</label>
+            <input type="color" id="pick-choice"><input type="text" id="hex-choice" spellcheck="false"></div>
+        <div class="row"><label for="hex-hover">Choice on hover</label>
+            <input type="color" id="pick-hover"><input type="text" id="hex-hover" spellcheck="false">
+            <label class="inline"><input type="checkbox" id="hover-auto"> Automatic</label></div>
+    </section>
+
+    <section>
+        <h2>Text</h2>
+        <div class="row"><label for="font-family">Font</label>
+            <select id="font-family">
+                <option value="system">System (sans-serif)</option>
+                <option value="serif">Serif</option>
+                <option value="mono">Monospace</option>
+                <option value="custom">Other…</option>
+            </select>
+            <input type="text" id="font-custom" placeholder="Font name" spellcheck="false" hidden></div>
+        <div class="row range-row"><label for="font-size">Size</label>
+            <div class="range-control">
+                <input type="range" id="font-size" min="12" max="32" step="1">
+                <input type="number" id="font-size-number" min="12" max="32" step="1" aria-label="Font size">
+                <span class="unit">px</span>
+            </div></div>
+        <div class="row range-row"><label for="line-height">Line height</label>
+            <div class="range-control">
+                <input type="range" id="line-height" min="1" max="2.2" step="0.05">
+                <input type="number" id="line-height-number" min="1" max="2.2" step="0.05" aria-label="Line height">
+                <span class="unit">×</span>
+            </div></div>
+        <div class="row range-row"><label for="width">Text width</label>
+            <div class="range-control">
+                <input type="range" id="width" min="24" max="70" step="1">
+                <input type="number" id="width-number" min="24" max="70" step="1" aria-label="Text width">
+                <span class="unit">rem</span>
+            </div>
+            <label class="inline"><input type="checkbox" id="width-full"> Full width</label></div>
+    </section>
+
+    <section>
+        <h2>Story information</h2>
+        <div class="row range-row"><label for="story-title-size">Size</label>
+            <div class="range-control">
+                <input type="range" id="story-title-size" min="16" max="100" step="1">
+                <input type="number" id="story-title-size-number" min="16" max="100" step="1" aria-label="Title screen font size">
+                <span class="unit">px</span>
+            </div></div>
+        <div class="row"><label for="story-title">Title</label>
+            <input type="text" id="story-title" placeholder="add a title">
+            <button type="button" class="clear-text-button" id="clear-story-title" aria-label="Clear title" title="Clear title">×</button></div>
+        <div class="row"><label for="story-author">Author</label>
+            <input type="text" id="story-author" placeholder="author name">
+            <button type="button" class="clear-text-button" id="clear-story-author" aria-label="Clear author" title="Clear author">×</button></div>
+        <div class="row"><label for="story-cover">Cover</label>
+            <div class="cover-input-field">
+                <input type="text" id="story-cover" placeholder="image/cover.jpg" spellcheck="false">
+                <button type="button" class="text-button" id="choose-story-cover" title="Choose an image; a picture from outside the project is copied into its image folder">Choose…</button>
+            </div>
+            <button type="button" class="clear-text-button" id="clear-story-cover" aria-label="Clear cover" title="Clear cover">×</button></div>
+    </section>
+
+    <section>
+        <h2>Text styling</h2>
+        <h3>Titles</h3>
+        <h4>Scene</h4>
+        <div class="row"><label for="scene-title-family">Font</label>
+            <select id="scene-title-family">
+                <option value="inherit">Default</option><option value="system">System</option>
+                <option value="serif">Serif</option><option value="mono">Monospace</option><option value="custom">Other…</option>
+            </select><input type="text" id="scene-title-custom" placeholder="Font name" spellcheck="false" hidden></div>
+        <div class="row range-row"><label for="scene-title-size">Size</label>
+            <div class="range-control">
+                <input type="range" id="scene-title-size" min="10" max="100" step="0.1">
+                <input type="number" id="scene-title-size-number" min="10" max="100" step="0.1" aria-label="Scene title size">
+                <span class="unit">px</span>
+            </div></div>
+        <div class="row"><label for="scene-title-color">Color</label>
+            <input type="color" id="scene-title-pick"><input type="text" id="scene-title-color" spellcheck="false">
+            <label class="inline"><input type="checkbox" id="scene-title-color-auto"> Default</label></div>
+        <div class="row"><label>Alignment</label>
+            <div class="segmented" id="scene-title-align">
+                <label><input type="radio" name="scene-title-align" value="auto" title="Follow the text below"><span>Auto</span></label>
+                <label><input type="radio" name="scene-title-align" value="left"><span>Left</span></label>
+                <label><input type="radio" name="scene-title-align" value="center"><span>Center</span></label>
+                <label><input type="radio" name="scene-title-align" value="right"><span>Right</span></label>
+            </div></div>
+    </section>
+
+    <section>
+        <h2>Alignment</h2>
+        <div class="row"><label>Story text</label>
+            <div class="segmented" id="align">
+                <label><input type="radio" name="align" value="left" checked><span>Left</span></label>
+                <label><input type="radio" name="align" value="center"><span>Center</span></label>
+                <label><input type="radio" name="align" value="right"><span>Right</span></label>
+            </div></div>
+        <div class="row"><label>Choices</label>
+            <div class="segmented" id="choice-align">
+                <label><input type="radio" name="choice-align" value="left" checked><span>Left</span></label>
+                <label><input type="radio" name="choice-align" value="center"><span>Center</span></label>
+                <label><input type="radio" name="choice-align" value="right"><span>Right</span></label>
+            </div></div>
+    </section>
+
+    <section>
+        <h2>Sound</h2>
+        <div class="row range-row"><label for="audio-master">Master</label>
+            <div class="range-control">
+                <input type="range" id="audio-master" min="0" max="100" step="1">
+                <input type="number" id="audio-master-number" min="0" max="100" step="1" aria-label="Master volume">
+                <span class="unit">%</span>
+            </div></div>
+        <div class="row range-row"><label for="audio-music">Music</label>
+            <div class="range-control">
+                <input type="range" id="audio-music" min="0" max="100" step="1">
+                <input type="number" id="audio-music-number" min="0" max="100" step="1" aria-label="Music volume">
+                <span class="unit">%</span>
+            </div></div>
+        <div class="row range-row"><label for="audio-sfx">SFX</label>
+            <div class="range-control">
+                <input type="range" id="audio-sfx" min="0" max="100" step="1">
+                <input type="number" id="audio-sfx-number" min="0" max="100" step="1" aria-label="SFX volume">
+                <span class="unit">%</span>
+            </div></div>
+    </section>
+
+    <section>
+        <h2>Exported page</h2>
+        <div class="row"><label class="inline"><input type="checkbox" id="controls-show"> Show the restart and save buttons</label></div>
+    </section>
+
+    </main>
+
+    <footer>
+        <button id="reset" type="button">Reset to classic</button>
+    </footer>
+
+    <script src="gameSettings.js"></script>
+</body>
+</html>

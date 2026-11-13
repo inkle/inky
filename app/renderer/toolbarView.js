@@ -1,4 +1,5 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
+const escapeHtml = require('./safeHtml.js').SafeHtml.escapeHtml;
 const i18n = require("./i18n.js");
 
 // Overriden by external setButtonActions call
@@ -56,10 +57,10 @@ function updateIssueSummary(issues, issueClickCallback) {
 
         var $issueRow = $(`<div class="row ${errorClass}">
                             <div class="col line-no">
-                              ${issue.lineNumber}
+                              ${escapeHtml(issue.lineNumber)}
                             </div>
                             <div class="col issue">
-                              ${issue.message}
+                              ${escapeHtml(issue.message)}
                             </div>
                             <span class="icon icon-right-open-big"></span>
                           </div>`);

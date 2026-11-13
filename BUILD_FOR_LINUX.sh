@@ -1,34 +1,55 @@
-cd "`dirname "$0"`"
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Uses: https://github.com/electron-userland/electron-packager
-# To install it globally:
-#
-#     npm install electron-packager -g
-#
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 INK_GIT_REPOSITORY NEW_OUTPUT_DIRECTORY" >&2
+    exit 2
+fi
 
-# Clean
-rm -rf Inky-linux-x64/
-rm -rf ReleaseUpload
+ROOT=$(cd -- "$(dirname -- "$0")" && pwd)
+INK_REPO=$(cd -- "$1" && pwd)
+OUT=$2
+PACKAGER="$ROOT/app/node_modules/.bin/electron-packager"
+test -x "$PACKAGER" || { echo "Install the project's locked app dependencies first." >&2; exit 1; }
+for tool in git dotnet node dpkg-deb python3 zip; do
+    command -v "$tool" >/dev/null || { echo "Required tool not found: $tool" >&2; exit 1; }
+done
+mkdir -- "$OUT"
+OUT=$(cd -- "$OUT" && pwd)
 
-# Ensure it's correctly/fully installed first
-( cd app && npm install )
+git -C "$ROOT" rev-parse HEAD > "$OUT/source-head.txt"
+git -C "$ROOT" status --short --untracked-files=all > "$OUT/source-status.txt"
+git -C "$ROOT" diff HEAD --binary > "$OUT/source-tracked.patch"
+(
+    cd "$ROOT"
+    git ls-files -z --cached --others --exclude-standard | sort -z | xargs -0 sha256sum
+) > "$OUT/source-sha256.txt"
 
-# Linux
-electron-packager app Inky --platform=linux --arch=x64 --icon=resources/Icon.icns --extend-info=resources/info.plist --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_mac"
-
-# Create a zip files ready for upload on Windows/Linux
-mkdir -p ReleaseUpload
-zip -r ReleaseUpload/Inky_linux.zip Inky-linux-x64
-
-#Prepare AppImage build structure
-mkdir -p AppImage/opt/inky
-mkdir -p AppImage/usr/share/pixmaps
-
-cp resources/AppRun AppImage/
-cp resources/com.inkle.inky.desktop AppImage/
-cp resources/Icon1024.png AppImage/inky.png
-cp resources/Icon1024.png AppImage/usr/share/pixmaps/inky.png
-cp -r Inky-linux-x64/* AppImage/opt/inky/
-
-#Build AppImage File ready for upload
-ARCH=x86_64 ./build/appimagetool-x86_64.AppImage -n AppImage ReleaseUpload/Inky.AppImage
+"$ROOT/compiler/build-linux-v1.sh" "$INK_REPO" "$OUT/compiler"
+mkdir "$OUT/stage"
+cp -a --reflink=auto "$ROOT/app" "$ROOT/build" "$ROOT/resources" "$ROOT/BUILD_DEB.sh" "$OUT/stage/"
+cp "$OUT/compiler/linux-x64/inklecate" "$OUT/stage/app/main-process/ink/inklecate_linux"
+(
+    cd "$OUT/stage"
+    ./app/node_modules/.bin/electron-packager app Inky --platform=linux --arch=x64 \
+        --out="$OUT/packaged" --prune --ignore=inklecate_mac
+)
+APP="$OUT/packaged/Inky-linux-x64"
+cmp "$OUT/compiler/linux-x64/inklecate" "$APP/resources/app/main-process/ink/inklecate_linux"
+mkdir -p "$OUT/AppDir/opt/inky" "$OUT/AppDir/usr/share/pixmaps" "$OUT/ReleaseUpload"
+install -m 755 "$ROOT/resources/AppRun" "$OUT/AppDir/AppRun"
+cp "$ROOT/resources/com.inkle.inky.desktop" "$OUT/AppDir/"
+cp "$ROOT/app/renderer/about/icon-round.png" "$OUT/AppDir/inky.png"
+cp "$ROOT/app/renderer/about/icon-round.png" "$OUT/AppDir/usr/share/pixmaps/inky.png"
+cp -a --reflink=auto "$APP/." "$OUT/AppDir/opt/inky/"
+ARCH=x86_64 "$ROOT/build/appimagetool-x86_64.AppImage" --appimage-extract-and-run \
+    -n "$OUT/AppDir" "$OUT/ReleaseUpload/Inky.AppImage"
+INKY_LINUX_APP_DIR="$APP" INKY_DEB_REVISION="${INKY_DEB_REVISION:-116}" \
+    "$OUT/stage/BUILD_DEB.sh"
+mv "$OUT/stage/ReleaseUpload/"*.deb "$OUT/ReleaseUpload/"
+(
+    cd "$OUT/packaged"
+    zip -qr "$OUT/ReleaseUpload/Inky_linux.zip" Inky-linux-x64
+)
+sha256sum "$OUT/ReleaseUpload/"* | tee "$OUT/package-sha256.txt"
+echo "Linux packages created in $OUT/ReleaseUpload"

@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const inkjsPackage = require('inkjs/package.json');
 const i18n = require('./i18n/i18n.js');
+const appPackage = require('../package.json');
 
 
 const electronWindowOptions = {
@@ -11,6 +12,7 @@ const electronWindowOptions = {
     height: 270,
     resizable: false,
     show: false,
+    icon: path.join(__dirname, '..', 'renderer', 'about', 'icon-round.png'),
     autoHideMenuBar: true,
     webPreferences: {
         preload: path.join(__dirname, '..', 'renderer', 'preload.js'),
@@ -43,7 +45,7 @@ function AboutWindow(theme) {
 
     w.webContents.on("did-finish-load", () => {
         w.webContents.send("set-about-data", {
-            "inkyVersion": electron.app.getVersion(),
+            "inkyVersion": appPackage.distributionVersion || electron.app.getVersion(),
             "inkVersion": inkVersion,
             "inkjsVersion": inkjsPackage.version
         });
