@@ -90,7 +90,7 @@ The package script builds and tests the compiler again, places it only into an
 isolated application copy, and generates the AppImage, Debian package and
 Linux zip from that single packaged application. It records the source HEAD,
 working-tree status, diff, file hashes, compiler hashes and package hashes.
-Debian revision defaults to `111`; override it with `INKY_DEB_REVISION` when
+Debian revision defaults to `117`; override it with `INKY_DEB_REVISION` when
 needed. Review the source status and hashes: a HEAD alone does not identify a
 dirty worktree. The script does not install dependencies, clean an existing
 directory, replace the checkout's compiler binaries, or publish a release.

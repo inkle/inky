@@ -2,7 +2,7 @@
 set -eu
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 APP_DIR=${INKY_LINUX_APP_DIR:-"$ROOT_DIR/Inky-linux-x64"}
-REVISION=${INKY_DEB_REVISION:-116}
+REVISION=${INKY_DEB_REVISION:-117}
 case "$REVISION" in ''|*[!0-9]*) echo 'Invalid Debian revision' >&2; exit 1;; esac
 VERSION=$(node -p 'require(process.argv[1]).version' "$ROOT_DIR/app/package.json")-$REVISION
 OUTPUT_DIR="$ROOT_DIR/ReleaseUpload"

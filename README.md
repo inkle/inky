@@ -10,7 +10,7 @@
 
 <p>
   <a href="https://github.com/inkle/inky"><img src="https://img.shields.io/badge/upstream-Inky%200.15.2-4764ac" alt="Based on Inky 0.15.2"></a>
-  <img src="https://img.shields.io/badge/community_revision-r116-30876c" alt="Community revision r116">
+  <img src="https://img.shields.io/badge/community_revision-r117-30876c" alt="Community revision r117">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
 </p>
 
@@ -37,6 +37,37 @@ Write Ink on the left. Experience the story on the right. As you revise passages
 Opening Inky without selecting a file reopens your most recent available saved project. The starter story appears when no saved project is available; use **File → New** to start a fresh story.
 
 The familiar Inky writing tools are still here: syntax highlighting, autocomplete, reusable snippets, issue reporting, the project Explorer, and interactive story navigation. Inky Extended adds more ways to shape what readers see and hear.
+
+## Choose your writing environment
+
+Use **View → Theme** to choose the editor's appearance. The four IDE themes are
+independent of the story's `game.yaml` palette: changing the editor theme keeps
+the Preview, story audio, and exported game presentation intact.
+
+| Menu entry | Writing environment |
+| :-- | :-- |
+| **Light — Pearl** | White writing paper, soft surrounding panels, and clear Ink accents |
+| **Dark — Graphite** | A balanced dark workspace for everyday writing |
+| **Contrast — Contrast 2.0** | Near-black surfaces and strong, readable indicators |
+| **Focus — Quiet Writing** | Warm text on slate with understated navigation cues |
+
+<div align="center">
+
+<a href="docs/screenshots/theme-pearl.png"><img src="docs/screenshots/theme-pearl.png" alt="Light 2.0 Pearl: light editor with Before Dawn and an independent dark story Preview" width="46%"></a>
+<a href="docs/screenshots/theme-graphite.png"><img src="docs/screenshots/theme-graphite.png" alt="Dark Graphite: Ink source and Before Dawn in the live Preview" width="46%"></a>
+
+<p><em>Light — Pearl</em> · <em>Dark — Graphite</em></p>
+
+<a href="docs/screenshots/theme-contrast.png"><img src="docs/screenshots/theme-contrast.png" alt="Contrast 2.0: high-contrast editor with the same Before Dawn Preview" width="46%"></a>
+<a href="docs/screenshots/theme-focus.png"><img src="docs/screenshots/theme-focus.png" alt="Focus 2.0 Quiet Writing: warm slate editor with the same Before Dawn Preview" width="46%"></a>
+
+<p><em>Contrast 2.0</em> · <em>Focus — Quiet Writing</em></p>
+
+</div>
+
+These are real Electron captures at the same window size. Click an image to
+inspect it at full resolution. Long passages use the reader's page controls;
+choices become available after the final page.
 
 ## Shape the reader's experience
 
@@ -150,34 +181,34 @@ Preview and Web Export are designed to behave consistently. Before sharing a sto
 
 ## Download and run
 
-**Inky Extended 0.15.2-116** is available for **Linux x86-64**. All four files are available in the [v0.15.2-116 release](https://github.com/glassflare/inky/releases/tag/v0.15.2-116).
+**Inky Extended 0.15.2-117** is available for **Linux x86-64**. All four files are available in the [v0.15.2-117 release](https://github.com/glassflare/inky/releases/tag/v0.15.2-117).
 
 | Download | File |
 | :-- | :-- |
-| **Debian / Ubuntu (amd64)** | [Inky-Extended-0.15.2-116-amd64.deb](https://github.com/glassflare/inky/releases/download/v0.15.2-116/Inky-Extended-0.15.2-116-amd64.deb) |
-| **AppImage (x86_64)** | [Inky-Extended-0.15.2-116-x86_64.AppImage](https://github.com/glassflare/inky/releases/download/v0.15.2-116/Inky-Extended-0.15.2-116-x86_64.AppImage) |
-| **Source archive** | [Inky-Extended-0.15.2-116-source.zip](https://github.com/glassflare/inky/releases/download/v0.15.2-116/Inky-Extended-0.15.2-116-source.zip) |
-| **SHA-256 checksums** | [SHA256SUMS.txt](https://github.com/glassflare/inky/releases/download/v0.15.2-116/SHA256SUMS.txt) |
+| **Debian / Ubuntu (amd64)** | [Inky-Extended-0.15.2-117-amd64.deb](https://github.com/glassflare/inky/releases/download/v0.15.2-117/Inky-Extended-0.15.2-117-amd64.deb) |
+| **AppImage (x86_64)** | [Inky-Extended-0.15.2-117-x86_64.AppImage](https://github.com/glassflare/inky/releases/download/v0.15.2-117/Inky-Extended-0.15.2-117-x86_64.AppImage) |
+| **Source archive** | [Inky-Extended-0.15.2-117-source.zip](https://github.com/glassflare/inky/releases/download/v0.15.2-117/Inky-Extended-0.15.2-117-source.zip) |
+| **SHA-256 checksums** | [SHA256SUMS.txt](https://github.com/glassflare/inky/releases/download/v0.15.2-117/SHA256SUMS.txt) |
 
 ### Debian / Ubuntu
 
 Download the `.deb`, then install it from the directory where you saved it:
 
 ```bash
-sudo apt install ./Inky-Extended-0.15.2-116-amd64.deb
+sudo apt install ./Inky-Extended-0.15.2-117-amd64.deb
 ```
 
 When replacing an experimental build with a higher Debian revision, such as
-`0.15.2-11092`, add `--allow-downgrades` to that command. Stable r110 through r115 installations
-upgrade normally to r116.
+`0.15.2-11092`, add `--allow-downgrades` to that command. Stable r110 through r116 installations
+upgrade normally to r117. Confirm an intentional downgrade before using that option.
 
 ### AppImage
 
 Download the AppImage, make it executable, and run it:
 
 ```bash
-chmod +x Inky-Extended-0.15.2-116-x86_64.AppImage
-./Inky-Extended-0.15.2-116-x86_64.AppImage
+chmod +x Inky-Extended-0.15.2-117-x86_64.AppImage
+./Inky-Extended-0.15.2-117-x86_64.AppImage
 ```
 
 Some Linux distributions may require FUSE compatibility libraries to run AppImages. The repository also contains build scripts for other platforms; the prebuilt downloads listed above target Linux.
@@ -210,6 +241,8 @@ npm test
 npm run test:web-export
 ```
 
+The default suite retains 14 existing optional GPU, legacy WebDriver, and media-picker cases as pending; they are not counted as passed. The release notes record validation of the real Linux packages.
+
 The permanent [Legendary 25 A's regression](app/test/legendary-25-as-regression.test.js)
 also checks real displayed pixels, title/blank-line edits, window sizes and scrolling.
 On Linux with an X11 display and GPU acceleration, enable it for a packaged build:
@@ -224,7 +257,7 @@ be retained with `INKY_VISUAL_ARTIFACTS=/absolute/output/directory`.
 
 The packaged Linux build uses the compatible source-map compiler built by the reproducible pipeline described in [compiler/source-map-protocol.md](compiler/source-map-protocol.md). The compiler binaries tracked in Git LFS do not provide that protocol; build the compatible compiler to use accurate Alt+click navigation when running from source.
 
-The underlying app version remains **0.15.2**; **r116** is the community revision. **Inky Extended** identifies this fork's distribution, not a change to Ink syntax or the original Inky project's ownership.
+The underlying app version remains **0.15.2**; **r117** is the community revision. **Inky Extended** identifies this fork's distribution, not a change to Ink syntax or the original Inky project's ownership.
 
 ## Contribute
 

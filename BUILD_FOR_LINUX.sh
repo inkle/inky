@@ -44,7 +44,7 @@ cp "$ROOT/app/renderer/about/icon-round.png" "$OUT/AppDir/usr/share/pixmaps/inky
 cp -a --reflink=auto "$APP/." "$OUT/AppDir/opt/inky/"
 ARCH=x86_64 "$ROOT/build/appimagetool-x86_64.AppImage" --appimage-extract-and-run \
     -n "$OUT/AppDir" "$OUT/ReleaseUpload/Inky.AppImage"
-INKY_LINUX_APP_DIR="$APP" INKY_DEB_REVISION="${INKY_DEB_REVISION:-116}" \
+INKY_LINUX_APP_DIR="$APP" INKY_DEB_REVISION="${INKY_DEB_REVISION:-117}" \
     "$OUT/stage/BUILD_DEB.sh"
 mv "$OUT/stage/ReleaseUpload/"*.deb "$OUT/ReleaseUpload/"
 (
