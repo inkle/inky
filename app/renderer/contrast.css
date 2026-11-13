@@ -151,13 +151,17 @@
     color: #282828;
 }
 
-.window.contrast ::-webkit-scrollbar {
+.window.contrast #editor ::-webkit-scrollbar,
+.window.contrast .sidebar ::-webkit-scrollbar,
+.window.contrast #toolbar .issue-popup ::-webkit-scrollbar {
     width: .75rem;
     background: #282828;
     border-left: 1px solid #222;
 }
 
-.window.contrast ::-webkit-scrollbar-thumb {
+.window.contrast #editor ::-webkit-scrollbar-thumb,
+.window.contrast .sidebar ::-webkit-scrollbar-thumb,
+.window.contrast #toolbar .issue-popup ::-webkit-scrollbar-thumb {
     background: #323232;
 }
 

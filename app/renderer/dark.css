@@ -1,171 +1,231 @@
-.window.dark #main,
+/*
+ * Graphite: the rebuilt "Dark" IDE theme.
+ * The existing View > Theme > Dark selection remains unchanged.
+ * Only editor chrome is themed here; #player owns its look through game.yaml.
+ * Ace's bundled "tomorrow_night" theme provides the base editor colors.
+ */
+.window.dark {
+    --inky-dark-editor: #20252c;
+    --inky-dark-gutter: #1c2128;
+    --inky-dark-sidebar: #181d24;
+    --inky-dark-toolbar: #252c35;
+    --inky-dark-border: #394450;
+    --inky-dark-text: #e4eaf1;
+    --inky-dark-muted: #a9b5c4;
+    --inky-dark-accent: #87b9ee;
+    --inky-dark-hover: #303c4c;
+    --inky-dark-selected: #344c66;
+    --sidebar-text: var(--inky-dark-text);
+    --editor-background: var(--inky-dark-editor);
+    --editor-foreground: var(--inky-dark-text);
+}
+
+/* Workspace and IDE chrome. Keep the story pane's CSS variables untouched. */
+.window.dark #main { background: var(--inky-dark-sidebar); }
 .window.dark #editor,
-.window.dark #editor .ace_gutter-layer,
-.window.dark .split {
-    background-color: #282828;
-}
-
+.window.dark #editor-pane { background: var(--inky-dark-editor); color: var(--inky-dark-text); }
+.window.dark .split { background: var(--inky-dark-border); }
 .window.dark #toolbar {
-    background-color: #131313;
-    border-bottom: #131313;
+    background: var(--inky-dark-toolbar);
+    border-bottom: 1px solid var(--inky-dark-border);
 }
+.window.dark #toolbar .button .icon { color: var(--inky-dark-muted); }
+.window.dark #toolbar .button:hover .icon,
+.window.dark #toolbar .button.selected .icon { color: var(--inky-dark-text); }
+.window.dark #toolbar p.issuesMessage,
+.window.dark #toolbar div.issuesSummary .issueCount { color: var(--inky-dark-muted); }
+.window.dark h1.title { color: var(--inky-dark-text); }
 
+/* Explorer: separate surface, legible filenames, subtle interaction states. */
 .window.dark #main .sidebar,
+.window.dark #main .sidebar .nav-wrapper,
 .window.dark #main .sidebar .footer {
-    background-color: #181818;
+    background: var(--inky-dark-sidebar);
+    color: var(--inky-dark-text);
 }
-
-.window.dark h1.title {
-    color: white;
-}
-
-
+.window.dark #main .sidebar .nav-wrapper { border-left-color: var(--inky-dark-border); }
+.window.dark #main .sidebar .footer { border-top: 1px solid var(--inky-dark-border); }
 .window.dark #main .sidebar .filename,
 .window.dark #main .sidebar .footer .add-include-button,
 .window.dark #main .sidebar .footer .new-include-form h5 {
-    color: #888;
+    color: var(--inky-dark-text);
 }
-
-.window.dark #main .sidebar .nav-group-item.active {
-    background: #1a292b;
+.window.dark #main .sidebar .nav-group-item.nav-tooltip,
+.window.dark #file-nav-wrapper .explorer-create-options { color: var(--inky-dark-muted); }
+.window.dark #main .sidebar .nav-group-item.active,
+.window.dark #file-nav-wrapper .jstree-default .jstree-wholerow-clicked {
+    background: var(--inky-dark-selected);
 }
-
-.window.dark #main .sidebar .nav-group-item.active .filename {
-    color: #CCC;
+.window.dark #file-nav-wrapper .jstree-default .jstree-wholerow-clicked {
+    box-shadow: inset 2px 0 var(--inky-dark-accent);
 }
-
-.window.dark #main .sidebar .nav-group-item.nav-tooltip {
-    color: #7b7b7b;
+.window.dark #file-nav-wrapper .jstree-default .jstree-wholerow-hovered {
+    background: var(--inky-dark-hover);
 }
-
-.window.dark #toolbar .button:hover .icon {
-    color: #999;
+.window.dark #file-nav-wrapper .jstree-default .jstree-anchor {
+    color: var(--inky-dark-text);
 }
-
-.window.dark #toolbar .button.selected .icon {
-    color: #CCC;
+.window.dark #file-nav-wrapper .ex-audio.ex-playing { color: var(--inky-dark-accent); }
+.window.dark #file-nav-wrapper .jstree-default .jstree-anchor.explorer-drop-target {
+    outline-color: var(--inky-dark-accent);
+    background: var(--inky-dark-hover);
 }
-
-/* e.g. filename input */
+.window.dark #file-nav-wrapper .jstree-rename-input,
 .window.dark #main .sidebar .footer input {
-    background: #333;
-    border: 1px solid #888;
-    color: #888;
+    background: var(--inky-dark-editor);
+    border: 1px solid var(--inky-dark-accent) !important;
+    color: var(--inky-dark-text);
 }
+.window.dark #main .sidebar .footer .checkbox { color: var(--inky-dark-muted); }
 
-.window.dark #main .sidebar .footer .checkbox {
-    color: #888;
+/* Ace built-in theme is set from editorView.js. These are the Ink-specific refinements. */
+.window.dark #editor .ace_gutter,
+.window.dark #editor .ace_gutter-layer {
+    background: var(--inky-dark-gutter);
+    color: var(--inky-dark-muted);
 }
-
-.window.dark #toolbar div.issuesSummary .issueCount {
-    color: #888;
+.window.dark #editor .ace_gutter-active-line {
+    background: var(--inky-dark-hover);
 }
-
-.window.dark #main .sidebar .footer {
-    border-top: 1px solid #282828;
+.window.dark #editor .ace_cursor { color: #f4f7fc; }
+.window.dark #editor .ace_marker-layer .ace_selection {
+    background: #425a75;
 }
-
-
-.window.dark .ace_editor .ace_marker-layer .ace_selection {
-    background-color: #444;
+.window.dark #editor .ace_marker-layer .ace_active-line {
+    background: rgba(158, 188, 220, 0.09);
 }
-
-.window.dark .ace_editor .ace_marker-layer .ace_selected-word {
-    background-color: #999;
-    border-color: #dedede;
+.window.dark #editor .ace_marker-layer .ace_selected-word {
+    background: rgba(135, 185, 238, 0.12);
+    border: 1px solid #72869d;
 }
-
-.window.dark #editor,
-.window.dark #player,
-.window.dark .ace_editor .ace_cursor {
-    /*color: #f0f0f0; */
-    color: #faf1c6;
-}
-
-.window.dark .ace_editor .ace_indent-guide {
-    opacity: .1;
-}
-
-.window.dark .ace_editor .ace_marker-layer .ace_active-line {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.window.dark #player hr {
-    border-top-color: #444;
-}
-
-.window.dark #player p.choice .choice-button:hover {
-    color: #999;
-}
-
-
-.window.dark #player .innerText p.customInstruction {
-    border-top-color: rgb(179, 94, 94);
-}
-
-.window.dark #editor .ace-error {
-    background: #580000
-}
-
-.window.dark #editor .ace_todo,
-.window.dark #editor .ace-todo {
-    background: #a97410;
-    color: #000000;
-}
-
+.window.dark #editor .ace_indent-guide { opacity: 0.28; }
+.window.dark #editor .ace-error { background: #77323b; }
 .window.dark #editor .ace_warning,
-.window.dark #editor .ace-warning {
-    background: #0f3553;
+.window.dark #editor .ace-warning { background: #785b24; }
+.window.dark #editor .ace_todo,
+.window.dark #editor .ace-todo { background: #47645c; color: #fff; }
+
+/* The custom Ink tokens are not standard Ace keywords; color them here. */
+.window.dark #editor span.ace_flow.ace_declaration,
+.window.dark #editor span.ace_divert,
+.window.dark #editor span.ace_choice.ace_label,
+.window.dark #editor span.ace_gather.ace_label,
+.window.dark #editor span.ace_glue,
+.window.dark #editor span.ace_include,
+.window.dark #editor span.ace_external {
+    color: #87c4e6;
+}
+.window.dark #editor span.ace_choice.ace_bullets,
+.window.dark #editor span.ace_choice.ace_weaveBracket,
+.window.dark #editor span.ace_gather.ace_bullets { color: #eaa2ab; }
+.window.dark #editor span.ace_var-decl,
+.window.dark #editor span.ace_list-decl,
+.window.dark #editor span.ace_logic:not(.ace_innerContent) { color: #a9d29b; }
+.window.dark #editor span.ace_tag,
+.window.dark #editor .ace_comment { color: #adb7c4; }
+.window.dark #editor span.ace_customInstruction { color: #f0ad99; }
+/* When Hide Tags is selected, tags should disappear against the editor surface. */
+.window.dark #main.hideTags #editor span.ace_tag { color: var(--inky-dark-editor); }
+
+/* Floating Ace completion/tooltip and jsTree menus are appended outside .window.
+ * Mirror the active theme on <html> (controller.js), so they still match. */
+html.dark .ace_autocomplete {
+    background: #252c35;
+    color: #e4eaf1;
+    border: 1px solid #506074;
+}
+html.dark .ace_autocomplete .ace_marker-layer .ace_active-line { background: #344c66; }
+html.dark .ace_autocomplete .ace_completion-highlight { color: #87b9ee; }
+html.dark .ace_autocomplete .ace_rightAlignedText { color: #a9b5c4; }
+html.dark .ace_autocomplete .ace_line-hover {
+    background: #303c4c;
+    border-color: #506074;
+}
+html.dark .ace_tooltip {
+    background: #252c35;
+    color: #e4eaf1;
+    border: 1px solid #506074;
+}
+html.dark .vakata-context.jstree-default-contextmenu {
+    background: #252c35;
+    border-color: #506074;
+    color: #e4eaf1;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+}
+html.dark .vakata-context.jstree-default-contextmenu li > a { color: #e4eaf1; }
+html.dark .vakata-context.jstree-default-contextmenu li > a:hover,
+html.dark .vakata-context.jstree-default-contextmenu .vakata-context-hover > a {
+    background: #344c66;
+    color: #fff;
+}
+html.dark .vakata-context.jstree-default-contextmenu .vakata-context-separator > a {
+    border-top-color: #506074;
 }
 
-.window.dark .ace_editor span.ace_flow.ace_declaration,
-.window.dark .ace_editor span.ace_divert,
-.window.dark .ace_editor span.ace_choice.ace_label,
-.window.dark .ace_editor span.ace_gather.ace_label,
-.window.dark .ace_editor span.ace_glue,
-.window.dark .ace_editor span.ace_include,
-.window.dark .ace_editor span.ace_external {
-    color:#6d9e8e;
+/* Toolbar issue details and scrolling surfaces. */
+.window.dark #toolbar .issue-popup {
+    background: var(--inky-dark-toolbar);
+    border-color: var(--inky-dark-border);
+    color: var(--inky-dark-text);
 }
-
-.window.dark .ace_editor span.ace_choice.ace_bullets,
-.window.dark .ace_editor span.ace_choice.ace_weaveBracket,
-.window.dark .ace_editor span.ace_gather.ace_bullets {
-    color: #ec3c2f;
+.window.dark #toolbar .issue-popup .row { border-bottom-color: var(--inky-dark-border); }
+.window.dark #toolbar .issue-popup .row:hover { background: var(--inky-dark-hover); }
+.window.dark #toolbar .issue-popup .line-no {
+    background: var(--inky-dark-gutter);
+    border-right-color: var(--inky-dark-border);
+    color: var(--inky-dark-muted);
 }
-
-.window.dark .ace_editor span.ace_var-decl,
-.window.dark .ace_editor span.ace_list-decl {
-    color: #ec3c2f;
-}
-.window.dark .ace_editor span.ace_logic:not(.ace_innerContent) {
-    color:#8eb865;
-}
-
-.window.dark #main.hideTags .ace_editor span.ace_tag {
-    color: #282828;
-}
-
-
-/* Custom instructions, e.g. >>> */
-.window.dark .window.contrast .ace_editor span.ace_customInstruction {
-    color: #c36f6f;
-}
-
-.window.dark ::-webkit-scrollbar {
+.window.dark #editor ::-webkit-scrollbar,
+.window.dark .sidebar ::-webkit-scrollbar,
+.window.dark #toolbar .issue-popup ::-webkit-scrollbar,
+html.dark .ace_autocomplete ::-webkit-scrollbar {
     width: .75rem;
-    background: #282828;
-    border-left: 1px solid #323232;
-  }
-  
-.window.dark ::-webkit-scrollbar-thumb {
-    background: #323232;
+    background: var(--inky-dark-sidebar);
+    border-left: 1px solid var(--inky-dark-border);
+}
+.window.dark #editor ::-webkit-scrollbar-thumb,
+.window.dark .sidebar ::-webkit-scrollbar-thumb,
+.window.dark #toolbar .issue-popup ::-webkit-scrollbar-thumb,
+html.dark .ace_autocomplete ::-webkit-scrollbar-thumb {
+    background: #465466;
+    border-radius: 8px;
 }
 
-.window.dark .sidebar .nav-wrapper {
-    border-left: 1px solid #282828;
-}
 
-.window.dark .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
-    background: #323232;
+/* Native Ace Find/Replace controls are injected after the theme styles. */
+.window.dark #editor .ace_search {
+    background: var(--inky-dark-toolbar);
+    color: var(--inky-dark-text);
+    border-color: var(--inky-dark-border);
 }
+.window.dark #editor .ace_search_form,
+.window.dark #editor .ace_replace_form { border-color: #506074; }
+.window.dark #editor .ace_search_field,
+.window.dark #editor .ace_searchbtn,
+.window.dark #editor .ace_replacebtn {
+    background-color: var(--inky-dark-editor);
+    color: var(--inky-dark-text);
+    border-color: var(--inky-dark-border);
+}
+.window.dark #editor .ace_search_field::placeholder { color: var(--inky-dark-muted); }
+.window.dark #editor .ace_searchbtn:hover,
+.window.dark #editor .ace_replacebtn:hover,
+.window.dark #editor .ace_button:hover { background-color: var(--inky-dark-hover); }
+.window.dark #editor .ace_button {
+    color: var(--inky-dark-text);
+    border-color: #506074;
+    opacity: 1;
+}
+.window.dark #editor .ace_button.checked { border-color: var(--inky-dark-accent); }
+
+/* Visual/Advanced are IDE tabs, independent of the story theme picker. */
+.window.dark #style-mode-bar {
+    background: var(--inky-dark-toolbar);
+    border-color: var(--inky-dark-border);
+}
+.window.dark .style-mode-tab { color: var(--inky-dark-muted); border-color: var(--inky-dark-border); }
+.window.dark .style-mode-tab:hover:not(:disabled) { background: var(--inky-dark-hover); color: var(--inky-dark-text); }
+.window.dark .style-mode-tab.active { background: var(--inky-dark-editor); color: var(--inky-dark-text); }
+.window.dark .style-mode-tab.active::before { background: var(--inky-dark-accent); }
+.window.dark .style-mode-tab:focus-visible { outline-color: var(--inky-dark-accent); }
+.window.dark #toolbar .issue-popup .error .issue { color: #f29b9b; }

@@ -172,6 +172,8 @@ editor.on("beforeEndOperation", function() {
 });
 
 exports.EditorView = {
+    // Use the Ace themes already bundled with Inky; no external theme library.
+    setEditorTheme: (name) => editor.setTheme(name),
     canFormatCode: () => !!(currentInkFile && currentInkFile.isInkFile && !editor.getReadOnly()),
     formatCode: () => {
         if (!currentInkFile || !currentInkFile.isInkFile || editor.getReadOnly()) return false;

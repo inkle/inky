@@ -118,7 +118,8 @@ exports.inkCompleter = {
             return;
         }
 
-        const cursorToken = session.getTokenAt(pos.row, pos.column);
+        // Ace returns null at the beginning of an empty line (Ctrl+Space).
+        const cursorToken = session.getTokenAt(pos.row, pos.column) || { type: "" };
         const isCursorInDivert = (cursorToken.type.indexOf("divert") != -1);
         const isCursorInFlow = (cursorToken.type.indexOf("flow") != -1);
         const isCursorInLabel = (cursorToken.type.indexOf(".label") != -1);

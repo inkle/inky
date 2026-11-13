@@ -13,6 +13,20 @@ function complete(line, projectDir) {
 }
 
 describe("Tag autocomplete", function () {
+    it("offers vocabulary on an empty Ace line without a cursor token", function () {
+        const previous = inkCompleter.inkFiles;
+        inkCompleter.inkFiles = [{ symbols: { getCachedVocabWords: () => ["lantern"] } }];
+        try {
+            let result;
+            inkCompleter.getCompletions({}, { getLine: () => "", getTokenAt: () => null },
+                {row: 0, column: 0}, "", (error, list) => {
+                    assert.ifError(error);
+                    result = list;
+                });
+            assert.deepStrictEqual(result, [{caption: "lantern", value: "lantern", meta: "Vocabulary"}]);
+        } finally { inkCompleter.inkFiles = previous; }
+    });
+
     it("offers music and SFX from their conventional folders and custom audio paths", function () {
         const dir = fs.mkdtempSync(path.join(os.tmpdir(), "inky-completer-"));
         fs.mkdirSync(path.join(dir, "audio", "music"), { recursive: true });
