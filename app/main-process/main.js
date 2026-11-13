@@ -96,14 +96,6 @@ ipcMain.handle("try-close", async (event) => {
     return parent ? dialog.showMessageBox(parent, options) : dialog.showMessageBox(options);
 });
 
-app.on('will-finish-launching', function () {
-    app.on("open-file", function (event, path) {
-        ProjectWindow.open(path);
-        event.preventDefault();
-    });
-
-});
-
 let isQuitting = false;
 
 app.on("open-file", function (event, path) {
@@ -309,28 +301,14 @@ app.on('ready', function () {
         }
     });
 
-    // Open a story passed on the command line on any platform.
-    if (process.argv.length > 1 && !pendingPathToOpen) {
-        const baseDir = process.env.OWD || process.cwd();
-        for (let i = 1; i < process.argv.length; i++) {
-            const arg = process.argv[i];
-            if( arg.startsWith("-") || !arg.toLowerCase().endsWith(".ink") ) continue;
-            const candidate = path.resolve(baseDir, arg);
-            if( require("fs").existsSync(candidate) ) {
-                pendingPathToOpen = candidate;
-                break;
-            }
-        }
-    }
-
-    // Opened Inky with specific file (e.g. drag and drop or windows command line)
-    if( pendingPathToOpen ) {
-        ProjectWindow.open(pendingPathToOpen);
-        pendingPathToOpen = null;
-    }
-    
-    // No file requested: start a new project holding The Borrowed Star story (see InkFile's initialContent).
-    else {
+    // Explicit file requests take priority. Otherwise resume the latest saved
+    // project that is still readable; first launch keeps the starter story.
+    const startupPath = ProjectWindow.getStartupPath(
+        pendingPathToOpen, process.argv.slice(1), process.env.OWD || process.cwd());
+    pendingPathToOpen = null;
+    if( startupPath ) {
+        ProjectWindow.open(startupPath);
+    } else {
         ProjectWindow.createEmpty();
     }
 

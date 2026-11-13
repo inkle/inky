@@ -256,16 +256,41 @@ ProjectWindow.withMainkInkPath = function(absPath) {
 
 
 ProjectWindow.getRecentFiles = function() {
-    if(!fs.existsSync(recentFilesPath)) {
-        return [];
-    }
-    const json = fs.readFileSync(recentFilesPath, "utf-8");
     try {
-        return JSON.parse(json);
+        const recentFiles = JSON.parse(fs.readFileSync(recentFilesPath, "utf-8"));
+        return Array.isArray(recentFiles) ? recentFiles.filter(file =>
+            typeof file === "string" && file.trim().length > 0) : [];
     } catch(e) {
-        console.error("Error in recent files JSON parsing:", e);
+        if( e.code !== "ENOENT" ) console.error("Could not read recent projects:", e);
         return [];
     }
+}
+
+ProjectWindow.getStartupPath = function(requestedPath, args = [], baseDir = process.cwd()) {
+    const availableProject = candidate => {
+        if( typeof candidate !== "string" || !candidate.trim() ) return null;
+        const absolutePath = path.resolve(baseDir, candidate);
+        if( path.extname(absolutePath).toLowerCase() !== ".ink" ) return null;
+        try {
+            if( !fs.statSync(absolutePath).isFile() ) return null;
+            fs.accessSync(absolutePath, fs.constants.R_OK);
+            return absolutePath;
+        } catch(error) {
+            return null;
+        }
+    };
+    const requested = availableProject(requestedPath);
+    if( requested ) return requested;
+    for( const arg of args ) {
+        if( typeof arg !== "string" || arg.startsWith("-") ) continue;
+        const explicit = availableProject(arg);
+        if( explicit ) return explicit;
+    }
+    for( const recent of ProjectWindow.getRecentFiles() ) {
+        const saved = availableProject(recent);
+        if( saved ) return saved;
+    }
+    return null;
 }
 
 ProjectWindow.clearRecentFiles = function() {
@@ -282,9 +307,14 @@ function addRecentFile(filePath) {
             typeof recentPath === "string" && path.resolve(recentPath) !== resolvedFilePath
         )
     ).slice(0, 5);
-    fs.writeFileSync(recentFilesPath, JSON.stringify(newRecentFiles), {
-        encoding: "utf-8"
-    });
+    try {
+        fs.writeFileSync(recentFilesPath, JSON.stringify(newRecentFiles), {
+            encoding: "utf-8"
+        });
+    } catch(error) {
+        console.error("Could not remember recent project:", error);
+        return;
+    }
 
     if( events.onRecentFilesChanged ) {
         events.onRecentFilesChanged(newRecentFiles);

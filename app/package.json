@@ -2,8 +2,8 @@
   "name": "inky",
   "productName": "Inky",
   "version": "0.15.2",
-  "communityRevision": 113,
-  "distributionVersion": "0.15.2-113",
+  "communityRevision": 114,
+  "distributionVersion": "0.15.2-114",
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "repository": {
@@ -17,7 +17,8 @@
     "test:node": "node --test test/audio-active-menu.node.cjs test/audio-consistency-93.node.cjs test/audio-no-immediate-cut.node.cjs test/audio-volume-availability.node.cjs test/paragraph-spacing.node.cjs",
     "test:web-export": "mocha test/web-export-only-smoke.js",
     "generate-locale": "node ../build/generateLocale.js",
-    "build-package": "node build-package.js"
+    "build-package": "node build-package.js",
+    "test:startup": "node test/helpers/startup-relaunch-check.cjs"
   },
   "keywords": [
     "ink",
