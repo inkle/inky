@@ -2,8 +2,8 @@
   "name": "inky",
   "productName": "Inky",
   "version": "0.15.2",
-  "communityRevision": 112,
-  "distributionVersion": "0.15.2-112",
+  "communityRevision": 113,
+  "distributionVersion": "0.15.2-113",
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "repository": {
