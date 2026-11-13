@@ -21,7 +21,7 @@ describe("Starter story of a new project", function () {
         assert.doesNotMatch(story, /\.(mp3|ogg|wav|jpe?g|png)\b/i);
     });
 
-    it("opens as a new untitled project instead of a copy of the sample", function () {
+    it("keeps the starter for first launch and new untitled projects", function () {
         const main = fs.readFileSync(path.join(__dirname, "../main-process/main.js"), "utf8");
         assert.match(main, /ProjectWindow\.createEmpty\(\)/);
         assert.doesNotMatch(main, /writableExamplePath|bundledExamplePath/);
