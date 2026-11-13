@@ -1,0 +1,184 @@
+/* Pearl is the Light IDE theme: white writing paper, mist-colored chrome,
+ * and restrained ink accents. The reader owns a separate palette.
+ */
+html.light,
+.window.light {
+    --pearl-paper: #ffffff;
+    --pearl-chrome: #f7f9fc;
+    --pearl-sidebar: #eef3f9;
+    --pearl-text: #243243;
+    --pearl-muted: #52677e;
+    --pearl-blue: #23659a;
+    --pearl-green: #146b4a;
+    --pearl-amber: #8a5b12;
+    --pearl-rose: #9c3c67;
+    --pearl-rule: #d8e1ec;
+    --pearl-control: #708399;
+    --pearl-selection: #e6eff9;
+}
+.window.light { --sidebar-text: var(--pearl-text); }
+.window.light #main { background: var(--pearl-chrome); }
+.window.light #editor-pane,
+.window.light #editor { background: var(--pearl-paper); color: var(--pearl-text); }
+.window.light .split { background: var(--pearl-rule); }
+.window.light h1.title { color: var(--pearl-text); }
+/* Scope native light controls too; never force the reading surface's scheme. */
+.window.light #editor-pane,
+.window.light #main .sidebar,
+.window.light #toolbar,
+html.light .ace_autocomplete,
+html.light .ace_tooltip,
+html.light .vakata-context,
+html.light .explorer-dialog,
+html.light .rich-toolbar { color-scheme: light; }
+
+/* Mist-colored navigation frames the white writing sheet. */
+.window.light #toolbar { background: var(--pearl-chrome); border-bottom-color: var(--pearl-rule); }
+.window.light #toolbar .button .icon,
+.window.light #toolbar .issuesMessage,
+.window.light #toolbar .issueCount { color: var(--pearl-muted); }
+.window.light #toolbar .button:hover .icon,
+.window.light #toolbar .button.selected .icon { color: var(--pearl-blue); }
+.window.light #toolbar .busySpinner { filter: brightness(.4); }
+.window.light #main .sidebar,
+.window.light #main .sidebar .nav-wrapper,
+.window.light #main .sidebar .footer { background: var(--pearl-sidebar); color: var(--pearl-text); border-color: var(--pearl-rule); }
+.window.light #file-nav-wrapper .file-explorer-header { background: var(--pearl-chrome); color: var(--pearl-muted); border-bottom-color: var(--pearl-rule); }
+.window.light #file-nav-wrapper .explorer-header-action { color: var(--pearl-muted); }
+.window.light #file-nav-wrapper .explorer-header-action:hover,
+.window.light #file-nav-wrapper .explorer-header-action:focus-visible { background: var(--pearl-selection); color: var(--pearl-blue); outline: 1px solid var(--pearl-blue); outline-offset: -1px; }
+.window.light #main .sidebar .filename,
+.window.light #file-nav-wrapper .jstree-anchor { color: var(--pearl-text); }
+.window.light #main .sidebar .nav-tooltip,
+.window.light #file-nav-wrapper .explorer-create-options,
+.window.light #main .sidebar .footer .checkbox { color: var(--pearl-muted); }
+.window.light #file-nav-wrapper .jstree-wholerow-hovered { background: #e4ebf4; }
+.window.light #file-nav-wrapper .jstree-wholerow-clicked,
+.window.light #main .sidebar .nav-group-item.active { background: var(--pearl-selection); box-shadow: inset 0 0 0 1px var(--pearl-blue); border-radius: 3px; }
+.window.light #file-nav-wrapper .ex-audio.ex-playing { color: var(--pearl-green); }
+.window.light #file-nav-wrapper .explorer-drop-target,
+.window.light #file-nav-wrapper.drop-active { outline-color: var(--pearl-blue); background-color: var(--pearl-selection); }
+.window.light #file-nav-wrapper .jstree-rename-input,
+.window.light #main .sidebar .footer input { background: var(--pearl-paper); color: var(--pearl-text); border-color: var(--pearl-blue) !important; }
+.window.light #main .sidebar .footer .add-include-button,
+.window.light #main .sidebar .footer .new-include-form h5 { color: var(--pearl-blue); }
+
+/* Clear navigation and selection markers, without changing Ace geometry. */
+.window.light #editor .ace_gutter { background: var(--pearl-chrome); color: var(--pearl-muted); }
+.window.light #editor .ace_gutter-layer { background: transparent; }
+.window.light #editor .ace_gutter-cell { color: var(--pearl-muted); }
+.window.light #editor .ace_gutter-active-line { background: var(--pearl-selection); box-shadow: inset 2px 0 var(--pearl-blue); }
+.window.light #editor .ace_marker-layer .ace_active-line { background: #f4f7fc; box-shadow: inset 0 -1px var(--pearl-control); }
+.window.light #editor .ace_cursor { color: var(--pearl-blue); }
+.window.light #editor .ace_marker-layer .ace_selection { background: var(--pearl-selection); box-shadow: inset 0 0 0 1px var(--pearl-blue); }
+.window.light #editor .ace_marker-layer .ace_selected-word { background: transparent; border: 1px solid var(--pearl-blue); }
+.window.light #editor .ace_marker-layer .ace_bracket { border: 1px solid var(--pearl-blue); }
+.window.light #editor .ace_invisible { color: var(--pearl-muted); }
+.window.light #editor .ace_fold { background: var(--pearl-blue); border-color: var(--pearl-blue); color: var(--pearl-paper); }
+
+/* Narrative remains neutral; syntax uses ink colors rather than neon accents. */
+.window.light #editor .ace_flow.ace_declaration,
+.window.light #editor .ace_divert,
+.window.light #editor .ace_choice.ace_label,
+.window.light #editor .ace_gather.ace_label,
+.window.light #editor .ace_glue,
+.window.light #editor .ace_include,
+.window.light #editor .ace_external,
+.window.light #editor .ace_keyword { color: var(--pearl-blue); }
+.window.light #editor .ace_choice.ace_bullets,
+.window.light #editor .ace_choice.ace_weaveBracket,
+.window.light #editor .ace_gather.ace_bullets,
+.window.light #editor .ace_customInstruction { color: var(--pearl-rose); }
+.window.light #editor .ace_var-decl,
+.window.light #editor .ace_list-decl,
+.window.light #editor .ace_variable,
+.window.light #editor .ace_logic:not(.ace_innerContent),
+.window.light #editor .ace_string { color: var(--pearl-green); }
+.window.light #editor .ace_tag,
+.window.light #editor .ace_meta.ace_tag,
+.window.light #editor .ace_entity.ace_name.ace_tag,
+.window.light #editor .ace_constant { color: var(--pearl-amber); }
+.window.light #editor .ace_comment { color: var(--pearl-muted); }
+.window.light #editor .ace-error,
+.window.light #editor .ace_invalid { background: #fbe9ef; color: var(--pearl-rose); }
+.window.light #editor .ace-warning,
+.window.light #editor .ace_warning { background: #fff4db; }
+.window.light #editor .ace-todo,
+.window.light #editor .ace_todo { background: #e4f2e9; color: var(--pearl-green); }
+.window.light #editor .ace_gutter-cell.ace_error { box-shadow: inset 3px 0 var(--pearl-rose); }
+.window.light #editor .ace_gutter-cell.ace_warning { box-shadow: inset 3px 0 var(--pearl-amber); }
+
+/* Native Find/Replace images are retained by setting background-color only. */
+.window.light #editor .ace_search { background: var(--pearl-chrome); color: var(--pearl-text); border-color: var(--pearl-control); }
+.window.light #editor .ace_search_form,
+.window.light #editor .ace_replace_form { border-color: var(--pearl-control); }
+.window.light #editor .ace_search_field,
+.window.light #editor .ace_searchbtn,
+.window.light #editor .ace_replacebtn { background-color: var(--pearl-paper); color: var(--pearl-text); border-color: var(--pearl-control); }
+.window.light #editor .ace_search_field::placeholder { color: var(--pearl-muted); }
+.window.light #editor .ace_button { color: var(--pearl-text); opacity: 1; border-color: var(--pearl-control); }
+.window.light #editor .ace_button:hover,
+.window.light #editor .ace_searchbtn:hover,
+.window.light #editor .ace_replacebtn:hover { background-color: var(--pearl-selection); }
+.window.light #editor .ace_button.checked { border-color: var(--pearl-blue); }
+.window.light #editor .ace_searchbtn_close { filter: none; }
+.window.light #editor .ace_searchbtn_close:hover { background-color: var(--pearl-selection); }
+.window.light #editor .ace_search_form.ace_nomatch { outline-color: var(--pearl-rose); }
+
+/* Body-level editor UI shares the raised paper surface, not a dark popup. */
+html.light .ace_autocomplete,
+html.light .ace_tooltip,
+html.light .vakata-context.jstree-default-contextmenu,
+html.light .explorer-dialog,
+html.light .rich-toolbar { background: var(--pearl-paper); color: var(--pearl-text); border-color: var(--pearl-control); box-shadow: 0 6px 20px rgba(36, 50, 67, .14); }
+html.light .ace_autocomplete .ace_marker-layer .ace_active-line { background: var(--pearl-selection); box-shadow: inset 0 0 0 1px var(--pearl-blue); }
+html.light .ace_autocomplete .ace_completion-highlight { color: var(--pearl-blue); }
+html.light .ace_autocomplete .ace_rightAlignedText { color: var(--pearl-muted); }
+html.light .ace_autocomplete .ace_line-hover { background: var(--pearl-selection); border-color: var(--pearl-blue); }
+html.light .vakata-context.jstree-default-contextmenu li > a { color: var(--pearl-text); text-shadow: none; }
+html.light .vakata-context.jstree-default-contextmenu li > a:hover,
+html.light .vakata-context.jstree-default-contextmenu .vakata-context-hover > a { background: var(--pearl-selection); color: var(--pearl-blue); box-shadow: none; }
+html.light .vakata-context.jstree-default-contextmenu .vakata-contextmenu-shortcut { color: var(--pearl-muted); opacity: 1; }
+html.light .vakata-context.jstree-default-contextmenu .vakata-context-separator > a { border-top-color: var(--pearl-rule); }
+html.light .explorer-dialog-note { color: var(--pearl-muted); }
+html.light .explorer-dialog-button { background: var(--pearl-chrome); color: var(--pearl-text); border-color: var(--pearl-control); }
+html.light .explorer-dialog-button:hover { background: var(--pearl-selection); }
+html.light .explorer-dialog-button.primary { background: var(--pearl-blue); color: var(--pearl-paper); border-color: var(--pearl-blue); }
+html.light .explorer-dialog-button.danger { background: var(--pearl-rose); color: var(--pearl-paper); border-color: var(--pearl-rose); }
+html.light .explorer-dialog-button:focus-visible { outline-color: var(--pearl-blue); }
+html.light .rich-toolbar-button { color: var(--pearl-blue); }
+html.light .rich-toolbar-button:hover,
+html.light .rich-toolbar-button.is-active { background: var(--pearl-selection); color: var(--pearl-text); }
+.window.light #goto-anything { background: var(--pearl-paper); color: var(--pearl-text); border-color: var(--pearl-control); }
+.window.light #goto-anything input { background: var(--pearl-chrome); color: var(--pearl-text); border-color: var(--pearl-control); }
+.window.light #goto-anything .meta,
+.window.light #goto-anything .ancestor { color: var(--pearl-muted); }
+.window.light #goto-anything .selected { background: var(--pearl-selection); border-color: var(--pearl-blue); }
+
+/* Errors and warnings remain visible and keep their semantic distinction. */
+.window.light #toolbar .issue-popup { background: var(--pearl-paper); color: var(--pearl-text); border-color: var(--pearl-control); }
+.window.light #toolbar .issue-popup .row { border-bottom-color: var(--pearl-rule); }
+.window.light #toolbar .issue-popup .row:hover { background: var(--pearl-selection); }
+.window.light #toolbar .issue-popup .line-no { background: var(--pearl-chrome); color: var(--pearl-muted); border-right-color: var(--pearl-rule); }
+.window.light #toolbar .issue-popup .error .issue { color: var(--pearl-rose); }
+.window.light #toolbar .issue-popup .warning .issue { color: var(--pearl-amber); }
+.window.light #toolbar .issue-popup .todo .issue { color: var(--pearl-green); }
+.window.light #toolbar .issue-popup .icon { color: var(--pearl-blue); }
+.window.light #style-mode-bar { background: var(--pearl-chrome); border-color: var(--pearl-rule); }
+.window.light .style-mode-tab { color: var(--pearl-muted); border-color: var(--pearl-rule); }
+.window.light .style-mode-tab:hover:not(:disabled) { background: var(--pearl-selection); color: var(--pearl-blue); }
+.window.light .style-mode-tab.active { background: var(--pearl-paper); color: var(--pearl-text); box-shadow: none; }
+.window.light .style-mode-tab.active::before { background: var(--pearl-blue); }
+.window.light .style-mode-tab:focus-visible { outline-color: var(--pearl-blue); }
+
+/* Native scrollbars on IDE surfaces only. */
+.window.light #editor ::-webkit-scrollbar,
+.window.light .sidebar ::-webkit-scrollbar,
+.window.light #toolbar .issue-popup ::-webkit-scrollbar,
+html.light .ace_autocomplete ::-webkit-scrollbar { background: var(--pearl-chrome); border-left-color: var(--pearl-rule); }
+.window.light #editor ::-webkit-scrollbar-thumb,
+.window.light .sidebar ::-webkit-scrollbar-thumb,
+.window.light #toolbar .issue-popup ::-webkit-scrollbar-thumb,
+html.light .ace_autocomplete ::-webkit-scrollbar-thumb { background: var(--pearl-control); border-radius: 6px; }
+.window.light #editor ::-webkit-scrollbar-thumb:hover,
+.window.light .sidebar ::-webkit-scrollbar-thumb:hover { background: var(--pearl-muted); }

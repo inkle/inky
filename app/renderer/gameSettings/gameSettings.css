@@ -307,3 +307,21 @@ input:disabled, select:disabled { opacity: .55; }
 .inky-quiet-writing select:focus-visible,
 .inky-quiet-writing button:focus-visible,
 .inky-quiet-writing .segmented input:focus-visible + span { outline: 2px solid #c9b58c; outline-offset: 1px; }
+
+/* Pearl is explicit, so the Light IDE stays light under a dark OS preference. */
+:root.inky-pearl {
+    --bg: #f7f9fc;
+    --panel: #ffffff;
+    --text: #243243;
+    --muted: #52677e;
+    --border: #708399;
+    --accent: #23659a;
+    --danger: #9c3c67;
+    color-scheme: light;
+}
+.inky-pearl .segmented input:checked + span { color: #ffffff; }
+.inky-pearl input:focus-visible,
+.inky-pearl select:focus-visible,
+.inky-pearl button:focus-visible,
+.inky-pearl .segmented input:focus-visible + span { outline: 2px solid #23659a; outline-offset: 1px; }
+.inky-pearl .segmented input:checked:focus-visible + span { outline-color: #ffffff; outline-offset: -3px; box-shadow: 0 0 0 2px #23659a; }

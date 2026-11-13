@@ -1288,14 +1288,15 @@ function syncStyleFormIdeTheme() {
         "inky-high-clarity", document.documentElement.classList.contains("contrast"));
     if( formDocument ) formDocument.documentElement.classList.toggle(
         "inky-quiet-writing", document.documentElement.classList.contains("focus"));
+    if( formDocument ) formDocument.documentElement.classList.toggle(
+        "inky-pearl", document.documentElement.classList.contains("light"));
 }
 
 function updateTheme(event, newTheme) {
     // Only the IDE theme changes: the reader remains controlled by game.yaml.
     const theme = ["dark", "contrast", "focus"].includes(String(newTheme || "").toLowerCase())
         ? String(newTheme).toLowerCase() : "light";
-    $(".window").removeClass("dark contrast focus");
-    if( theme !== "light" ) $(".window").addClass(theme);
+    $(".window").removeClass("light dark contrast focus").addClass(theme);
 
     // Each dark IDE palette uses a bundled native Ace theme.
     const editorThemes = {
@@ -1310,6 +1311,7 @@ function updateTheme(event, newTheme) {
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.classList.toggle("contrast", theme === "contrast");
     document.documentElement.classList.toggle("focus", theme === "focus");
+    document.documentElement.classList.toggle("light", theme === "light");
     syncStyleFormIdeTheme();
 }
 
