@@ -1,174 +1,220 @@
-.window.contrast #main,
-.window.contrast #editor,
-.window.contrast #toolbar,
-.window.contrast #editor .ace_gutter-layer,
-.window.contrast .split {
-    background-color: #222;
+/*
+ * Contrast / High Clarity.
+ * Near-black paper, bright Ink semantics and explicit focus boundaries.
+ * Blue identifies actions; amber identifies the current writing/navigation point.
+ * These surfaces belong to the IDE. Story colors stay in game.yaml.
+ */
+html.contrast,
+.window.contrast {
+    --hc-paper: #0e1117;
+    --hc-panel: #202733;
+    --hc-explorer: #161c26;
+    --hc-text: #f5f7fa;
+    --hc-secondary: #b8c4d3;
+    --hc-blue: #8cd4ff;
+    --hc-amber: #ffd78a;
+    --hc-green: #b1e5b0;
+    --hc-pink: #ffabba;
+    --hc-edge: #7d91aa;
+    --hc-selection: #203a51;
 }
+.window.contrast { --sidebar-text: var(--hc-text); }
+.window.contrast #main { background: var(--hc-explorer); }
+.window.contrast #editor-pane,
+.window.contrast #editor { background: var(--hc-paper); color: var(--hc-text); }
+.window.contrast .split { background: var(--hc-edge); }
+.window.contrast h1.title { color: var(--hc-text); }
 
-.window.contrast #main .sidebar,
-.window.contrast #main .sidebar .footer {
-    background-color: #282828;
-}
-
-.window.contrast h1.title {
-    color: white;
-}
-
-
-.window.contrast #main .sidebar .filename,
-.window.contrast #main .sidebar .footer .add-include-button,
-.window.contrast #main .sidebar .footer .new-include-form h5 {
-    color: #888;
-}
-
-.window.contrast #main .sidebar .nav-group-item.active {
-    background: #2f3e4c;
-}
-
-.window.contrast #main .sidebar .nav-group-item.active .filename {
-    color: #CCC;
-}
-
-.window.contrast #main .sidebar .nav-group-item.nav-tooltip {
-    color: #7b7b7b;
-}
-
-.window.contrast #toolbar .button:hover .icon {
-    color: #999;
-}
-
-.window.contrast #toolbar .button.selected .icon {
-    color: #CCC;
-}
-
-/* e.g. filename input */
-.window.contrast #main .sidebar .footer input {
-    background: #333;
-    border: 1px solid #888;
-    color: #888;
-}
-
-.window.contrast #main .sidebar .footer .checkbox {
-    color: #888;
-}
-
-
-
+/* A quiet toolbar with clearly readable controls and issue states. */
 .window.contrast #toolbar {
-    border-bottom: 1px solid #333;
+    background: var(--hc-paper);
+    border-bottom: 1px solid var(--hc-edge);
 }
-
-.window.contrast #toolbar div.issuesSummary .issueCount {
-    color: #888;
+.window.contrast #toolbar .button .icon,
+.window.contrast #toolbar .issuesMessage,
+.window.contrast #toolbar .issueCount { color: var(--hc-secondary); }
+.window.contrast #toolbar .button:hover .icon,
+.window.contrast #toolbar .button.selected .icon { color: var(--hc-blue); }
+.window.contrast #toolbar .issue-popup {
+    background: var(--hc-panel); color: var(--hc-text); border-color: var(--hc-edge);
 }
+.window.contrast #toolbar .issue-popup .row { border-bottom-color: var(--hc-edge); }
+.window.contrast #toolbar .issue-popup .row:hover { background: var(--hc-selection); }
+.window.contrast #toolbar .issue-popup .line-no {
+    background: var(--hc-paper); color: var(--hc-secondary); border-right-color: var(--hc-edge);
+}
+.window.contrast #toolbar .issue-popup .error .issue { color: var(--hc-pink); }
+.window.contrast #toolbar .issue-popup .warning .issue { color: var(--hc-amber); }
+.window.contrast #toolbar .issue-popup .todo .issue { color: var(--hc-green); }
+.window.contrast #toolbar .issue-popup .icon { color: var(--hc-blue); }
 
+/* Explorer: crisp boundaries and an amber selection rail, without changing row sizes. */
+.window.contrast #main .sidebar,
+.window.contrast #main .sidebar .nav-wrapper,
 .window.contrast #main .sidebar .footer {
-    border-top: 1px solid #555;
+    background: var(--hc-explorer); color: var(--hc-text); border-color: var(--hc-edge);
 }
-
-
-.window.contrast .ace_editor .ace_marker-layer .ace_selection {
-    background-color: #444;
+.window.contrast #file-nav-wrapper .file-explorer-header {
+    background: var(--hc-panel); color: var(--hc-text); border-bottom-color: var(--hc-edge);
 }
-
-.window.contrast .ace_editor .ace_marker-layer .ace_selected-word {
-    background-color: #999;
-    border-color: #dedede;
+.window.contrast #file-nav-wrapper .explorer-header-action { color: var(--hc-secondary); }
+.window.contrast #file-nav-wrapper .explorer-header-action:hover,
+.window.contrast #file-nav-wrapper .explorer-header-action:focus-visible {
+    background: var(--hc-selection); color: var(--hc-blue); outline: 1px solid var(--hc-blue); outline-offset: -1px;
 }
-
-.window.contrast #editor,
-.window.contrast #player,
-.window.contrast .ace_editor .ace_cursor {
-    /*color: #f0f0f0; */
-    color: #faf2e7;
+.window.contrast #main .sidebar .filename,
+.window.contrast #file-nav-wrapper .jstree-anchor { color: var(--hc-text); }
+.window.contrast #main .sidebar .nav-tooltip,
+.window.contrast #file-nav-wrapper .explorer-create-options,
+.window.contrast #main .sidebar .footer .checkbox { color: var(--hc-secondary); }
+.window.contrast #file-nav-wrapper .jstree-wholerow-hovered { background: var(--hc-panel); }
+.window.contrast #file-nav-wrapper .jstree-wholerow-clicked {
+    background: var(--hc-selection); box-shadow: inset 3px 0 var(--hc-amber);
 }
-
-.window.contrast .ace_editor .ace_indent-guide {
-    opacity: .1;
+.window.contrast #main .sidebar .nav-group-item.active {
+    background: var(--hc-selection); box-shadow: inset 3px 0 var(--hc-amber);
 }
-
-.window.contrast .ace_editor .ace_marker-layer .ace_active-line {
-    background-color: rgba(255, 255, 255, 0.05);
+.window.contrast #file-nav-wrapper .jstree-ocl { filter: brightness(2.2); }
+.window.contrast #file-nav-wrapper .ex-audio.ex-playing { color: var(--hc-blue); }
+.window.contrast #file-nav-wrapper .explorer-drop-target,
+.window.contrast #file-nav-wrapper.drop-active { outline-color: var(--hc-blue); background-color: var(--hc-selection); }
+.window.contrast #file-nav-wrapper .jstree-rename-input,
+.window.contrast #main .sidebar .footer input {
+    background: var(--hc-paper); color: var(--hc-text); border-color: var(--hc-blue) !important;
 }
+.window.contrast #main .sidebar .footer .add-include-button,
+.window.contrast #main .sidebar .footer .new-include-form h5 { color: var(--hc-text); }
 
-.window.contrast #player hr {
-    border-top-color: #444;
+/* A visible caret and explicit selection boundaries do not rely on a faint wash. */
+.window.contrast #editor .ace_gutter,
+.window.contrast #editor .ace_gutter-layer {
+    background: var(--hc-explorer); color: var(--hc-secondary);
 }
-
-.window.contrast #player p.choice .choice-button:hover {
-    color: #999;
+/* The native active-gutter layer sits behind the number layer. */
+.window.contrast #editor .ace_gutter-layer { background: transparent; }
+.window.contrast #editor .ace_gutter-active-line {
+    background: var(--hc-panel); box-shadow: inset 3px 0 var(--hc-amber);
 }
-
-
-
-.window.contrast #editor .ace-error {
-    background: #81265b;
+.window.contrast #editor .ace_cursor { color: var(--hc-text); border-left-color: var(--hc-text); }
+.window.contrast #editor .ace_marker-layer .ace_active-line {
+    background: #182331; box-shadow: inset 2px 0 var(--hc-amber);
 }
-
-.window.contrast #editor .ace_todo,
-.window.contrast #editor .ace-todo {
-    background: #a97410;
-    color: #000000;
+.window.contrast #editor .ace_marker-layer .ace_selection {
+    background: var(--hc-selection); box-shadow: inset 0 0 0 1px var(--hc-blue);
 }
+.window.contrast #editor .ace_marker-layer .ace_selected-word,
+.window.contrast #editor .ace_marker-layer .ace_bracket { border: 1px solid var(--hc-amber); }
+.window.contrast #editor .ace_invisible { color: var(--hc-secondary); }
+.window.contrast #editor .ace_indent-guide { opacity: .65; }
+.window.contrast #editor .ace-error,
+.window.contrast #editor .ace_invalid { background: #421e2c; color: var(--hc-text); }
+.window.contrast #editor .ace-warning,
+.window.contrast #editor .ace_warning { background: #42331c; }
+.window.contrast #editor .ace-todo,
+.window.contrast #editor .ace_todo { background: #203d2a; color: var(--hc-text); }
+.window.contrast #editor .ace_gutter-cell.ace_error { box-shadow: inset 3px 0 var(--hc-pink); }
+.window.contrast #editor .ace_gutter-cell.ace_warning { box-shadow: inset 3px 0 var(--hc-amber); }
 
-.window.contrast #editor .ace_warning,
-.window.contrast #editor .ace-warning {
-    background: #0f3553;
+/* Ink cues: cool flow, green state, pink choices, amber metadata and numbers. */
+.window.contrast #editor .ace_flow.ace_declaration,
+.window.contrast #editor .ace_divert,
+.window.contrast #editor .ace_choice.ace_label,
+.window.contrast #editor .ace_gather.ace_label,
+.window.contrast #editor .ace_glue,
+.window.contrast #editor .ace_include,
+.window.contrast #editor .ace_external,
+.window.contrast #editor .ace_entity.ace_name.ace_tag { color: var(--hc-blue); }
+.window.contrast #editor .ace_choice.ace_bullets,
+.window.contrast #editor .ace_choice.ace_weaveBracket,
+.window.contrast #editor .ace_gather.ace_bullets { color: var(--hc-pink); }
+.window.contrast #editor .ace_var-decl,
+.window.contrast #editor .ace_list-decl,
+.window.contrast #editor .ace_variable,
+.window.contrast #editor .ace_logic:not(.ace_innerContent),
+.window.contrast #editor .ace_string { color: var(--hc-green); }
+.window.contrast #editor .ace_tag,
+.window.contrast #editor .ace_constant.ace_numeric { color: var(--hc-amber); }
+.window.contrast #editor .ace_comment { color: var(--hc-secondary); }
+.window.contrast #editor .ace_customInstruction { color: var(--hc-pink); }
+.window.contrast #main.hideTags #editor .ace_tag { color: var(--hc-paper); }
+
+/* Find/Replace retains Ace's native images, commands and geometry. */
+.window.contrast #editor .ace_search {
+    background: var(--hc-panel); color: var(--hc-text); border-color: var(--hc-edge);
 }
-
-.window.contrast .ace_editor span.ace_flow.ace_declaration,
-.window.contrast .ace_editor span.ace_divert,
-.window.contrast .ace_editor span.ace_choice.ace_label,
-.window.contrast .ace_editor span.ace_gather.ace_label,
-.window.contrast .ace_editor span.ace_glue,
-.window.contrast .ace_editor span.ace_include,
-.window.contrast .ace_editor span.ace_external {
-    color:#3eebff;
+.window.contrast #editor .ace_search_form,
+.window.contrast #editor .ace_replace_form { border-color: var(--hc-edge); }
+.window.contrast #editor .ace_search_field,
+.window.contrast #editor .ace_searchbtn,
+.window.contrast #editor .ace_replacebtn {
+    background-color: var(--hc-paper); color: var(--hc-text); border-color: var(--hc-edge);
 }
-
-.window.contrast .ace_editor span.ace_choice.ace_bullets,
-.window.contrast .ace_editor span.ace_choice.ace_weaveBracket,
-.window.contrast .ace_editor span.ace_gather.ace_bullets {
-    color: #00b6a5;
+.window.contrast #editor .ace_search_field::placeholder { color: var(--hc-secondary); }
+.window.contrast #editor .ace_searchbtn:hover,
+.window.contrast #editor .ace_replacebtn:hover,
+.window.contrast #editor .ace_button:hover { background-color: var(--hc-selection); }
+.window.contrast #editor .ace_searchbtn:hover {
+    background-color: var(--hc-paper);
+    box-shadow: inset 0 0 0 1px var(--hc-blue);
 }
+.window.contrast #editor .ace_button { color: var(--hc-text); opacity: 1; border-color: var(--hc-edge); }
+.window.contrast #editor .ace_button.checked { border-color: var(--hc-blue); }
+.window.contrast #editor .ace_search_form.ace_nomatch { outline-color: var(--hc-pink); }
+.window.contrast #editor .ace_searchbtn_close { filter: brightness(1.9); }
+.window.contrast #editor .ace_searchbtn_close:hover { filter: none; background-color: var(--hc-selection); }
 
-.window.contrast .ace_editor span.ace_var-decl,
-.window.contrast .ace_editor span.ace_list-decl {
-    color: #00b6a5;
+/* Body-level popups use their own Contrast scope; nothing reaches the story. */
+html.contrast .ace_autocomplete,
+html.contrast .ace_tooltip {
+    background: #202733; color: #f5f7fa; border: 1px solid #7d91aa;
 }
-.window.contrast .ace_editor span.ace_logic:not(.ace_innerContent) {
-    color: #00b6a5;
+html.contrast .ace_autocomplete .ace_marker-layer .ace_active-line {
+    background: #203a51; box-shadow: inset 3px 0 #ffd78a;
 }
-
-/* Custom instructions, e.g. >>> */
-.window.contrast .ace_editor span.ace_customInstruction {
-    color: red;
+html.contrast .ace_autocomplete .ace_completion-highlight { color: #8cd4ff; }
+html.contrast .ace_autocomplete .ace_rightAlignedText { color: #b8c4d3; }
+html.contrast .ace_autocomplete .ace_line-hover { background: #203a51; border-color: #8cd4ff; }
+html.contrast .vakata-context.jstree-default-contextmenu {
+    background: #202733; color: #f5f7fa; border-color: #7d91aa; box-shadow: 0 8px 24px #0008;
 }
-
-
-.window.contrast #main.hideTags .ace_editor span.ace_tag {
-    color: #282828;
+html.contrast .vakata-context.jstree-default-contextmenu li > a { color: #f5f7fa; text-shadow: none; }
+html.contrast .vakata-context.jstree-default-contextmenu li > a:hover,
+html.contrast .vakata-context.jstree-default-contextmenu .vakata-context-hover > a {
+    background: #203a51; color: #8cd4ff; box-shadow: inset 3px 0 #ffd78a;
 }
+html.contrast .vakata-context.jstree-default-contextmenu .vakata-context-separator > a { border-top-color: #7d91aa; }
+html.contrast .vakata-context.jstree-default-contextmenu .vakata-contextmenu-shortcut {
+    color: #b8c4d3; opacity: 1;
+}
+.window.contrast #goto-anything,
+html.contrast .explorer-dialog { background: var(--hc-panel); color: var(--hc-text); border-color: var(--hc-edge); }
+.window.contrast #goto-anything input { background: var(--hc-paper); color: var(--hc-text); border-color: var(--hc-edge); }
+.window.contrast #goto-anything .meta,
+.window.contrast #goto-anything .ancestor,
+html.contrast .explorer-dialog-note { color: var(--hc-secondary); }
+.window.contrast #goto-anything .selected { background: var(--hc-selection); border-color: var(--hc-amber); }
+html.contrast .explorer-dialog-button { background: var(--hc-paper); color: var(--hc-text); border-color: var(--hc-edge); }
+html.contrast .explorer-dialog-button:hover { background: var(--hc-selection); }
+html.contrast .explorer-dialog-button.primary { background: var(--hc-blue); color: var(--hc-paper); border-color: var(--hc-blue); }
+html.contrast .explorer-dialog-button.danger { background: var(--hc-pink); color: var(--hc-paper); border-color: var(--hc-pink); }
 
+/* Clear tab and keyboard-focus markers; no new sizes or spacing. */
+.window.contrast #style-mode-bar { background: var(--hc-panel); border-color: var(--hc-edge); }
+.window.contrast .style-mode-tab { color: var(--hc-secondary); border-color: var(--hc-edge); }
+.window.contrast .style-mode-tab:hover:not(:disabled) { background: var(--hc-selection); color: var(--hc-blue); }
+.window.contrast .style-mode-tab.active { background: var(--hc-paper); color: var(--hc-text); box-shadow: none; }
+.window.contrast .style-mode-tab.active::before { background: var(--hc-amber); }
+.window.contrast .style-mode-tab:focus-visible,
+html.contrast .explorer-dialog-button:focus-visible { outline-color: var(--hc-blue); }
+
+/* Scope native scrollbars to IDE surfaces, leaving the reader's styles alone. */
 .window.contrast #editor ::-webkit-scrollbar,
 .window.contrast .sidebar ::-webkit-scrollbar,
-.window.contrast #toolbar .issue-popup ::-webkit-scrollbar {
-    width: .75rem;
-    background: #282828;
-    border-left: 1px solid #222;
-}
-
+.window.contrast #toolbar .issue-popup ::-webkit-scrollbar,
+html.contrast .ace_autocomplete ::-webkit-scrollbar { background: #0e1117; border-left-color: #7d91aa; }
 .window.contrast #editor ::-webkit-scrollbar-thumb,
 .window.contrast .sidebar ::-webkit-scrollbar-thumb,
-.window.contrast #toolbar .issue-popup ::-webkit-scrollbar-thumb {
-    background: #323232;
-}
-
-.window.contrast .sidebar .nav-wrapper {
-    border-left: 1px solid #222;
-}
-
-.window.contrast .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
-    background: #323232;
-}
+.window.contrast #toolbar .issue-popup ::-webkit-scrollbar-thumb,
+html.contrast .ace_autocomplete ::-webkit-scrollbar-thumb { background: #7d91aa; border-radius: 2px; }
+.window.contrast #editor ::-webkit-scrollbar-thumb:hover,
+.window.contrast .sidebar ::-webkit-scrollbar-thumb:hover { background: #8cd4ff; }

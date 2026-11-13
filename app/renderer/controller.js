@@ -1284,6 +1284,8 @@ function syncStyleFormIdeTheme() {
     const formDocument = frame && frame.contentDocument;
     if( formDocument ) formDocument.documentElement.classList.toggle(
         "inky-graphite", document.documentElement.classList.contains("dark"));
+    if( formDocument ) formDocument.documentElement.classList.toggle(
+        "inky-high-clarity", document.documentElement.classList.contains("contrast"));
 }
 
 function updateTheme(event, newTheme) {
@@ -1295,11 +1297,16 @@ function updateTheme(event, newTheme) {
 
     // Ace themes are included in acesrc. The Dark menu entry selects Graphite
     // chrome plus Ace's restrained tomorrow_night editor theme.
-    EditorView.setEditorTheme(theme === "dark" ? "ace/theme/tomorrow_night" : "ace/theme/textmate");
+    const editorThemes = {
+        dark: "ace/theme/tomorrow_night",
+        contrast: "ace/theme/tomorrow_night_bright"
+    };
+    EditorView.setEditorTheme(editorThemes[theme] || "ace/theme/textmate");
 
     // Ace autocomplete and jsTree context menus live outside .window. Also
     // enables the already-existing html.dark styling on the Visual/Advanced tabs.
     document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.classList.toggle("contrast", theme === "contrast");
     syncStyleFormIdeTheme();
 }
 
