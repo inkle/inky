@@ -20,6 +20,10 @@ const NOT_NARRATIVE = /^(?:\/\/|\/\*|\*\/|\*|\+|\-|->|<-|=|#|~|\{|\}|\[|<>|VAR\b
 function narrative(line, inComment) {
     if( inComment || !line.trim() ) return false;
     const trimmed = line.trim();
+    // A one-line boolean conditional containing literal prose still emits a
+    // narrative paragraph. Keep block conditionals and alternatives structural.
+    const conditional = trimmed.match(/^\{\s*[A-Za-z_][A-Za-z0-9_]*\s*:\s*([^{}|]+)\}$/);
+    if( conditional ) return narrative(conditional[1], false);
     if( NOT_NARRATIVE.test(trimmed) || trimmed.includes("/*") || trimmed.includes("*/") ) return false;
     // Ink glue joins physical lines and should never be interrupted by a tag.
     if( trimmed.startsWith("<>") || trimmed.endsWith("<>") ) return false;

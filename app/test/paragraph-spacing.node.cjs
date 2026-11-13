@@ -16,6 +16,10 @@ const cases = [
   "-> start\n=== start ===\n* [Open]\n    First.\n\n    Second.\n    -> DONE\n* [Close]\n    Third.\n    -> DONE\n",
   "-> start\n=== start ===\nGlue <>\n\nand text.\n-> DONE\n"
 ];
+const conditionalCases = [
+  "VAR active = true\n-> start\n=== start ===\n{active: First.}\n\nSecond.\n\nThird.\n+ [Finish] -> DONE\n",
+  "VAR active = false\n-> start\n=== start ===\nFirst.\n\n{active: Second.}\n\nThird.\n+ [Finish] -> DONE\n"
+];
 function compile(source) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(),"inky-paragraph-"));
   try {
@@ -74,6 +78,47 @@ test("Ink runtime attaches marker to the intended output line",()=>{
   const seenMulti=[];
   while(multi.canContinue)seenMulti.push({text:multi.Continue().trim(),tags:multi.currentTags});
   assert.deepEqual(seenMulti.map(x=>x.tags.map(gapCount).find(Boolean)||0),[0,0,3]);
+});
+test("blank lines after conditional prose separate narrative blocks",()=>{
+  const source = "{active: First.}\n\nSecond.\n\nThird.\n";
+  assert.equal(annotate(source), "{active: First.}\n# " + MARKER + ": 1\nSecond.\n# " + MARKER + ": 1\nThird.\n");
+  for(const structural of ["{active:\nFirst.\n}", "{active: First. | Second.}", "{active: -> next}", "{active: First. <>}"]){
+    const text = structural + "\n\nThird.\n";
+    assert.equal(annotate(text), text);
+  }
+  if(process.platform!=="linux" || !fs.existsSync(compiler)) return;
+  const ink = require("inkjs");
+  const story = new ink.Story(compile(annotate(conditionalCases[0])));
+  const seen=[];
+  while(story.canContinue){
+    const text=story.Continue().trim();
+    if(text) seen.push({text,gap:Math.max(0,...story.currentTags.map(gapCount))});
+  }
+  assert.deepEqual(seen,[{text:"First.",gap:0},{text:"Second.",gap:1},{text:"Third.",gap:1}]);
+  assert.deepEqual(story.currentChoices.map(c=>c.text),["Finish"]);
+  assert.equal(story.variablesState.active,true);
+});
+test("conditional paragraph gaps preserve output, choices and variables on both branches",()=>{
+  if(process.platform!=="linux" || !fs.existsSync(compiler)) return;
+  const ink = require("inkjs");
+  const read = story => {
+    const lines=[];
+    while(story.canContinue){
+      const text=story.Continue().trim();
+      const tags=story.currentTags.filter(tag=>!gapCount(tag));
+      if(text || tags.length) lines.push({text,tags});
+    }
+    return {lines,choices:story.currentChoices.map(c=>c.text),active:story.variablesState.active};
+  };
+  // Tags legitimately change compiled branch offsets, so compare executed
+  // behavior rather than raw instruction addresses for inline conditionals.
+  for(const source of conditionalCases){
+    const before=new ink.Story(compile(source));
+    const after=new ink.Story(compile(annotate(source)));
+    assert.deepEqual(read(after),read(before));
+    before.ChooseChoiceIndex(0);after.ChooseChoiceIndex(0);
+    assert.deepEqual(read(after),read(before));
+  }
 });
 test("Preview and browser rendering hide the tag and give identical spacing",()=>{
   const read=p=>fs.readFileSync(path.resolve(__dirname,p),"utf8");
