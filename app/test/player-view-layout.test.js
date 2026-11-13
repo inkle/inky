@@ -95,6 +95,7 @@ describe("preview page layout", function () {
             const choiceLabel = "Casos de espaçamento";
             playerView.addChoice({ choice: { text: choiceLabel, tags: [] } }, () => {});
             document.querySelector(".choice-button").click();
+                require("../renderer/playerView.js").PlayerView.contentReady();
 
             const nextScene = [
                 "Linhas consecutivas, sem margem adicional.",
@@ -107,6 +108,7 @@ describe("preview page layout", function () {
             addMapped("Uma linha vazia", 313);
             playerView.addTags([marker]);
 
+            playerView.contentReady();
             const finalParagraph = Array.from(document.querySelectorAll("p.storyText")).pop();
             const finalStart = window.jQuery(finalParagraph).data("sourceOffsets")[0];
             assert.strictEqual(finalStart, 313);
@@ -519,6 +521,7 @@ describe("preview page layout", function () {
 
                 playerView.addChoice({ choice: { text: "Continue", tags: [] } }, () => {});
                 frame.querySelector(".choice-button").click();
+                require("../renderer/playerView.js").PlayerView.contentReady();
 
                 assert.strictEqual(frame.classList.contains("has-background"), false);
                 assert.strictEqual(frame.style.backgroundImage, "");
@@ -627,6 +630,7 @@ describe("preview page layout", function () {
                 playerView.addChoice({ choice: { text: "Leave", tags: [] } }, () => {});
 
                 document.querySelector(".choice-button").click();
+                require("../renderer/playerView.js").PlayerView.contentReady();
                 const frame = document.querySelector(".innerText.active");
                 assert.strictEqual(frame.classList.contains("has-visual"), false);
                 assert.strictEqual(frame.querySelector(".story-visual").hidden, true);
@@ -710,6 +714,7 @@ describe("preview page layout", function () {
         it("clears the footer when a choice is taken", function () {
             withChoices(["One", "Two"], frame => {
                 frame.querySelector(".choice-button").click();
+                require("../renderer/playerView.js").PlayerView.contentReady();
                 const footer = frame.querySelector(".story-choices");
                 assert.strictEqual(footer.hidden, true);
                 assert.strictEqual(footer.querySelectorAll(".choice").length, 0);

@@ -459,8 +459,6 @@
         if( titleScreen ) titleScreen.hidden = true;
         storyFrame.classList.remove("title-screen-active");
         storyContainer.hidden = false;
-        if( pager ) pager.refresh();
-
         // A saved game goes on from where it was saved, with its music. After a reset the story
         // starts from its beginning instead.
         startsFromBeginning = false;
@@ -497,8 +495,8 @@
     // all the next content up as far as the next set of choices.
     function continueStory() {
 
-        var delay = 0.0;
-
+        // Build the complete turn synchronously. Layout/pagination runs once
+        // after text, media tags, choices and the ending are all present.
         // Generate story text - loop through available content
         while(story.canContinue) {
 
@@ -605,8 +603,7 @@
                 if( paragraphAlign ) sceneTitleElement.classList.add("align" + paragraphAlign);
                 sceneTitleElement.textContent = plainStoryText(sceneTitle);
                 storyContainer.appendChild(sceneTitleElement);
-                showAfter(delay, sceneTitleElement);
-                delay += 200.0;
+
             }
 
             // Preview flushes the paragraph before processing its #image tags.
@@ -618,8 +615,7 @@
                     imageElement.alt = "";
                     imageElement.src = imageUrl;
                     if( !showSceneImage(imageElement) ) storyContainer.appendChild(imageElement);
-                    showAfter(delay, imageElement);
-                    delay += 200.0;
+
                 });
             }
 
@@ -633,7 +629,7 @@
             if( paragraphAlign && !storyContainer.querySelector("p:not(.choice)") )
                 setHeaderAlignment(paragraphAlign);
 
-            // Create paragraph element (initially hidden)
+            // Create paragraph element
             var paragraphElement = document.createElement('p');
             var blankLines = tags.reduce(function(count, tag) {
                 return Math.max(count, paragraphGapCount(tag));
@@ -669,13 +665,10 @@
                 tagsElement.className = 'tags';
                 tagsElement.textContent = "# " + visibleTags.join(", ");
                 storyContainer.appendChild(tagsElement);
-                showAfter(delay, tagsElement);
-                delay += 200.0;
+
             }
 
-            // Fade in paragraph after a short delay
-            showAfter(delay, paragraphElement);
-            delay += 200.0;
+
         }
 
         // Create HTML choices from ink choices
@@ -736,9 +729,7 @@
             choicesContainer.hidden = false;
             storyFrame.classList.add("has-choices");
 
-            // Fade choice in after a short delay
-            showAfter(delay, choiceParagraphElement);
-            delay += 200.0;
+
 
             // Click on choice
             if(isClickable){
@@ -768,7 +759,7 @@
             if( endingEnabled ) {
                 const marker = EndingMarker.create(document, endingText);
                 storyContainer.appendChild(marker);
-                showAfter(delay, marker);
+
             }
             // Reader-owned replay is not an Ink choice; it must never suppress the ending.
             if (playAgainEnabled) {
@@ -777,7 +768,7 @@
                 choicesContainer.appendChild(replay);
                 choicesContainer.hidden = false;
                 storyFrame.classList.add("has-choices");
-                showAfter(delay, replay);
+
             }
         }
 
@@ -809,22 +800,6 @@
     // -----------------------------------
     // Various Helper functions
     // -----------------------------------
-
-    // Detects whether the user accepts animations
-    function isAnimationEnabled() {
-        return window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-    }
-
-    // Fades in an element after a specified delay
-    function showAfter(delay, el) {
-        if( isAnimationEnabled() ) {
-            el.classList.add("hide");
-            setTimeout(function() { el.classList.remove("hide") }, delay);
-        } else {
-            // If the user doesn't want animations, show immediately
-            el.classList.remove("hide");
-        }
-    }
 
     // Clear the story content and scene-specific background while preserving the page header.
     // The incoming line or selected branch is rendered after this call.

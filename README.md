@@ -10,7 +10,7 @@
 
 <p>
   <a href="https://github.com/inkle/inky"><img src="https://img.shields.io/badge/upstream-Inky%200.15.2-4764ac" alt="Based on Inky 0.15.2"></a>
-  <img src="https://img.shields.io/badge/community_revision-r114-30876c" alt="Community revision r114">
+  <img src="https://img.shields.io/badge/community_revision-r115-30876c" alt="Community revision r115">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
 </p>
 
@@ -150,34 +150,34 @@ Preview and Web Export are designed to behave consistently. Before sharing a sto
 
 ## Download and run
 
-**Inky Extended 0.15.2-114** is available for **Linux x86-64**. All four files are available in the [v0.15.2-114 release](https://github.com/glassflare/inky/releases/tag/v0.15.2-114).
+**Inky Extended 0.15.2-115** is available for **Linux x86-64**. All four files are available in the [v0.15.2-115 release](https://github.com/glassflare/inky/releases/tag/v0.15.2-115).
 
 | Download | File |
 | :-- | :-- |
-| **Debian / Ubuntu (amd64)** | [Inky-Extended-0.15.2-114-amd64.deb](https://github.com/glassflare/inky/releases/download/v0.15.2-114/Inky-Extended-0.15.2-114-amd64.deb) |
-| **AppImage (x86_64)** | [Inky-Extended-0.15.2-114-x86_64.AppImage](https://github.com/glassflare/inky/releases/download/v0.15.2-114/Inky-Extended-0.15.2-114-x86_64.AppImage) |
-| **Source archive** | [Inky-Extended-0.15.2-114-source.zip](https://github.com/glassflare/inky/releases/download/v0.15.2-114/Inky-Extended-0.15.2-114-source.zip) |
-| **SHA-256 checksums** | [SHA256SUMS.txt](https://github.com/glassflare/inky/releases/download/v0.15.2-114/SHA256SUMS.txt) |
+| **Debian / Ubuntu (amd64)** | [Inky-Extended-0.15.2-115-amd64.deb](https://github.com/glassflare/inky/releases/download/v0.15.2-115/Inky-Extended-0.15.2-115-amd64.deb) |
+| **AppImage (x86_64)** | [Inky-Extended-0.15.2-115-x86_64.AppImage](https://github.com/glassflare/inky/releases/download/v0.15.2-115/Inky-Extended-0.15.2-115-x86_64.AppImage) |
+| **Source archive** | [Inky-Extended-0.15.2-115-source.zip](https://github.com/glassflare/inky/releases/download/v0.15.2-115/Inky-Extended-0.15.2-115-source.zip) |
+| **SHA-256 checksums** | [SHA256SUMS.txt](https://github.com/glassflare/inky/releases/download/v0.15.2-115/SHA256SUMS.txt) |
 
 ### Debian / Ubuntu
 
 Download the `.deb`, then install it from the directory where you saved it:
 
 ```bash
-sudo apt install ./Inky-Extended-0.15.2-114-amd64.deb
+sudo apt install ./Inky-Extended-0.15.2-115-amd64.deb
 ```
 
 When replacing an experimental build with a higher Debian revision, such as
-`0.15.2-11092`, add `--allow-downgrades` to that command. Stable r110 through r113 installations
-upgrade normally to r114.
+`0.15.2-11092`, add `--allow-downgrades` to that command. Stable r110 through r114 installations
+upgrade normally to r115.
 
 ### AppImage
 
 Download the AppImage, make it executable, and run it:
 
 ```bash
-chmod +x Inky-Extended-0.15.2-114-x86_64.AppImage
-./Inky-Extended-0.15.2-114-x86_64.AppImage
+chmod +x Inky-Extended-0.15.2-115-x86_64.AppImage
+./Inky-Extended-0.15.2-115-x86_64.AppImage
 ```
 
 Some Linux distributions may require FUSE compatibility libraries to run AppImages. The repository also contains build scripts for other platforms; the prebuilt downloads listed above target Linux.
@@ -224,7 +224,7 @@ be retained with `INKY_VISUAL_ARTIFACTS=/absolute/output/directory`.
 
 The packaged Linux build uses the compatible source-map compiler built by the reproducible pipeline described in [compiler/source-map-protocol.md](compiler/source-map-protocol.md). The compiler binaries tracked in Git LFS do not provide that protocol; build the compatible compiler to use accurate Alt+click navigation when running from source.
 
-The underlying app version remains **0.15.2**; **r114** is the community revision. **Inky Extended** identifies this fork's distribution, not a change to Ink syntax or the original Inky project's ownership.
+The underlying app version remains **0.15.2**; **r115** is the community revision. **Inky Extended** identifies this fork's distribution, not a change to Ink syntax or the original Inky project's ownership.
 
 ## Contribute
 

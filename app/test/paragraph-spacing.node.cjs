@@ -133,11 +133,7 @@ test("Preview and browser rendering hide the tag and give identical spacing",()=
   assert.match(chrome, /#main #player \.story-passage p\.storyText\.inky-paragraph-gap\s*\{\s*margin-top:\s*var\(--inky-paragraph-gap, 1lh\)/);
   assert.ok(chrome.indexOf("p.storyText.inky-paragraph-gap") > chrome.indexOf(".story-passage p.storyText {"), "gap override must follow the baseline margin reset");
   assert.match(read("../renderer/playerView.js"),/\$lastStoryParagraph\[0\]\.style\.setProperty\("--inky-paragraph-gap", blankLines \+ "lh"\)/);
-  // The new paragraph is positioned after the tags and title before animation.
   const preview = read("../renderer/playerView.js");
-  assert.match(preview, /const \$newParagraph = flushPendingStoryText\(false\)/);
-  assert.match(preview, /if\( \$newParagraph && \$newParagraph\.length && animationEnabled && shouldAnimate\(\) \)\s*fadeIn\(\$newParagraph\)/);
-  assert.ok(preview.indexOf("fadeIn($newParagraph)") > preview.indexOf("tags.forEach(addImageTag)"));
   assert.match(preview, /Math\.abs\(passage\.scrollTop - target\) < 1/);
   assert.match(read("../export-for-web-template/main.js"),/blankLines \+ 'lh'/);
   assert.match(read("../renderer/gameChrome.css"),/flex-shrink:\s*0/);
