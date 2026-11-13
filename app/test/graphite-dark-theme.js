@@ -56,7 +56,8 @@ describe("Graphite replacement for the Dark IDE theme", function() {
                 assert.strictEqual(dom.window.document.querySelector(".window").classList.contains(theme), theme !== "light");
                 assert.strictEqual(dom.window.document.querySelector("iframe").contentDocument.documentElement.classList.contains("inky-graphite"), dark);
                 assert.strictEqual(themes.at(-1), dark ? "ace/theme/tomorrow_night" :
-                    theme === "contrast" ? "ace/theme/tomorrow_night_bright" : "ace/theme/textmate");
+                    theme === "contrast" ? "ace/theme/tomorrow_night_bright" :
+                    theme === "focus" ? "ace/theme/twilight" : "ace/theme/textmate");
             }
         } finally { dom.window.close(); }
     });

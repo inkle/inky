@@ -1,171 +1,174 @@
-.window.focus #main,
-.window.focus #editor,
-.window.focus #toolbar,
-.window.focus #editor .ace_gutter-layer,
-.window.focus .split {
-    background-color: #181818;
+/* Quiet Writing: warm paper on slate, with a continuous writing surface.
+ * Muted chrome stays readable. Underlines identify the current item;
+ * explicit outlines identify interaction. All surfaces belong to the IDE.
+ */
+html.focus,
+.window.focus {
+    --qw-paper: #20262b;
+    --qw-panel: #272d32;
+    --qw-sidebar: #242b30;
+    --qw-text: #e9e4d6;
+    --qw-muted: #aeb8be;
+    --qw-flow: #91b9c1;
+    --qw-meta: #c9b58c;
+    --qw-state: #a9c6a4;
+    --qw-error: #edaaaa;
+    --qw-rule: #465057;
+    --qw-control: #809199;
+    --qw-selection: #34434a;
 }
+.window.focus { --sidebar-text: var(--qw-text); }
+.window.focus #main { background: var(--qw-sidebar); }
+.window.focus #editor-pane,
+.window.focus #editor { background: var(--qw-paper); color: var(--qw-text); }
+.window.focus .split { background: var(--qw-rule); }
+.window.focus h1.title { color: var(--qw-text); }
 
+/* Chrome is quiet, never concealed: every action and issue stays available. */
+.window.focus #toolbar { background: var(--qw-panel); border-bottom-color: var(--qw-rule); }
+.window.focus #toolbar .button .icon,
+.window.focus #toolbar .issuesMessage,
+.window.focus #toolbar .issueCount { color: var(--qw-muted); }
+.window.focus #toolbar .button:hover .icon,
+.window.focus #toolbar .button.selected .icon { color: var(--qw-text); }
 .window.focus #main .sidebar,
-.window.focus #main .sidebar .footer {
-    background-color: #222;
-}
-
-.window.focus h1.title {
-    color: white;
-}
-
-
+.window.focus #main .sidebar .nav-wrapper,
+.window.focus #main .sidebar .footer { background: var(--qw-sidebar); color: var(--qw-text); border-color: var(--qw-rule); }
+.window.focus #file-nav-wrapper .file-explorer-header { background: var(--qw-panel); color: var(--qw-muted); border-bottom-color: var(--qw-rule); }
+.window.focus #file-nav-wrapper .explorer-header-action { color: var(--qw-muted); }
+.window.focus #file-nav-wrapper .explorer-header-action:hover,
+.window.focus #file-nav-wrapper .explorer-header-action:focus-visible { color: var(--qw-text); background: var(--qw-selection); outline: 1px solid var(--qw-flow); outline-offset: -1px; }
 .window.focus #main .sidebar .filename,
+.window.focus #file-nav-wrapper .jstree-anchor { color: var(--qw-text); }
+.window.focus #main .sidebar .nav-tooltip,
+.window.focus #file-nav-wrapper .explorer-create-options,
+.window.focus #main .sidebar .footer .checkbox { color: var(--qw-muted); }
+.window.focus #file-nav-wrapper .jstree-wholerow-hovered { background: var(--qw-panel); }
+.window.focus #file-nav-wrapper .jstree-wholerow-clicked,
+.window.focus #main .sidebar .nav-group-item.active { background: var(--qw-selection); box-shadow: inset 0 -2px var(--qw-flow); }
+.window.focus #file-nav-wrapper .jstree-ocl { filter: brightness(1.8); }
+.window.focus #file-nav-wrapper .ex-audio.ex-playing { color: var(--qw-state); }
+.window.focus #file-nav-wrapper .explorer-drop-target,
+.window.focus #file-nav-wrapper.drop-active { outline-color: var(--qw-flow); background-color: var(--qw-selection); }
+.window.focus #file-nav-wrapper .jstree-rename-input,
+.window.focus #main .sidebar .footer input { background: var(--qw-paper); color: var(--qw-text); border-color: var(--qw-flow) !important; }
 .window.focus #main .sidebar .footer .add-include-button,
-.window.focus #main .sidebar .footer .new-include-form h5 {
-    color: #888;
-}
+.window.focus #main .sidebar .footer .new-include-form h5 { color: var(--qw-text); }
 
-.window.focus #main .sidebar .nav-group-item.active {
-    background: #2f2f2f;
-}
+/* Gutter and text share one sheet of slate. Amber marks the writing position. */
+.window.focus #editor .ace_gutter { background: var(--qw-paper); color: var(--qw-muted); }
+.window.focus #editor .ace_gutter-layer { background: transparent; }
+.window.focus #editor .ace_gutter-cell { color: var(--qw-muted); }
+.window.focus #editor .ace_gutter-active-line { background: #2a3339; box-shadow: inset 0 -2px var(--qw-meta); }
+.window.focus #editor .ace_marker-layer .ace_active-line { background: #2a3339; box-shadow: inset 0 -1px var(--qw-control); }
+.window.focus #editor .ace_cursor { color: var(--qw-text); }
+.window.focus #editor .ace_marker-layer .ace_selection { background: var(--qw-selection); box-shadow: inset 0 0 0 1px var(--qw-flow); }
+.window.focus #editor .ace_marker-layer .ace_selected-word { background: transparent; border: 1px solid var(--qw-flow); }
+.window.focus #editor .ace_marker-layer .ace_bracket { border: 1px solid var(--qw-meta); }
+.window.focus #editor .ace_invisible { color: var(--qw-muted); }
+.window.focus #editor .ace_fold { background: var(--qw-flow); border-color: var(--qw-flow); color: var(--qw-paper); }
 
-.window.focus #main .sidebar .nav-group-item.active .filename {
-    color: #CCC;
-}
+/* Narrative keeps the warm foreground. Semantic accents are deliberately soft. */
+.window.focus #editor .ace_flow.ace_declaration,
+.window.focus #editor .ace_divert,
+.window.focus #editor .ace_choice.ace_label,
+.window.focus #editor .ace_gather.ace_label,
+.window.focus #editor .ace_glue,
+.window.focus #editor .ace_include,
+.window.focus #editor .ace_external,
+.window.focus #editor .ace_keyword { color: var(--qw-flow); }
+.window.focus #editor .ace_choice.ace_bullets,
+.window.focus #editor .ace_choice.ace_weaveBracket,
+.window.focus #editor .ace_gather.ace_bullets,
+.window.focus #editor .ace_customInstruction { color: var(--qw-meta); }
+.window.focus #editor .ace_var-decl,
+.window.focus #editor .ace_list-decl,
+.window.focus #editor .ace_variable,
+.window.focus #editor .ace_logic:not(.ace_innerContent),
+.window.focus #editor .ace_string { color: var(--qw-state); }
+.window.focus #editor .ace_tag,
+.window.focus #editor .ace_meta.ace_tag,
+.window.focus #editor .ace_entity.ace_name.ace_tag,
+.window.focus #editor .ace_constant { color: var(--qw-meta); }
+.window.focus #editor .ace_comment { color: var(--qw-muted); }
+.window.focus #editor .ace-error,
+.window.focus #editor .ace_invalid { background: #4a3033; color: var(--qw-text); }
+.window.focus #editor .ace-warning,
+.window.focus #editor .ace_warning { background: #443c2c; }
+.window.focus #editor .ace-todo,
+.window.focus #editor .ace_todo { background: #304038; color: var(--qw-text); }
+.window.focus #editor .ace_gutter-cell.ace_error { box-shadow: inset 2px 0 var(--qw-error); }
+.window.focus #editor .ace_gutter-cell.ace_warning { box-shadow: inset 2px 0 var(--qw-meta); }
 
-.window.focus #main .sidebar .nav-group-item.nav-tooltip {
-    color: #7b7b7b;
-}
+/* Preserve Ace's native Find/Replace images and commands. */
+.window.focus #editor .ace_search { background: var(--qw-panel); color: var(--qw-text); border-color: var(--qw-control); }
+.window.focus #editor .ace_search_form,
+.window.focus #editor .ace_replace_form { border-color: var(--qw-control); }
+.window.focus #editor .ace_search_field,
+.window.focus #editor .ace_searchbtn,
+.window.focus #editor .ace_replacebtn { background-color: var(--qw-paper); color: var(--qw-text); border-color: var(--qw-control); }
+.window.focus #editor .ace_search_field::placeholder { color: var(--qw-muted); }
+.window.focus #editor .ace_button { color: var(--qw-text); border-color: var(--qw-control); opacity: 1; }
+.window.focus #editor .ace_button:hover,
+.window.focus #editor .ace_replacebtn:hover { background-color: var(--qw-selection); }
+.window.focus #editor .ace_button.checked { border-color: var(--qw-flow); }
+.window.focus #editor .ace_searchbtn:hover { background-color: var(--qw-paper); box-shadow: inset 0 0 0 1px var(--qw-flow); }
+.window.focus #editor .ace_searchbtn_close { filter: brightness(1.6); }
+.window.focus #editor .ace_searchbtn_close:hover { filter: none; background-color: var(--qw-selection); }
+.window.focus #editor .ace_search_form.ace_nomatch { outline-color: var(--qw-error); }
 
-.window.focus #toolbar .button:hover .icon {
-    color: #999;
-}
+/* Floating editor UI is attached to body, so it uses the document's IDE flag. */
+html.focus .ace_autocomplete,
+html.focus .ace_tooltip { background: var(--qw-panel); color: var(--qw-text); border: 1px solid var(--qw-control); }
+html.focus .ace_autocomplete .ace_marker-layer .ace_active-line { background: var(--qw-selection); box-shadow: inset 0 -2px var(--qw-flow); }
+html.focus .ace_autocomplete .ace_completion-highlight { color: var(--qw-flow); }
+html.focus .ace_autocomplete .ace_rightAlignedText { color: var(--qw-muted); }
+html.focus .ace_autocomplete .ace_line-hover { background: var(--qw-selection); border-color: var(--qw-flow); }
+html.focus .vakata-context.jstree-default-contextmenu { background: var(--qw-panel); color: var(--qw-text); border-color: var(--qw-control); }
+html.focus .vakata-context.jstree-default-contextmenu li > a { color: var(--qw-text); text-shadow: none; }
+html.focus .vakata-context.jstree-default-contextmenu li > a:hover,
+html.focus .vakata-context.jstree-default-contextmenu .vakata-context-hover > a { background: var(--qw-selection); color: var(--qw-text); box-shadow: inset 0 -1px var(--qw-flow); }
+html.focus .vakata-context.jstree-default-contextmenu .vakata-contextmenu-shortcut { color: var(--qw-muted); opacity: 1; }
+html.focus .vakata-context.jstree-default-contextmenu .vakata-context-separator > a { border-top-color: var(--qw-rule); }
+.window.focus #goto-anything,
+html.focus .explorer-dialog { background: var(--qw-panel); color: var(--qw-text); border-color: var(--qw-control); }
+.window.focus #goto-anything input { background: var(--qw-paper); color: var(--qw-text); border-color: var(--qw-control); }
+.window.focus #goto-anything .meta,
+.window.focus #goto-anything .ancestor,
+html.focus .explorer-dialog-note { color: var(--qw-muted); }
+.window.focus #goto-anything .selected { background: var(--qw-selection); border-color: var(--qw-flow); }
+html.focus .explorer-dialog-button { background: var(--qw-paper); color: var(--qw-text); border-color: var(--qw-control); }
+html.focus .explorer-dialog-button:hover { background: var(--qw-selection); }
+html.focus .explorer-dialog-button.primary { background: var(--qw-selection); color: var(--qw-text); border-color: var(--qw-flow); }
+html.focus .explorer-dialog-button.danger { background: #4a3033; color: var(--qw-text); border-color: var(--qw-error); }
+html.focus .explorer-dialog-button:focus-visible { outline-color: var(--qw-meta); }
 
-.window.focus #toolbar .button.selected .icon {
-    color: #CCC;
-}
+/* Issues retain separate error, warning and TODO cues; no information is dimmed. */
+.window.focus #toolbar .issue-popup { background: var(--qw-panel); color: var(--qw-text); border-color: var(--qw-control); }
+.window.focus #toolbar .issue-popup .row { border-bottom-color: var(--qw-rule); }
+.window.focus #toolbar .issue-popup .row:hover { background: var(--qw-selection); }
+.window.focus #toolbar .issue-popup .line-no { background: var(--qw-paper); color: var(--qw-muted); border-right-color: var(--qw-rule); }
+.window.focus #toolbar .issue-popup .error .issue { color: var(--qw-error); }
+.window.focus #toolbar .issue-popup .warning .issue { color: var(--qw-meta); }
+.window.focus #toolbar .issue-popup .todo .issue { color: var(--qw-state); }
+.window.focus #toolbar .issue-popup .icon { color: var(--qw-flow); }
 
-/* e.g. filename input */
-.window.focus #main .sidebar .footer input {
-    background: #333;
-    border: 1px solid #888;
-    color: #888;
-}
+/* A slim underline matches the Explorer's selected item instead of a bright tab. */
+.window.focus #style-mode-bar { background: var(--qw-panel); border-color: var(--qw-rule); }
+.window.focus .style-mode-tab { color: var(--qw-muted); border-color: var(--qw-rule); }
+.window.focus .style-mode-tab:hover:not(:disabled) { background: var(--qw-selection); color: var(--qw-text); }
+.window.focus .style-mode-tab.active { background: var(--qw-paper); color: var(--qw-text); box-shadow: inset 0 -2px var(--qw-flow); }
+.window.focus .style-mode-tab.active::before { background: transparent; }
+.window.focus .style-mode-tab:focus-visible { outline-color: var(--qw-meta); }
 
-.window.focus #main .sidebar .footer .checkbox {
-    color: #888;
-}
-
-
-
-.window.focus #toolbar {
-    border-bottom: 1px solid #222;
-}
-
-.window.focus #toolbar div.issuesSummary .issueCount {
-    color: #888;
-}
-
-.window.focus #main .sidebar .footer {
-    border-top: 1px solid #555;
-}
-
-
-.window.focus .ace_editor .ace_marker-layer .ace_selection {
-    background-color: #444;
-}
-
-.window.focus .ace_editor .ace_marker-layer .ace_selected-word {
-    background-color: #999;
-    border-color: #dedede;
-}
-
-.window.focus #editor,
-.window.focus #player,
-.window.focus .ace_editor .ace_cursor {
-    /*color: #f0f0f0; */
-    color: #faf1c6;
-}
-
-.window.focus .ace_editor .ace_indent-guide {
-    opacity: .1;
-}
-
-.window.focus .ace_editor .ace_marker-layer .ace_active-line {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.window.focus #player hr {
-    border-top-color: #444;
-}
-
-.window.focus #player p.choice .choice-button:hover {
-    color: #999;
-}
-
-.window.focus #editor .ace-error {
-    background: #580000
-}
-
-.window.focus #editor .ace_todo,
-.window.focus #editor .ace-todo {
-    background: #5f6238;
-    color:  #444;
-}
-
-.window.focus #editor .ace_warning,
-.window.focus #editor .ace-warning {
-    background: #0f3553;
-}
-
-.window.focus .ace_editor span.ace_flow.ace_declaration,
-.window.focus .ace_editor span.ace_divert,
-.window.focus .ace_editor span.ace_choice.ace_label,
-.window.focus .ace_editor span.ace_gather.ace_label,
-.window.focus .ace_editor span.ace_glue,
-.window.focus .ace_editor span.ace_include,
-.window.focus .ace_editor span.ace_external {
-    color: #434f53;
-}
-
-.window.focus .ace_editor span.ace_choice.ace_bullets,
-.window.focus .ace_editor span.ace_choice.ace_weaveBracket,
-.window.focus .ace_editor span.ace_gather.ace_bullets {
-    color:  #535353;
-}
-
-.window.focus .ace_editor span.ace_var-decl,
-.window.focus .ace_editor span.ace_list-decl {
-    color: #535353;
-}
-.window.focus .ace_editor span.ace_logic:not(.ace_innerContent) {
-    color: #535353;
-}
-
-.window.focus #main.hideTags .ace_editor span.ace_tag {
-    color: #535353;
-}
-
-/* Custom instructions, e.g. >>> */
-.window.focus .ace_editor span.ace_customInstruction {
-    color: #5f4c4c;
-}
-
+/* Only IDE scrollbars participate; the reading surface owns its own styling. */
 .window.focus #editor ::-webkit-scrollbar,
 .window.focus .sidebar ::-webkit-scrollbar,
-.window.focus #toolbar .issue-popup ::-webkit-scrollbar {
-    width: .75rem;
-    background: #282828;
-    border-left: 1px solid #323232;
-  }
-  
+.window.focus #toolbar .issue-popup ::-webkit-scrollbar,
+html.focus .ace_autocomplete ::-webkit-scrollbar { background: var(--qw-paper); border-left-color: var(--qw-rule); }
 .window.focus #editor ::-webkit-scrollbar-thumb,
 .window.focus .sidebar ::-webkit-scrollbar-thumb,
-.window.focus #toolbar .issue-popup ::-webkit-scrollbar-thumb {
-    background: #323232;
-}
-
-
-.window.focus .sidebar .nav-wrapper {
-    border-left: 1px solid #282828;
-}
-.window.focus .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
-    background: #323232;
-}
+.window.focus #toolbar .issue-popup ::-webkit-scrollbar-thumb,
+html.focus .ace_autocomplete ::-webkit-scrollbar-thumb { background: var(--qw-control); border-radius: 8px; }
+.window.focus #editor ::-webkit-scrollbar-thumb:hover,
+.window.focus .sidebar ::-webkit-scrollbar-thumb:hover { background: var(--qw-muted); }

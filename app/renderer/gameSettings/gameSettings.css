@@ -286,3 +286,24 @@ input:disabled, select:disabled { opacity: .55; }
 /* A dark inner ring stays visible on the bright selected radio surface. */
 .inky-high-clarity .segmented input:focus-visible + span { outline: 2px solid #ffd78a; outline-offset: 1px; }
 .inky-high-clarity .segmented input:checked:focus-visible + span { outline-color: #0e1117; outline-offset: -3px; box-shadow: 0 0 0 2px #ffd78a; }
+
+/* Quiet Writing styles this IDE form, including when it loads after the menu. */
+:root.inky-quiet-writing {
+    --bg: #20262b;
+    --panel: #272d32;
+    --text: #e9e4d6;
+    --muted: #aeb8be;
+    --border: #809199;
+    --accent: #91b9c1;
+    --danger: #edaaaa;
+    color-scheme: dark;
+}
+.inky-quiet-writing .segmented input:checked + span {
+    background: #34434a;
+    color: #e9e4d6;
+    box-shadow: inset 0 -2px #91b9c1;
+}
+.inky-quiet-writing input:focus-visible,
+.inky-quiet-writing select:focus-visible,
+.inky-quiet-writing button:focus-visible,
+.inky-quiet-writing .segmented input:focus-visible + span { outline: 2px solid #c9b58c; outline-offset: 1px; }

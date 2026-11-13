@@ -38,7 +38,7 @@ describe("Contrast / High Clarity", function() {
     });
     it("retains the exact Ace choices for Light, Graphite and Focus", function() {
         withThemes((context, document, chosen) => {
-            for(const [name, ace] of Object.entries({light: "textmate", dark: "tomorrow_night", focus: "textmate"})) {
+            for(const [name, ace] of Object.entries({light: "textmate", dark: "tomorrow_night", focus: "twilight"})) {
                 context.updateTheme(null, "contrast");
                 context.updateTheme(null, name);
                 assert.strictEqual(chosen.at(-1), "ace/theme/" + ace);
