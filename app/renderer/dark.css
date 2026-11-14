@@ -84,16 +84,12 @@
     background: var(--inky-dark-gutter);
     color: var(--inky-dark-muted);
 }
-.window.dark #editor .ace_gutter-active-line {
-    background: var(--inky-dark-hover);
-}
+.window.dark #editor .ace_gutter-active-line { background: var(--inky-dark-hover); box-shadow: none; border: 0; outline: none; }
 .window.dark #editor .ace_cursor { color: #f4f7fc; }
 .window.dark #editor .ace_marker-layer .ace_selection {
     background: #425a75;
 }
-.window.dark #editor .ace_marker-layer .ace_active-line {
-    background: rgba(158, 188, 220, 0.09);
-}
+.window.dark #editor .ace_marker-layer .ace_active-line { background: rgba(158, 188, 220, 0.09); box-shadow: none; border: 0; outline: none; }
 .window.dark #editor .ace_marker-layer .ace_selected-word {
     background: rgba(135, 185, 238, 0.12);
     border: 1px solid #72869d;

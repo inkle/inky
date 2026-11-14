@@ -92,13 +92,9 @@ html.contrast,
 }
 /* The native active-gutter layer sits behind the number layer. */
 .window.contrast #editor .ace_gutter-layer { background: transparent; }
-.window.contrast #editor .ace_gutter-active-line {
-    background: var(--hc-panel); box-shadow: inset 3px 0 var(--hc-amber);
-}
-.window.contrast #editor .ace_cursor { color: var(--hc-text); border-left-color: var(--hc-text); }
-.window.contrast #editor .ace_marker-layer .ace_active-line {
-    background: #182331; box-shadow: inset 2px 0 var(--hc-amber);
-}
+.window.contrast #editor .ace_gutter-active-line { background: var(--hc-panel); box-shadow: none; border: 0; outline: none; }
+.window.contrast #editor .ace_cursor { color: var(--hc-text); }
+.window.contrast #editor .ace_marker-layer .ace_active-line { background: #182331; box-shadow: none; border: 0; outline: none; }
 .window.contrast #editor .ace_marker-layer .ace_selection {
     background: var(--hc-selection); box-shadow: inset 0 0 0 1px var(--hc-blue);
 }

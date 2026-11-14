@@ -59,8 +59,8 @@ html.focus,
 .window.focus #editor .ace_gutter { background: var(--qw-paper); color: var(--qw-muted); }
 .window.focus #editor .ace_gutter-layer { background: transparent; }
 .window.focus #editor .ace_gutter-cell { color: var(--qw-muted); }
-.window.focus #editor .ace_gutter-active-line { background: #2a3339; box-shadow: inset 0 -2px var(--qw-meta); }
-.window.focus #editor .ace_marker-layer .ace_active-line { background: #2a3339; box-shadow: inset 0 -1px var(--qw-control); }
+.window.focus #editor .ace_gutter-active-line { background: #2a3339; box-shadow: none; border: 0; outline: none; }
+.window.focus #editor .ace_marker-layer .ace_active-line { background: #2a3339; box-shadow: none; border: 0; outline: none; }
 .window.focus #editor .ace_cursor { color: var(--qw-text); }
 .window.focus #editor .ace_marker-layer .ace_selection { background: var(--qw-selection); box-shadow: inset 0 0 0 1px var(--qw-flow); }
 .window.focus #editor .ace_marker-layer .ace_selected-word { background: transparent; border: 1px solid var(--qw-flow); }

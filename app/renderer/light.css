@@ -67,8 +67,8 @@ html.light .rich-toolbar { color-scheme: light; }
 .window.light #editor .ace_gutter { background: var(--pearl-chrome); color: var(--pearl-muted); }
 .window.light #editor .ace_gutter-layer { background: transparent; }
 .window.light #editor .ace_gutter-cell { color: var(--pearl-muted); }
-.window.light #editor .ace_gutter-active-line { background: var(--pearl-selection); box-shadow: inset 2px 0 var(--pearl-blue); }
-.window.light #editor .ace_marker-layer .ace_active-line { background: #f4f7fc; box-shadow: inset 0 -1px var(--pearl-control); }
+.window.light #editor .ace_gutter-active-line { background: var(--pearl-selection); box-shadow: none; border: 0; outline: none; }
+.window.light #editor .ace_marker-layer .ace_active-line { background: #f4f7fc; box-shadow: none; border: 0; outline: none; }
 .window.light #editor .ace_cursor { color: var(--pearl-blue); }
 .window.light #editor .ace_marker-layer .ace_selection { background: var(--pearl-selection); box-shadow: inset 0 0 0 1px var(--pearl-blue); }
 .window.light #editor .ace_marker-layer .ace_selected-word { background: transparent; border: 1px solid var(--pearl-blue); }
